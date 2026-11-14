@@ -1422,12 +1422,6 @@ export class BridgeAssistant extends HTMLElement {
               </label>
 
               <label class="checkbox-label">
-                <input type="checkbox" name="need" value="step_free_access" 
-                  ${this.supportNeeds.needs.includes("step_free_access") ? "checked" : ""}>
-                <span>${this.t("needStepFree")}</span>
-              </label>
-
-              <label class="checkbox-label">
                 <input type="checkbox" name="need" value="other" 
                   ${this.supportNeeds.needs.includes("other") || !!this.supportNeeds.other_text ? "checked" : ""}>
                 <span>${this.t("needOther")}</span>

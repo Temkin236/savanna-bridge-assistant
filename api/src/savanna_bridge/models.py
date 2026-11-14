@@ -78,14 +78,14 @@ class LinkConfirmResponse(BaseModel):
 class SupportNeeds(BaseModel):
     needs: list[str] = Field(default_factory=list)
     other_text: str | None = ""
-    preferred_contact_mode: Literal["text", "voice", "video"] = "text"
+    preferred_contact_mode: Literal["text", "voice", "video", "telegram"] = "text"
 
 
 class HandoffCard(BaseModel):
     language: Language = Language.EN
     context: str
     support_needs: list[str] = Field(default_factory=list)
-    contact_mode: Literal["text", "voice", "video"] = "text"
+    contact_mode: Literal["text", "voice", "video", "telegram"] = "text"
 
 
 class HandoffRequest(BaseModel):
