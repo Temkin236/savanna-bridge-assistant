@@ -362,6 +362,7 @@ def get_support_needs(_token: Any = Depends(verify_optional_token)) -> SupportNe
 
 
 @app.put("/support-needs", response_model=SupportNeeds, tags=["Support"])
+@app.post("/support-needs", response_model=SupportNeeds, tags=["Support"])
 def put_support_needs(
     payload: SupportNeeds, _token: Any = Depends(verify_optional_token)
 ) -> SupportNeeds:
@@ -388,8 +389,15 @@ def create_handoff(
 
 
 @app.get("/handoff/queue", tags=["Handoff"])
-def handoff_queue() -> dict[str, list[Handoff]]:
-    items = db.list_handoffs(status="waiting")
+def handoff_queue(status: str | None = None) -> dict[str, list[Handoff]]:
+    if status is None or status == "active":
+        all_items = db.list_handoffs()
+        # Return waiting and claimed handoffs for the active console queue
+        items = [h for h in all_items if h.status in ("waiting", "claimed")]
+    elif status == "all":
+        items = db.list_handoffs()
+    else:
+        items = db.list_handoffs(status=status)
     return {"items": items}
 
 

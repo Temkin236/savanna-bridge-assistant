@@ -11,8 +11,10 @@ import json
 import logging
 import os
 import threading
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("savanna_bridge.channels.health")
 
 PORT = int(os.getenv("HEALTH_PORT", "8081"))
@@ -59,8 +61,13 @@ def main() -> None:
     if BOT_TOKEN:
         from bot import start_bot
 
-        logger.info("Telegram bot token detected. Running aiogram bot...")
-        asyncio.run(start_bot())
+        logger.info("Telegram bot token detected. Running aiogram bot supervisor loop...")
+        while True:
+            try:
+                asyncio.run(start_bot())
+            except Exception as e:
+                logger.error("Bot crashed or disconnected: %s. Retrying in 5 seconds...", e, exc_info=True)
+                time.sleep(5)
     else:
         logger.info("Running in mock bot mode (no TELEGRAM_BOT_TOKEN). Health endpoint active.")
         t.join()

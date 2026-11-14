@@ -21,12 +21,40 @@ from aiogram.types import (
     ReplyKeyboardMarkup,
 )
 from audio_helper import ogg_opus_to_wav
+from dotenv import load_dotenv
+
+# Load .env from repository root
+env_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".env"))
+load_dotenv(env_path)
 
 # Configuration
 API_BASE_URL: str = os.getenv("API_BASE_URL", "http://localhost:8000").rstrip("/")
+if os.path.exists("/.dockerenv") and "localhost" in API_BASE_URL:
+    API_BASE_URL = "http://api:8000"
+
 BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("savanna_bridge.bot")
+
+
+async def send_safe_message(
+    message: types.Message,
+    text: str,
+    parse_mode: str | None = "Markdown",
+    reply_markup: Any = None,
+) -> Any:
+    """Send message safely, gracefully falling back if Telegram Markdown parsing fails."""
+    try:
+        return await message.answer(text, parse_mode=parse_mode, reply_markup=reply_markup)
+    except Exception as e:
+        logger.warning(
+            "Failed sending message with parse_mode=%s: %s. Falling back to plain text.",
+            parse_mode,
+            e,
+        )
+        clean = text.replace("**", "").replace("*", "").replace("`", "")
+        return await message.answer(clean, reply_markup=reply_markup)
 
 # In-memory user state: user_id -> dict
 USER_SESSIONS: dict[int, dict[str, Any]] = {}
@@ -257,14 +285,42 @@ async def handle_handoff(message: types.Message) -> None:
     else:
         msg = "⚠️ እርዳታ ለማግኘት አልተቻለም። እባክዎ ጥቂት ቆይተው እንደገና ይሞክሩ።"
 
-    await message.answer(msg, parse_mode="Markdown")
+    await send_safe_message(message, msg)
+
+
+@router.message(F.text.in_({"❓ ጥያቄ ጠይቅ", "❓ Ask a Question"}))
+async def handle_ask_prompt(message: types.Message) -> None:
+    user_id = message.from_user.id if message.from_user else 0
+    state = get_user_state(user_id)
+    lang = state.get("language", "am")
+    if lang == "am":
+        prompt = (
+            "❓ **ጥያቄዎን ይጻፉ ወይም የድምጽ መልዕክት ይላኩ**\n\n"
+            "ስለ ኮርሱ፣ ስለ ምዝገባ፣ ስለ ማጠናቀቂያ ቀኖች ወይም ስለ ሞጁሎች የሚፈልጉትን ይጠይቁ።"
+        )
+    elif lang == "om":
+        prompt = (
+            "❓ **Gaaffii keessan barreessaa ykn sagaleedhaan ergaa**\n\n"
+            "Waa'ee barnootaa, galmee, ykn qabiyyee kamiyyuu gaafachuu dandeessu."
+        )
+    elif lang == "ti":
+        prompt = (
+            "❓ **ሕቶኹም ብጽሑፍ ወይ ብድምጺ ስደዱ**\n\n"
+            "ብዛዕባ ትሕዝቶ ኮርስ፣ ምዝገባ፣ ወይ ካልእ ዝኾነ ሕቶ ክትሓቱ ትኽእሉ ኢኹም።"
+        )
+    else:
+        prompt = (
+            "❓ **Please type your question or send a voice message.**\n\n"
+            "You can ask about course modules, deadlines, assignments, or platform navigation."
+        )
+    await send_safe_message(message, prompt)
 
 
 @router.message(F.text.in_({"📅 ምን ይጠበቃል?", "📅 Deadlines"}) | Command("deadlines"))
 async def handle_deadlines(message: types.Message) -> None:
     res = await call_api("GET", "/learner/deadlines")
     if not res or not res.get("items"):
-        await message.answer("ምንም መጪ ማጠናቀቂያዎች የሉም። / No upcoming deadlines.")
+        await send_safe_message(message, "ምንም መጪ ማጠናቀቂያዎች የሉም። / No upcoming deadlines.")
         return
 
     lines = ["📅 **መጪ የኮርስ ማጠናቀቂያዎች / Upcoming Deadlines:**\n"]
@@ -273,14 +329,14 @@ async def handle_deadlines(message: types.Message) -> None:
             f"• **{item['title']}**\n  ቀን/Due: `{item['due_at']}`\n  [ሊንክ/Link]({item['url']})\n"
         )
     lines.append("እርዳታ ከፈለጉ `2` ብለው ይመልሱ። / Reply 2 if you need assistance.")
-    await message.answer("\n".join(lines), parse_mode="Markdown")
+    await send_safe_message(message, "\n".join(lines))
 
 
 @router.message(F.text.in_({"📚 ሞጁሎች", "📚 Course Modules"}) | Command("modules"))
 async def handle_modules(message: types.Message) -> None:
     res = await call_api("GET", "/learner/modules")
     if not res or not res.get("items"):
-        await message.answer("የኮርስ ሞጁሎችን ማግኘት አልተቻለም። / Could not retrieve modules.")
+        await send_safe_message(message, "የኮርስ ሞጁሎችን ማግኘት አልተቻለም። / Could not retrieve modules.")
         return
 
     lines = ["📚 **የኮርሱ ሞጁሎች / Course Modules:**\n"]
@@ -289,7 +345,7 @@ async def handle_modules(message: types.Message) -> None:
             f"• **ሞጁል {m['number']}: {m['title']}**\n  {m['summary']}\n  [መግቢያ]({m['url']})\n"
         )
     lines.append("ስለ አንድ ሞጁል ለማብራራት ጥያቄዎን ይጻፉ። / Ask any question to learn more.")
-    await message.answer("\n".join(lines), parse_mode="Markdown")
+    await send_safe_message(message, "\n".join(lines))
 
 
 @router.message(F.text.in_({"💼 የሥራ እድሎች", "💼 Job Alerts"}) | Command("jobs"))
@@ -299,7 +355,7 @@ async def handle_jobs(message: types.Message) -> None:
 
     res = await call_api("GET", "/jobs")
     if not res or not res.get("items"):
-        await message.answer("ምንም የሥራ ማስታወቂያ አልተገኘም። / No jobs found.")
+        await send_safe_message(message, "ምንም የሥራ ማስታወቂያ አልተገኘም። / No jobs found.")
         return
 
     job = res["items"][0]
@@ -318,7 +374,7 @@ async def handle_jobs(message: types.Message) -> None:
         f"3️⃣ - ስለ ሥራው አብራራልኝ / Explain this job\n"
         f"ለመስተንግዶ ማመልከቻ: /accommodations"
     )
-    await message.answer(msg, parse_mode="Markdown")
+    await send_safe_message(message, msg)
 
 
 @router.message(Command("accommodations"))
@@ -348,7 +404,7 @@ async def handle_accommodations(message: types.Message) -> None:
     else:
         msg = "⚠️ ረቂቁን ማመንጨት አልተቻለም።"
 
-    await message.answer(msg, parse_mode="Markdown")
+    await send_safe_message(message, msg)
 
 
 @router.message(F.text.in_({"⚙️ ቅንብሮች", "⚙️ Settings"}) | Command("settings"))
@@ -379,19 +435,19 @@ async def handle_settings(message: types.Message) -> None:
         f"/unmute - ድምጽ ለማብራት\n"
         f"/lite - የዳታ ቁጠባን ለመቀየር"
     )
-    await message.answer(msg, parse_mode="Markdown")
+    await send_safe_message(message, msg)
 
 
 @router.message(Command("mute"))
 async def handle_mute(message: types.Message) -> None:
     await call_api("PUT", "/notification-settings", {"muted": True})
-    await message.answer("🔕 ማሳወቂያዎች ድምጽ አልባ ሆነዋል። / Notifications muted.")
+    await send_safe_message(message, "🔕 ማሳወቂያዎች ድምጽ አልባ ሆነዋል። / Notifications muted.")
 
 
 @router.message(Command("unmute"))
 async def handle_unmute(message: types.Message) -> None:
     await call_api("PUT", "/notification-settings", {"muted": False})
-    await message.answer("🔔 ማሳወቂያዎች ተከፍተዋል። / Notifications unmuted.")
+    await send_safe_message(message, "🔔 ማሳወቂያዎች ተከፍተዋል። / Notifications unmuted.")
 
 
 @router.message(F.text.in_({"1", "2", "3"}))
@@ -401,11 +457,11 @@ async def handle_numeric_reply(message: types.Message) -> None:
     choice = message.text.strip()
 
     if choice == "1":
-        await message.answer(
+        await send_safe_message(
+            message,
             "👍 **ተመዝግቧል! / Noted!**\n"
             "የሥራ ማመልከቻ መረጃ: https://jobs.example.org/apply\n"
             "የመስተንግዶ ጥያቄ ረቂቅ ለማዘጋጀት: /accommodations",
-            parse_mode="Markdown",
         )
     elif choice == "2":
         state["last_context"] = (
@@ -420,12 +476,14 @@ async def handle_numeric_reply(message: types.Message) -> None:
             {"question": question, "language": state["language"], "channel": "telegram"},
         )
         if res and "answer" in res:
-            await message.answer(
-                f"💼 **የሥራው ማብራሪያ / Job Explanation:**\n\n{res['answer']}", parse_mode="Markdown"
+            await send_safe_message(
+                message,
+                f"💼 **የሥራው ማብራሪያ / Job Explanation:**\n\n{res['answer']}",
             )
         else:
-            await message.answer(
-                "ሥራው የደንበኞች አገልግሎት ድጋፍን ያካትታል። / The job involves customer support."
+            await send_safe_message(
+                message,
+                "ሥራው የደንበኞች አገልግሎት ድጋፍን ያካትታል። / The job involves customer support.",
             )
 
 
@@ -434,7 +492,7 @@ async def handle_voice_message(message: types.Message, bot: Bot) -> None:
     user_id = message.from_user.id if message.from_user else 0
     state = get_user_state(user_id)
 
-    await message.answer("🎧 ድምጽዎን በማዳመጥ ላይ... / Processing your voice note...")
+    await send_safe_message(message, "🎧 ድምጽዎን በማዳመጥ ላይ... / Processing your voice note...")
 
     try:
         file = await bot.get_file(message.voice.file_id)
@@ -463,7 +521,7 @@ async def handle_voice_message(message: types.Message, bot: Bot) -> None:
         else "Please explain Module 2."
     )
 
-    await message.answer(f"📝 **የድምጽ ግልባጭ / Transcript:**\n_{transcript}_", parse_mode="Markdown")
+    await send_safe_message(message, f"📝 **የድምጽ ግልባጭ / Transcript:**\n_{transcript}_")
 
     ask_res = await call_api(
         "POST",
@@ -476,7 +534,7 @@ async def handle_voice_message(message: types.Message, bot: Bot) -> None:
         },
     )
     if not ask_res:
-        await message.answer("⚠️ መልስ ማግኘት አልተቻለም። / Could not retrieve answer.")
+        await send_safe_message(message, "⚠️ መልስ ማግኘት አልተቻለም። / Could not retrieve answer.")
         return
 
     answer_text = ask_res.get("answer", "")
@@ -488,7 +546,7 @@ async def handle_voice_message(message: types.Message, bot: Bot) -> None:
         for c in citations:
             formatted += f"\n• [{c['heading']}]({c['url']}) (Page {c.get('page', 1)})"
 
-    await message.answer(formatted, parse_mode="Markdown")
+    await send_safe_message(message, formatted)
 
     if not state["lite_mode"]:
         synth_res = await call_api(
@@ -497,7 +555,7 @@ async def handle_voice_message(message: types.Message, bot: Bot) -> None:
             {"text": answer_text[:200], "language": state["language"], "speed": 1.0},
         )
         if synth_res and "audio_url" in synth_res:
-            await message.answer(f"🔊 የድምጽ መልስ / Audio replay: {synth_res['audio_url']}")
+            await send_safe_message(message, f"🔊 የድምጽ መልስ / Audio replay: {synth_res['audio_url']}")
 
 
 @router.message(F.text)
@@ -522,7 +580,7 @@ async def handle_text_question(message: types.Message) -> None:
         },
     )
     if not res:
-        await message.answer("⚠️ አገልግሎቱ ለጊዜው አልተገኘም። / Assistant temporarily unavailable.")
+        await send_safe_message(message, "⚠️ አገልግሎቱ ለጊዜው አልተገኘም። / Assistant temporarily unavailable.")
         return
 
     answer_text = res.get("answer", "")
@@ -547,7 +605,7 @@ async def handle_text_question(message: types.Message) -> None:
             ]
         )
 
-    await message.answer(reply_msg, parse_mode="Markdown", reply_markup=reply_markup)
+    await send_safe_message(message, reply_msg, reply_markup=reply_markup)
 
 
 @router.callback_query(F.data == "call_handoff")
