@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Savanna Bridge - Agent Support Console</title>
+    <style>
+      :root {
+        --bg-color: #f8fafc;
+        --card-bg: #ffffff;
+        --text-color: #0f172a;
+        --muted-text: #475569;
+        --primary: #0284c7;
+        --primary-hover: #0369a1;
+        --border-color: #cbd5e1;
+        --focus-ring: #0284c7;
+        --success: #15803d;
+        --tag-bg: #e0f2fe;
+        --tag-text: #0369a1;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-color: #0f172a;
+          --card-bg: #1e293b;
+          --text-color: #f8fafc;
+          --muted-text: #cbd5e1;
+          --primary: #38bdf8;
+          --primary-hover: #7dd3fc;
+          --border-color: #334155;
+          --focus-ring: #38bdf8;
+          --success: #4ade80;
+          --tag-bg: #075985;
+          --tag-text: #e0f2fe;
+        }
+      }
+
+      *, *::before, *::after {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 1.5rem;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        line-height: 1.6;
+      }
+
+      header {
+        max-width: 72rem;
+        margin: 0 auto 2rem auto;
+        border-bottom: 2px solid var(--border-color);
+        padding-bottom: 1rem;
+      }
+
+      h1 {
+        font-size: 1.75rem;
+        margin: 0 0 0.5rem 0;
+        font-weight: 700;
+      }
+
+      .status-banner {
+        padding: 0.75rem 1rem;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        font-weight: 600;
+        display: inline-block;
+      }
+
+      .agent-config {
+        margin-top: 1rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: center;
+      }
+
+      main {
+        max-width: 72rem;
+        margin: 0 auto;
+      }
+
+      .notice-box {
+        background: var(--tag-bg);
+        color: var(--tag-text);
+        padding: 1rem 1.25rem;
+        border-radius: 0.5rem;
+        margin-bottom: 2rem;
+        border-left: 4px solid var(--primary);
+      }
+
+      .notice-box p {
+        margin: 0;
+        font-weight: 500;
+      }
+
+      .queue-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+      }
+
+      .queue-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(22rem, 1fr));
+        gap: 1.5rem;
+      }
+
+      .handoff-card {
+        background: var(--card-bg);
+        border: 2px solid var(--border-color);
+        border-radius: 0.75rem;
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .handoff-card.claimed {
+        border-color: var(--primary);
+      }
+
+      .card-title {
+        font-size: 1.15rem;
+        font-weight: 700;
+        margin: 0 0 0.5rem 0;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        background: var(--tag-bg);
+        color: var(--tag-text);
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .needs-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        margin: 0.5rem 0;
+      }
+
+      .context-box {
+        background: var(--bg-color);
+        padding: 0.75rem;
+        border-radius: 0.35rem;
+        margin: 0.75rem 0;
+        font-size: 0.95rem;
+      }
+
+      .card-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-top: 1rem;
+        border-top: 1px solid var(--border-color);
+        padding-top: 1rem;
+      }
+
+      .reply-form {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      input[type="text"], textarea {
+        width: 100%;
+        padding: 0.65rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.35rem;
+        background: var(--bg-color);
+        color: var(--text-color);
+        font-size: 1rem;
+      }
+
+      button, a.button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 2.75rem;
+        min-width: 2.75rem;
+        padding: 0.6rem 1.25rem;
+        border-radius: 0.375rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        border: none;
+        background-color: var(--primary);
+        color: #ffffff;
+      }
+
+      button:hover, a.button:hover {
+        background-color: var(--primary-hover);
+      }
+
+      button.secondary, a.button.secondary {
+        background-color: transparent;
+        border: 2px solid var(--primary);
+        color: var(--primary);
+      }
+
+      button.danger {
+        background-color: #dc2626;
+        color: #ffffff;
+      }
+
+      button.danger:hover {
+        background-color: #b91c1c;
+      }
+
+      :focus-visible {
+        outline: 3px solid var(--focus-ring);
+        outline-offset: 3px;
+      }
+
+      .empty-queue {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--muted-text);
+        font-size: 1.15rem;
+        border: 2px dashed var(--border-color);
+        border-radius: 0.75rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Savanna Bridge - Agent Support Console</h1>
+      <div id="liveStatus" class="status-banner" role="status" aria-live="polite">
+        Connecting to queue...
+      </div>
+      <div class="agent-config">
+        <label for="agentRef"><strong>Active Agent Name:</strong></label>
+        <input type="text" id="agentRef" value="Agent Sarah" style="max-width: 15rem;" />
+        <label for="apiEndpoint"><strong>API Base URL:</strong></label>
+        <input type="text" id="apiEndpoint" value="http://localhost:8000" style="max-width: 18rem;" />
+        <button type="button" id="refreshBtn">🔄 Refresh Queue</button>
+      </div>
+    </header>
+
+    <main>
+      <div class="notice-box" role="region" aria-label="Privacy and consent guidelines">
+        <p>
+          🛡️ <strong>Learner Control &amp; Privacy Rule:</strong> The agent console never starts screen sharing on behalf of the learner.
+          The learner initiates, controls, and stops screen sharing solely within the Jitsi room. No remote takeover is possible.
+        </p>
+      </div>
+
+      <section aria-labelledby="queueHeading">
+        <div class="queue-header">
+          <h2 id="queueHeading">Waiting Learners &amp; Active Requests</h2>
+          <span id="queueCount" style="font-weight: 600;">0 requests waiting</span>
+        </div>
+
+        <div id="queueGrid" class="queue-grid" aria-live="polite">
+          <div class="empty-queue">
+            <p>No learners currently in the queue. You can refresh anytime.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const statusBanner = document.getElementById("liveStatus");
+      const queueCount = document.getElementById("queueCount");
+      const queueGrid = document.getElementById("queueGrid");
+      const agentRefInput = document.getElementById("agentRef");
+      const apiEndpointInput = document.getElementById("apiEndpoint");
+      const refreshBtn = document.getElementById("refreshBtn");
+
+      let currentHandoffs = [];
+
+      function getApiUrl() {
+        return apiEndpointInput.value.replace(/\/+$/, "");
+      }
+
+      function getAgentRef() {
+        return agentRefInput.value.trim() || "Agent Demo";
+      }
+
+      async function fetchQueue() {
+        const url = `${getApiUrl()}/handoff/queue`;
+        try {
+          const res = await fetch(url);
+          if (!res.ok) {
+            statusBanner.textContent = `Error: API returned ${res.status}`;
+            return;
+          }
+          const data = await res.json();
+          currentHandoffs = data.items || [];
+          renderQueue();
+          statusBanner.textContent = `🟢 Connected. Last checked: ${new Date().toLocaleTimeString()}`;
+        } catch (err) {
+          statusBanner.textContent = `⚠️ Connection error to ${url}. Make sure API is running.`;
+        }
+      }
+
+      function renderQueue() {
+        queueCount.textContent = `${currentHandoffs.length} request${currentHandoffs.length === 1 ? "" : "s"} waiting`;
+
+        if (currentHandoffs.length === 0) {
+          queueGrid.innerHTML = `
+            <div class="empty-queue">
+              <p>No learners currently in the queue. New requests will appear here automatically.</p>
+            </div>
+          `;
+          return;
+        }
+
+        queueGrid.innerHTML = "";
+
+        currentHandoffs.forEach((item) => {
+          const card = item.card || {};
+          const isClaimed = item.status === "claimed";
+          const cardEl = document.createElement("article");
+          cardEl.className = `handoff-card ${isClaimed ? "claimed" : ""}`;
+          cardEl.setAttribute("aria-labelledby", `heading-${item.id}`);
+
+          const supportBadges = (card.support_needs || [])
+            .map(need => `<span class="badge">${escapeHtml(need.replace("_", " "))}</span>`)
+            .join("");
+
+          cardEl.innerHTML = `
+            <div>
+              <h3 id="heading-${item.id}" class="card-title">
+                Learner Request #${escapeHtml(item.id)}
+              </h3>
+              <div>
+                <span class="badge" style="background: ${isClaimed ? 'var(--primary)' : 'var(--success)'}; color: #fff;">
+                  ${isClaimed ? 'Claimed by ' + escapeHtml(item.agent_ref || 'Agent') : 'Waiting'}
+                </span>
+                <span class="badge">Language: ${escapeHtml(card.language || 'en').toUpperCase()}</span>
+                <span class="badge">Mode: ${escapeHtml(card.contact_mode || 'text')}</span>
+              </div>
+
+              <div class="context-box">
+                <strong>Context:</strong> ${escapeHtml(card.context || 'Requested assistance')}
+              </div>
+
+              <div>
+                <strong>Support Preferences:</strong>
+                <div class="needs-list">
+                  ${supportBadges || '<span style="color: var(--muted-text);">None specified</span>'}
+                </div>
+              </div>
+            </div>
+
+            <div class="card-actions">
+              ${!isClaimed ? `
+                <button type="button" onclick="claimHandoff('${item.id}')">
+                  ✋ Claim this Request
+                </button>
+              ` : `
+                <a href="${escapeHtml(item.room_url)}" target="_blank" rel="noopener noreferrer" class="button secondary">
+                  📹 Open Live Jitsi Room
+                </a>
+
+                <form class="reply-form" onsubmit="event.preventDefault(); replyHandoff('${item.id}', this);">
+                  <label for="reply-${item.id}"><strong>Send Reply to Learner:</strong></label>
+                  <input type="text" id="reply-${item.id}" name="message" placeholder="Type your message..." required />
+                  <button type="submit">💬 Send Message</button>
+                </form>
+
+                <button type="button" class="danger" onclick="closeHandoff('${item.id}')">
+                  ✓ Close Request
+                </button>
+              `}
+            </div>
+          `;
+
+          queueGrid.appendChild(cardEl);
+        });
+      }
+
+      async function claimHandoff(id) {
+        const agent = getAgentRef();
+        try {
+          const res = await fetch(`${getApiUrl()}/handoff/${id}/claim`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ agent_ref: agent }),
+          });
+          if (res.ok) {
+            statusBanner.textContent = `Claimed request #${id}`;
+            fetchQueue();
+          }
+        } catch (err) {
+          alert(`Failed to claim: ${err.message}`);
+        }
+      }
+
+      async function replyHandoff(id, form) {
+        const messageInput = form.elements["message"];
+        const message = messageInput.value.trim();
+        if (!message) return;
+
+        try {
+          const res = await fetch(`${getApiUrl()}/handoff/${id}/reply`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ agent_ref: getAgentRef(), message: message }),
+          });
+          if (res.ok) {
+            messageInput.value = "";
+            statusBanner.textContent = `Replied to #${id}: "${message}"`;
+          }
+        } catch (err) {
+          alert(`Failed to reply: ${err.message}`);
+        }
+      }
+
+      async function closeHandoff(id) {
+        if (!confirm(`Are you sure you want to close request #${id}?`)) return;
+
+        try {
+          const res = await fetch(`${getApiUrl()}/handoff/${id}/close`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({}),
+          });
+          if (res.ok) {
+            statusBanner.textContent = `Closed request #${id}`;
+            fetchQueue();
+          }
+        } catch (err) {
+          alert(`Failed to close: ${err.message}`);
+        }
+      }
+
+      function escapeHtml(str) {
+        return String(str || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      refreshBtn.addEventListener("click", fetchQueue);
+      setInterval(fetchQueue, 5000);
+      fetchQueue();
+    </script>
+  </body>
+</html>
