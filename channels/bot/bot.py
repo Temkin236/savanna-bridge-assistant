@@ -251,7 +251,8 @@ async def handle_confirm(message: types.Message) -> None:
         await message.answer("❌ ኮዱ ትክክል አይደለም ወይም ጊዜው አልፏል። / Invalid or expired code.")
 
 
-@router.message(F.text.in_({"👥 ከሰው ጋር ተገናኝ", "👥 Talk to a Person"}) | Command("handoff"))
+@router.message(Command("handoff"))
+@router.message(F.text.in_({"👥 ከሰው ጋር ተገናኝ", "👥 Talk to a Person"}))
 async def handle_handoff(message: types.Message) -> None:
     user_id = message.from_user.id if message.from_user else 0
     state = get_user_state(user_id)
@@ -316,7 +317,8 @@ async def handle_ask_prompt(message: types.Message) -> None:
     await send_safe_message(message, prompt)
 
 
-@router.message(F.text.in_({"📅 ምን ይጠበቃል?", "📅 Deadlines"}) | Command("deadlines"))
+@router.message(Command("deadlines"))
+@router.message(F.text.in_({"📅 ምን ይጠበቃል?", "📅 Deadlines"}))
 async def handle_deadlines(message: types.Message) -> None:
     res = await call_api("GET", "/learner/deadlines")
     if not res or not res.get("items"):
@@ -332,7 +334,8 @@ async def handle_deadlines(message: types.Message) -> None:
     await send_safe_message(message, "\n".join(lines))
 
 
-@router.message(F.text.in_({"📚 ሞጁሎች", "📚 Course Modules"}) | Command("modules"))
+@router.message(Command("modules"))
+@router.message(F.text.in_({"📚 ሞጁሎች", "📚 Course Modules"}))
 async def handle_modules(message: types.Message) -> None:
     res = await call_api("GET", "/learner/modules")
     if not res or not res.get("items"):
@@ -348,7 +351,8 @@ async def handle_modules(message: types.Message) -> None:
     await send_safe_message(message, "\n".join(lines))
 
 
-@router.message(F.text.in_({"💼 የሥራ እድሎች", "💼 Job Alerts"}) | Command("jobs"))
+@router.message(Command("jobs"))
+@router.message(F.text.in_({"💼 የሥራ እድሎች", "💼 Job Alerts"}))
 async def handle_jobs(message: types.Message) -> None:
     user_id = message.from_user.id if message.from_user else 0
     state = get_user_state(user_id)
@@ -407,7 +411,8 @@ async def handle_accommodations(message: types.Message) -> None:
     await send_safe_message(message, msg)
 
 
-@router.message(F.text.in_({"⚙️ ቅንብሮች", "⚙️ Settings"}) | Command("settings"))
+@router.message(Command("settings"))
+@router.message(F.text.in_({"⚙️ ቅንብሮች", "⚙️ Settings"}))
 async def handle_settings(message: types.Message) -> None:
     res = await call_api("GET", "/notification-settings")
     if not res:
