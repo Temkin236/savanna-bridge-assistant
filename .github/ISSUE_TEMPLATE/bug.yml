@@ -1,0 +1,41 @@
+name: Bug report
+description: Report a reproducible project issue
+title: "[bug] "
+labels: [bug]
+body:
+  - type: dropdown
+    id: owner
+    attributes:
+      label: Owning area
+      options:
+        - A - API
+        - B - Widget
+        - C - Channels
+        - D - Quality, docs, or root
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - blocker
+        - critical
+        - serious
+        - moderate
+        - minor
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction and expected result
+      description: Include the device, browser, assistive technology, language, and exact steps.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Add logs or screenshots with personal data removed.
+

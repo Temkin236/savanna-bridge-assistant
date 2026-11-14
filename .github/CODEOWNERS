@@ -1,0 +1,17 @@
+# Temporary repository owner fallback. Replace the handles below with the four
+# actual team GitHub handles before enabling required CODEOWNERS reviews.
+* @Temkin236
+
+# Folder ownership from the working agreement
+/api/ @Temkin236
+/widget/ @Temkin236
+/channels/ @Temkin236
+/docs/ @Temkin236
+/tests/ @Temkin236
+/demo-host/ @Temkin236
+/.github/ @Temkin236
+/docker-compose.yml @Temkin236
+/Makefile @Temkin236
+/.env.example @Temkin236
+/README.md @Temkin236
+

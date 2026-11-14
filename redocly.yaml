@@ -1,0 +1,14 @@
+extends:
+  - recommended
+
+rules:
+  # This repository deliberately publishes local development and Prism servers.
+  no-server-example.com: off
+  # Authentication and input errors use shared responses where relevant. Some
+  # read-only demo routes have no meaningful operation-specific 4xx response.
+  operation-4xx-response: off
+  # Licensing is a team/legal decision and is not invented during scaffolding.
+  info-license: off
+  # The compact tag list is self-explanatory in this internal hackathon contract.
+  tag-description: off
+

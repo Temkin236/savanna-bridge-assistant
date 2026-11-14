@@ -1,0 +1,162 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      api: ${{ steps.filter.outputs.api }}
+      widget: ${{ steps.filter.outputs.widget }}
+      channels: ${{ steps.filter.outputs.channels }}
+      integration: ${{ steps.filter.outputs.integration }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            api:
+              - 'api/**'
+            widget:
+              - 'widget/**'
+            channels:
+              - 'channels/**'
+            integration:
+              - '.github/**'
+              - 'docs/**'
+              - 'tests/**'
+              - 'demo-host/**'
+              - 'docker-compose.yml'
+              - 'Makefile'
+              - 'README.md'
+
+  folder-scope:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python tests/check_scope.py --branch "${GITHUB_HEAD_REF}" --base "${GITHUB_BASE_REF}"
+
+  api-contract:
+    needs: changes
+    if: needs.changes.outputs.api == 'true' || needs.changes.outputs.integration == 'true' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python tests/check_openapi_examples.py
+      - run: python tests/check_secrets.py
+      - run: npx --yes @redocly/cli@2.78.0 lint api/openapi.yaml
+
+  api:
+    needs: changes
+    if: needs.changes.outputs.api == 'true' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -e ".[dev]"
+        working-directory: api
+      - run: ruff check .
+        working-directory: api
+      - run: pytest -q
+        working-directory: api
+
+  widget:
+    needs: changes
+    if: needs.changes.outputs.widget == 'true' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: widget/package-lock.json
+      - run: npm ci
+        working-directory: widget
+      - run: npm run build
+        working-directory: widget
+
+  channels:
+    needs: changes
+    if: needs.changes.outputs.channels == 'true' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build channels/bot
+
+  compose:
+    needs: changes
+    if: needs.changes.outputs.integration == 'true' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cp .env.example .env
+      - run: docker compose config --quiet
+      - run: make up
+      - run: |
+          for attempt in {1..30}; do
+            if curl --fail --silent http://localhost:8000/health \
+              && curl --fail --silent http://localhost:4010/health \
+              && curl --fail --silent http://localhost:8080/health.html \
+              && curl --fail --silent http://localhost:4173/health.html; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker compose ps
+          docker compose logs
+          exit 1
+      - run: docker compose exec -T bot python /tests/integration_flow.py --api http://api:8000 --channel-dir /app
+      - if: always()
+        run: docker compose down --volumes --remove-orphans
+
+  axe-baseline:
+    needs: changes
+    if: needs.changes.outputs.integration == 'true' || needs.changes.outputs.widget == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose up --build -d api console demo-host
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: tests/package-lock.json
+      - run: npm ci
+        working-directory: tests
+      - run: npx playwright install --with-deps chromium
+        working-directory: tests
+      - run: |
+          for attempt in {1..30}; do
+            if curl --fail --silent http://localhost:8000/health; then
+              exit 0
+            fi
+            sleep 2
+          done
+          exit 1
+      - run: npm run verify
+        working-directory: tests
+        env:
+          PUBLIC_API_BASE_URL: http://localhost:8000
+          CONSOLE_BASE_URL: http://localhost:8080
+      - if: always()
+        run: docker compose down --remove-orphans
+

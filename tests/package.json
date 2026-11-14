@@ -1,0 +1,18 @@
+{
+  "name": "savanna-bridge-integration-tests",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "axe": "playwright test axe.spec.ts",
+    "e2e": "playwright test integration.spec.ts",
+    "verify": "playwright test axe.spec.ts integration.spec.ts",
+    "axe:baseline": "node capture-axe-baseline.mjs",
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.0",
+    "@playwright/test": "^1.49.0"
+  }
+}
+

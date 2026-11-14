@@ -1,0 +1,1268 @@
+openapi: 3.1.0
+info:
+  title: Savanna Bridge Assistant API
+  version: 1.0.0
+  summary: Portable multilingual learning and career support contract
+  description: >-
+    Frozen G0 contract for the Savanna Bridge Assistant. Changes after G0 must
+    be additive and owned by Person A. Savanna is one adapter, not the system
+    boundary. Mock and sandbox behavior must be labelled in responses and UI.
+servers:
+  - url: http://localhost:8000
+    description: Local API
+  - url: http://localhost:4010
+    description: Prism contract mock
+security:
+  - WidgetToken: []
+tags:
+  - name: System
+  - name: Tutor
+  - name: Linking
+  - name: Support
+  - name: Handoff
+  - name: Jobs
+  - name: Alerts
+  - name: Learner
+  - name: Speech
+  - name: Teacher
+
+paths:
+  /health:
+    get:
+      tags: [System]
+      operationId: getHealth
+      summary: Check service health
+      security: []
+      responses:
+        "200":
+          description: Service is ready
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+
+  /ask:
+    post:
+      tags: [Tutor]
+      operationId: askTutor
+      summary: Ask from indexed platform content
+      description: >-
+        Answers must contain citations when retrieval is confident. Weak
+        retrieval must return a refusal and offer human help; it must not guess.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AskRequest"
+      responses:
+        "200":
+          description: Grounded answer or safe refusal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Answer"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+  /link/start:
+    post:
+      tags: [Linking]
+      operationId: startAccountLink
+      summary: Create an expiring one-time account link code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LinkStartRequest"
+      responses:
+        "200":
+          description: One-time code created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LinkStartResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /link/confirm:
+    post:
+      tags: [Linking]
+      operationId: confirmAccountLink
+      summary: Consume a one-time account link code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LinkConfirmRequest"
+      responses:
+        "200":
+          description: Session linked without identity proof
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LinkConfirmResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "410":
+          description: Code expired or was already used
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /support-needs:
+    get:
+      tags: [Support]
+      operationId: getSupportNeeds
+      summary: Read the learner's private support preferences
+      responses:
+        "200":
+          description: Current preferences
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SupportNeeds"
+    put:
+      tags: [Support]
+      operationId: updateSupportNeeds
+      summary: Update the learner's private support preferences
+      description: Never request ID, medical proof, diagnosis, or history.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SupportNeeds"
+      responses:
+        "200":
+          description: Saved preferences
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SupportNeeds"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /handoff:
+    post:
+      tags: [Handoff]
+      operationId: createHandoff
+      summary: Ask a human for help with learner consent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HandoffRequest"
+      responses:
+        "201":
+          description: Handoff queued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Handoff"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /handoff/queue:
+    get:
+      tags: [Handoff]
+      operationId: listHandoffQueue
+      summary: List waiting learners for the agent console
+      responses:
+        "200":
+          description: Current queue
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Handoff"
+                example:
+                  items:
+                    - id: handoff_01
+                      status: waiting
+                      card:
+                        language: am
+                        context: The learner was opening Module 2 and asked for a person.
+                        support_needs: [written_instructions]
+                        contact_mode: text
+                      room_url: https://meet.jit.si/savanna-bridge-demo-handoff-01
+                      created_at: "2026-11-14T10:30:00+03:00"
+
+  /handoff/{handoff_id}/claim:
+    post:
+      tags: [Handoff]
+      operationId: claimHandoff
+      summary: Claim a waiting handoff
+      parameters:
+        - $ref: "#/components/parameters/HandoffId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentAction"
+      responses:
+        "200":
+          description: Handoff claimed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Handoff"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /handoff/{handoff_id}/reply:
+    post:
+      tags: [Handoff]
+      operationId: replyToHandoff
+      summary: Send a text reply to the learner
+      parameters:
+        - $ref: "#/components/parameters/HandoffId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HandoffReplyRequest"
+      responses:
+        "200":
+          description: Reply accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HandoffReply"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /handoff/{handoff_id}/close:
+    post:
+      tags: [Handoff]
+      operationId: closeHandoff
+      summary: Close a completed handoff
+      parameters:
+        - $ref: "#/components/parameters/HandoffId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentAction"
+      responses:
+        "200":
+          description: Handoff closed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Handoff"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /jobs:
+    get:
+      tags: [Jobs]
+      operationId: listJobs
+      summary: List schema.org JobPosting records
+      parameters:
+        - name: field
+          in: query
+          schema:
+            type: string
+          example: customer support
+        - name: support_need
+          in: query
+          schema:
+            type: string
+            enum: [extra_time, screen_reader_help, written_instructions, step_free_access, other]
+          example: screen_reader_help
+      responses:
+        "200":
+          description: Matching jobs
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Job"
+                example:
+                  items:
+                    - id: job_01
+                      title: Customer Support Assistant
+                      description: Help customers by phone and chat.
+                      hiring_organization: Addis Services Cooperative
+                      employment_type: FULL_TIME
+                      job_location: Addis Ababa
+                      date_posted: "2026-11-12"
+                      valid_through: "2026-11-30"
+                      application_url: https://jobs.example.org/customer-support-assistant
+                      source_url: https://jobs.example.org/customer-support-assistant
+                      accommodations: [screen_reader_compatible, step_free_office]
+
+  /alerts/subscriptions:
+    post:
+      tags: [Alerts]
+      operationId: createAlertSubscription
+      summary: Save an opted-in job alert subscription
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AlertSubscription"
+      responses:
+        "201":
+          description: Subscription saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlertSubscription"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /alerts/match:
+    post:
+      tags: [Alerts]
+      operationId: matchAlerts
+      summary: Match a job to opted-in learners
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [job_id]
+              properties:
+                job_id:
+                  type: string
+              example:
+                job_id: job_01
+      responses:
+        "200":
+          description: Matching learner channels with no unnecessary personal data
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [matches]
+                properties:
+                  matches:
+                    type: array
+                    items:
+                      type: object
+                      required: [learner_ref, channels]
+                      properties:
+                        learner_ref:
+                          type: string
+                        channels:
+                          type: array
+                          items:
+                            type: string
+                            enum: [telegram, sms_sandbox]
+                example:
+                  matches:
+                    - learner_ref: learner_demo_01
+                      channels: [telegram, sms_sandbox]
+
+  /notification-settings:
+    get:
+      tags: [Alerts]
+      operationId: getNotificationSettings
+      summary: Read notification choices
+      responses:
+        "200":
+          description: Current settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationSettings"
+    put:
+      tags: [Alerts]
+      operationId: updateNotificationSettings
+      summary: Update notification choices or mute notifications
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NotificationSettings"
+      responses:
+        "200":
+          description: Saved settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationSettings"
+
+  /learner/deadlines:
+    get:
+      tags: [Learner]
+      operationId: listLearnerDeadlines
+      summary: List linked learner deadlines
+      responses:
+        "200":
+          description: Upcoming deadlines
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Deadline"
+                example:
+                  items:
+                    - id: deadline_01
+                      title: Module 2 knowledge check
+                      due_at: "2026-11-16T17:00:00+03:00"
+                      course_id: course_demo
+                      url: https://learning.example.org/courses/course_demo/module-2
+
+  /learner/modules:
+    get:
+      tags: [Learner]
+      operationId: listLearnerModules
+      summary: List course modules from the platform adapter
+      parameters:
+        - name: course_id
+          in: query
+          schema:
+            type: string
+          example: course_demo
+      responses:
+        "200":
+          description: Available modules
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/CourseModule"
+                example:
+                  items:
+                    - id: module_2
+                      number: 2
+                      title: Communicating with customers
+                      summary: Learn how to listen, clarify, and respond.
+                      url: https://learning.example.org/courses/course_demo/module-2
+
+  /accommodation/draft:
+    post:
+      tags: [Jobs]
+      operationId: draftAccommodationRequest
+      summary: Draft an editable interview accommodation request
+      description: Draft only. The learner must edit and confirm before anything is sent.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccommodationDraftRequest"
+      responses:
+        "200":
+          description: Editable message draft
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccommodationDraft"
+
+  /speech/transcribe:
+    post:
+      tags: [Speech]
+      operationId: transcribeSpeech
+      summary: Transcribe a short voice input without retaining it by default
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TranscriptionRequest"
+      responses:
+        "200":
+          description: Editable transcript
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transcription"
+        "413":
+          description: Audio is too large
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /speech/synthesize:
+    post:
+      tags: [Speech]
+      operationId: synthesizeSpeech
+      summary: Synthesize read-aloud audio
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SynthesisRequest"
+      responses:
+        "200":
+          description: Short-lived audio result with complete text equivalent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SynthesisResult"
+
+  /teacher/stats:
+    get:
+      tags: [Teacher]
+      operationId: getTeacherStats
+      summary: Get anonymous most-asked questions
+      responses:
+        "200":
+          description: Aggregate statistics with no learner names
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeacherStats"
+
+components:
+  securitySchemes:
+    WidgetToken:
+      type: apiKey
+      in: header
+      name: X-Widget-Token
+      description: Signed, expiring token issued by the host platform.
+
+  parameters:
+    HandoffId:
+      name: handoff_id
+      in: path
+      required: true
+      schema:
+        type: string
+      example: handoff_01
+
+  responses:
+    BadRequest:
+      description: Invalid input
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            error:
+              code: invalid_request
+              message: Check the highlighted fields and try again.
+              request_id: req_demo_01
+    Unauthorized:
+      description: Missing or invalid widget token
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            error:
+              code: invalid_widget_token
+              message: This assistant session has expired. Reopen it from the platform.
+              request_id: req_demo_02
+    NotFound:
+      description: Requested record was not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            error:
+              code: not_found
+              message: The requested item was not found.
+              request_id: req_demo_03
+    RateLimited:
+      description: Too many requests
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          example: 30
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            error:
+              code: rate_limited
+              message: Please wait a moment and try again.
+              request_id: req_demo_04
+
+  schemas:
+    Language:
+      type: string
+      enum: [am, en, om, ti]
+      example: am
+
+    Health:
+      type: object
+      required: [status, service, version, provider]
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded]
+        service:
+          type: string
+        version:
+          type: string
+        provider:
+          type: string
+        mocked:
+          type: boolean
+      example:
+        status: ok
+        service: savanna-bridge-api
+        version: 0.1.0
+        provider: offline
+        mocked: true
+
+    AskRequest:
+      type: object
+      required: [question, language]
+      properties:
+        question:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        language:
+          $ref: "#/components/schemas/Language"
+        course_id:
+          type: string
+        simple_mode:
+          type: boolean
+          default: false
+        anonymous:
+          type: boolean
+          default: false
+        channel:
+          type: string
+          enum: [web, telegram, sms_sandbox]
+      example:
+        question: What is in Module 2?
+        language: en
+        course_id: course_demo
+        simple_mode: false
+        anonymous: true
+        channel: web
+
+    Citation:
+      type: object
+      required: [title, heading, url]
+      properties:
+        title:
+          type: string
+        heading:
+          type: string
+        page:
+          type: integer
+          minimum: 1
+        url:
+          type: string
+          format: uri
+      example:
+        title: Customer Service Foundations
+        heading: Module 2 - Communicating with customers
+        page: 3
+        url: https://learning.example.org/courses/course_demo/module-2
+
+    Answer:
+      type: object
+      required: [answer, citations, language, offer_human, reason]
+      properties:
+        answer:
+          type: string
+        citations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Citation"
+        language:
+          $ref: "#/components/schemas/Language"
+        offer_human:
+          type: boolean
+        reason:
+          type: string
+          enum: [grounded, low_confidence, no_content, provider_unavailable]
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        provider:
+          type: string
+        mocked:
+          type: boolean
+      example:
+        answer: Module 2 explains how to listen, clarify a customer's need, and respond clearly.
+        citations:
+          - title: Customer Service Foundations
+            heading: Module 2 - Communicating with customers
+            page: 3
+            url: https://learning.example.org/courses/course_demo/module-2
+        language: en
+        offer_human: false
+        reason: grounded
+        confidence: 0.88
+        provider: offline
+        mocked: true
+
+    LinkStartRequest:
+      type: object
+      required: [session_id, channel]
+      properties:
+        session_id:
+          type: string
+        channel:
+          type: string
+          enum: [web, telegram]
+        learner_reference:
+          type: string
+          description: Non-sensitive account reference such as username or enrolment code.
+      example:
+        session_id: web_demo_01
+        channel: web
+        learner_reference: learner-demo
+
+    LinkStartResponse:
+      type: object
+      required: [link_id, code, expires_at, single_use]
+      properties:
+        link_id:
+          type: string
+        code:
+          type: string
+          pattern: "^[0-9]{6}$"
+        expires_at:
+          type: string
+          format: date-time
+        single_use:
+          type: boolean
+        mocked:
+          type: boolean
+      example:
+        link_id: link_01
+        code: "482913"
+        expires_at: "2026-11-14T10:40:00+03:00"
+        single_use: true
+        mocked: true
+
+    LinkConfirmRequest:
+      type: object
+      required: [link_id, code]
+      properties:
+        link_id:
+          type: string
+        code:
+          type: string
+          pattern: "^[0-9]{6}$"
+      example:
+        link_id: link_01
+        code: "482913"
+
+    LinkConfirmResponse:
+      type: object
+      required: [linked, learner_ref]
+      properties:
+        linked:
+          type: boolean
+        learner_ref:
+          type: string
+        mocked:
+          type: boolean
+      example:
+        linked: true
+        learner_ref: learner_demo_01
+        mocked: true
+
+    SupportNeed:
+      type: string
+      enum: [extra_time, screen_reader_help, written_instructions, step_free_access, other]
+
+    SupportNeeds:
+      type: object
+      required: [needs]
+      properties:
+        needs:
+          type: array
+          uniqueItems: true
+          items:
+            $ref: "#/components/schemas/SupportNeed"
+        other_text:
+          type: string
+          maxLength: 500
+        preferred_contact_mode:
+          type: string
+          enum: [text, voice, video, telegram]
+      example:
+        needs: [written_instructions, screen_reader_help]
+        other_text: ""
+        preferred_contact_mode: text
+
+    HandoffCard:
+      type: object
+      required: [language, context, support_needs, contact_mode]
+      properties:
+        language:
+          $ref: "#/components/schemas/Language"
+        context:
+          type: string
+          maxLength: 2000
+        support_needs:
+          type: array
+          items:
+            $ref: "#/components/schemas/SupportNeed"
+        contact_mode:
+          type: string
+          enum: [text, voice, video, telegram]
+      example:
+        language: am
+        context: The learner was opening Module 2 and asked for a person.
+        support_needs: [written_instructions]
+        contact_mode: text
+
+    HandoffRequest:
+      type: object
+      required: [consent, card]
+      properties:
+        consent:
+          type: boolean
+          const: true
+        card:
+          $ref: "#/components/schemas/HandoffCard"
+        channel:
+          type: string
+          enum: [web, telegram, sms_sandbox]
+      example:
+        consent: true
+        card:
+          language: en
+          context: The learner could not find the assessment instructions.
+          support_needs: [written_instructions]
+          contact_mode: text
+        channel: web
+
+    Handoff:
+      type: object
+      required: [id, status, card, room_url, created_at]
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum: [waiting, claimed, closed]
+        card:
+          $ref: "#/components/schemas/HandoffCard"
+        room_url:
+          type: string
+          format: uri
+        agent_ref:
+          type: [string, "null"]
+        created_at:
+          type: string
+          format: date-time
+        mocked:
+          type: boolean
+      example:
+        id: handoff_01
+        status: waiting
+        card:
+          language: en
+          context: The learner could not find the assessment instructions.
+          support_needs: [written_instructions]
+          contact_mode: text
+        room_url: https://meet.jit.si/savanna-bridge-demo-handoff-01
+        agent_ref: null
+        created_at: "2026-11-14T10:30:00+03:00"
+        mocked: true
+
+    AgentAction:
+      type: object
+      required: [agent_ref]
+      properties:
+        agent_ref:
+          type: string
+      example:
+        agent_ref: agent_demo_01
+
+    HandoffReplyRequest:
+      type: object
+      required: [agent_ref, message]
+      properties:
+        agent_ref:
+          type: string
+        message:
+          type: string
+          minLength: 1
+          maxLength: 2000
+      example:
+        agent_ref: agent_demo_01
+        message: I can help. Which part of the instructions is unclear?
+
+    HandoffReply:
+      type: object
+      required: [handoff_id, delivered, message, sent_at]
+      properties:
+        handoff_id:
+          type: string
+        delivered:
+          type: boolean
+        message:
+          type: string
+        sent_at:
+          type: string
+          format: date-time
+      example:
+        handoff_id: handoff_01
+        delivered: true
+        message: I can help. Which part of the instructions is unclear?
+        sent_at: "2026-11-14T10:32:00+03:00"
+
+    Job:
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - hiring_organization
+        - employment_type
+        - job_location
+        - date_posted
+        - application_url
+        - source_url
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        hiring_organization:
+          type: string
+        employment_type:
+          type: string
+        job_location:
+          type: string
+        date_posted:
+          type: string
+          format: date
+        valid_through:
+          type: string
+          format: date
+        application_url:
+          type: string
+          format: uri
+        source_url:
+          type: string
+          format: uri
+        accommodations:
+          type: array
+          items:
+            type: string
+      example:
+        id: job_01
+        title: Customer Support Assistant
+        description: Help customers by phone and chat.
+        hiring_organization: Addis Services Cooperative
+        employment_type: FULL_TIME
+        job_location: Addis Ababa
+        date_posted: "2026-11-12"
+        valid_through: "2026-11-30"
+        application_url: https://jobs.example.org/customer-support-assistant
+        source_url: https://jobs.example.org/customer-support-assistant
+        accommodations: [screen_reader_compatible, step_free_office]
+
+    AlertSubscription:
+      type: object
+      required: [learner_ref, fields, channels, opted_in]
+      properties:
+        learner_ref:
+          type: string
+        fields:
+          type: array
+          items:
+            type: string
+        needs:
+          type: array
+          items:
+            $ref: "#/components/schemas/SupportNeed"
+        channels:
+          type: array
+          items:
+            type: string
+            enum: [telegram, sms_sandbox]
+        opted_in:
+          type: boolean
+      example:
+        learner_ref: learner_demo_01
+        fields: [customer support]
+        needs: [screen_reader_help]
+        channels: [telegram, sms_sandbox]
+        opted_in: true
+
+    NotificationSettings:
+      type: object
+      required: [deadlines, new_lessons, job_alerts, muted]
+      properties:
+        deadlines:
+          type: boolean
+        new_lessons:
+          type: boolean
+        job_alerts:
+          type: boolean
+        muted:
+          type: boolean
+        low_bandwidth:
+          type: boolean
+      example:
+        deadlines: true
+        new_lessons: true
+        job_alerts: true
+        muted: false
+        low_bandwidth: true
+
+    Deadline:
+      type: object
+      required: [id, title, due_at, course_id, url]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        due_at:
+          type: string
+          format: date-time
+        course_id:
+          type: string
+        url:
+          type: string
+          format: uri
+      example:
+        id: deadline_01
+        title: Module 2 knowledge check
+        due_at: "2026-11-16T17:00:00+03:00"
+        course_id: course_demo
+        url: https://learning.example.org/courses/course_demo/module-2
+
+    CourseModule:
+      type: object
+      required: [id, number, title, summary, url]
+      properties:
+        id:
+          type: string
+        number:
+          type: integer
+          minimum: 1
+        title:
+          type: string
+        summary:
+          type: string
+        url:
+          type: string
+          format: uri
+      example:
+        id: module_2
+        number: 2
+        title: Communicating with customers
+        summary: Learn how to listen, clarify, and respond.
+        url: https://learning.example.org/courses/course_demo/module-2
+
+    AccommodationDraftRequest:
+      type: object
+      required: [job_id, language, needs]
+      properties:
+        job_id:
+          type: string
+        language:
+          $ref: "#/components/schemas/Language"
+        needs:
+          type: array
+          items:
+            $ref: "#/components/schemas/SupportNeed"
+        employer_name:
+          type: string
+      example:
+        job_id: job_01
+        language: en
+        needs: [written_instructions, extra_time]
+        employer_name: Addis Services Cooperative
+
+    AccommodationDraft:
+      type: object
+      required: [subject, message, editable, sent]
+      properties:
+        subject:
+          type: string
+        message:
+          type: string
+        editable:
+          type: boolean
+        sent:
+          type: boolean
+          const: false
+      example:
+        subject: Interview accommodation request
+        message: Please provide the interview questions in writing and allow a little extra response time. Thank you.
+        editable: true
+        sent: false
+
+    TranscriptionRequest:
+      type: object
+      required: [audio_base64, media_type, language]
+      properties:
+        audio_base64:
+          type: string
+          contentEncoding: base64
+        media_type:
+          type: string
+          enum: [audio/webm, audio/ogg, audio/wav, audio/mpeg]
+        language:
+          $ref: "#/components/schemas/Language"
+        retain:
+          type: boolean
+          default: false
+          description: Must default to false; voice is not stored without explicit consent.
+      example:
+        audio_base64: UklGRiQAAABXQVZFZm10IBAAAAABAAEA
+        media_type: audio/wav
+        language: am
+        retain: false
+
+    Transcription:
+      type: object
+      required: [transcript, language, retained, editable]
+      properties:
+        transcript:
+          type: string
+        language:
+          $ref: "#/components/schemas/Language"
+        retained:
+          type: boolean
+        editable:
+          type: boolean
+        provider:
+          type: string
+        mocked:
+          type: boolean
+      example:
+        transcript: Please explain Module 2.
+        language: en
+        retained: false
+        editable: true
+        provider: offline
+        mocked: true
+
+    SynthesisRequest:
+      type: object
+      required: [text, language]
+      properties:
+        text:
+          type: string
+          minLength: 1
+          maxLength: 5000
+        language:
+          $ref: "#/components/schemas/Language"
+        speed:
+          type: number
+          minimum: 0.5
+          maximum: 2
+          default: 1
+      example:
+        text: Module 2 explains how to listen and respond clearly.
+        language: en
+        speed: 1
+
+    SynthesisResult:
+      type: object
+      required: [audio_url, text, language, expires_at]
+      properties:
+        audio_url:
+          type: string
+          format: uri
+        text:
+          type: string
+        language:
+          $ref: "#/components/schemas/Language"
+        expires_at:
+          type: string
+          format: date-time
+        provider:
+          type: string
+        mocked:
+          type: boolean
+      example:
+        audio_url: http://localhost:8000/media/tts/demo.ogg
+        text: Module 2 explains how to listen and respond clearly.
+        language: en
+        expires_at: "2026-11-14T11:00:00+03:00"
+        provider: offline
+        mocked: true
+
+    TeacherStats:
+      type: object
+      required: [questions, privacy]
+      properties:
+        questions:
+          type: array
+          items:
+            type: object
+            required: [question, count]
+            properties:
+              question:
+                type: string
+              count:
+                type: integer
+                minimum: 1
+        privacy:
+          type: string
+      example:
+        questions:
+          - question: What is due this week?
+            count: 8
+          - question: Explain Module 2.
+            count: 5
+        privacy: Aggregated counts only; no learner names or message histories.
+
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message, request_id]
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            request_id:
+              type: string
+            details:
+              type: object
+              additionalProperties: true
+      example:
+        error:
+          code: invalid_request
+          message: Check the highlighted fields and try again.
+          request_id: req_demo_01

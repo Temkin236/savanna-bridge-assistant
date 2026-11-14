@@ -1,0 +1,20 @@
+{
+  "a": ["api/"],
+  "b": ["widget/"],
+  "c": ["channels/"],
+  "d": [
+    ".github/",
+    "docs/",
+    "tests/",
+    "demo-host/",
+    "scripts/",
+    ".editorconfig",
+    ".env.example",
+    ".gitattributes",
+    ".gitignore",
+    "CODEOWNERS",
+    "Makefile",
+    "README.md",
+    "docker-compose.yml"
+  ]
+}

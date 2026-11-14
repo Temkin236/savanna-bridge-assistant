@@ -1,0 +1,4 @@
+# Canonical rules live in .github/CODEOWNERS, where GitHub discovers them.
+# This pointer exists because the project brief calls out a root CODEOWNERS file.
+/.github/CODEOWNERS @Temkin236
+
