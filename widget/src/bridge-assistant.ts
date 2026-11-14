@@ -1670,9 +1670,8 @@ export class BridgeAssistant extends HTMLElement {
             ${
               isRefusal
                 ? `
-                <div class="refusal-box">
-                  <p style="margin:0 0 0.5rem 0;">${this.t("refusalNotice")}</p>
-                  <button type="button" class="btn btn-primary btn-talk-person" data-msg-id="${msg.id}" style="font-size:0.8125rem; min-height:2.25rem;">
+                <div class="refusal-box" style="margin-top:0.5rem; padding:0.5rem; border-radius:0.5rem; background:rgba(239,68,68,0.06); border:1px solid rgba(239,68,68,0.2);">
+                  <button type="button" class="btn btn-primary btn-talk-person" data-msg-id="${msg.id}" style="font-size:0.8125rem; min-height:2.25rem; width:100%;">
                     👤 ${this.t("talkToPersonButton")}
                   </button>
                 </div>

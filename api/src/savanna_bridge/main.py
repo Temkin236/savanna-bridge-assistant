@@ -9,6 +9,7 @@ import base64
 import contextlib
 import logging
 import random
+import struct
 import time
 from datetime import UTC, datetime, timedelta
 from typing import Any
@@ -257,6 +258,35 @@ def ask(payload: AskRequest, _token: Any = Depends(verify_optional_token)) -> An
 
     # Record question anonymously for teacher stats (FR-39 / NFR-5)
     db.record_question(question)
+
+    # Friendly greeting detection (do not refuse standard conversational greetings)
+    clean_q = "".join(c for c in question.lower() if c.isalnum() or c.isspace()).strip()
+    greetings = {
+        "hi", "hello", "hy", "hey", "hy there", "hi there", "hello there", "hey there",
+        "good morning", "good afternoon", "good evening", "greetings",
+        "ሰላም", "ሰላም ነው", "እንዴት ነህ", "እንዴት ነሽ", "ታዲያስ",
+        "akkam", "ashamaa", "halkan gaarii", "akkami",
+        "ሰላም ከመይ", "ከመይ ኣለኹም",
+        "مرحبا", "أهلا", "أهلاً", "السلام عليكم", "صباح الخير", "مساء الخير"
+    }
+    if clean_q in greetings:
+        welcome_msgs = {
+            Language.AM: "ሰላም! እንኳን ወደ ሳቫና ብሪጅ ረዳት በደህና መጡ። ስለ ኮርስ ሞጁሎች፣ ማጠናቀቂያ ቀኖች ወይም ስለ ምዝገባ ምን ልርዳዎት?",
+            Language.OM: "Akkam! Baga nagaan gara Gargaaraa Savanna Bridge dhuftan. Waa'ee kutaalee barnootaa ykn yeroo xumuraa maalan isin gargaaruu danda'a?",
+            Language.TI: "ሰላም! ናብ ሓጋዚ ሳቫና ብሪጅ ብደሓን መጻእኹም። ብዛዕባ ሞጁላት ኮርስ ወይ ናይ ምዝዛም ዕለታት እንታይ ክሕግዘኩም?",
+            Language.AR: "مرحباً بك! أنا مساعدك في سافانا بريدج. يمكنني مساعدتك في استعراض وحدات الدورة، المواعيد النهائية، أو الإجابة عن استفساراتك. كيف يمكنني مساعدتك اليوم؟",
+            Language.EN: "Hello! Welcome to the Savanna Bridge Assistant. I can help answer questions about your course modules, deadlines, assignments, or connect you with a mentor. How can I assist you today?",
+        }
+        return Answer(
+            answer=welcome_msgs.get(user_lang, welcome_msgs[Language.EN]),
+            citations=[],
+            language=user_lang,
+            offer_human=False,
+            reason="grounded",
+            confidence=1.0,
+            provider=ai.name,
+            mocked=ai.is_mocked,
+        )
 
     # If language is Afaan Oromoo (om), Tigrinya (ti), or Arabic (ar), translate question to English for retrieval
     query_for_retrieval = question
@@ -593,6 +623,48 @@ def synthesize_speech(payload: SynthesisRequest) -> SynthesisResult:
         expires_at=expires_at,
         provider=ai.name,
         mocked=ai.is_mocked,
+    )
+
+
+def _generate_demo_audio() -> bytes:
+    import math
+    sample_rate = 16000
+    duration = 0.5
+    num_samples = int(sample_rate * duration)
+    data = bytearray()
+    for i in range(num_samples):
+        t = float(i) / sample_rate
+        sample = int(16000.0 * math.exp(-4.0 * t) * math.sin(2.0 * math.pi * 520.0 * t))
+        data.extend(struct.pack("<h", max(-32768, min(32767, sample))))
+    header = struct.pack(
+        "<4sI4s4sIHHIIHH4sI",
+        b"RIFF",
+        36 + len(data),
+        b"WAVE",
+        b"fmt ",
+        16,
+        1,
+        1,
+        sample_rate,
+        sample_rate * 2,
+        2,
+        16,
+        b"data",
+        len(data),
+    )
+    return header + data
+
+
+_DEMO_AUDIO = _generate_demo_audio()
+
+
+@app.get("/media/tts/{filename}", tags=["Speech"])
+def get_media_tts(filename: str) -> Response:
+    media_type = "audio/ogg" if filename.endswith(".ogg") else "audio/wav"
+    return Response(
+        content=_DEMO_AUDIO,
+        media_type=media_type,
+        headers={"Accept-Ranges": "bytes", "Cache-Control": "public, max-age=3600"},
     )
 
 
