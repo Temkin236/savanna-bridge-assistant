@@ -113,10 +113,23 @@ async def log_and_rate_limit(request: Request, call_next: Any) -> Response:
     request.state.request_id = req_id
     client_ip = request.client.host if request.client else "127.0.0.1"
 
+    # Log incoming request
+    origin = request.headers.get("origin", "-")
+    user_agent = request.headers.get("user-agent", "-")
+    logger.info(
+        "--> [%s] %s %s from %s (Origin: %s)",
+        req_id,
+        request.method,
+        request.url.path,
+        client_ip,
+        origin,
+    )
+
     # Rate limit check (exclude health checks)
     if request.url.path != "/health":
         allowed, retry_after = rate_limiter.is_allowed(client_ip)
         if not allowed:
+            logger.warning("Rate limit exceeded for %s on %s", client_ip, request.url.path)
             err = ErrorResponse(
                 error=ErrorDetail(
                     code="rate_limited",
@@ -132,18 +145,30 @@ async def log_and_rate_limit(request: Request, call_next: Any) -> Response:
             return response
 
     start_time = time.perf_counter()
-    response = await call_next(request)
-    duration_ms = (time.perf_counter() - start_time) * 1000
-
-    logger.info(
-        '{"request_id": "%s", "method": "%s", "path": "%s", "status": %d, "duration_ms": %.2f}',
-        req_id,
-        request.method,
-        request.url.path,
-        response.status_code,
-        duration_ms,
-    )
-    return response
+    try:
+        response = await call_next(request)
+        duration_ms = (time.perf_counter() - start_time) * 1000
+        logger.info(
+            "<-- [%s] %s %s => %d (%.2f ms)",
+            req_id,
+            request.method,
+            request.url.path,
+            response.status_code,
+            duration_ms,
+        )
+        return response
+    except Exception as exc:
+        duration_ms = (time.perf_counter() - start_time) * 1000
+        logger.error(
+            "<-- [%s] %s %s => FAILED with %s (%.2f ms)",
+            req_id,
+            request.method,
+            request.url.path,
+            exc,
+            duration_ms,
+            exc_info=True,
+        )
+        raise exc
 
 
 # Validation error handler
