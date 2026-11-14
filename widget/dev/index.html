@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Savanna Bridge Widget Development Host</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        line-height: 1.6;
+        padding: 2rem;
+        max-width: 800px;
+        margin: 0 auto;
+        color: #1e293b;
+        background: #f8fafc;
+      }
+      header {
+        margin-bottom: 2rem;
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 1rem;
+      }
+      .card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      }
+      .badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        background: #dbeafe;
+        color: #1e40af;
+      }
+      button {
+        cursor: pointer;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        border-radius: 0.375rem;
+        border: 1px solid #cbd5e1;
+        background: #f1f5f9;
+      }
+      button:hover {
+        background: #e2e8f0;
+      }
+      code {
+        background: #f1f5f9;
+        padding: 0.2rem 0.4rem;
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <span class="badge">Person B Dev Host</span>
+      <h1>Savanna Bridge Assistant Development</h1>
+      <p>This host exercises the standalone <code>&lt;bridge-assistant&gt;</code> custom element under standard host page styles, verifying Shadow DOM style encapsulation and WCAG 2.2 AA accessibility.</p>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>Customer Service Foundations - Module 2</h2>
+        <p><strong>Lesson:</strong> Communicating with customers clearly, actively listening, and confirming mutual understanding before acting.</p>
+        <p>Try asking the assistant:</p>
+        <ul>
+          <li><code>What is in Module 2?</code> (or in Amharic <code>በሞጁል 2 ውስጥ ምን አለ?</code>)</li>
+          <li><code>When is Module 2 due?</code></li>
+          <li><code>How can I request quiet space?</code></li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>Features to Verify</h2>
+        <ul>
+          <li><strong>Keyboard & Focus:</strong> Press Tab to the bottom-right launcher button, press Enter/Space to open. Focus moves inside. Press Escape to close, focus restores to launcher.</li>
+          <li><strong>Bilingual Toggle:</strong> Toggle between English and Amharic (አማርኛ) using the header button.</li>
+          <li><strong>Voice Input:</strong> Click the microphone button to test recording and review editable transcript before sending.</li>
+          <li><strong>Read-Aloud Playback:</strong> Click "Read Aloud" on any assistant response to test audio playback, speed control (0.75x - 1.5x), and sound-off text equivalence.</li>
+          <li><strong>Support Needs Panel:</strong> Check preferences with zero proof or documentation requested.</li>
+          <li><strong>Barrier-free Account Linking:</strong> Generate a one-time 6-digit code or confirm a code from Telegram without phone or national ID.</li>
+          <li><strong>Live Help Handoff:</strong> Request mentor assistance with explicit consent and learner-controlled screen sharing.</li>
+        </ul>
+      </section>
+    </main>
+
+    <!-- The Web Component -->
+    <bridge-assistant id="assistant" data-api="http://localhost:8000" data-course="course_demo" data-lang="en"></bridge-assistant>
+
+    <script type="module" src="/src/bridge-assistant.ts"></script>
+    <script>
+      // Allow overriding API URL from query param ?api=http://localhost:4010
+      const params = new URLSearchParams(window.location.search);
+      const apiParam = params.get("api");
+      if (apiParam) {
+        document.getElementById("assistant").setAttribute("data-api", apiParam);
+      }
+    </script>
+  </body>
+</html>
