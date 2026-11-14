@@ -772,6 +772,8 @@ export class BridgeAssistant extends HTMLElement {
   private currentLang: SupportedLanguage = "en";
   private simpleMode = false;
   private isRecording = false;
+  private isOpen = false;
+
   private isThinking = false;
   private mediaRecorder: MediaRecorder | null = null;
   private audioChunks: Blob[] = [];
@@ -834,8 +836,9 @@ export class BridgeAssistant extends HTMLElement {
     this.currentLang = lang;
     sessionStorage.setItem("savanna_bridge_lang", lang);
     this.render();
+    this.setupListeners();
     const dialog = this.shadowRoot?.querySelector<HTMLElement>("[role=dialog]");
-    if (dialog && !dialog.hidden) {
+    if (dialog && this.isOpen) {
       dialog.focus();
     }
   }
@@ -1287,7 +1290,7 @@ export class BridgeAssistant extends HTMLElement {
       <style>${STYLES}</style>
 
       <!-- Floating Launcher Button -->
-      <button class="launcher" type="button" aria-expanded="false" aria-controls="bridge-dialog" aria-haspopup="dialog">
+      <button class="launcher" type="button" aria-expanded="${this.isOpen}" aria-controls="bridge-dialog" aria-haspopup="dialog">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
         </svg>
@@ -1295,7 +1298,7 @@ export class BridgeAssistant extends HTMLElement {
       </button>
 
       <!-- Accessible Dialog -->
-      <section id="bridge-dialog" class="panel" role="dialog" aria-modal="true" aria-labelledby="bridge-title" tabindex="-1" hidden>
+      <section id="bridge-dialog" class="panel" role="dialog" aria-modal="true" aria-labelledby="bridge-title" tabindex="-1" ${this.isOpen ? "" : "hidden"}>
         
         <!-- Offline Warning Bar -->
         ${this.isOffline ? `<div class="offline-bar" role="alert">${this.t("offlineNotice")}</div>` : ""}
@@ -1676,6 +1679,7 @@ export class BridgeAssistant extends HTMLElement {
 
     // Open/Close Dialog
     const closeDialog = (): void => {
+      this.isOpen = false;
       dialog.hidden = true;
       launcher.setAttribute("aria-expanded", "false");
       (this.previousFocus ?? launcher).focus();
@@ -1683,6 +1687,7 @@ export class BridgeAssistant extends HTMLElement {
 
     launcher.addEventListener("click", () => {
       this.previousFocus = document.activeElement as HTMLElement | null;
+      this.isOpen = true;
       dialog.hidden = false;
       launcher.setAttribute("aria-expanded", "true");
       dialog.focus();
