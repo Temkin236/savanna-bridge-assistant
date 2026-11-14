@@ -144,6 +144,11 @@ class Database:
         """
         with get_connection(self.db_path) as conn:
             row = conn.execute("SELECT * FROM links WHERE link_id = ?", (link_id,)).fetchone()
+            if not row and code:
+                row = conn.execute(
+                    "SELECT * FROM links WHERE code = ? AND used = 0 ORDER BY created_at DESC LIMIT 1",
+                    (code,),
+                ).fetchone()
             if not row:
                 return False, "", "not_found"
             if row["used"]:
@@ -155,7 +160,7 @@ class Database:
                 return False, "", "invalid_code"
 
             # Consume code
-            conn.execute("UPDATE links SET used = 1 WHERE link_id = ?", (link_id,))
+            conn.execute("UPDATE links SET used = 1 WHERE link_id = ?", (row["link_id"],))
             conn.commit()
             return True, row["learner_ref"], "ok"
 

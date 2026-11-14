@@ -76,6 +76,13 @@
       .live-dot {
         animation: pulse-dot 2s infinite ease-in-out;
       }
+      :focus-visible {
+        outline: 3px solid #1677ff;
+        outline-offset: 2px;
+      }
+      button, a.button {
+        min-height: 2.75rem;
+      }
     </style>
   </head>
   <body class="min-h-screen antialiased flex flex-col">
@@ -102,7 +109,7 @@
           <!-- Live Status & Agent Config -->
           <div class="flex items-center gap-4">
             <!-- Connection Status -->
-            <div id="connectionStatus" class="hidden sm:flex items-center gap-2 text-xs font-medium text-gray-600 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200">
+            <div id="connectionStatus" role="status" class="hidden sm:flex items-center gap-2 text-xs font-medium text-gray-600 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200">
               <span class="w-2 h-2 rounded-full bg-emerald-500 live-dot"></span>
               <span id="connectionText">Checking connection...</span>
             </div>
@@ -113,6 +120,7 @@
                 A
               </div>
               <div class="flex flex-col">
+                <label for="agentRef" class="sr-only">Active Agent Name</label>
                 <span class="text-[10px] text-gray-400 font-semibold uppercase leading-tight">Agent ID</span>
                 <input
                   type="text"
@@ -123,6 +131,10 @@
                 />
               </div>
             </div>
+
+            <!-- API Base URL Hidden Accessible Binding -->
+            <label for="apiEndpoint" class="sr-only">API Base URL</label>
+            <input type="hidden" id="apiEndpoint" value="http://localhost:8000" />
 
             <!-- Refresh Button -->
             <button
@@ -148,8 +160,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
         </svg>
         <div class="text-xs text-amber-900 leading-relaxed">
-          <strong class="font-bold">Strict Learner-Controlled Session Rule:</strong> Agents cannot remotely initiate screen sharing or takeover a learner's device. 
-          Learners retain full, sole authority to toggle their camera, microphone, and screen inside the live room. All handoffs require explicit learner consent.
+          <strong class="font-bold">Strict Learner-Controlled Session Rule:</strong> The agent console never starts screen sharing on behalf of the learner. The learner initiates, controls, and stops screen sharing solely within the Jitsi room. No remote takeover is possible. All handoffs require explicit learner consent.
         </div>
       </div>
 
@@ -756,26 +767,40 @@
         drawerReplyMessage.value = text;
       }
 
-      async function submitDrawerReply() {
-        if (!activeDrawerHandoff) return;
-        const msg = drawerReplyMessage.value.trim();
+      async function replyHandoff(id, messageOrForm) {
+        let msg = "";
+        if (typeof messageOrForm === "string") {
+          msg = messageOrForm.trim();
+        } else if (messageOrForm && messageOrForm.elements) {
+          msg = (messageOrForm.elements["message"]?.value || "").trim();
+        }
         if (!msg) return;
 
         try {
-          const res = await fetch(`${API_URL}/handoff/${activeDrawerHandoff.id}/reply`, {
+          const res = await fetch(`${API_URL}/handoff/${id}/reply`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ agent_ref: getAgentRef(), message: msg }),
           });
           if (res.ok) {
             alert("Reply sent successfully to learner!");
-            drawerReplyMessage.value = "";
+            if (messageOrForm && messageOrForm.elements && messageOrForm.elements["message"]) {
+              messageOrForm.elements["message"].value = "";
+            }
+            if (drawerReplyMessage) drawerReplyMessage.value = "";
           } else {
             alert("Failed to deliver reply.");
           }
         } catch (err) {
           alert(`Error sending reply: ${err.message}`);
         }
+      }
+
+      async function submitDrawerReply() {
+        if (!activeDrawerHandoff) return;
+        const msg = drawerReplyMessage.value.trim();
+        if (!msg) return;
+        await replyHandoff(activeDrawerHandoff.id, msg);
       }
 
       function escapeHtml(str) {

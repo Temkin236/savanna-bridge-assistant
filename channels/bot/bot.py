@@ -21,6 +21,7 @@ import httpx
 from aiogram import Bot, Dispatcher, F, Router, types
 from aiogram.filters import Command
 from aiogram.types import (
+    BotCommand,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
     KeyboardButton,
@@ -87,6 +88,7 @@ def make_main_keyboard(lang: str = "am", lite: bool = False) -> ReplyKeyboardMar
                 [KeyboardButton(text="1"), KeyboardButton(text="2"), KeyboardButton(text="3")],
                 [
                     KeyboardButton(text="/start"),
+                    KeyboardButton(text="/link"),
                     KeyboardButton(text="/help"),
                     KeyboardButton(text="/lite"),
                 ],
@@ -99,30 +101,35 @@ def make_main_keyboard(lang: str = "am", lite: bool = False) -> ReplyKeyboardMar
             [KeyboardButton(text="❓ ጥያቄ ጠይቅ"), KeyboardButton(text="👥 ከሰው ጋር ተገናኝ")],
             [KeyboardButton(text="📅 ምን ይጠበቃል?"), KeyboardButton(text="📚 ሞጁሎች")],
             [KeyboardButton(text="💼 የሥራ እድሎች"), KeyboardButton(text="⚙️ ቅንብሮች")],
+            [KeyboardButton(text="🔗 መለያ አገናኝ"), KeyboardButton(text="❓ እርዳታ")],
         ]
     elif lang == "om":
         kb = [
             [KeyboardButton(text="❓ Gaaffii Gaafadhu"), KeyboardButton(text="👥 Nama Waliin Dubbadhu")],
             [KeyboardButton(text="📅 Yeroo Xumuraa"), KeyboardButton(text="📚 Kutaa Barnootaa")],
             [KeyboardButton(text="💼 Carraa Hojii"), KeyboardButton(text="⚙️ Qindaa'inoota")],
+            [KeyboardButton(text="🔗 Herrega Walqabsiisi"), KeyboardButton(text="❓ Gargaarsa")],
         ]
     elif lang == "ti":
         kb = [
             [KeyboardButton(text="❓ ሕቶ ሕተት"), KeyboardButton(text="👥 ምስ ሰብ ተራኸብ")],
             [KeyboardButton(text="📅 ናይ ምዝዛም ዕለት"), KeyboardButton(text="📚 ሞጁላት")],
             [KeyboardButton(text="💼 ናይ ስራሕ ዕድላት"), KeyboardButton(text="⚙️ ቅጥዕታት")],
+            [KeyboardButton(text="🔗 ኣካውንት ኣላግብ"), KeyboardButton(text="❓ ሓገዝ")],
         ]
     elif lang == "ar":
         kb = [
             [KeyboardButton(text="❓ طرح سؤال"), KeyboardButton(text="👥 التحدث مع شخص")],
             [KeyboardButton(text="📅 المواعيد النهائية"), KeyboardButton(text="📚 وحدات الدورة")],
             [KeyboardButton(text="💼 فرص العمل"), KeyboardButton(text="⚙️ الإعدادات")],
+            [KeyboardButton(text="🔗 ربط الحساب"), KeyboardButton(text="❓ المساعدة")],
         ]
     else:
         kb = [
             [KeyboardButton(text="❓ Ask a Question"), KeyboardButton(text="👥 Talk to a Person")],
             [KeyboardButton(text="📅 Deadlines"), KeyboardButton(text="📚 Course Modules")],
             [KeyboardButton(text="💼 Job Alerts"), KeyboardButton(text="⚙️ Settings")],
+            [KeyboardButton(text="🔗 Link Account"), KeyboardButton(text="❓ Help")],
         ]
     return ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
 
@@ -225,6 +232,7 @@ async def handle_language_choice(callback: types.CallbackQuery) -> None:
 
 
 @router.message(Command("help"))
+@router.message(F.text.in_({"❓ እርዳታ", "❓ Help", "❓ Gargaarsa", "❓ ሓገዝ", "❓ المساعدة"}))
 async def handle_help(message: types.Message) -> None:
     user_id = message.from_user.id if message.from_user else 0
     state = get_user_state(user_id)
@@ -337,6 +345,7 @@ async def handle_lite_toggle(message: types.Message) -> None:
 
 
 @router.message(Command("link"))
+@router.message(F.text.in_({"🔗 መለያ አገናኝ", "🔗 Link Account", "🔗 Herrega Walqabsiisi", "🔗 ኣካውንት ኣላግብ", "🔗 ربط الحساب"}))
 async def handle_link(message: types.Message) -> None:
     user_id = message.from_user.id if message.from_user else 0
     state = get_user_state(user_id)
@@ -357,31 +366,41 @@ async def handle_link(message: types.Message) -> None:
             "am": (
                 f"🔗 **የመለያ ማገናኛ ኮድ**\n\n"
                 f"የእርስዎ ኮድ: `{code}`\n"
-                f"ይህ ኮድ ለ 10 ደቂቃ ብቻ ያገለግላል። በመድረኩ ላይ ያስገቡት።\n\n"
+                f"ይህ ኮድ ለ 10 ደቂቃ ብቻ ያገለግላል። በድር ገጹ ላይ ባለው የረዳት መስኮት ያስገቡት።\n\n"
+                f"ወይም ከድር ገጹ ኮድ ካገኙ እዚህ በሚከተለው መልኩ ይላኩ:\n"
+                f"`/confirm <የ6-አሃዝ-ኮድ>` (ምሳሌ: `/confirm {code}`)\n\n"
                 f"*ምንም መታወቂያ ወይም የሕክምና ማረጋገጫ አይጠየቅም።*"
             ),
             "om": (
                 f"🔗 **Koodii Herrega Walqunnamsiisuu**\n\n"
                 f"Koodii keessan: `{code}`\n"
                 f"Koodiin kun daqiiqaa 10 qofaaf hojjeta. Fuula weebsaayitii irratti galchaa.\n\n"
+                f"Ykn koodii weebsaayitii irraa argattan asitti ergaa:\n"
+                f"`/confirm <koodii>` (Fkn: `/confirm {code}`)\n\n"
                 f"*Waraqaan eenyummaa ykn ragaan yaalaa hin gaafatamu.*"
             ),
             "ti": (
                 f"🔗 **ናይ ኣካውንት መላገቢ ኮድ**\n\n"
                 f"ኮድኩም: `{code}`\n"
                 f"እዚ ኮድ ን10 ደቒቕ ጥራይ የገልግል። ኣብ መርበብ ሓበሬታ የእትውዎ።\n\n"
+                f"ወይ ድማ ካብ መርበብ ሓበሬታ ዝረኸብክምዎ ኮድ ኣብዚ ስደዱ:\n"
+                f"`/confirm <ኮድ>` (ኣብነት: `/confirm {code}`)\n\n"
                 f"*ዋላ ሓደ መታወቒ ወይ ናይ ሕክምና መርትዖ ኣይሕተትን እዩ።*"
             ),
             "ar": (
                 f"🔗 **رمز ربط الحساب**\n\n"
                 f"الرمز الخاص بك: `{code}`\n"
-                f"صالح لمدة 10 دقائق فقط. أدخل هذا الرمز في المنصة.\n\n"
+                f"صالح لمدة 10 دقائق فقط. أدخل هذا الرمز في نافذة المساعد على موقع الويب.\n\n"
+                f"أو إذا حصلت على رمز من الموقع، أرسله هنا:\n"
+                f"`/confirm <الرمز>` (مثال: `/confirm {code}`)\n\n"
                 f"*لا يُطلب أي إثبات هوية أو وثائق طبية على الإطلاق.*"
             ),
             "en": (
                 f"🔗 **Account Link Code**\n\n"
-                f"Your code: `{code}`\n"
-                f"Expires in 10 minutes. Enter this code on the web platform.\n\n"
+                f"Your one-time code: `{code}`\n"
+                f"Expires in 10 minutes. Enter this code on the web assistant widget.\n\n"
+                f"Or if you already generated a code on the web widget, reply here with:\n"
+                f"`/confirm <code>` (e.g. `/confirm {code}`)\n\n"
                 f"*Zero ID or medical proof requested.*"
             ),
         }
@@ -405,27 +424,30 @@ async def handle_confirm(message: types.Message) -> None:
     lang = state.get("language", "en")
 
     if len(args) < 2:
-        await send_safe_message(message, "Usage: `/confirm <6-digit-code>`")
+        await send_safe_message(message, "Usage: `/confirm <6-digit-code>` (e.g. `/confirm 123456`)")
         return
     code = args[1].strip()
 
     res = await call_api("POST", "/link/confirm", {"link_id": f"link_{user_id}", "code": code})
     if res and res.get("linked"):
+        state["linked"] = True
+        if res.get("learner_ref"):
+            state["learner_ref"] = res["learner_ref"]
         ok_msgs = {
-            "am": "✅ መለያዎ በተሳካ ሁኔታ ተገናኝቷል!",
-            "om": "✅ Herregni keessan milkaa'inaan walqabateera!",
-            "ti": "✅ ኣካውንትኩም ብዓወት ተላጊቡ ኣሎ!",
-            "ar": "✅ تم ربط حسابك بنجاح!",
-            "en": "✅ Account successfully linked!",
+            "am": "✅ መለያዎ በተሳካ ሁኔታ ተገናኝቷል! ምርጫዎችዎ አሁን ተመሳስለዋል።",
+            "om": "✅ Herregni keessan milkaa'inaan walqabateera! Filannoowwan keessan wal-simataniiru.",
+            "ti": "✅ ኣካውንትኩም ብዓወት ተላጊቡ ኣሎ! ምርጫታትኩም ሐዚ ተመሳሲሎም ኣለዉ።",
+            "ar": "✅ تم ربط حسابك بنجاح! تفضيلاتك متزامنة الآن.",
+            "en": "✅ Account successfully linked! Your preferences are now synchronized across web and Telegram.",
         }
         await send_safe_message(message, ok_msgs.get(lang, ok_msgs["en"]))
     else:
         fail_msgs = {
-            "am": "❌ ኮዱ ትክክል አይደለም ወይም ጊዜው አልፏል።",
-            "om": "❌ Koodiin dogoggora ykn yeroon isaa darbeera.",
-            "ti": "❌ ኮድ ጌጋ እዩ ወይ ግዜኡ ሓሊፉ።",
-            "ar": "❌ الرمز غير صحيح أو انتهت صلاحيته.",
-            "en": "❌ Invalid or expired code.",
+            "am": "❌ ኮዱ ትክክል አይደለም ወይም ጊዜው አልፏል። እባክዎ እንደገና ይሞክሩ።",
+            "om": "❌ Koodiin dogoggora ykn yeroon isaa darbeera. Mee irra deebi'aa yaalaa.",
+            "ti": "❌ ኮድ ጌጋ እዩ ወይ ግዜኡ ሓሊፉ። በጃኹም ደጊምኩም ፈትኑ።",
+            "ar": "❌ الرمز غير صحيح أو انتهت صلاحيته. يرجى المحاولة مرة أخرى.",
+            "en": "❌ Invalid or expired code. Please request a fresh code and try again.",
         }
         await send_safe_message(message, fail_msgs.get(lang, fail_msgs["en"]))
 
@@ -1101,6 +1123,27 @@ def get_dispatcher() -> Dispatcher:
     return dp
 
 
+async def setup_bot_commands(bot: Bot) -> None:
+    commands = [
+        BotCommand(command="start", description="Start assistant & choose language"),
+        BotCommand(command="link", description="Get a one-time code to link your account"),
+        BotCommand(command="confirm", description="Confirm linking code (e.g. /confirm 123456)"),
+        BotCommand(command="help", description="View all available commands and help"),
+        BotCommand(command="handoff", description="Talk to a human mentor / get live help"),
+        BotCommand(command="deadlines", description="View upcoming course deadlines"),
+        BotCommand(command="modules", description="Browse syllabus and course modules"),
+        BotCommand(command="jobs", description="Explore inclusive job opportunities"),
+        BotCommand(command="accommodations", description="Draft interview accommodation request"),
+        BotCommand(command="lite", description="Toggle low-bandwidth Lite Mode"),
+        BotCommand(command="settings", description="Manage notifications & preferences"),
+    ]
+    try:
+        await bot.set_my_commands(commands)
+        logger.info("Bot commands successfully registered with Telegram.")
+    except Exception as e:
+        logger.warning("Could not set bot commands: %s", e)
+
+
 async def start_bot() -> None:
     if not BOT_TOKEN:
         logger.warning("No TELEGRAM_BOT_TOKEN provided. Telegram bot polling is idle.")
@@ -1110,6 +1153,7 @@ async def start_bot() -> None:
     bot = Bot(token=BOT_TOKEN)
     logger.info("Starting Telegram bot polling...")
     try:
+        await setup_bot_commands(bot)
         await dp.start_polling(bot)
     finally:
         await bot.session.close()
