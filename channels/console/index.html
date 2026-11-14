@@ -10,13 +10,14 @@
         --card-bg: #ffffff;
         --text-color: #0f172a;
         --muted-text: #475569;
-        --primary: #0284c7;
-        --primary-hover: #0369a1;
+        --primary: #0369a1;
+        --primary-hover: #075985;
         --border-color: #cbd5e1;
-        --focus-ring: #0284c7;
+        --focus-ring: #0369a1;
         --success: #15803d;
         --tag-bg: #e0f2fe;
         --tag-text: #0369a1;
+        --btn-text: #ffffff;
       }
 
       @media (prefers-color-scheme: dark) {
@@ -32,6 +33,7 @@
           --success: #4ade80;
           --tag-bg: #075985;
           --tag-text: #e0f2fe;
+          --btn-text: #0f172a;
         }
       }
 
@@ -198,7 +200,7 @@
         text-decoration: none;
         border: none;
         background-color: var(--primary);
-        color: #ffffff;
+        color: var(--btn-text);
       }
 
       button:hover, a.button:hover {
