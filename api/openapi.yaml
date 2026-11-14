@@ -615,7 +615,7 @@ components:
   schemas:
     Language:
       type: string
-      enum: [am, en, om, ti]
+      enum: [am, en, om, ti, ar]
       example: am
 
     Health:

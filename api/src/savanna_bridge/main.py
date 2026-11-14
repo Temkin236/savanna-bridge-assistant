@@ -258,9 +258,9 @@ def ask(payload: AskRequest, _token: Any = Depends(verify_optional_token)) -> An
     # Record question anonymously for teacher stats (FR-39 / NFR-5)
     db.record_question(question)
 
-    # If language is Afaan Oromo (om) or Tigrinya (ti), translate question to English for retrieval
+    # If language is Afaan Oromoo (om), Tigrinya (ti), or Arabic (ar), translate question to English for retrieval
     query_for_retrieval = question
-    if user_lang in (Language.OM, Language.TI):
+    if user_lang in (Language.OM, Language.TI, Language.AR):
         query_for_retrieval = ai.translate(question, user_lang.value, "en")
 
     # Search course content with BM25
@@ -282,7 +282,11 @@ def ask(payload: AskRequest, _token: Any = Depends(verify_optional_token)) -> An
                 else (
                     "እዚ ካብቲ ትሕዝቶ ኮርስ ክረጋገጽ ኣይተኻእለን። ናይ ሰብ ሓገዝ ትደልዩ ዶ?"
                     if user_lang == Language.TI
-                    else "I cannot verify that from the course content. Would you like a person to help?"
+                    else (
+                        "لا يمكنني التحقق من ذلك من محتوى الدورة. هل ترغب في مساعدة من شخص؟"
+                        if user_lang == Language.AR
+                        else "I cannot verify that from the course content. Would you like a person to help?"
+                    )
                 )
             )
         )

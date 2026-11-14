@@ -13,6 +13,7 @@ class Language(StrEnum):
     EN = "en"
     OM = "om"
     TI = "ti"
+    AR = "ar"
 
 
 class Health(BaseModel):
