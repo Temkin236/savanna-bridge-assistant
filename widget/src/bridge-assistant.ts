@@ -48,8 +48,6 @@ export interface ChatMessage {
   originalQuestion?: string;
   audioUrl?: string;
   isAudioPlaying?: boolean;
-  isAudioPaused?: boolean;
-  isReadingPage?: boolean;
 }
 
 export interface SupportNeedsData {
@@ -89,9 +87,6 @@ export const ICONS = {
   key: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 2l-2 2m-1.5 1.5L14 9l-1.5-1.5-3 3L8 9 5 12l3 3 4.5-4.5"></path><circle cx="7.5" cy="16.5" r="4.5"></circle></svg>`,
   listen: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`,
   pause: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>`,
-  stop: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg>`,
-  replay: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>`,
-  volume: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`,
   lightbulb: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="9" y1="18" x2="15" y2="18"></line><line x1="10" y1="22" x2="14" y2="22"></line><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5.76.76 1.23 1.52 1.41 2.5"></path></svg>`,
   book: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>`,
   arrowRight: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>`,
@@ -161,12 +156,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     lookingInCourse: "Looking in the course...",
     answerHeading: "Answer",
     listenButton: "Listen",
-<<<<<<< Updated upstream
     pauseButton: "Stop",
-=======
-    pauseButton: "Pause",
-    stopButton: "Stop",
->>>>>>> Stashed changes
     replayButton: "Replay",
     makeSimplerButton: "Make simpler",
     sourcesTitle: "Course sources:",
@@ -204,7 +194,6 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     requestMentorBtn: "Request Human Mentor",
     copyRoomBtn: "Copy Link",
     linkCodeCopied: "Link copied to clipboard!",
-<<<<<<< Updated upstream
     voiceAccessibilityLabel: "Voice Accessibility",
     voiceAccessibilityDesc: "Spoken welcome, read-aloud responses, and voice navigation",
     autoWelcomeLabel: "Spoken Welcome Announcement",
@@ -242,22 +231,6 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     onboardingSkip: "Skip for now",
     onboardingReplay: "Setup Tour / Onboarding",
     voiceTab: "Voice & Audio",
-=======
-    pageContextBadge: "Current Lesson:",
-    readPageBtn: "Read this page aloud",
-    explainLessonBtn: "Explain this lesson",
-    summarizePageBtn: "Summarize this page",
-    readingAloudHeading: "Reading page aloud",
-    speakingIndicator: "Speaking...",
-    listeningIndicator: "Listening...",
-    wakeWordSetting: "Voice activation (Wake word 'Help')",
-    wakeWordDesc: "Say 'Help' to automatically open assistant and start speaking",
-    navigatedToNotice: "Navigated to new lesson:",
-    followupTitle: "💡 Follow-up questions:",
-    followupQ1: "💡 Explain with examples",
-    followupQ2: "➡️ What to know before next lesson?",
-    followupQ3: "📝 Quiz me on this topic",
->>>>>>> Stashed changes
   },
   am: {
     appTitle: "የሳቫና ብሪጅ ረዳት",
@@ -307,12 +280,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     answerHeading: "መልስ",
     listenButton: "አዳምጥ",
     pauseButton: "አቁም",
-<<<<<<< Updated upstream
     replayButton: "እንደገና አጫውት",
-=======
-    stopButton: "አቁም",
-    replayButton: "ደግመህ አጫውት",
->>>>>>> Stashed changes
     makeSimplerButton: "ቀለል አድርግ",
     sourcesTitle: "የኮርስ ምንጮች፡",
     talkToPersonButton: "ከሰው ጋር ተነጋገር",
@@ -349,7 +317,6 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     requestMentorBtn: "የሰው አማካሪ ጠይቅ",
     copyRoomBtn: "ሊንኩን ቅዳ",
     linkCodeCopied: "ሊንኩ ተቀድቷል!",
-<<<<<<< Updated upstream
     voiceAccessibilityLabel: "የድምጽ አገልግሎት",
     voiceAccessibilityDesc: "የድምጽ ሰላምታ፣ መልሶችን ጮክ ብሎ ማንበብ፣ እና የድምጽ ዳሰሳ",
     autoWelcomeLabel: "ገጹ ሲከፈት የድምጽ ሰላምታ ይስጡ",
@@ -387,22 +354,6 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     onboardingSkip: "ለጊዜው እለፈው",
     onboardingReplay: "የመጀመሪያ ቅንብር መመሪያ",
     voiceTab: "ድምጽ እና ማዳመጥ",
-=======
-    pageContextBadge: "ወቅታዊ ትምህርት፡",
-    readPageBtn: "ይህንን ገጽ ጮክ ብለህ አንብብልኝ",
-    explainLessonBtn: "ይህንን ትምህርት አስረዳኝ",
-    summarizePageBtn: "ይህንን ገጽ አጠቃልል",
-    readingAloudHeading: "ገጹን ጮክ ብሎ በማንበብ ላይ",
-    speakingIndicator: "እየተናገረ ነው...",
-    listeningIndicator: "እያዳመጠ ነው...",
-    wakeWordSetting: "የድምጽ ማግበር (የማንቂያ ቃል 'እርዳታ' / 'Help')",
-    wakeWordDesc: "ረዳቱን በራስ-ሰር ለመክፈትና ለማናገር 'እርዳታ' ወይም 'Help' ይበሉ",
-    navigatedToNotice: "ወደ አዲስ ትምህርት ገጽ ተቀይሯል፡",
-    followupTitle: "💡 ተከታይ ጥያቄዎች፡",
-    followupQ1: "💡 በምሳሌዎች አስረዳኝ",
-    followupQ2: "➡️ ወደ ቀጣዩ ትምህርት ከመሄዴ በፊት ምን ልወቅ?",
-    followupQ3: "📝 ግንዛቤዬን ፈትነኝ",
->>>>>>> Stashed changes
   },
   om: {
     appTitle: "Gargaaraa Savanna Bridge",
@@ -452,12 +403,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     answerHeading: "Deebii",
     listenButton: "Dhaggeeffadhu",
     pauseButton: "Dhaabi",
-<<<<<<< Updated upstream
     replayButton: "Irra deebi'i",
-=======
-    stopButton: "Dhaabi",
-    replayButton: "Irra deebi'ii taphachiisi",
->>>>>>> Stashed changes
     makeSimplerButton: "Salphisi",
     sourcesTitle: "Madda barnootaa:",
     talkToPersonButton: "Nama waliin dubbadhu",
@@ -494,7 +440,6 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     requestMentorBtn: "Gorsaa Gaafadhaa",
     copyRoomBtn: "Waraabi",
     linkCodeCopied: "Waraabameera!",
-<<<<<<< Updated upstream
     voiceAccessibilityLabel: "Tajaajila Sagalee",
     voiceAccessibilityDesc: "Nagaa gaafachuu sagalee, deebii dubbisuu, fi sagaleen deemsisa",
     autoWelcomeLabel: "Banaamuu irratti nagaa sagaleen",
@@ -532,22 +477,6 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     onboardingSkip: "Ammaaf darbi",
     onboardingReplay: "Daawwannaa Qindaa'inaa",
     voiceTab: "Sagalee & Dhaggeeffannaa",
-=======
-    pageContextBadge: "Kutaa Barnootaa Ammaa:",
-    readPageBtn: "Fuula kana sagaleedhaan naaf dubbisi",
-    explainLessonBtn: "Barnoota kana naaf ibsi",
-    summarizePageBtn: "Fuula kana naaf gabaabsi",
-    readingAloudHeading: "Fuula kana sagaleedhaan dubbisaa jira",
-    speakingIndicator: "Dubbataa jira...",
-    listeningIndicator: "Dhaggeeffachaa jira...",
-    wakeWordSetting: "Sagaleen kakaasuu (Jechama 'Gargaarsa' / 'Help')",
-    wakeWordDesc: "Gargaaraa ofumaan banuuf 'Gargaarsa' ykn 'Help' jedhaa",
-    navigatedToNotice: "Gara barnoota haaraatti jijjiirameera:",
-    followupTitle: "💡 Gaaffilee itti aanan:",
-    followupQ1: "💡 Fakkeenyotaan naaf ibsi",
-    followupQ2: "➡️ Barnoota itti aanuuf maal beekuun qaba?",
-    followupQ3: "📝 Hubannoo koo na qori",
->>>>>>> Stashed changes
   },
   ti: {
     appTitle: "ናይ ሳቫና ብሪጅ ሓጋዚ",
@@ -597,12 +526,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     answerHeading: "መልሲ",
     listenButton: "ስማዕ",
     pauseButton: "ኣዕርፍ",
-<<<<<<< Updated upstream
     replayButton: "ደጊምካ ስማዕ",
-=======
-    stopButton: "ኣቁም",
-    replayButton: "ደጊምካ ኣጻውት",
->>>>>>> Stashed changes
     makeSimplerButton: "ቀሊል ግበሮ",
     sourcesTitle: "ምንጭታት ኮርስ፡",
     talkToPersonButton: "ምስ ሰብ ተዛረብ",
@@ -639,7 +563,6 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     requestMentorBtn: "ናይ ሰብ ሓገዝ ሕተት",
     copyRoomBtn: "ቅዳሕ",
     linkCodeCopied: "ተቐዲሑ ኣሎ!",
-<<<<<<< Updated upstream
     voiceAccessibilityLabel: "ናይ ድምጺ ኣገልግሎት",
     voiceAccessibilityDesc: "ናይ ድምጺ ሰላምታ፡ መልስታት ዓው ኢልካ ምንባብ፡ ናይ ድምጺ ምንቅስቓስ",
     autoWelcomeLabel: "ገጽ ክኽፈት ከሎ ብድምጺ ሰላምታ ሃብ",
@@ -677,22 +600,6 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     onboardingSkip: "ንሕጂ ሕለፎ",
     onboardingReplay: "ናይ መጀመርታ መምርሒ",
     voiceTab: "ድምጽን ምስማዕን",
-=======
-    pageContextBadge: "ህሉው ትምህርቲ፡",
-    readPageBtn: "እዚ ገጽ ብድምጺ ኣንብበለይ",
-    explainLessonBtn: "እዚ ትምህርቲ ኣብርሃለይ",
-    summarizePageBtn: "እዚ ገጽ ኣጠቃልሎ",
-    readingAloudHeading: "ገጽ ብድምጺ ምንባብ",
-    speakingIndicator: "ይዛረብ ኣሎ...",
-    listeningIndicator: "ይሰምዕ ኣሎ...",
-    wakeWordSetting: "ብድምጺ ምኽፋት ('ሓገዝ' / 'Help')",
-    wakeWordDesc: "ንሓጋዚ ንምኽፋት 'ሓገዝ' ወይ 'Help' በሉ",
-    navigatedToNotice: "ናብ ሓድሽ ትምህርቲ ተቐይሩ፡",
-    followupTitle: "💡 ቀጸልቲ ሕቶታት፡",
-    followupQ1: "💡 ብኣብነታት ኣረድኣኒ",
-    followupQ2: "➡️ ናብ ዝቕጽል ትምህርቲ ቅድሚ ምኻደይ እንታይ ክፈልጥ ኣለኒ?",
-    followupQ3: "📝 ግንዛበይ ፈትነኒ",
->>>>>>> Stashed changes
   },
   ar: {
     appTitle: "مساعد سافانا بريدج",
@@ -741,14 +648,8 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     lookingInCourse: "جاري البحث في محتوى الدورة...",
     answerHeading: "الإجابة",
     listenButton: "استماع",
-<<<<<<< Updated upstream
     pauseButton: "إيقاف",
     replayButton: "إعادة",
-=======
-    pauseButton: "إيقاف مؤقت",
-    stopButton: "إيقاف",
-    replayButton: "إعادة التشغيل",
->>>>>>> Stashed changes
     makeSimplerButton: "تبسيط الشرح",
     sourcesTitle: "مصادر الدورة:",
     talkToPersonButton: "التحدث مع شخص",
@@ -785,7 +686,6 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     requestMentorBtn: "طلب مساعدة بشرية",
     copyRoomBtn: "نسخ الرابط",
     linkCodeCopied: "تم نسخ الرابط بنجاح!",
-<<<<<<< Updated upstream
     voiceAccessibilityLabel: "المساعدة الصوتية",
     voiceAccessibilityDesc: "ترحيب صوتي، قراءة الإجابات بصوت عالٍ، وملاحة صوتية",
     autoWelcomeLabel: "ترحيب صوتي تلقائي",
@@ -823,22 +723,6 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     onboardingSkip: "تخطي الآن",
     onboardingReplay: "دليل الإعداد الأولي",
     voiceTab: "الصوت والقراءة",
-=======
-    pageContextBadge: "الدرس الحالي:",
-    readPageBtn: "اقرأ هذه الصفحة بصوت عالٍ",
-    explainLessonBtn: "اشرح لي هذا الدرس",
-    summarizePageBtn: "لخص هذه الصفحة",
-    readingAloudHeading: "قراءة محتوى الصفحة بصوت عالٍ",
-    speakingIndicator: "جاري التحدث...",
-    listeningIndicator: "جاري الاستماع...",
-    wakeWordSetting: "التفعيل الصوتي (كلمة التنبيه 'مساعدة' / 'Help')",
-    wakeWordDesc: "قل 'مساعدة' أو 'Help' لفتح المساعد تلقائياً والتحدث مباشرة",
-    navigatedToNotice: "تم الانتقال إلى درس جديد:",
-    followupTitle: "💡 أسئلة متابعة مقترحة:",
-    followupQ1: "💡 اشرح بالأمثلة",
-    followupQ2: "➡️ ماذا يجب أن أفهم قبل الدرس التالي؟",
-    followupQ3: "📝 اختبر فهمي لهذا الموضوع",
->>>>>>> Stashed changes
   },
 };
 
@@ -1255,11 +1139,6 @@ const STYLES = `
   .answer-text {
     margin: 0 0 0.5rem 0;
     word-break: break-word;
-<<<<<<< Updated upstream
-=======
-    line-height: 1.5;
-    white-space: pre-wrap;
->>>>>>> Stashed changes
   }
 
   .answer-actions {
@@ -1283,46 +1162,6 @@ const STYLES = `
     padding-top: 0.5rem;
     border-top: 1px solid var(--b-border);
     font-size: 0.8125rem;
-  }
-
-  .followup-box {
-    margin-top: 0.625rem;
-    padding-top: 0.5rem;
-    border-top: 1px dashed var(--b-border);
-  }
-
-  .followup-title {
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: var(--b-text-muted);
-    margin-bottom: 0.375rem;
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-  }
-
-  .followup-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.375rem;
-  }
-
-  .btn-followup {
-    font-size: 0.8125rem !important;
-    padding: 0.25rem 0.625rem !important;
-    min-height: 2rem !important;
-    border-radius: 1rem !important;
-    background: #f8fafc !important;
-    border: 1px solid #cbd5e1 !important;
-    color: var(--b-text) !important;
-    cursor: pointer;
-    transition: background 0.15s ease, border-color 0.15s ease;
-  }
-
-  .btn-followup:hover {
-    background: #e2e8f0 !important;
-    border-color: var(--b-primary) !important;
-    color: var(--b-primary) !important;
   }
 
   .sources-title {
@@ -1355,53 +1194,6 @@ const STYLES = `
     padding: 0.5rem 0.875rem;
     font-style: italic;
     color: var(--b-text-muted);
-  }
-
-  .page-context-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    background: var(--b-surface-alt);
-    border: 1px solid var(--b-border);
-    padding: 0.375rem 0.625rem;
-    border-radius: 9999px;
-    font-size: 0.8125rem;
-    color: var(--b-primary);
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-  }
-
-  .speaking-indicator-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    background: #eff6ff;
-    border: 1px solid #bfdbfe;
-    color: #1d4ed8;
-    padding: 0.25rem 0.5rem;
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    animation: sb-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-
-  .listening-indicator-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    background: #fef2f2;
-    border: 1px solid #fecaca;
-    color: #dc2626;
-    padding: 0.25rem 0.5rem;
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    animation: sb-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-
-  @keyframes sb-pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
   }
 
   /* Footer (Always Visible) */
@@ -1795,14 +1587,6 @@ export class BridgeAssistant extends HTMLElement {
   private activeRecognition: any = null;
   private wakeWordRecognizer: any = null;
   private activeAudio: HTMLAudioElement | null = null;
-  private activeUtterance: any = null;
-  private readingWatchdogTimer: any = null;
-  private currentReading: {
-    msgId: string;
-    items: Array<{ text: string; element: HTMLElement | null }>;
-    currentIndex: number;
-    isPaused: boolean;
-  } | null = null;
 
   private messages: ChatMessage[] = [];
   private sessionId = `sess_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
@@ -1853,14 +1637,6 @@ export class BridgeAssistant extends HTMLElement {
   private popstateListener: (() => void) | null = null;
 
   private previousFocus: HTMLElement | null = null;
-
-  // Page Context & Voice Activation State
-  private lastPageUrl = "";
-  private lastPageTitle = "";
-  private lastPageSection = "";
-  private navCheckTimer: number | null = null;
-  private voiceActivationEnabled = false;
-  private wakeWordRecognition: any = null;
 
   // Attributes: supports both guide plain attributes (lang, api, content) and data-*
   get apiBase(): string {
@@ -1913,10 +1689,6 @@ export class BridgeAssistant extends HTMLElement {
     this.attachShadow({ mode: "open" });
     this.render();
     this.setupNetworkMonitor();
-    this.setupPageNavigationMonitor();
-    if (this.voiceActivationEnabled) {
-      this.setupWakeWordDetector();
-    }
 
     // Universal compatibility: track SPA navigation without re-initializing widget
     this.popstateListener = () => {
@@ -1951,7 +1723,6 @@ export class BridgeAssistant extends HTMLElement {
       window.clearInterval(this.telegramPollTimer);
       this.telegramPollTimer = null;
     }
-<<<<<<< Updated upstream
     if (this.wakeWordRecognizer) {
       try { this.wakeWordRecognizer.stop(); } catch {}
       this.wakeWordRecognizer = null;
@@ -1964,19 +1735,6 @@ export class BridgeAssistant extends HTMLElement {
     if (this.isReadingPage) {
       this.stopPageReading();
     }
-=======
-    if (this.navCheckTimer) {
-      window.clearInterval(this.navCheckTimer);
-      this.navCheckTimer = null;
-    }
-    if (this.wakeWordRecognition) {
-      try {
-        this.wakeWordRecognition.stop();
-      } catch {}
-      this.wakeWordRecognition = null;
-    }
-    this.stopPageReadingHighlight();
->>>>>>> Stashed changes
   }
 
   private t(key: string): string {
@@ -2132,17 +1890,10 @@ export class BridgeAssistant extends HTMLElement {
       const savedAutoRead = localStorage.getItem("savanna_bridge_auto_read");
       if (savedAutoRead !== null) this.autoReadSpeech = savedAutoRead === "true";
       const savedSimple = localStorage.getItem("savanna_bridge_simple_mode");
-<<<<<<< Updated upstream
       if (savedSimple) {
         this.simpleMode = savedSimple === "true";
         this.accessibilityPrefs.simple_mode = this.simpleMode;
       }
-=======
-      if (savedSimple) this.simpleMode = savedSimple === "true";
-
-      const savedWake = localStorage.getItem("savanna_bridge_wake_word");
-      if (savedWake) this.voiceActivationEnabled = savedWake === "true";
->>>>>>> Stashed changes
     } catch {
       // Ignore storage errors
     }
@@ -2860,20 +2611,8 @@ export class BridgeAssistant extends HTMLElement {
           }
         };
 
-<<<<<<< Updated upstream
         this.activeRecognition.onerror = (e: any) => {
           console.warn("Active speech recognition error:", e.error);
-=======
-        recognition.onend = () => {
-          this.isRecording = false;
-          this.updateMicButtonUI();
-          if (inputEl.value) {
-            const spokenText = inputEl.value;
-            inputEl.value = "";
-            this.announce(this.t("voicePreviewNotice"));
-            this.askQuestion(spokenText, false, true);
-          }
->>>>>>> Stashed changes
         };
 
         this.activeRecognition.start();
@@ -2985,7 +2724,6 @@ export class BridgeAssistant extends HTMLElement {
       if (res.ok) {
         const data = await res.json();
         if (data.transcript) {
-<<<<<<< Updated upstream
           const detected = this.detectLanguage(data.transcript);
           if (detected !== this.currentLang) {
             this.setLanguage(detected, false);
@@ -2993,11 +2731,7 @@ export class BridgeAssistant extends HTMLElement {
           inputEl.value = (inputEl.value ? inputEl.value + " " : "") + data.transcript;
           inputEl.focus();
           this.playEarcon("transcribed");
-=======
-          inputEl.value = "";
->>>>>>> Stashed changes
           this.announce(this.t("voicePreviewNotice"));
-          await this.askQuestion(data.transcript, false, true);
         }
       }
     } catch (err) {
@@ -3008,7 +2742,6 @@ export class BridgeAssistant extends HTMLElement {
     }
   }
 
-<<<<<<< Updated upstream
   private updateMicButtonUI(): void {
     const micBtn = this.shadowRoot?.querySelector<HTMLButtonElement>("#mic-btn");
     if (!micBtn) return;
@@ -3160,7 +2893,7 @@ export class BridgeAssistant extends HTMLElement {
 
   // --- Q&A / Ask ---
 
-  public async askQuestion(questionText: string, forceSimple = false, fromVoice = false): Promise<void> {
+  public async askQuestion(questionText: string, forceSimple = false): Promise<void> {
     const q = questionText.trim();
     if (!q || this.isThinking) return;
 
@@ -3189,6 +2922,7 @@ export class BridgeAssistant extends HTMLElement {
     this.isThinking = true;
     this.announce(this.t("lookingInCourse"));
     this.renderMessages();
+    const pageContext = this.extractPlatformContext();
 
     try {
       let res = await fetch(`${this.apiBase}/api/v1/ask`, {
@@ -3200,6 +2934,7 @@ export class BridgeAssistant extends HTMLElement {
           course_id: this.courseId,
           simple_mode: forceSimple || this.simpleMode,
           channel: "web",
+          ...pageContext,
         }),
       });
 
@@ -3213,6 +2948,7 @@ export class BridgeAssistant extends HTMLElement {
             course_id: this.courseId,
             simple_mode: forceSimple || this.simpleMode,
             channel: "web",
+            ...pageContext,
           }),
         });
       }
@@ -3235,16 +2971,9 @@ export class BridgeAssistant extends HTMLElement {
         this.saveChatState();
         this.renderMessages();
 
-<<<<<<< Updated upstream
         // Automatically read response aloud in appropriate language
         if (this.autoReadSpeech || (this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_tts)) {
           this.speakResponse(assistantMsg);
-=======
-        if (fromVoice) {
-          setTimeout(() => {
-            this.handleListen(assistantMsg);
-          }, 300);
->>>>>>> Stashed changes
         }
       } else {
         const errMsg: ChatMessage = {
@@ -3252,12 +2981,8 @@ export class BridgeAssistant extends HTMLElement {
           sender: "assistant",
           text: this.t("serverErrorNotice"),
           offerHuman: true,
-<<<<<<< Updated upstream
         };
         this.messages.push(errMsg);
-=======
-        });
->>>>>>> Stashed changes
         this.renderMessages();
       }
     } catch {
@@ -3274,12 +2999,8 @@ export class BridgeAssistant extends HTMLElement {
         sender: "assistant",
         text: this.t("savedOnPhoneNotice"),
         offerHuman: true,
-<<<<<<< Updated upstream
       };
       this.messages.push(offlineMsg);
-=======
-      });
->>>>>>> Stashed changes
       this.renderMessages();
     }
   }
@@ -3699,16 +3420,6 @@ export class BridgeAssistant extends HTMLElement {
                 </div>
                 <input type="checkbox" id="chk-simple-mode" class="toggle-switch" aria-label="${this.t("simpleModeLabel")}" ${this.simpleMode ? "checked" : ""}>
               </label>
-
-              <!-- Wake Word Voice Activation -->
-              <div style="border-top:1px solid var(--b-border); margin:0.5rem 0;"></div>
-              <label class="toggle-row">
-                <div class="toggle-info">
-                  <span class="toggle-title">${this.t("wakeWordSetting")}</span>
-                  <span class="toggle-desc">${this.t("wakeWordDesc")}</span>
-                </div>
-                <input type="checkbox" id="chk-wake-word" class="toggle-switch" ${this.voiceActivationEnabled ? "checked" : ""}>
-              </label>
             </div>
 
             <!-- Voice Accessibility & Screen Reader Suite -->
@@ -3928,17 +3639,12 @@ export class BridgeAssistant extends HTMLElement {
     ` : "";
 
     if (this.messages.length === 0) {
-      const sectionName = this.lastPageSection || "The Future of the VA Industry";
       chatLog.innerHTML = `
         ${onboardHtml}
         <div class="empty-state">
-          <div class="page-context-pill">
-            ${ICONS.book} <span>${this.t("pageContextBadge")} <strong>${this.escapeHtml(sectionName)}</strong></span>
-          </div>
-          <p style="margin:0 0 0.5rem 0; font-size:1rem; font-weight:600;">${this.t("emptyWelcome")}</p>
+          <p style="margin:0; font-size:1rem; font-weight:600;">${this.t("emptyWelcome")}</p>
           <div class="suggested-questions">
             <span style="font-size:0.8125rem; font-weight:700; color:var(--b-text-muted);">${this.t("suggestedTitle")}</span>
-<<<<<<< Updated upstream
             <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ1"))}">
               ${ICONS.arrowRight} ${this.escapeHtml(this.t("suggestedQ1"))}
             </button>
@@ -3952,16 +3658,7 @@ export class BridgeAssistant extends HTMLElement {
         </div>
       `;
 
-      chatLog.querySelector<HTMLButtonElement>(".btn-quick-explain")?.addEventListener("click", () => {
-        this.askQuestion(this.t("explainLessonBtn"));
-      });
-      chatLog.querySelector<HTMLButtonElement>(".btn-quick-summarize")?.addEventListener("click", () => {
-        this.askQuestion(this.t("summarizePageBtn"));
-      });
-      chatLog.querySelector<HTMLButtonElement>(".btn-quick-read")?.addEventListener("click", () => {
-        this.askQuestion(this.t("readPageBtn"));
-      });
-      chatLog.querySelectorAll<HTMLButtonElement>(".btn-suggested[data-q]").forEach((btn) => {
+      chatLog.querySelectorAll<HTMLButtonElement>(".btn-suggested").forEach((btn) => {
         btn.addEventListener("click", () => {
           const q = btn.getAttribute("data-q");
           if (q) this.askQuestion(q);
@@ -3981,21 +3678,8 @@ export class BridgeAssistant extends HTMLElement {
         }
 
         // Assistant Message Card
-        const uniqueCitations: Citation[] = [];
-        const seenCit = new Set<string>();
-        if (msg.citations) {
-          for (const cit of msg.citations) {
-            const rawLabel = cit.title || cit.heading || "";
-            const label = rawLabel.replace(/\s*\|\s*.*$/, "").replace(/^Concept page:\s*/i, "").trim();
-            if (label && !seenCit.has(label)) {
-              seenCit.add(label);
-              uniqueCitations.push({ ...cit, title: label });
-            }
-          }
-        }
-        const hasCitations = uniqueCitations.length > 0;
+        const hasCitations = msg.citations && msg.citations.length > 0;
         const isRefusal = !!msg.isRefusal;
-<<<<<<< Updated upstream
 
         return `
           <div class="msg-row msg-assistant" id="${msg.id}">
@@ -4041,25 +3725,14 @@ export class BridgeAssistant extends HTMLElement {
             : ""
           }
 
-            <!-- Listen, Stop, Replay & Make Simpler action buttons -->
+            <!-- Listen & Make Simpler action buttons -->
             <div class="answer-actions">
               <button type="button" class="btn btn-secondary btn-listen" data-msg-id="${msg.id}">
                 ${msg.isAudioPlaying ? `${ICONS.pause} ${this.t("pauseButton")}` : `${ICONS.sound} ${this.t("listenButton")}`}
               </button>
-<<<<<<< Updated upstream
               <button type="button" class="btn btn-secondary btn-simpler" data-msg-id="${msg.id}">
                 ${ICONS.lightbulb} ${this.t("makeSimplerButton")}
               </button>
-              <button type="button" class="btn btn-secondary btn-replay" data-msg-id="${msg.id}" style="display:inline-flex; align-items:center; gap:0.375rem;">
-                ${ICONS.replay}
-                <span>${this.t("replayButton")}</span>
-              </button>
-              <button type="button" class="btn btn-secondary btn-simpler" data-msg-id="${msg.id}" style="display:inline-flex; align-items:center; gap:0.375rem;">
-                ${ICONS.lightbulb}
-                <span>${this.t("makeSimplerButton")}</span>
->>>>>>> Stashed changes
-              </button>
-              ${msg.isAudioPlaying ? `<span class="speaking-indicator-pill" role="status" aria-live="polite">${ICONS.volume} <span>${this.t("speakingIndicator")}</span></span>` : ""}
             </div>
 
             <!-- Citations / Sources with readable names -->
@@ -4067,56 +3740,19 @@ export class BridgeAssistant extends HTMLElement {
             ? `
                 <div class="sources-box">
                   <div class="sources-title">${this.t("sourcesTitle")}</div>
-<<<<<<< Updated upstream
                   ${msg.citations!
               .map(
                 (c) => `
                     <a href="${this.escapeHtml(c.url)}" target="_blank" rel="noopener noreferrer" class="source-link">
                       📖 ${this.escapeHtml(c.title || c.heading)}
-=======
-                  ${uniqueCitations
-                    .map(
-                      (c) => `
-                    <a href="${this.escapeHtml(c.url)}" target="_blank" rel="noopener noreferrer" class="source-link citation-link" style="display:inline-flex; align-items:center; gap:0.375rem;">
-                      ${ICONS.book} <span>${this.escapeHtml(c.title || c.heading)}</span>
->>>>>>> Stashed changes
                     </a>
                   `
               )
               .join("")}
                 </div>
               `
-<<<<<<< Updated upstream
             : ""
           }
-=======
-                : ""
-            }
-
-            <!-- Suggested Follow-up Questions -->
-            ${
-              !isRefusal && !msg.isHandoff
-                ? `
-                <div class="followup-box">
-                  <div class="followup-title">
-                    <span>${this.t("followupTitle")}</span>
-                  </div>
-                  <div class="followup-chips">
-                    <button type="button" class="btn btn-secondary btn-followup" data-query="${this.escapeHtml(this.t("followupQ1"))}">
-                      ${this.t("followupQ1")}
-                    </button>
-                    <button type="button" class="btn btn-secondary btn-followup" data-query="${this.escapeHtml(this.t("followupQ2"))}">
-                      ${this.t("followupQ2")}
-                    </button>
-                    <button type="button" class="btn btn-secondary btn-followup" data-query="${this.escapeHtml(this.t("followupQ3"))}">
-                      ${this.t("followupQ3")}
-                    </button>
-                  </div>
-                </div>
-              `
-                : ""
-            }
->>>>>>> Stashed changes
           </div>
         `;
       })
@@ -4130,48 +3766,7 @@ export class BridgeAssistant extends HTMLElement {
       `;
     }
 
-    if (this.isRecording) {
-      chatLog.innerHTML += `
-        <div class="live-status-indicator" style="display:inline-flex; align-items:center; gap:0.375rem;">
-          <span class="listening-indicator-pill">${ICONS.mic} <span>${this.t("listeningIndicator")}</span></span>
-        </div>
-      `;
-    }
-
     // Attach listeners for dynamic answer buttons
-    chatLog.querySelectorAll<HTMLElement>(".answer-para-item").forEach((el) => {
-      el.addEventListener("click", () => {
-        const msgId = el.getAttribute("data-msg-id");
-        const idx = parseInt(el.getAttribute("data-idx") || "0", 10);
-        const msg = this.messages.find((m) => m.id === msgId);
-        if (msg) {
-          this.startSequentialReading(msg, idx);
-        }
-      });
-    });
-
-    chatLog.querySelectorAll<HTMLButtonElement>(".btn-prev-para").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const msgId = btn.getAttribute("data-msg-id");
-        const msg = this.messages.find((m) => m.id === msgId);
-        if (msg && this.currentReading && this.currentReading.currentIndex > 0) {
-          this.currentReading.currentIndex--;
-          this.playNextReadingItem(msg);
-        }
-      });
-    });
-
-    chatLog.querySelectorAll<HTMLButtonElement>(".btn-next-para").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const msgId = btn.getAttribute("data-msg-id");
-        const msg = this.messages.find((m) => m.id === msgId);
-        if (msg && this.currentReading && this.currentReading.currentIndex < this.currentReading.items.length - 1) {
-          this.currentReading.currentIndex++;
-          this.playNextReadingItem(msg);
-        }
-      });
-    });
-
     chatLog.querySelectorAll<HTMLButtonElement>(".btn-listen").forEach((btn) => {
       btn.addEventListener("click", () => {
         const msgId = btn.getAttribute("data-msg-id");
@@ -4186,36 +3781,11 @@ export class BridgeAssistant extends HTMLElement {
       });
     });
 
-    chatLog.querySelectorAll<HTMLButtonElement>(".btn-stop").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const msgId = btn.getAttribute("data-msg-id");
-        const msg = this.messages.find((m) => m.id === msgId);
-        if (msg) this.handleStop(msg);
-      });
-    });
-
-    chatLog.querySelectorAll<HTMLButtonElement>(".btn-replay").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const msgId = btn.getAttribute("data-msg-id");
-        const msg = this.messages.find((m) => m.id === msgId);
-        if (msg) this.handleReplay(msg);
-      });
-    });
-
     chatLog.querySelectorAll<HTMLButtonElement>(".btn-simpler").forEach((btn) => {
       btn.addEventListener("click", () => {
         const msgId = btn.getAttribute("data-msg-id");
         const msg = this.messages.find((m) => m.id === msgId);
         if (msg) this.askQuestion(`Explain simpler: ${msg.text}`, true);
-      });
-    });
-
-    chatLog.querySelectorAll<HTMLButtonElement>(".btn-followup").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const query = btn.getAttribute("data-query");
-        if (query) {
-          this.askQuestion(query);
-        }
       });
     });
 
@@ -4238,9 +3808,6 @@ export class BridgeAssistant extends HTMLElement {
     });
 
     chatLog.scrollTop = chatLog.scrollHeight;
-    setTimeout(() => {
-      chatLog.scrollTop = chatLog.scrollHeight;
-    }, 40);
   }
 
   private bindEvents(): void {
@@ -4311,21 +3878,6 @@ export class BridgeAssistant extends HTMLElement {
     // Quick Language Toggle Button (.lang-btn)
     this.shadowRoot.querySelector(".lang-btn")?.addEventListener("click", () => {
       this.setLanguage(this.currentLang === "en" ? "am" : "en");
-=======
-    // Language Buttons: Direct setLanguage call & toggle support for .lang-btn
-    this.shadowRoot.querySelectorAll<HTMLButtonElement>(".lang-toggle-btn").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        if (btn.classList.contains("lang-btn") && btn.id === "btn-lang-en") {
-          const nextLang = this.currentLang === "en" ? "am" : "en";
-          this.setLanguage(nextLang);
-          return;
-        }
-        const langCode = btn.id.replace("btn-lang-", "") as SupportedLanguage;
-        if (langCode) {
-          this.setLanguage(langCode);
-        }
-      });
->>>>>>> Stashed changes
     });
 
     // Settings Modal
@@ -4428,7 +3980,6 @@ export class BridgeAssistant extends HTMLElement {
       });
     }
 
-<<<<<<< Updated upstream
     // Auto-read Speech Toggle
     const chkAutoRead = this.shadowRoot.querySelector<HTMLInputElement>("#chk-auto-read");
     if (chkAutoRead) {
@@ -4438,42 +3989,6 @@ export class BridgeAssistant extends HTMLElement {
         if (!this.autoReadSpeech && this.isSpeaking) {
           this.stopSpeaking();
         }
-=======
-    // Wake Word Toggle
-    const chkWakeWord = this.shadowRoot.querySelector<HTMLInputElement>("#chk-wake-word");
-    if (chkWakeWord) {
-      chkWakeWord.addEventListener("change", () => {
-        this.voiceActivationEnabled = chkWakeWord.checked;
-        localStorage.setItem("savanna_bridge_wake_word", this.voiceActivationEnabled ? "true" : "false");
-        if (this.voiceActivationEnabled) {
-          this.setupWakeWordDetector();
-        } else if (this.wakeWordRecognition) {
-          try {
-            this.wakeWordRecognition.stop();
-          } catch {}
-          this.wakeWordRecognition = null;
-        }
-      });
-    }
-
-    // Clear Chat Button
-    this.shadowRoot.querySelector("#btn-clear-chat")?.addEventListener("click", () => {
-      this.clearChat();
-    });
-
-    // Generate Link Code Button
-    this.shadowRoot.querySelector("#btn-generate-code")?.addEventListener("click", () => {
-      this.generateLinkCode();
-    });
-
-    // Handoff Request Form in Settings
-    const handoffForm = this.shadowRoot.querySelector<HTMLFormElement>("#handoff-request-form");
-    if (handoffForm) {
-      handoffForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const reasonInput = this.shadowRoot?.querySelector<HTMLInputElement>("#handoff-reason");
-        this.requestHandoff(reasonInput?.value || undefined);
->>>>>>> Stashed changes
       });
     }
 
