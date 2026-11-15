@@ -132,6 +132,17 @@ class RetrievalEngine:
         else:
             self.bm25 = SimpleBM25Plus(self.tokenized_corpus)
 
+    def add_chunks(self, new_chunks: list[ContentChunk]) -> int:
+        """Add dynamic content chunks from the host and update the BM25 index."""
+        self.chunks.extend(new_chunks)
+        self.tokenized_corpus = [tokenize(f"{c.title} {c.heading} {c.text}") for c in self.chunks]
+        self.vocabulary = {w for doc in self.tokenized_corpus for w in doc}
+        if HAS_RANK_BM25:
+            self.bm25 = BM25Plus(self.tokenized_corpus)
+        else:
+            self.bm25 = SimpleBM25Plus(self.tokenized_corpus)
+        return len(self.chunks)
+
     def search(
         self,
         query: str,

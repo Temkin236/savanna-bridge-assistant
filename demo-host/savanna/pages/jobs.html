@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Savanna Career Gateway - Job Opportunities</title>
+    <!-- schema.org JobPosting JSON-LD (Level 3 Open Standards Compliance) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "JobPosting",
+      "title": "Junior Front-End Developer",
+      "description": "Accessible front-end development position with inclusive mentoring and flexible working conditions.",
+      "datePosted": "2026-11-14",
+      "employmentType": "FULL_TIME",
+      "jobLocationType": "TELECOMMUTE",
+      "hiringOrganization": {
+        "@type": "Organization",
+        "name": "Test Employer PLC"
+      },
+      "jobLocation": {
+        "@type": "Place",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Addis Ababa",
+          "addressCountry": "ET"
+        }
+      },
+      "jobBenefits": "Remote work, flexible hours, interpreter for interviews, screen reader friendly toolchain"
+    }
+    </script>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        line-height: 1.6;
+        margin: 0;
+        padding: 2rem;
+        background: #f8fafc;
+        color: #0f172a;
+      }
+      main {
+        max-width: 800px;
+        margin: 0 auto;
+        background: #fff;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+      }
+      .job-card {
+        border: 1px solid #e2e8f0;
+        padding: 1.5rem;
+        border-radius: 6px;
+        margin-top: 1rem;
+      }
+      .tag {
+        display: inline-block;
+        background: #e0f2fe;
+        color: #0369a1;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        margin-right: 0.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Savanna Career Gateway</h1>
+      <p>Explore inclusive job opportunities with verified employer accessibility accommodations.</p>
+      
+      <article class="job-card">
+        <h2>Junior Front-End Developer</h2>
+        <p><strong>Employer:</strong> Test Employer PLC &bull; Addis Ababa (Remote / Telecommute)</p>
+        <p>Accessible front-end development position with inclusive mentoring and flexible working conditions.</p>
+        <div>
+          <span class="tag">Remote Work</span>
+          <span class="tag">Flexible Hours</span>
+          <span class="tag">Interview Accommodations</span>
+          <span class="tag">Screen Reader Friendly</span>
+        </div>
+      </article>
+    </main>
+
+    <!-- Mount Assistant Widget -->
+    <db-assistant lang="en" api="http://localhost:8000" content="jobs"></db-assistant>
+    <script src="/widget/widget.iife.js" defer></script>
+  </body>
+</html>
+

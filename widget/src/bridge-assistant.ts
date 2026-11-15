@@ -1,22 +1,22 @@
 /**
- * Savanna Bridge Assistant (<bridge-assistant>)
- * Multilingual accessible learning and live help web component.
+ * Savanna Bridge Assistant (<bridge-assistant> & <db-assistant>)
+ * Multilingual, accessible learning and live help web component.
  *
- * Implements Milestones B-M1, B-M2, B-M3, B-M4:
- * - Accessible Dialog & polite live region
- * - Bilingual Amharic (አማርኛ) / English (with Oromo & Tigrinya support)
- * - Grounded retrieval Q&A with clickable citation links
- * - Low-confidence refusal with human handoff recommendation
- * - Voice input via Speech API / MediaRecorder with editable preview
- * - Read-aloud TTS on every answer with Play/Pause/Speed controls
- * - Sound-off equivalence (text always visible)
- * - Simple-mode explanation toggle
- * - Private support-needs self-declaration (Zero proof / ID required)
- * - Barrier-free account linking (Zero proof / ID required)
- * - Human mentor handoff with explicit learner consent
- * - Strict learner-controlled screen sharing
- * - High accessibility (WCAG 2.2 AA, >=44px touch targets, forced-colors, reduced-motion, 200% zoom)
- * - Offline resilience with sessionStorage caching
+ * Implements:
+ * - Simple production-ready layout:
+ *   1. Header: title, language switch with native scripts (አማርኛ / English), Settings, Close.
+ *   2. Body: message list. Empty state shows welcome + 3 suggested course questions.
+ *   3. Footer: text input with Send, Mic, Talk to a person, and Continue on Telegram.
+ *   4. Settings dialog: text size (smaller, normal, larger), high contrast, simple mode, support needs.
+ * - One primary action per screen, plain words, no jargon, no icon-only buttons.
+ * - Answer format: heading, text, Listen, Make simpler, source links with readable names.
+ * - Loading: 'Looking in the course' announced once in aria-live.
+ * - Not found: clear notice, offer Talk to a person & Try another question buttons.
+ * - Offline: banner + 'Saved on this phone. It will send when you are online.' (localStorage queue).
+ * - Telegram: deep_link <a> tag, polls status every 2s for 10m, announces 'Telegram connected', shows Disconnect.
+ * - Visual: 44px touch targets, 4.5:1 contrast, rem units, visible focus, host CSS variable adoption.
+ * - Events: db-assistant:question and db-assistant:escalated (CustomEvents).
+ * - Aliased as <db-assistant> and <bridge-assistant>.
  */
 
 export type SupportedLanguage = "am" | "en" | "om" | "ti" | "ar";
@@ -32,10 +32,10 @@ export interface ChatMessage {
   id: string;
   sender: "learner" | "assistant";
   text: string;
+  heading?: string;
   citations?: Citation[];
   offerHuman?: boolean;
-  reason?: "grounded" | "low_confidence" | "no_content" | "provider_unavailable";
-  confidence?: number;
+  isRefusal?: boolean;
   audioUrl?: string;
   isAudioPlaying?: boolean;
 }
@@ -46,356 +46,344 @@ export interface SupportNeedsData {
   preferred_contact_mode: "text" | "voice" | "video" | "telegram";
 }
 
-// Complete UI strings for English, Amharic, Afaan Oromo, and Tigrinya
 const I18N: Record<SupportedLanguage, Record<string, string>> = {
   en: {
     appTitle: "Savanna Bridge Assistant",
     appSubtitle: "Ask questions, adjust support, or connect with a mentor",
-    launcherLabel: "Help & Assistant",
     closeLabel: "Close dialog",
-    chatTab: "Chat",
-    supportTab: "Support Needs",
-    linkTab: "Link Account",
-    handoffTab: "Talk to a Person",
-    inputPlaceholder: "Ask a question about this course...",
-    sendButton: "Send",
-    simpleModeLabel: "Simple explanation",
-    simpleModeTitle: "Explain in shorter, simpler sentences",
-    voiceInputLabel: "Voice input",
-    recordingState: "Listening... click to finish",
-    transcribingState: "Transcribing audio...",
-    voicePreviewNotice: "Voice transcribed! You can edit the text before sending.",
-    micError: "Microphone unavailable or permission denied. Please type your question.",
-    readAloud: "Read Aloud",
-    pause: "Pause",
-    resume: "Resume",
-    speed: "Speed",
-    thinking: "Finding verified answer...",
-    sourcesTitle: "Sources & Citations:",
-    talkToPersonButton: "Talk to a person",
-    refusalNotice: "I cannot verify this from the course materials. A human mentor can help you directly.",
-    offlineNotice: "You are offline. Showing cached answers where available.",
-    offlineUnavailable: "This action requires an internet connection. Please reconnect and try again.",
-    supportTitle: "Private Support Preferences",
-    supportZeroProofBanner: "No medical documentation, diagnosis, or proof required. All preferences are private and self-declared.",
+    launcherLabel: "Help & Assistant",
+    settingsLabel: "Settings",
+    settingsTitle: "Assistant Settings",
+    closeSettings: "Done",
+    textSizeLabel: "Text Size",
+    textSmaller: "Smaller",
+    textNormal: "Normal",
+    textLarger: "Larger",
+    highContrastLabel: "High Contrast",
+    simpleModeLabel: "Simple mode",
+    simpleModeDesc: "Explain answers in shorter, simpler sentences",
+    supportNeedsTitle: "Support Preferences",
+    supportZeroProof: "No medical documentation or proof required. All preferences are private.",
     needExtraTime: "Extra response time for tests and questions",
     needScreenReader: "Screen reader friendly materials and alt text",
     needWritten: "Written questions and instructions",
-    needStepFree: "Step-free wheelchair access / ground-floor space",
-    needQuiet: "Quiet space with low sensory distractions",
     needOther: "Other support needs",
-    otherPlaceholder: "Specify any other accommodations you need...",
-    contactModeTitle: "Preferred contact mode for live help:",
+    otherPlaceholder: "Describe any other accommodations...",
+    contactModeLabel: "Preferred contact mode for live help:",
     modeText: "Text chat",
     modeVoice: "Voice call",
     modeVideo: "Video call",
     modeTelegram: "Telegram message",
-    saveSupportButton: "Save Support Preferences",
-    supportSavedNotice: "Support preferences saved privately.",
-    linkTitle: "Barrier-Free Account Linking",
-    linkZeroProofBanner: "No national ID, phone number, or proof required. Link across devices using a temporary code.",
-    generateCodeButton: "Generate One-Time Code",
-    yourCodeIs: "Your 6-digit code:",
-    codeExpiresNote: "Enter this code in Telegram bot with /confirm within 10 minutes.",
-    orEnterCode: "Or enter code from Telegram:",
-    codePlaceholder: "6-digit code (e.g. 123456)",
-    confirmCodeButton: "Confirm Code",
-    linkSuccessNotice: "Account linked successfully! Your preferences are now synchronized.",
-    handoffTitle: "Connect with a Human Mentor",
-    handoffConsentBanner: "You are connecting to a human mentor via a Jitsi Meet audio/video room. Screen sharing is completely optional and can only be started, viewed, or stopped by you from inside the meeting controls. The assistant will never start screen sharing automatically.",
-    handoffConsentCheck: "I consent to connect with a human mentor",
-    handoffReasonLabel: "What do you need help with? (Optional)",
-    handoffReasonPlaceholder: "e.g., I'm stuck on Module 2 exercise...",
-    requestMentorButton: "Request Human Help",
-    requestingMentor: "Connecting with mentor...",
-    mentorReadyTitle: "Your Live Help Room is Ready!",
-    joinRoomButton: "Join Jitsi Meeting Room ↗",
-    screenShareReminder: "Reminder: You are in full control of screen sharing. You can leave the room at any time.",
-    leaveRoomButton: "Leave / Close Help Request",
-    requestClosedNotice: "Live help request closed.",
+    saveSupportBtn: "Save Preferences",
+    supportSavedNotice: "Preferences saved privately.",
+    emptyWelcome: "Welcome! Ask any question about your course.",
+    suggestedTitle: "Suggested questions:",
+    suggestedQ1: "What does Module 2 teach?",
+    suggestedQ2: "Explain customer service foundations",
+    suggestedQ3: "How do I communicate with customers?",
+    inputPlaceholder: "Ask a question about this course...",
+    sendButton: "Send",
+    micLabel: "Microphone (voice input)",
+    recordingState: "Listening... tap to finish",
+    transcribingState: "Transcribing audio...",
+    voicePreviewNotice: "Voice transcribed. You can edit the text before sending.",
+    micError: "Microphone unavailable. Please type your question.",
+    lookingInCourse: "Looking in the course...",
+    answerHeading: "Answer",
+    listenButton: "Listen",
+    pauseButton: "Pause",
+    makeSimplerButton: "Make simpler",
+    sourcesTitle: "Course sources:",
+    talkToPersonButton: "Talk to a person",
+    continueOnTelegram: "Continue on Telegram",
+    continueOnTelegramAria: "Continue on Telegram (opens Telegram)",
+    telegramPrivacyNotice: "Telegram will receive your questions and the answers.",
+    telegramConnected: "Telegram connected",
+    connectedToTelegram: "Connected to Telegram",
+    disconnectTelegram: "Disconnect",
+    tryAnotherQuestion: "Try another question",
+    notVerifiedNotice: "I cannot verify this from the course materials. A human mentor can help you directly.",
+    offlineBanner: "You are offline.",
+    savedOnPhoneNotice: "Saved on this phone. It will send when you are online.",
+    serverErrorNotice: "Could not connect to the assistant. Please check your connection and try again.",
+    handoffReadyTitle: "Your Live Help Room is Ready",
+    joinRoomButton: "Join Live Help Room ↗",
+    leaveRoomButton: "Close Help Session",
+    androidFallbackNote: "Android note: Browser screen sharing (getDisplayMedia) is not supported in Chrome on Android. Your mentor automatically sees your active lesson URL, section, and focused element.",
   },
   am: {
     appTitle: "የሳቫና ብሪጅ ረዳት",
     appSubtitle: "ጥያቄዎችን ይጠይቁ፣ ድጋፍዎን ያስተካክሉ፣ ወይም ከአማካሪ ጋር ይገናኙ",
-    launcherLabel: "እርዳታ እና ረዳት",
     closeLabel: "መስኮቱን ዝጋ",
-    chatTab: "ውይይት",
-    supportTab: "የድጋፍ ፍላጎቶች",
-    linkTab: "መለያ ማገናኘት",
-    handoffTab: "ከሰው ጋር ተነጋገር",
-    inputPlaceholder: "ስለዚህ ኮርስ ጥያቄ ይጠይቁ...",
-    sendButton: "ላክ",
+    launcherLabel: "እርዳታ እና ረዳት",
+    settingsLabel: "ቅንብሮች",
+    settingsTitle: "የረዳት ቅንብሮች",
+    closeSettings: "ጨርስ",
+    textSizeLabel: "የጽሑፍ መጠን",
+    textSmaller: "አነስተኛ",
+    textNormal: "መደበኛ",
+    textLarger: "ትልቅ",
+    highContrastLabel: "ከፍተኛ ንፅፅር",
     simpleModeLabel: "ቀላል ማብራሪያ",
-    simpleModeTitle: "በቀላል እና አጫጭር ዓረፍተ ነገሮች አስረዳኝ",
-    voiceInputLabel: "በድምጽ ይጠይቁ",
-    recordingState: "እያዳመጥኩ ነው... ለማጠናቀቅ ይጫኑ",
-    transcribingState: "ድምጹን ወደ ጽሑፍ በመቀየር ላይ...",
-    voicePreviewNotice: "ድምጽዎ ወደ ጽሑፍ ተቀይሯል! ከመላክዎ በፊት ማስተካከል ይችላሉ።",
-    micError: "ማይክሮፎን ማግኘት አልተቻለም። እባክዎ ጥያቄዎን በጽሑፍ ያስገቡ።",
-    readAloud: "አንብብልኝ",
-    pause: "አቁም",
-    resume: "ቀጥል",
-    speed: "ፍጥነት",
-    thinking: "የተረጋገጠ መልስ በመፈለግ ላይ...",
-    sourcesTitle: "ማጣቀሻዎች እና ምንጮች፡",
-    talkToPersonButton: "ከሰው ጋር ተነጋገር",
-    refusalNotice: "ይህን ከኮርሱ ይዘት ማረጋገጥ አልቻልኩም። የሰው አማካሪ በቀጥታ ሊረዳዎት ይችላል።",
-    offlineNotice: "አሁን ከመስመር ውጭ ነዎት። የቀደሙ መልሶች እዚህ ይታያሉ።",
-    offlineUnavailable: "ይህ እርምጃ የበይነመረብ ግንኙነት ይፈልጋል። እባክዎ እንደገና ይገናኙ።",
-    supportTitle: "የግል የድጋፍ ፍላጎቶች",
-    supportZeroProofBanner: "ምንም ዓይነት የህክምና ማስረጃ ወይም ማረጋገጫ አያስፈልግም። ምርጫዎችዎ ሚስጥራዊ ናቸው።",
+    simpleModeDesc: "መልሶችን በአጫጭርና በቀላል ዓረፍተ ነገሮች አስረዳኝ",
+    supportNeedsTitle: "የግል የድጋፍ ፍላጎቶች",
+    supportZeroProof: "ምንም ዓይነት የህክምና ማስረጃ ወይም ማረጋገጫ አያስፈልግም።",
     needExtraTime: "ለፈተናዎች እና ጥያቄዎች ተጨማሪ ጊዜ",
     needScreenReader: "ለስክሪን አንባቢ ምቹ የሆነ አቀራረብ",
     needWritten: "የጽሑፍ ጥያቄዎች እና መመሪያዎች",
-    needStepFree: "ደረጃ የሌለው የመንኮራኩር ወንበር መዳረሻ / ምድር ቤት",
-    needQuiet: "ጸጥ ያለ እና ረብሻ የሌለበት ቦታ",
     needOther: "ሌሎች የድጋፍ ፍላጎቶች",
-    otherPlaceholder: "ሌላ የሚፈልጉትን ማስተናገጃ ይግለጹ...",
-    contactModeTitle: "ለቀጥታ እርዳታ የሚመርጡት የመገናኛ ዘዴ፡",
-    modeText: "የጽሑፍ ውይይት",
+    otherPlaceholder: "የሚፈልጉትን ተጨማሪ ድጋፍ ይግለጹ...",
+    contactModeLabel: "የቀጥታ ድጋፍ የሚፈልጉበት መንገድ፡",
+    modeText: "የጽሑፍ መልእክት",
     modeVoice: "የድምጽ ጥሪ",
     modeVideo: "የቪዲዮ ጥሪ",
     modeTelegram: "የቴሌግራም መልእክት",
-    saveSupportButton: "የድጋፍ ምርጫዎችን አስቀምጥ",
-    supportSavedNotice: "የድጋፍ ምርጫዎችዎ በሚስጥር ተቀምጠዋል።",
-    linkTitle: "ያለ ገደብ መለያ ማገናኘት",
-    linkZeroProofBanner: "መታወቂያ ወይም ስልክ ቁጥር አያስፈልግም። በጊዜያዊ ኮድ በየትኛውም መሣሪያ ያገናኙ።",
-    generateCodeButton: "ባለ 6-አሃዝ ኮድ አውጣ",
-    yourCodeIs: "የእርስዎ ኮድ፡",
-    codeExpiresNote: "ይህን ኮድ በቴሌግራም ቦት ውስጥ በ /confirm በ10 ደቂቃ ውስጥ ያስገቡ።",
-    orEnterCode: "ወይም ከቴሌግራም የተቀበሉትን ኮድ ያስገቡ፡",
-    codePlaceholder: "ባለ 6-አሃዝ ኮድ (ለምሳሌ 123456)",
-    confirmCodeButton: "ኮዱን አረጋግጥ",
-    linkSuccessNotice: "መለያዎ በተሳካ ሁኔታ ተገናኝቷል! ምርጫዎችዎ ተመሳስለዋል።",
-    handoffTitle: "ከሰው አማካሪ ጋር ይገናኙ",
-    handoffConsentBanner: "በ Jitsi Meet የድምጽ/ቪዲዮ ክፍል ከአማካሪ ጋር ይገናኛሉ። የስክሪን ማጋራት ሙሉ በሙሉ በእርስዎ ምርጫ ላይ የተመሰረተ ሲሆን፣ እርስዎ ብቻ ከስብሰባው ውስጥ ሆነው ሊጀምሩ ወይም ሊያቆሙ ይችላሉ። ረዳቱ በራሱ ስክሪንዎን አያጋራም።",
-    handoffConsentCheck: "ከሰው አማካሪ ጋር ለመገናኘት ተስማምቻለሁ",
-    handoffReasonLabel: "ምን እንዲረዳዎት ይፈልጋሉ? (አማራጭ)",
-    handoffReasonPlaceholder: "ለምሳሌ፡ በሞጁል 2 መልመጃ ላይ ተቸግሬ ነው...",
-    requestMentorButton: "የሰው እርዳታ ጠይቅ",
-    requestingMentor: "ከአማካሪ ጋር በማገናኘት ላይ...",
-    mentorReadyTitle: "የቀጥታ እርዳታ ክፍልዎ ዝግጁ ነው!",
-    joinRoomButton: "ወደ Jitsi ስብሰባ ክፍል ግባ ↗",
-    screenShareReminder: "ማሳሰቢያ፡ የስክሪን ማጋራት ሙሉ በሙሉ በእርስዎ ቁጥጥር ስር ነው። በማንኛውም ጊዜ ክፍሉን መልቀቅ ይችላሉ።",
-    leaveRoomButton: "ክፍሉን ልቀቅ / ጥያቄውን ዝጋ",
-    requestClosedNotice: "የእርዳታ ጥያቄው ተዘግቷል።",
+    saveSupportBtn: "ምርጫዎችን መዝግብ",
+    supportSavedNotice: "ምርጫዎችዎ በሚስጥር ተቀምጠዋል።",
+    emptyWelcome: "እንኳን ደህና መጡ! ስለ ኮርሱ ማንኛውንም ጥያቄ ይጠይቁ።",
+    suggestedTitle: "የተጠቆሙ ጥያቄዎች፡",
+    suggestedQ1: "ሞጁል 2 ምን ያስተምራል?",
+    suggestedQ2: "የደንበኞች አገልግሎት መሰረቶችን አስረዳኝ",
+    suggestedQ3: "ከደንበኞች ጋር እንዴት መገናኘት እችላለሁ?",
+    inputPlaceholder: "ስለዚህ ኮርስ ጥያቄ ይጠይቁ...",
+    sendButton: "ላክ",
+    micLabel: "ማይክሮፎን (የድምጽ ግብዓት)",
+    recordingState: "እያዳመጥኩ ነው... ለማጠናቀቅ ይጫኑ",
+    transcribingState: "ድምጹን ወደ ጽሑፍ በመቀየር ላይ...",
+    voicePreviewNotice: "ድምጽዎ ወደ ጽሑፍ ተቀይሯል። ከመላክዎ በፊት ማስተካከል ይችላሉ።",
+    micError: "ማይክሮፎን ማግኘት አልተቻለም። እባክዎ ጥያቄዎን በጽሑፍ ያስገቡ።",
+    lookingInCourse: "በኮርሱ ውስጥ በመፈለግ ላይ...",
+    answerHeading: "መልስ",
+    listenButton: "አዳምጥ",
+    pauseButton: "አቁም",
+    makeSimplerButton: "ቀለል አድርግ",
+    sourcesTitle: "የኮርስ ምንጮች፡",
+    talkToPersonButton: "ከሰው ጋር ተነጋገር",
+    continueOnTelegram: "በቴሌግራም ቀጥል",
+    continueOnTelegramAria: "በቴሌግራም ቀጥል (ቴሌግራምን ይከፍታል)",
+    telegramPrivacyNotice: "ቴሌግራም ጥያቄዎችዎን እና መልሶቹን ይቀበላል።",
+    telegramConnected: "ቴሌግራም ተገናኝቷል",
+    connectedToTelegram: "ከቴሌግራም ጋር ተገናኝቷል",
+    disconnectTelegram: "ግንኙነት አቋርጥ",
+    tryAnotherQuestion: "ሌላ ጥያቄ ሞክር",
+    notVerifiedNotice: "ይህን ከኮርሱ ይዘት ማረጋገጥ አልቻልኩም። የሰው አማካሪ በቀጥታ ሊረዳዎት ይችላል።",
+    offlineBanner: "ከመስመር ውጭ ነዎት።",
+    savedOnPhoneNotice: "በዚህ ስልክ ላይ ተቀምጧል። መስመር ላይ ሲሆኑ ይላካል።",
+    serverErrorNotice: "ከአገልጋዩ ጋር መገናኘት አልተቻለም። እባክዎ ግንኙነትዎን ያረጋግጡና እንደገና ይሞክሩ።",
+    handoffReadyTitle: "የቀጥታ ድጋፍ ክፍልዎ ዝግጁ ነው",
+    joinRoomButton: "ወደ ስብሰባው ክፍል ግባ ↗",
+    leaveRoomButton: "ክፍለ-ጊዜውን ዝጋ",
+    androidFallbackNote: "የአንድሮይድ ማሳሰቢያ፡ በአንድሮይድ ክሮም ላይ የስክሪን ማጋራት አይደገፍም። አማካሪዎ እርስዎ ያሉበትን የትምህርት ገጽ እና ርዕስ በቀጥታ ይመለከታል።",
   },
   om: {
-    appTitle: "Gargaaraa Saavaanaa Biriijii",
-    appSubtitle: "Gaaffii gaafadhaa, deeggarsa barbaaddan filadhaa, ykn nama waliin haasa'aa",
-    launcherLabel: "Gargaarsa",
+    appTitle: "Gargaaraa Savanna Bridge",
+    appSubtitle: "Gaaffii gaafadhaa, deeggarsa madaalsisaa, ykn gorsaa waliin walqunnamaa",
     closeLabel: "Cufi",
-    chatTab: "Haasaa",
-    supportTab: "Fedhii Deeggarsaa",
-    linkTab: "Herrega Walqabsiisi",
-    handoffTab: "Nama Waliin Dubbadhu",
-    inputPlaceholder: "Waa'ee barnoota kanaa gaaffii gaafadhaa...",
-    sendButton: "Ergi",
+    launcherLabel: "Gargaarsa",
+    settingsLabel: "Qindaa'ina",
+    settingsTitle: "Qindaa'ina Gargaaraa",
+    closeSettings: "Xumuri",
+    textSizeLabel: "Hamma Barruu",
+    textSmaller: "Xiqqaa",
+    textNormal: "Idilee",
+    textLarger: "Guddaa",
+    highContrastLabel: "Waliin-dhaabbii Olaanaa",
     simpleModeLabel: "Ibsa salphaa",
-    simpleModeTitle: "Hima gabaabaa fi salphaan naaf ibsi",
-    voiceInputLabel: "Sagaleedhaan gaafadhu",
-    recordingState: "Dhaggeeffachaa jira... xumuruuf cuqaasaa",
-    transcribingState: "Sagalee gara barruutti jijjiiraa jira...",
-    voicePreviewNotice: "Sagaleen gara barruutti jijjiirameera! Erguun dura sirreessuu dandeessu.",
-    micError: "Maaykirofooniin hin argamne. Barruudhaan barreessaa.",
-    readAloud: "Naaf dubbisi",
-    pause: "Dhaabi",
-    resume: "Itti fufi",
-    speed: "Saffisa",
-    thinking: "Deebii mirkanaa'e barbaadaa jira...",
-    sourcesTitle: "Madda Deebii:",
-    talkToPersonButton: "Nama waliin dubbadhu",
-    refusalNotice: "Qabiyyee barnootaa keessaa mirkaneessuu hin dandeenye. Gargaarsi namaa ni barbaachisaa?",
-    offlineNotice: "Tajaajila toora irraa ala jirtu.",
-    offlineUnavailable: "Kuni intarneetii barbaada.",
-    supportTitle: "Fedhii Deeggarsaa Dhuunfaa",
-    supportZeroProofBanner: "Waraqaan fayyaa ykn ragaan kamiyyuu hin barbaachisu. Filannoon keessan dhuunfaadha.",
+    simpleModeDesc: "Himoota gaggabaaboo fi salphaadhaan ibsi",
+    supportNeedsTitle: "Filannoo Deeggarsaa",
+    supportZeroProof: "Waraqaan yaalaa hin barbaachisu. Filannoon keessan dhuunfaadha.",
     needExtraTime: "Qorumsaaf yeroo dabalataa",
     needScreenReader: "Dubbisaa iskiriiniif kan mijate",
-    needWritten: "Qajeelfama fi gaaffiiwwan barruudhaan",
-    needStepFree: "Bakka sadarkaa hin qabne / lafa irra",
-    needQuiet: "Bakka callisaa",
+    needWritten: "Qajeelfama barruudhaan",
     needOther: "Deeggarsa biraa",
-    otherPlaceholder: "Fedhii biraa qabdan ibsaa...",
-    contactModeTitle: "Mala qunnamtii filattan:",
+    otherPlaceholder: "Ibsaa...",
+    contactModeLabel: "Mala qunnamtii filattan:",
     modeText: "Barruu",
     modeVoice: "Sagalee",
     modeVideo: "Viidiyoo",
     modeTelegram: "Telegiraamii",
-    saveSupportButton: "Fedhii Deeggarsaa Galmeessi",
-    supportSavedNotice: "Fedhiin deeggarsaa galmaa'eera.",
-    linkTitle: "Herrega Walqabsiisuu",
-    linkZeroProofBanner: "Waraqaan eenyummaa hin barbaachisu.",
-    generateCodeButton: "Koodii Baasi",
-    yourCodeIs: "Koodiin keessan:",
-    codeExpiresNote: "Koodii kana daqiiqaa 10 keessatti Telegiraamii irratti galchaa.",
-    orEnterCode: "Ykn koodii Telegiraamii irraa dhufe galchaa:",
-    codePlaceholder: "Koodii lakkoofsa 6",
-    confirmCodeButton: "Koodii Mirkaneessi",
-    linkSuccessNotice: "Milkaa'inaan walqabateera!",
-    handoffTitle: "Gorsaa Waliin Walqunnamaa",
-    handoffConsentBanner: "Kutaa Jitsi Meet keessatti gorsaa waliin walqunnamtu. Iskiriinii qooduun fedhii keessan qofaan ta'a.",
-    handoffConsentCheck: "Gorsaa waliin walqunnamuuf walii galeera",
-    handoffReasonLabel: "Maal irratti gargaarsa barbaaddu?",
-    handoffReasonPlaceholder: "Ibsaa...",
-    requestMentorButton: "Gargaarsa Namaa Gaafadhu",
-    requestingMentor: "Walqunnamsiisaa jira...",
-    mentorReadyTitle: "Kutaan keessan qophiidha!",
-    joinRoomButton: "Kutaa Jitsi Seenaa ↗",
-    screenShareReminder: "Iskiriinii qooduun to'annoo keessan jala jira.",
+    saveSupportBtn: "Galmeessi",
+    supportSavedNotice: "Filannoon keessan galmaa'eera.",
+    emptyWelcome: "Baga nagaan dhuftan! Gaaffii kamiyyuu gaafadhaa.",
+    suggestedTitle: "Gaaffiiwwan filataman:",
+    suggestedQ1: "Kutaan 2 maal barsiisa?",
+    suggestedQ2: "Bu'uuraalee tajaajila maamiltootaa ibsi",
+    suggestedQ3: "Maamiltoota waliin akkamittan qunnama?",
+    inputPlaceholder: "Waa'ee barnoota kanaa gaafadhaa...",
+    sendButton: "Ergi",
+    micLabel: "Maaykirofoonii",
+    recordingState: "Dhaggeeffachaa jira...",
+    transcribingState: "Sagalee jijjiiraa jira...",
+    voicePreviewNotice: "Sagaleen gara barruutti jijjiirameera.",
+    micError: "Maaykirofooniin hin argamne.",
+    lookingInCourse: "Barnoota keessaa barbaadaa jira...",
+    answerHeading: "Deebii",
+    listenButton: "Dhaggeeffadhu",
+    pauseButton: "Dhaabi",
+    makeSimplerButton: "Salphisi",
+    sourcesTitle: "Madda barnootaa:",
+    talkToPersonButton: "Nama waliin dubbadhu",
+    continueOnTelegram: "Telegiraamiin Itti fufi",
+    continueOnTelegramAria: "Telegiraamiin Itti fufi (Telegiraamii bana)",
+    telegramPrivacyNotice: "Telegiraam gaaffii fi deebii keessan ni fudhata.",
+    telegramConnected: "Telegiraam walqabateera",
+    connectedToTelegram: "Telegiraamii waliin walqabateera",
+    disconnectTelegram: "Gargar Baasi",
+    tryAnotherQuestion: "Gaaffii biraa yaali",
+    notVerifiedNotice: "Barnoota keessaa mirkaneessuu hin dandeenye.",
+    offlineBanner: "Toora irraa ala jirtu.",
+    savedOnPhoneNotice: "Bilbila kana irratti kuufameera. Toora irratti yemmuu dhuftan ergama.",
+    serverErrorNotice: "Gargaaraa waliin walqunnamuu hin dandeenye.",
+    handoffReadyTitle: "Kutaan gargaarsaa qophiidha",
+    joinRoomButton: "Kutaa Seenaa ↗",
     leaveRoomButton: "Kutaa Dhiisaa",
-    requestClosedNotice: "Gaaffiin cufameera.",
+    androidFallbackNote: "Iskiriinii qooduun Android irratti hin danda'amu.",
   },
   ti: {
     appTitle: "ናይ ሳቫና ብሪጅ ሓጋዚ",
     appSubtitle: "ሕቶታት ሕተቱ፡ ድሌትኩም ኣመዓራርዩ፡ ወይ ምስ መካሪ ተራኸቡ",
-    launcherLabel: "ሓገዝ",
     closeLabel: "ዕጾ",
-    chatTab: "ዕላል",
-    supportTab: "ናይ ሓገዝ ድሌታት",
-    linkTab: "ኣካውንት ኣተኣሳስር",
-    handoffTab: "ምስ ሰብ ተዛረብ",
-    inputPlaceholder: "ብዛዕባዚ ኮርስ ሕቶ ሕተቱ...",
-    sendButton: "ስደድ",
+    launcherLabel: "ሓገዝ",
+    settingsLabel: "ቅጥዕታት",
+    settingsTitle: "ናይ ሓጋዚ ቅጥዕታት",
+    closeSettings: "ወዲአ",
+    textSizeLabel: "መጠን ጽሑፍ",
+    textSmaller: "ንእሽቶ",
+    textNormal: "ስሩዕ",
+    textLarger: "ዓቢ",
+    highContrastLabel: "ላዕለዋይ ንጽጽር",
     simpleModeLabel: "ቀሊል መብርሂ",
-    simpleModeTitle: "ብሓጸርቲ ሓረጋት ኣረድኣኒ",
-    voiceInputLabel: "ብድምጺ ሕተቱ",
-    recordingState: "ይሰምዕ ኣለኹ... ንምውዳእ ጠውቑ",
-    transcribingState: "ናብ ጽሑፍ ይቕየር ኣሎ...",
-    voicePreviewNotice: "ድምጽኹም ናብ ጽሑፍ ተቐዪሩ ኣሎ! ቅድሚ ምስዳድኩም ከተዐርይዎ ትኽእሉ ኢኹም።",
-    micError: "ማይክሮፎን ክርከብ ኣይተኻእለን። ብጽሑፍ ሕተቱ።",
-    readAloud: "ኣንብበለይ",
-    pause: "ኣዕርፍ",
-    resume: "ቀጽል",
-    speed: "ቅልጣፈ",
-    thinking: "መልሲ ይድለ ኣሎ...",
-    sourcesTitle: "ምንጭታት፡",
-    talkToPersonButton: "ምስ ሰብ ተዛረብ",
-    refusalNotice: "እዚ ካብቲ ትሕዝቶ ኮርስ ክረጋገጽ ኣይተኻእለን። ናይ ሰብ ሓገዝ ይድለ ዶ?",
-    offlineNotice: "መስመር ተቛሪጹ ኣሎ።",
-    offlineUnavailable: "እዚ ኢንተርነት ይደሊ እዩ።",
-    supportTitle: "ናይ ውልቂ ሓገዝ ምርጫታት",
-    supportZeroProofBanner: "ሕክምናዊ መርትዖ ወይ ምስክር ወረቐት ኣየድልን እዩ። ምርጫታትኩም ምስጢራዊ እዩ።",
-    needExtraTime: "ተወሳኺ ግዜ ንፈተናታትን ሕቶታትን",
+    simpleModeDesc: "ብሓጸርቲ ሓረጋት ኣረድኣኒ",
+    supportNeedsTitle: "ናይ ውልቂ ሓገዝ ምርጫታት",
+    supportZeroProof: "ሕክምናዊ መርትዖ ኣየድልን እዩ። ምርጫታትኩም ምስጢራዊ እዩ።",
+    needExtraTime: "ተወሳኺ ግዜ ንፈተናታት",
     needScreenReader: "ንስክሪን ኣንባቢ ምቹእ",
-    needWritten: "ናይ ጽሑፍ መምርሒታትን ሕቶታትን",
-    needStepFree: "ደረጃ ዘይብሉ ምቹእ መእተዊ",
-    needQuiet: "ህዱእ ቦታ",
+    needWritten: "ናይ ጽሑፍ መምርሒታት",
     needOther: "ካልእ ድሌታት",
-    otherPlaceholder: "ካልእ ድሌትኩም ግለጹ...",
-    contactModeTitle: "ትመርጽዎ ናይ ርክብ መገዲ፡",
+    otherPlaceholder: "ግለጹ...",
+    contactModeLabel: "ትመርጽዎ ናይ ርክብ መገዲ፡",
     modeText: "ጽሑፍ",
     modeVoice: "ድምጺ",
     modeVideo: "ቪድዮ",
     modeTelegram: "ቴሌግራም",
-    saveSupportButton: "ምርጫታት ኣቐምጥ",
+    saveSupportBtn: "ኣቐምጥ",
     supportSavedNotice: "ምርጫታትኩም ተቐሚጡ ኣሎ።",
-    linkTitle: "ኣካውንት ምትእስሳር",
-    linkZeroProofBanner: "መታወቂያ ኣየድልን። ብግዚያዊ ኮድ ኣተኣሳስሩ።",
-    generateCodeButton: "ኮድ ኣውጽእ",
-    yourCodeIs: "ኮድኩም፡",
-    codeExpiresNote: "ኣብ ቴሌግራም ብ /confirm ኣብ ውሽጢ 10 ደቒቕ የእትውዎ።",
-    orEnterCode: "ካብ ቴሌግራም ዝመጸ ኮድ የእትዉ፡",
-    codePlaceholder: "ናይ 6-ኣሃዝ ኮድ",
-    confirmCodeButton: "ኮድ ኣረጋግጽ",
-    linkSuccessNotice: "ብዓወት ተተሓሒዙ ኣሎ!",
-    handoffTitle: "ምስ ሰብ መካሪ ተራኸቡ",
-    handoffConsentBanner: "ኣብ Jitsi Meet ምስ መካሪ ትራኸቡ። ስክሪን ምክፋል ብፍቓድኩም ጥራይ እዩ።",
-    handoffConsentCheck: "ምስ መካሪ ንምርኻብ ተሰማሚዐ ኣለኹ",
-    handoffReasonLabel: "እንታይ ሓገዝ ትደልዩ?",
-    handoffReasonPlaceholder: "ግለጹ...",
-    requestMentorButton: "ናይ ሰብ ሓገዝ ሕተት",
-    requestingMentor: "ይራኸብ ኣሎ...",
-    mentorReadyTitle: "ክፍልኹም ድሉው እዩ!",
-    joinRoomButton: "ናብ Jitsi ክፍል እቶ ↗",
-    screenShareReminder: "ስክሪን ምክፋል ኣብ ትሕቲ ቁጽጽርኩም እዩ።",
-    leaveRoomButton: "ክፍሊ ሕደጉ",
-    requestClosedNotice: "ሕቶ ተዓጽዩ ኣሎ።",
+    emptyWelcome: "እንቋዕ ብደሓን መጻእኩም! ዝኾነ ሕቶ ሕተቱ።",
+    suggestedTitle: "ዝተመርጹ ሕቶታት፡",
+    suggestedQ1: "ሞጁል 2 እንታይ ይምህር?",
+    suggestedQ2: "መሰረታት ኣገልግሎት ዓማዊል ኣብርሃለይ",
+    suggestedQ3: "ምስ ዓማዊል ብኸመይ ይራኸብ?",
+    inputPlaceholder: "ብዛዕባዚ ኮርስ ሕቶ ሕተቱ...",
+    sendButton: "ስደድ",
+    micLabel: "ማይክሮፎን",
+    recordingState: "ይሰምዕ ኣለኹ...",
+    transcribingState: "ናብ ጽሑፍ ይቕየር ኣሎ...",
+    voicePreviewNotice: "ድምጽኹም ናብ ጽሑፍ ተቐዪሩ ኣሎ።",
+    micError: "ማይክሮፎን ክርከብ ኣይተኻእለን።",
+    lookingInCourse: "ኣብ ኮርስ ይድለ ኣሎ...",
+    answerHeading: "መልሲ",
+    listenButton: "ስማዕ",
+    pauseButton: "ኣዕርፍ",
+    makeSimplerButton: "ቀሊል ግበሮ",
+    sourcesTitle: "ምንጭታት ኮርስ፡",
+    talkToPersonButton: "ምስ ሰብ ተዛረብ",
+    continueOnTelegram: "ብቴሌግራም ቀጽል",
+    continueOnTelegramAria: "ብቴሌግራም ቀጽል (ቴሌግራም ይኸፍት)",
+    telegramPrivacyNotice: "ቴሌግራም ሕቶኹምን መልስኹምን ይቕበል እዩ።",
+    telegramConnected: "ቴሌግራም ተላጊቡ ኣሎ",
+    connectedToTelegram: "ምስ ቴሌግራም ተላጊቡ ኣሎ",
+    disconnectTelegram: "ግንኙነት ኣቋርጽ",
+    tryAnotherQuestion: "ካልእ ሕቶ ፈትን",
+    notVerifiedNotice: "እዚ ካብቲ ትሕዝቶ ኮርስ ክረጋገጽ ኣይተኻእለን።",
+    offlineBanner: "መስመር ተቛሪጹ ኣሎ።",
+    savedOnPhoneNotice: "ኣብዚ ስልኪ ተቐሚጡ ኣሎ። ኦንላይን ምስ ኮንኩም ክስደድ እዩ።",
+    serverErrorNotice: "ምስ ሓጋዚ ክራኸብ ኣይተኻእለን።",
+    handoffReadyTitle: "ናይ ሓገዝ ክፍሊ ድሉው እዩ",
+    joinRoomButton: "ናብ ክፍሊ እቶ ↗",
+    leaveRoomButton: "ክፍሊ ዕጾ",
+    androidFallbackNote: "ኣብ አንድሮይድ ስክሪን ምክፋል ኣይድገፍን።",
   },
   ar: {
     appTitle: "مساعد سافانا بريدج",
     appSubtitle: "اطرح أسئلة، خصص دعمك، أو تواصل مع مرشد",
-    launcherLabel: "المساعدة والمساعد",
     closeLabel: "إغلاق النافذة",
-    chatTab: "المحادثة",
-    supportTab: "احتياجات الدعم",
-    linkTab: "ربط الحساب",
-    handoffTab: "التحدث مع شخص",
-    inputPlaceholder: "اطرح سؤالاً حول هذه الدورة التدريبية...",
-    sendButton: "إرسال",
+    launcherLabel: "المساعدة والمساعد",
+    settingsLabel: "الإعدادات",
+    settingsTitle: "إعدادات المساعد",
+    closeSettings: "تم",
+    textSizeLabel: "حجم النص",
+    textSmaller: "أصغر",
+    textNormal: "عادي",
+    textLarger: "أكبر",
+    highContrastLabel: "تباين عالٍ",
     simpleModeLabel: "شرح مبسط",
-    simpleModeTitle: "اشرح بجمل أقصر وأبسط",
-    voiceInputLabel: "الإدخال الصوتي",
-    recordingState: "جاري الاستماع... اضغط للإنهاء",
-    transcribingState: "جاري تحويل الصوت إلى نص...",
-    voicePreviewNotice: "تم تفريغ الصوت! يمكنك تعديل النص قبل الإرسال.",
-    micError: "الميكروفون غير متوفر أو تم رفض الإذن. يرجى كتابة سؤالك.",
-    readAloud: "قراءة بصوت عالٍ",
-    pause: "إيقاف مؤقت",
-    resume: "استئناف",
-    speed: "السرعة",
-    thinking: "جاري البحث عن إجابة موثقة...",
-    sourcesTitle: "المصادر والمراجع:",
-    talkToPersonButton: "التحدث مع شخص",
-    refusalNotice: "لا يمكنني التحقق من ذلك من محتوى الدورة. يمكن لمرشد بشري مساعدتك مباشرة.",
-    offlineNotice: "أنت غير متصل بالإنترنت. يتم عرض الإجابات المحفوظة.",
-    offlineUnavailable: "يتطلب هذا الإجراء اتصالاً بالإنترنت. يرجى إعادة الاتصال والمحاولة.",
-    supportTitle: "تفضيلات الدعم الخاصة",
-    supportZeroProofBanner: "لا يُطلب أي تشخيص أو وثائق طبية أو إثبات هوية. جميع التفضيلات سرية ومصرح بها ذاتياً.",
-    needExtraTime: "وقت استجابة إضافي للاختبارات والأسئلة",
-    needScreenReader: "مواد متوافقة مع قارئ الشاشة ونصوص بديلة",
+    simpleModeDesc: "اشرح بجمل أقصر وأبسط",
+    supportNeedsTitle: "تفضيلات الدعم",
+    supportZeroProof: "لا يُطلب أي تشخيص أو وثائق طبية. جميع التفضيلات سرية.",
+    needExtraTime: "وقت استجابة إضافي للاختبارات",
+    needScreenReader: "مواد متوافقة مع قارئ الشاشة",
     needWritten: "أسئلة وتعليمات مكتوبة",
-    needStepFree: "تسهيلات الوصول للكراسي المتحركة",
-    needQuiet: "مساحة هادئة مع مشتتات حسية منخفضة",
     needOther: "احتياجات دعم أخرى",
-    otherPlaceholder: "حدد أي تسهيلات وصول أخرى تحتاجها...",
-    contactModeTitle: "طريقة التواصل المفضلة للمساعدة المباشرة:",
+    otherPlaceholder: "حدد أي احتياجات أخرى...",
+    contactModeLabel: "طريقة التواصل المفضلة للمساعدة:",
     modeText: "محادثة نصية",
     modeVoice: "مكالمة صوتية",
     modeVideo: "مكالمة فيديو",
     modeTelegram: "رسالة تيليجرام",
-    saveSupportButton: "حفظ تفضيلات الدعم",
-    supportSavedNotice: "تم حفظ تفضيلات الدعم بسرية.",
-    linkTitle: "ربط الحساب بدون عوائق",
-    linkZeroProofBanner: "لا يلزم رقم هوية وطنية أو رقم هاتف. اربط عبر الأجهزة باستخدام رمز مؤقت.",
-    generateCodeButton: "توليد رمز لمرة واحدة",
-    yourCodeIs: "الرمز الخاص بك المكون من 6 أرقام:",
-    codeExpiresNote: "أدخل هذا الرمز في بوت التيليجرام باستخدام /confirm خلال 10 دقائق.",
-    orEnterCode: "أو أدخل الرمز من تيليجرام:",
-    codePlaceholder: "رمز من 6 أرقام (مثال 123456)",
-    confirmCodeButton: "تأكيد الرمز",
-    linkSuccessNotice: "تم ربط الحساب بنجاح! تفضيلاتك متزامنة الآن.",
-    handoffTitle: "التواصل مع مرشد بشري",
-    handoffConsentBanner: "أنت تتصل بمرشد بشري عبر غرفة صوت وفيديو في Jitsi Meet. مشاركة الشاشة اختيارية بالكامل ولا يمكن بدؤها أو إيقافها إلا بواسطتك. المساعد لن يبدأ مشاركة الشاشة تلقائياً أبداً.",
-    handoffConsentCheck: "أوافق على التواصل مع مرشد بشري",
-    handoffReasonLabel: "ما الذي تحتاج إلى مساعدة فيه؟ (اختياري)",
-    handoffReasonPlaceholder: "مثال: أحتاج مساعدة في تمرين الوحدة الثانية...",
-    requestMentorButton: "طلب مساعدة بشرية",
-    requestingMentor: "جاري الاتصال بالمرشد...",
-    mentorReadyTitle: "غرفة المساعدة المباشرة جاهزة!",
-    joinRoomButton: "الانضمام لغرفة Jitsi ↗",
-    screenShareReminder: "تذكير: أنت تتحكم بالكامل في مشاركة الشاشة. يمكنك مغادرة الغرفة في أي وقت.",
-    leaveRoomButton: "مغادرة / إغلاق طلب المساعدة",
-    requestClosedNotice: "تم إغلاق طلب المساعدة المباشرة.",
+    saveSupportBtn: "حفظ التفضيلات",
+    supportSavedNotice: "تم حفظ التفضيلات بسرية.",
+    emptyWelcome: "مرحباً بك! اطرح أي سؤال حول الدورة التدريبية.",
+    suggestedTitle: "أسئلة مقترحة:",
+    suggestedQ1: "ماذا نتعلم في الوحدة الثانية؟",
+    suggestedQ2: "اشرح أساسيات خدمة العملاء",
+    suggestedQ3: "كيف أتواصل بفعالية مع العملاء؟",
+    inputPlaceholder: "اطرح سؤالاً حول هذه الدورة...",
+    sendButton: "إرسال",
+    micLabel: "الميكروفون (إدخال صوتي)",
+    recordingState: "جاري الاستماع... اضغط للإنهاء",
+    transcribingState: "جاري تحويل الصوت إلى نص...",
+    voicePreviewNotice: "تم تحويل الصوت إلى نص. يمكنك تعديله قبل الإرسال.",
+    micError: "الميكروفون غير متوفر.",
+    lookingInCourse: "جاري البحث في محتوى الدورة...",
+    answerHeading: "الإجابة",
+    listenButton: "استماع",
+    pauseButton: "إيقاف مؤقت",
+    makeSimplerButton: "تبسيط الشرح",
+    sourcesTitle: "مصادر الدورة:",
+    talkToPersonButton: "التحدث مع شخص",
+    continueOnTelegram: "المتابعة عبر تيليجرام",
+    continueOnTelegramAria: "المتابعة عبر تيليجرام (يفتح تيليجرام)",
+    telegramPrivacyNotice: "سيتلقى تيليجرام أسئلتك وإجاباتها.",
+    telegramConnected: "تم ربط تيليجرام",
+    connectedToTelegram: "متصل عبر تيليجرام",
+    disconnectTelegram: "قطع الاتصال",
+    tryAnotherQuestion: "جرب سؤالاً آخر",
+    notVerifiedNotice: "لا يمكنني التحقق من ذلك من محتوى الدورة. يمكن لمرشد بشري مساعدتك مباشرة.",
+    offlineBanner: "أنت غير متصل بالإنترنت.",
+    savedOnPhoneNotice: "تم الحفظ على الهاتف. سيتم الإرسال فور اتصالك بالإنترنت.",
+    serverErrorNotice: "تعذر الاتصال بالمساعد. يرجى التحقق من اتصالك والمحاولة لاحقاً.",
+    handoffReadyTitle: "غرفة المساعدة المباشرة جاهزة",
+    joinRoomButton: "الانضمام للغرفة ↗",
+    leaveRoomButton: "إغلاق الجلسة",
+    androidFallbackNote: "ملاحظة أندرويد: مشاركة الشاشة عبر المتصفح غير مدعومة على متصفح Chrome لنظام أندرويد.",
   },
 };
 
 const STYLES = `
   :host {
-    --b-font: system-ui, -apple-system, "Noto Sans Ethiopic", "Nyala", "Abyssinica SIL", sans-serif;
-    --b-bg: #ffffff;
-    --b-text: #0f172a;
+    --b-font: var(--bs-body-font-family, system-ui, -apple-system, "Noto Sans Ethiopic", "Nyala", sans-serif);
+    --b-bg: var(--bs-body-bg, #ffffff);
+    --b-text: var(--bs-body-color, #0f172a);
     --b-text-muted: #475569;
     --b-border: #cbd5e1;
-    --b-primary: #1d4ed8;
+    --b-primary: var(--bs-primary, #1d4ed8);
     --b-primary-hover: #1e40af;
     --b-primary-contrast: #ffffff;
     --b-surface: #f8fafc;
     --b-surface-alt: #f1f5f9;
-    --b-accent: #0284c7;
     --b-focus: #2563eb;
     --b-radius: 0.75rem;
-    --b-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    --b-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
     font-family: var(--b-font);
     font-size: 1rem;
     line-height: 1.5;
@@ -403,11 +391,27 @@ const STYLES = `
     color: var(--b-text);
   }
 
+  :host([data-size="smaller"]) { font-size: 0.875rem; }
+  :host([data-size="normal"]) { font-size: 1rem; }
+  :host([data-size="larger"]) { font-size: 1.15rem; }
+
+  :host([data-contrast="high"]) {
+    --b-bg: #ffffff;
+    --b-text: #000000;
+    --b-text-muted: #111111;
+    --b-border: #000000;
+    --b-primary: #000080;
+    --b-primary-hover: #000050;
+    --b-primary-contrast: #ffffff;
+    --b-surface: #ffffff;
+    --b-surface-alt: #f0f0f0;
+    --b-focus: #000000;
+  }
+
   *, *::before, *::after {
     box-sizing: inherit;
   }
 
-  /* High-Contrast / Forced-Colors Mode (WCAG 2.2 AA) */
   @media (forced-colors: active) {
     :host {
       --b-bg: Canvas;
@@ -420,12 +424,11 @@ const STYLES = `
       --b-surface-alt: Canvas;
       --b-focus: Highlight;
     }
-    button, input, textarea, select {
+    button, input, textarea, select, .btn {
       border: 2px solid ButtonText !important;
     }
   }
 
-  /* Reduced Motion */
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation: none !important;
@@ -433,11 +436,7 @@ const STYLES = `
     }
   }
 
-  [hidden] {
-    display: none !important;
-  }
-
-  /* Target Size: Min 44x44px for touch targets */
+  /* Touch Targets: Min 44x44px (2.75rem) */
   button, .btn {
     min-height: 2.75rem;
     min-width: 2.75rem;
@@ -455,6 +454,7 @@ const STYLES = `
     justify-content: center;
     gap: 0.375rem;
     text-decoration: none;
+    line-height: 1.2;
   }
 
   button:hover, .btn:hover {
@@ -471,9 +471,14 @@ const STYLES = `
     color: var(--b-primary-contrast);
     border-color: var(--b-primary);
   }
-
   .btn-primary:hover {
     background: var(--b-primary-hover);
+  }
+
+  .btn-secondary {
+    background: var(--b-surface-alt);
+    color: var(--b-text);
+    border-color: var(--b-border);
   }
 
   .btn-danger {
@@ -482,32 +487,29 @@ const STYLES = `
     border-color: #dc2626;
   }
 
-  .btn-danger:hover {
-    background: #b91c1c;
-  }
-
-  /* Launcher Floating Button */
+  /* Floating Launcher Button */
   .launcher {
     position: fixed;
     inset: auto 1.25rem 1.25rem auto;
-    z-index: 2147483647;
+    z-index: 2147483640;
     background: var(--b-primary);
     color: var(--b-primary-contrast);
     border: 2px solid var(--b-primary-contrast);
     border-radius: 2rem;
     padding: 0.625rem 1.25rem;
     box-shadow: var(--b-shadow);
-    font-size: 1rem;
     font-weight: 700;
-    min-height: 3rem;
+  }
+  .launcher:hover {
+    background: var(--b-primary-hover);
   }
 
-  /* Dialog Panel - 200% Zoom safe: uses min() and responsive padding */
+  /* Open Panel */
   .panel {
     position: fixed;
     inset: auto 1rem 5rem auto;
-    width: min(28rem, calc(100vw - 2rem));
-    height: min(42rem, calc(100vh - 6.5rem));
+    width: min(28rem, calc(100vw - 1.5rem));
+    height: min(44rem, calc(100vh - 6.5rem));
     max-height: calc(100vh - 6.5rem);
     display: flex;
     flex-direction: column;
@@ -516,13 +518,13 @@ const STYLES = `
     border: 2px solid var(--b-border);
     border-radius: var(--b-radius);
     box-shadow: var(--b-shadow);
-    z-index: 2147483647;
+    z-index: 2147483640;
     overflow: hidden;
   }
 
-  /* Dialog Header */
+  /* Header */
   .header {
-    padding: 0.75rem 1rem;
+    padding: 0.625rem 0.875rem;
     border-bottom: 1px solid var(--b-border);
     background: var(--b-surface);
     display: flex;
@@ -539,17 +541,8 @@ const STYLES = `
 
   .title {
     margin: 0;
-    font-size: 1.125rem;
+    font-size: 1.0625rem;
     font-weight: 700;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .subtitle {
-    margin: 0;
-    font-size: 0.75rem;
-    color: var(--b-text-muted);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -561,122 +554,108 @@ const STYLES = `
     gap: 0.375rem;
   }
 
-  /* Nav Tabs */
-  .nav-tabs {
-    display: flex;
-    border-bottom: 1px solid var(--b-border);
-    background: var(--b-surface-alt);
-    flex-shrink: 0;
-    overflow-x: auto;
-  }
-
-  .tab-btn {
-    flex: 1;
+  .lang-toggle-btn {
+    font-size: 0.875rem;
+    padding: 0.375rem 0.625rem;
     min-height: 2.75rem;
-    border: none;
-    border-bottom: 3px solid transparent;
-    border-radius: 0;
-    background: transparent;
+  }
+
+  .lang-toggle-btn[aria-pressed="true"] {
+    background: var(--b-primary);
+    color: var(--b-primary-contrast);
+    border-color: var(--b-primary);
+  }
+
+  /* Offline Bar */
+  .offline-bar {
+    background: #854d0e;
+    color: #fef9c3;
     font-size: 0.8125rem;
+    padding: 0.375rem 0.75rem;
+    text-align: center;
     font-weight: 600;
-    padding: 0.5rem 0.25rem;
-    white-space: nowrap;
-    color: var(--b-text-muted);
   }
 
-  .tab-btn[aria-selected="true"] {
-    border-bottom-color: var(--b-primary);
-    color: var(--b-primary);
-    background: var(--b-bg);
-    font-weight: 700;
-  }
-
-  /* Tab Panels */
-  .tab-panel {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    min-height: 0;
-  }
-
-  /* Chat Log - polite live region */
+  /* Body / Message List */
   .chat-log {
     flex: 1;
     overflow-y: auto;
     padding: 0.875rem;
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.875rem;
     background: var(--b-bg);
+    min-height: 0;
   }
 
-  .message {
-    max-width: 88%;
+  .empty-state {
+    text-align: center;
+    padding: 1.5rem 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .suggested-questions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    text-align: left;
+  }
+
+  .btn-suggested {
+    text-align: left;
+    justify-content: flex-start;
+    background: var(--b-surface-alt);
+    border-color: var(--b-border);
+    font-weight: 500;
     padding: 0.625rem 0.875rem;
-    border-radius: 0.75rem;
-    font-size: 0.9375rem;
-    line-height: 1.45;
-    word-break: break-word;
+    line-height: 1.35;
+  }
+  .btn-suggested:hover {
+    background: var(--b-surface);
+    border-color: var(--b-primary);
+    color: var(--b-primary);
   }
 
-  .message-learner {
+  /* Message items */
+  .msg-row {
+    display: flex;
+    flex-direction: column;
+    max-width: 90%;
+  }
+
+  .msg-learner {
     align-self: flex-end;
     background: var(--b-primary);
     color: var(--b-primary-contrast);
-    border-bottom-right-radius: 0.125rem;
+    padding: 0.625rem 0.875rem;
+    border-radius: 0.75rem 0.75rem 0.125rem 0.75rem;
   }
 
-  .message-assistant {
+  .msg-assistant {
     align-self: flex-start;
     background: var(--b-surface-alt);
     color: var(--b-text);
+    padding: 0.75rem 0.875rem;
+    border-radius: 0.75rem 0.75rem 0.75rem 0.125rem;
     border: 1px solid var(--b-border);
-    border-bottom-left-radius: 0.125rem;
   }
 
-  .message-text {
-    margin: 0 0 0.5rem 0;
-  }
-  .message-text:last-child {
-    margin-bottom: 0;
-  }
-
-  /* Citations */
-  .citations {
-    margin-top: 0.5rem;
-    padding-top: 0.5rem;
-    border-top: 1px solid var(--b-border);
-    font-size: 0.8125rem;
-  }
-
-  .citations-title {
+  .answer-heading {
+    margin: 0 0 0.375rem 0;
+    font-size: 0.9375rem;
     font-weight: 700;
-    margin-bottom: 0.25rem;
-    color: var(--b-text-muted);
-  }
-
-  .citation-link {
-    display: block;
-    margin-bottom: 0.25rem;
     color: var(--b-primary);
-    text-decoration: underline;
-    word-break: break-all;
   }
 
-  /* Confidence / Refusal Box */
-  .refusal-box {
-    margin-top: 0.5rem;
-    padding: 0.5rem;
-    background: #fef2f2;
-    border: 1px solid #fecaca;
-    border-radius: 0.375rem;
-    font-size: 0.875rem;
-    color: #991b1b;
+  .answer-text {
+    margin: 0 0 0.5rem 0;
+    word-break: break-word;
   }
 
-  /* Audio Controls Row */
-  .audio-controls {
+  .answer-actions {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -686,19 +665,54 @@ const STYLES = `
     flex-wrap: wrap;
   }
 
-  .speed-select {
+  .answer-actions button {
     font-size: 0.8125rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.375rem;
-    border: 1px solid var(--b-border);
-    background: var(--b-surface);
-    color: var(--b-text);
-    min-height: 2rem;
+    min-height: 2.25rem;
+    padding: 0.25rem 0.625rem;
   }
 
-  /* Chat Input Area */
-  .chat-footer {
-    padding: 0.75rem;
+  .sources-box {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--b-border);
+    font-size: 0.8125rem;
+  }
+
+  .sources-title {
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    color: var(--b-text-muted);
+  }
+
+  .source-link {
+    display: block;
+    color: var(--b-primary);
+    text-decoration: underline;
+    margin-bottom: 0.25rem;
+    word-break: break-all;
+  }
+
+  .not-verified-box {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 0.5rem;
+    color: #991b1b;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .live-status-indicator {
+    padding: 0.5rem 0.875rem;
+    font-style: italic;
+    color: var(--b-text-muted);
+  }
+
+  /* Footer (Always Visible) */
+  .footer {
+    padding: 0.625rem 0.75rem;
     border-top: 1px solid var(--b-border);
     background: var(--b-surface);
     display: flex;
@@ -707,21 +721,13 @@ const STYLES = `
     flex-shrink: 0;
   }
 
-  .simple-mode-row {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.8125rem;
-    color: var(--b-text-muted);
-  }
-
-  .chat-input-row {
+  .input-row {
     display: flex;
     align-items: center;
     gap: 0.375rem;
   }
 
-  .chat-input {
+  .text-input {
     flex: 1;
     min-height: 2.75rem;
     padding: 0.5rem 0.75rem;
@@ -737,182 +743,215 @@ const STYLES = `
     background: #ef4444;
     color: #ffffff;
     border-color: #ef4444;
-    animation: pulse 1.5s infinite;
   }
 
-  @keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.08); }
-    100% { transform: scale(1); }
+  .footer-actions-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.375rem;
   }
 
-  /* Form & Settings Panels */
-  .scroll-body {
-    flex: 1;
-    overflow-y: auto;
+  .btn-footer {
+    font-size: 0.8125rem;
+    padding: 0.5rem 0.375rem;
+    text-align: center;
+  }
+
+  .telegram-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .telegram-privacy-note {
+    font-size: 0.6875rem;
+    color: var(--b-text-muted);
+    text-align: center;
+    line-height: 1.25;
+  }
+
+  /* Settings Modal Dialog */
+  .settings-dialog {
+    position: absolute;
+    inset: 0;
+    background: var(--b-bg);
+    color: var(--b-text);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
     padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    overflow-y: auto;
   }
 
-  .banner {
-    padding: 0.75rem;
-    border-radius: 0.5rem;
+  .settings-dialog[hidden] {
+    display: none !important;
+  }
+
+  .settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--b-border);
+    padding-bottom: 0.5rem;
+  }
+
+  .settings-section {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .settings-label {
+    font-weight: 700;
     font-size: 0.875rem;
-    line-height: 1.4;
-    border: 1px solid var(--b-border);
-    background: var(--b-surface-alt);
   }
 
-  .banner-info {
-    border-color: #bfdbfe;
-    background: #eff6ff;
-    color: #1e40af;
-  }
-
-  .banner-warning {
-    border-color: #fef08a;
-    background: #fefce8;
-    color: #854d0e;
-  }
-
-  .checkbox-group {
+  .size-btn-group {
     display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.375rem;
   }
 
-  .checkbox-label {
+  .size-btn-group button {
+    flex: 1;
+  }
+
+  .size-btn-group button[aria-pressed="true"] {
+    background: var(--b-primary);
+    color: var(--b-primary-contrast);
+    border-color: var(--b-primary);
+  }
+
+  .checkbox-row {
     display: flex;
-    align-items: flex-start;
-    gap: 0.625rem;
-    font-size: 0.9375rem;
+    align-items: center;
+    gap: 0.5rem;
     cursor: pointer;
   }
-
-  .checkbox-label input[type="checkbox"],
-  .checkbox-label input[type="radio"] {
-    margin-top: 0.25rem;
+  .checkbox-row input[type="checkbox"] {
     width: 1.25rem;
     height: 1.25rem;
     accent-color: var(--b-primary);
   }
-
-  .code-display {
-    font-family: monospace;
-    font-size: 2rem;
-    letter-spacing: 0.35rem;
-    text-align: center;
-    padding: 1rem;
-    background: var(--b-surface-alt);
-    border: 2px dashed var(--b-primary);
-    border-radius: 0.5rem;
-    font-weight: 700;
-    color: var(--b-primary);
-  }
-
-  .status-announcement {
-    padding: 0.5rem 0.75rem;
-    border-radius: 0.375rem;
-    font-size: 0.875rem;
-    background: #f0fdf4;
-    color: #166534;
-    border: 1px solid #bbf7d0;
-  }
-
-  /* Offline indicator */
-  .offline-bar {
-    background: #78350f;
-    color: #fef3c7;
-    font-size: 0.75rem;
-    padding: 0.25rem 0.75rem;
-    text-align: center;
-    flex-shrink: 0;
-  }
 `;
 
 export class BridgeAssistant extends HTMLElement {
-  private activeTab: "chat" | "support" | "link" | "handoff" = "chat";
-  private previousFocus: HTMLElement | null = null;
-  private currentLang: SupportedLanguage = "en";
-  private simpleMode = false;
-  private isRecording = false;
   private isOpen = false;
+  private currentLang: SupportedLanguage = "en";
+  private textSize: "smaller" | "normal" | "larger" = "normal";
+  private highContrast = false;
+  private simpleMode = false;
+  private isOffline = !navigator.onLine;
 
   private isThinking = false;
+  private isRecording = false;
   private mediaRecorder: MediaRecorder | null = null;
   private audioChunks: Blob[] = [];
   private activeAudio: HTMLAudioElement | null = null;
-  private messages: ChatMessage[] = [];
-  private isOffline = !navigator.onLine;
 
+  private messages: ChatMessage[] = [];
+  private sessionId = `sess_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+
+  // Telegram link state
+  private telegramToken: string | null = null;
+  private telegramDeepLink: string = "https://t.me/savannah_assistant3_bot";
+  private isTelegramLinked = false;
+  private telegramPollTimer: number | null = null;
+
+  // Settings dialog visibility
+  private isSettingsOpen = false;
+
+  // Active Handoff state
+  private activeHandoff: { id: string; room_url: string } | null = null;
+
+  // Support needs
   private supportNeeds: SupportNeedsData = {
     needs: ["written_instructions"],
     other_text: "",
     preferred_contact_mode: "text",
   };
 
-  private activeHandoff: { id: string; room_url: string; status: string } | null = null;
-  private currentLinkCode: { code: string; expires_at: string } | null = null;
+  private previousFocus: HTMLElement | null = null;
 
-  // Attributes
+  // Attributes: supports both guide plain attributes (lang, api, content) and data-*
   get apiBase(): string {
-    return this.getAttribute("data-api") || "http://localhost:8000";
+    return this.getAttribute("api") || this.getAttribute("data-api") || "http://localhost:8000";
   }
 
   get courseId(): string {
-    return this.getAttribute("data-course") || "course_demo";
+    return this.getAttribute("content") || this.getAttribute("data-course") || "course_demo";
   }
 
-  get widgetToken(): string | null {
-    return this.getAttribute("data-token");
+  static get observedAttributes(): string[] {
+    return ["lang", "data-lang", "api", "data-api", "content", "data-course"];
+  }
+
+  attributeChangedCallback(name: string, oldValue: string, newValue: string): void {
+    if (oldValue === newValue) return;
+    if ((name === "lang" || name === "data-lang") && newValue in I18N) {
+      this.currentLang = newValue as SupportedLanguage;
+      if (this.shadowRoot) {
+        this.render();
+      }
+    }
   }
 
   connectedCallback(): void {
     if (this.shadowRoot) return;
 
-    // Restore cached language or respect data-lang
-    const attrLang = this.getAttribute("data-lang") as SupportedLanguage | null;
+    const attrLang = (this.getAttribute("lang") || this.getAttribute("data-lang")) as SupportedLanguage | null;
     const cachedLang = sessionStorage.getItem("savanna_bridge_lang") as SupportedLanguage | null;
-    if (attrLang && (attrLang in I18N)) {
+    if (attrLang && attrLang in I18N) {
       this.currentLang = attrLang;
-    } else if (cachedLang && (cachedLang in I18N)) {
+    } else if (cachedLang && cachedLang in I18N) {
       this.currentLang = cachedLang;
     }
 
-    // Restore chat history from sessionStorage
-    this.restoreCachedChat();
+    this.restoreState();
 
     this.attachShadow({ mode: "open" });
     this.render();
-    this.setupListeners();
     this.setupNetworkMonitor();
 
-    // Fetch initial support needs in background
+    // Fetch initial Telegram start link and support needs
+    this.fetchTelegramStartLink();
     this.fetchSupportNeeds();
   }
 
+  disconnectedCallback(): void {
+    if (this.telegramPollTimer) {
+      window.clearInterval(this.telegramPollTimer);
+      this.telegramPollTimer = null;
+    }
+  }
+
   private t(key: string): string {
-    const langDict = I18N[this.currentLang] || I18N.en;
-    return langDict[key] || I18N.en[key] || key;
+    const dict = I18N[this.currentLang] || I18N.en;
+    return dict[key] || I18N.en[key] || key;
+  }
+
+  private announce(text: string): void {
+    const liveRegion = this.shadowRoot?.querySelector("#live-announcer");
+    if (liveRegion) {
+      liveRegion.textContent = "";
+      setTimeout(() => {
+        liveRegion.textContent = text;
+      }, 50);
+    }
   }
 
   private setLanguage(lang: SupportedLanguage): void {
     this.currentLang = lang;
     sessionStorage.setItem("savanna_bridge_lang", lang);
     this.render();
-    this.setupListeners();
-    const dialog = this.shadowRoot?.querySelector<HTMLElement>("[role=dialog]");
-    if (dialog && this.isOpen) {
-      dialog.focus();
-    }
   }
 
   private setupNetworkMonitor(): void {
     window.addEventListener("online", () => {
       this.isOffline = false;
       this.render();
+      this.flushOfflineQueue();
     });
     window.addEventListener("offline", () => {
       this.isOffline = true;
@@ -920,40 +959,158 @@ export class BridgeAssistant extends HTMLElement {
     });
   }
 
-  private restoreCachedChat(): void {
+  private async flushOfflineQueue(): Promise<void> {
     try {
-      const saved = sessionStorage.getItem("savanna_bridge_chat_cache");
-      if (saved) {
-        this.messages = JSON.parse(saved);
+      const queueRaw = localStorage.getItem("db_assistant_offline_queue");
+      if (!queueRaw) return;
+      const queue = JSON.parse(queueRaw);
+      localStorage.removeItem("db_assistant_offline_queue");
+      for (const item of queue) {
+        if (item && item.question) {
+          await this.askQuestion(item.question);
+        }
       }
-    } catch {
-      this.messages = [];
+    } catch (e) {
+      console.warn("Could not flush offline queue", e);
     }
   }
 
-  private saveChatCache(): void {
+  private restoreState(): void {
     try {
-      sessionStorage.setItem("savanna_bridge_chat_cache", JSON.stringify(this.messages.slice(-20)));
+      const savedMessages = sessionStorage.getItem("savanna_bridge_chat_history");
+      if (savedMessages) this.messages = JSON.parse(savedMessages);
+
+      const savedContrast = localStorage.getItem("savanna_bridge_contrast");
+      if (savedContrast) this.highContrast = savedContrast === "high";
+
+      const savedSize = localStorage.getItem("savanna_bridge_text_size") as "smaller" | "normal" | "larger" | null;
+      if (savedSize) this.textSize = savedSize;
     } catch {
-      // Ignore sessionStorage quotas
+      // Ignore storage errors
     }
   }
 
-  private getAuthHeaders(): HeadersInit {
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-    };
-    if (this.widgetToken) {
-      headers["X-Widget-Token"] = this.widgetToken;
+  private saveChatState(): void {
+    try {
+      sessionStorage.setItem("savanna_bridge_chat_history", JSON.stringify(this.messages.slice(-25)));
+    } catch {
+      // Ignore
     }
-    return headers;
   }
+
+  // --- Telegram Link Methods ---
+
+  private async fetchTelegramStartLink(): Promise<void> {
+    try {
+      const res = await fetch(`${this.apiBase}/api/v1/link/start`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          session_id: this.sessionId,
+          channel: "web",
+          learner_reference: `learner_${this.sessionId}`,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        this.telegramToken = data.token;
+        this.telegramDeepLink = data.deep_link;
+        this.updateTelegramLinkUI();
+      }
+    } catch (err) {
+      console.warn("Could not fetch telegram link start:", err);
+    }
+  }
+
+  private onTelegramLinkClicked(): void {
+    if (this.isTelegramLinked || !this.telegramToken) return;
+
+    if (this.telegramPollTimer) {
+      window.clearInterval(this.telegramPollTimer);
+    }
+
+    let pollCount = 0;
+    const maxPolls = 300; // 10 minutes (every 2s)
+
+    this.telegramPollTimer = window.setInterval(async () => {
+      pollCount++;
+      if (pollCount > maxPolls) {
+        if (this.telegramPollTimer) window.clearInterval(this.telegramPollTimer);
+        this.telegramPollTimer = null;
+        return;
+      }
+
+      try {
+        const res = await fetch(`${this.apiBase}/api/v1/link/status?token=${encodeURIComponent(this.telegramToken!)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.linked) {
+            if (this.telegramPollTimer) window.clearInterval(this.telegramPollTimer);
+            this.telegramPollTimer = null;
+            this.isTelegramLinked = true;
+            this.announce(this.t("telegramConnected"));
+            this.updateTelegramLinkUI();
+          }
+        }
+      } catch (err) {
+        console.warn("Telegram status polling error:", err);
+      }
+    }, 2000);
+  }
+
+  private async disconnectTelegram(): Promise<void> {
+    try {
+      await fetch(`${this.apiBase}/api/v1/link/disconnect`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          session_id: this.sessionId,
+          channel: "telegram",
+        }),
+      });
+    } catch {
+      // Ignore
+    }
+    this.isTelegramLinked = false;
+    await this.fetchTelegramStartLink();
+    this.updateTelegramLinkUI();
+  }
+
+  private updateTelegramLinkUI(): void {
+    const container = this.shadowRoot?.querySelector("#telegram-container");
+    if (!container) return;
+
+    if (this.isTelegramLinked) {
+      container.innerHTML = `
+        <div style="display:flex; align-items:center; gap:0.375rem; width:100%;">
+          <span style="font-size:0.8125rem; font-weight:600; color:#166534; flex:1;">
+            ✓ ${this.t("connectedToTelegram")}
+          </span>
+          <button type="button" class="btn btn-secondary" id="btn-disconnect-tg" style="font-size:0.75rem; min-height:2.25rem; padding:0.25rem 0.5rem;">
+            ${this.t("disconnectTelegram")}
+          </button>
+        </div>
+        <div class="telegram-privacy-note">${this.t("telegramPrivacyNotice")}</div>
+      `;
+      container.querySelector("#btn-disconnect-tg")?.addEventListener("click", () => this.disconnectTelegram());
+    } else {
+      container.innerHTML = `
+        <a href="${this.telegramDeepLink}" target="_blank" rel="noopener noreferrer" 
+           class="btn btn-secondary btn-footer" id="tg-deep-link" 
+           aria-label="${this.t("continueOnTelegramAria")}">
+          ${this.t("continueOnTelegram")}
+        </a>
+        <div class="telegram-privacy-note">${this.t("telegramPrivacyNotice")}</div>
+      `;
+      container.querySelector("#tg-deep-link")?.addEventListener("click", () => this.onTelegramLinkClicked());
+    }
+  }
+
+  // --- Support Needs API ---
 
   private async fetchSupportNeeds(): Promise<void> {
     try {
-      const res = await fetch(`${this.apiBase}/support-needs`, {
-        headers: this.getAuthHeaders(),
-      });
+      const res = await fetch(`${this.apiBase}/api/v1/support-needs`);
       if (res.ok) {
         const data = await res.json();
         this.supportNeeds = {
@@ -963,14 +1120,40 @@ export class BridgeAssistant extends HTMLElement {
         };
       }
     } catch {
-      // Use defaults if API is unavailable
+      // Ignore
     }
   }
 
-  // Voice Input Implementation
+  private async saveSupportNeeds(needs: string[], otherText: string, contactMode: "text" | "voice" | "video" | "telegram"): Promise<void> {
+    this.supportNeeds = {
+      needs,
+      other_text: otherText,
+      preferred_contact_mode: contactMode,
+    };
+    try {
+      const res = await fetch(`${this.apiBase}/api/v1/support-needs`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(this.supportNeeds),
+      });
+      const noticeEl = this.shadowRoot?.querySelector("#support-saved-notice");
+      if (noticeEl) {
+        noticeEl.removeAttribute("hidden");
+        setTimeout(() => noticeEl.setAttribute("hidden", "true"), 3500);
+      }
+      if (!res.ok) {
+        console.warn("PUT /support-needs failed", res.status);
+      }
+    } catch (e) {
+      console.warn("Save support needs error:", e);
+    }
+  }
+
+  // --- Voice Input ---
+
   private async toggleVoiceInput(inputEl: HTMLInputElement): Promise<void> {
     if (this.isRecording) {
-      this.stopVoiceRecording(inputEl);
+      this.stopVoiceRecording();
     } else {
       await this.startVoiceRecording(inputEl);
     }
@@ -981,7 +1164,6 @@ export class BridgeAssistant extends HTMLElement {
       alert(this.t("micError"));
       return;
     }
-
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       this.audioChunks = [];
@@ -991,36 +1173,34 @@ export class BridgeAssistant extends HTMLElement {
           ? "audio/ogg"
           : "audio/wav";
 
-      this.mediaRecorder = new MediaRecorder(stream, { credentials: false } as MediaRecorderOptions);
-      this.mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) this.audioChunks.push(event.data);
+      this.mediaRecorder = new MediaRecorder(stream);
+      this.mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) this.audioChunks.push(e.data);
       };
-
       this.mediaRecorder.onstop = async () => {
-        stream.getTracks().forEach((track) => track.stop());
-        const audioBlob = new Blob(this.audioChunks, { type: mimeType });
-        await this.sendAudioForTranscription(audioBlob, mimeType, inputEl);
+        stream.getTracks().forEach((t) => t.stop());
+        const blob = new Blob(this.audioChunks, { type: mimeType });
+        await this.sendAudioForTranscription(blob, mimeType, inputEl);
       };
 
       this.mediaRecorder.start();
       this.isRecording = true;
-      this.updateVoiceButtonUI();
-    } catch (err) {
-      console.warn("Microphone access error:", err);
+      this.updateMicButtonUI();
+    } catch {
       alert(this.t("micError"));
     }
   }
 
-  private stopVoiceRecording(_inputEl: HTMLInputElement): void {
+  private stopVoiceRecording(): void {
     if (this.mediaRecorder && this.mediaRecorder.state !== "inactive") {
       this.mediaRecorder.stop();
     }
     this.isRecording = false;
-    this.updateVoiceButtonUI();
+    this.updateMicButtonUI();
   }
 
-  private updateVoiceButtonUI(): void {
-    const micBtn = this.shadowRoot?.querySelector<HTMLButtonElement>(".mic-btn");
+  private updateMicButtonUI(): void {
+    const micBtn = this.shadowRoot?.querySelector<HTMLButtonElement>("#mic-btn");
     if (!micBtn) return;
     if (this.isRecording) {
       micBtn.classList.add("recording");
@@ -1029,34 +1209,27 @@ export class BridgeAssistant extends HTMLElement {
     } else {
       micBtn.classList.remove("recording");
       micBtn.setAttribute("aria-pressed", "false");
-      micBtn.setAttribute("title", this.t("voiceInputLabel"));
+      micBtn.setAttribute("title", this.t("micLabel"));
     }
   }
 
-  private async sendAudioForTranscription(
-    blob: Blob,
-    mediaType: string,
-    inputEl: HTMLInputElement
-  ): Promise<void> {
-    const statusEl = this.shadowRoot?.querySelector<HTMLElement>(".transcription-status");
-    if (statusEl) statusEl.textContent = this.t("transcribingState");
-
+  private async sendAudioForTranscription(blob: Blob, mediaType: string, inputEl: HTMLInputElement): Promise<void> {
+    this.announce(this.t("transcribingState"));
     try {
       const reader = new FileReader();
       const base64Promise = new Promise<string>((resolve, reject) => {
         reader.onloadend = () => {
           const res = reader.result as string;
-          const base64 = res.split(",")[1] || "";
-          resolve(base64);
+          resolve(res.split(",")[1] || "");
         };
         reader.onerror = reject;
       });
       reader.readAsDataURL(blob);
       const audioBase64 = await base64Promise;
 
-      const res = await fetch(`${this.apiBase}/speech/transcribe`, {
+      const res = await fetch(`${this.apiBase}/api/v1/speech/transcribe`, {
         method: "POST",
-        headers: this.getAuthHeaders(),
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           audio_base64: audioBase64,
           media_type: mediaType,
@@ -1068,217 +1241,178 @@ export class BridgeAssistant extends HTMLElement {
       if (res.ok) {
         const data = await res.json();
         if (data.transcript) {
-          // Editable preview: populate input field so the learner can edit before sending!
           inputEl.value = (inputEl.value ? inputEl.value + " " : "") + data.transcript;
           inputEl.focus();
-          if (statusEl) statusEl.textContent = this.t("voicePreviewNotice");
+          this.announce(this.t("voicePreviewNotice"));
         }
-      } else {
-        if (statusEl) statusEl.textContent = "";
       }
     } catch {
-      if (statusEl) statusEl.textContent = "";
+      // Transcription fallback
     }
   }
 
-  // Read-Aloud TTS Implementation
-  private async handleReadAloud(msg: ChatMessage, speed = 1): Promise<void> {
+  // --- TTS Audio ---
+
+  private async handleListen(msg: ChatMessage): Promise<void> {
     if (this.activeAudio && !this.activeAudio.paused && msg.isAudioPlaying) {
       this.activeAudio.pause();
       msg.isAudioPlaying = false;
-      this.renderChatMessages();
+      this.renderMessages();
       return;
     }
 
-    // Call /speech/synthesize
     try {
-      const res = await fetch(`${this.apiBase}/speech/synthesize`, {
+      const res = await fetch(`${this.apiBase}/api/v1/speech/synthesize`, {
         method: "POST",
-        headers: this.getAuthHeaders(),
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           text: msg.text,
           language: this.currentLang,
-          speed: speed,
+          speed: 1.0,
         }),
       });
 
       if (res.ok) {
         const data = await res.json();
-        if (this.activeAudio) {
-          this.activeAudio.pause();
-        }
-        this.activeAudio = new Audio(data.audio_url);
-        this.activeAudio.playbackRate = speed;
+        if (this.activeAudio) this.activeAudio.pause();
+        const audioUrl = data.audio_url?.startsWith("http") ? data.audio_url : `${this.apiBase}${data.audio_url || ""}`;
+        this.activeAudio = new Audio(audioUrl);
         this.activeAudio.onended = () => {
           msg.isAudioPlaying = false;
-          this.renderChatMessages();
+          this.renderMessages();
         };
-        this.activeAudio.play().catch(() => {
-          // Fallback to Web Speech API
-          this.fallbackSpeechSynthesis(msg.text, speed);
-        });
+        this.activeAudio.play().catch(() => this.fallbackTTS(msg.text));
         msg.isAudioPlaying = true;
-        this.renderChatMessages();
+        this.renderMessages();
       } else {
-        this.fallbackSpeechSynthesis(msg.text, speed);
+        this.fallbackTTS(msg.text);
       }
     } catch {
-      this.fallbackSpeechSynthesis(msg.text, speed);
+      this.fallbackTTS(msg.text);
     }
   }
 
-  private fallbackSpeechSynthesis(text: string, speed = 1): void {
+  private fallbackTTS(text: string): void {
     if ("speechSynthesis" in window) {
       window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = speed;
-      utterance.lang = this.currentLang === "am" ? "am-ET" : "en-US";
-      window.speechSynthesis.speak(utterance);
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = this.currentLang === "am" ? "am-ET" : "en-US";
+      window.speechSynthesis.speak(u);
     }
   }
 
-  // Q&A with /ask
-  private async askQuestion(questionText: string): Promise<void> {
+  // --- Q&A / Ask ---
+
+  public async askQuestion(questionText: string, forceSimple = false): Promise<void> {
     const q = questionText.trim();
     if (!q || this.isThinking) return;
 
+    this.dispatchEvent(
+      new CustomEvent("db-assistant:question", {
+        bubbles: true,
+        composed: true,
+        detail: { text: q, language: this.currentLang },
+      })
+    );
+
     const learnerMsg: ChatMessage = {
-      id: `m_${Date.now()}_learner`,
+      id: `msg_${Date.now()}_learner`,
       sender: "learner",
       text: q,
     };
     this.messages.push(learnerMsg);
     this.isThinking = true;
-    this.renderChatMessages();
-
-    // Scroll chat to bottom
-    const chatLog = this.shadowRoot?.querySelector(".chat-log");
-    if (chatLog) chatLog.scrollTop = chatLog.scrollHeight;
+    this.announce(this.t("lookingInCourse"));
+    this.renderMessages();
 
     try {
-      const res = await fetch(`${this.apiBase}/ask`, {
+      let res = await fetch(`${this.apiBase}/api/v1/ask`, {
         method: "POST",
-        headers: this.getAuthHeaders(),
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           question: q,
           language: this.currentLang,
           course_id: this.courseId,
-          simple_mode: this.simpleMode,
+          simple_mode: forceSimple || this.simpleMode,
           channel: "web",
         }),
       });
+
+      if (!res.ok && res.status === 404) {
+        res = await fetch(`${this.apiBase}/ask`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            question: q,
+            language: this.currentLang,
+            course_id: this.courseId,
+            simple_mode: forceSimple || this.simpleMode,
+            channel: "web",
+          }),
+        });
+      }
 
       this.isThinking = false;
 
       if (res.ok) {
         const data = await res.json();
+        const isRefusal = !!data.offer_human || data.reason === "low_confidence";
         const assistantMsg: ChatMessage = {
-          id: `m_${Date.now()}_assistant`,
+          id: `msg_${Date.now()}_assistant`,
           sender: "assistant",
           text: data.answer,
+          heading: this.t("answerHeading"),
           citations: data.citations || [],
           offerHuman: data.offer_human,
-          reason: data.reason,
-          confidence: data.confidence,
+          isRefusal: isRefusal,
         };
         this.messages.push(assistantMsg);
-        this.saveChatCache();
+        this.saveChatState();
       } else {
-        const errData = await res.json().catch(() => ({}));
-        const errMsg = errData.error?.message || "An error occurred while fetching the answer.";
         this.messages.push({
-          id: `m_${Date.now()}_err`,
+          id: `msg_${Date.now()}_err`,
           sender: "assistant",
-          text: errMsg,
+          text: this.t("serverErrorNotice"),
           offerHuman: true,
         });
       }
     } catch {
       this.isThinking = false;
+      try {
+        const queue = JSON.parse(localStorage.getItem("db_assistant_offline_queue") || "[]");
+        queue.push({ question: q, language: this.currentLang, timestamp: Date.now() });
+        localStorage.setItem("db_assistant_offline_queue", JSON.stringify(queue));
+      } catch {
+        // Ignore
+      }
       this.messages.push({
-        id: `m_${Date.now()}_err`,
+        id: `msg_${Date.now()}_offline`,
         sender: "assistant",
-        text: this.t("offlineNotice"),
+        text: this.t("savedOnPhoneNotice"),
         offerHuman: true,
       });
     }
 
-    this.renderChatMessages();
-    if (chatLog) chatLog.scrollTop = chatLog.scrollHeight;
+    this.renderMessages();
   }
 
-  // Account Linking Methods
-  private async startAccountLink(): Promise<void> {
-    try {
-      const res = await fetch(`${this.apiBase}/link/start`, {
-        method: "POST",
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify({
-          session_id: `web_${Date.now()}`,
-          channel: "web",
-          learner_reference: "web_learner",
-        }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        this.currentLinkCode = {
-          code: data.code,
-          expires_at: data.expires_at,
-        };
-        this.renderTabContent();
-      }
-    } catch {
-      alert(this.t("offlineUnavailable"));
-    }
-  }
+  // --- Human Handoff ---
 
-  private async confirmAccountLink(code: string): Promise<void> {
-    try {
-      const res = await fetch(`${this.apiBase}/link/confirm`, {
-        method: "POST",
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify({
-          link_id: "link_web_user",
-          code: code.trim(),
-        }),
-      });
-      if (res.ok) {
-        const statusBox = this.shadowRoot?.querySelector(".link-status");
-        if (statusBox) {
-          statusBox.textContent = this.t("linkSuccessNotice");
-          statusBox.classList.remove("hidden");
-        }
-      } else {
-        alert("Invalid or expired code. Please verify and try again.");
-      }
-    } catch {
-      alert(this.t("offlineUnavailable"));
-    }
-  }
-
-  // Handoff & Human Mentor Methods
   private async requestHandoff(contextReason?: string): Promise<void> {
     if (this.isOffline) {
-      alert(this.t("offlineUnavailable"));
+      alert(this.t("offlineBanner"));
       return;
     }
 
-    const consentBox = this.shadowRoot?.querySelector<HTMLInputElement>("#handoff-consent");
-    if (consentBox && !consentBox.checked) {
-      alert("Please check the consent box to proceed.");
-      return;
-    }
-
-    const statusEl = this.shadowRoot?.querySelector(".handoff-status");
-    if (statusEl) statusEl.textContent = this.t("requestingMentor");
+    this.announce(this.t("lookingInCourse"));
 
     try {
-      const res = await fetch(`${this.apiBase}/handoff`, {
+      const res = await fetch(`${this.apiBase}/api/v1/escalations`, {
         method: "POST",
-        headers: this.getAuthHeaders(),
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           consent: true,
-          learner_ref: "learner_web_user",
+          learner_ref: `learner_${this.sessionId}`,
           card: {
             language: this.currentLang,
             context: contextReason || "Learner requested a human mentor from web assistant.",
@@ -1291,342 +1425,262 @@ export class BridgeAssistant extends HTMLElement {
 
       if (res.ok) {
         const data = await res.json();
+        const ticketId = data.ticketId || data.id || "ticket_01";
         this.activeHandoff = {
-          id: data.id,
-          room_url: data.room_url,
-          status: data.status,
+          id: ticketId,
+          room_url: data.room_url || "https://meet.jit.si/savanna-bridge-demo",
         };
-        this.renderTabContent();
+
+        this.dispatchEvent(
+          new CustomEvent("db-assistant:escalated", {
+            bubbles: true,
+            composed: true,
+            detail: { ticketId },
+          })
+        );
+
+        this.messages.push({
+          id: `msg_${Date.now()}_handoff`,
+          sender: "assistant",
+          text: `${this.t("handoffReadyTitle")}: ${this.activeHandoff.room_url}`,
+          heading: this.t("handoffReadyTitle"),
+          offerHuman: false,
+        });
+        this.renderMessages();
       } else {
-        alert("Could not create handoff request. Please try again.");
+        alert(this.t("serverErrorNotice"));
       }
     } catch {
-      alert(this.t("offlineUnavailable"));
+      alert(this.t("serverErrorNotice"));
     }
   }
 
-  private async closeHandoff(): Promise<void> {
-    if (!this.activeHandoff) return;
-    try {
-      await fetch(`${this.apiBase}/handoff/${this.activeHandoff.id}/close`, {
-        method: "POST",
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify({}),
-      });
-    } catch {
-      // Ignore
-    }
-    this.activeHandoff = null;
-    this.renderTabContent();
-  }
+  // --- Rendering ---
 
-  // Support Needs Save
-  private async saveSupportNeeds(needs: string[], otherText: string, contactMode: "text" | "voice" | "video" | "telegram"): Promise<void> {
-    this.supportNeeds = {
-      needs: needs,
-      other_text: otherText,
-      preferred_contact_mode: contactMode,
-    };
-
-    try {
-      const res = await fetch(`${this.apiBase}/support-needs`, {
-        method: "PUT",
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(this.supportNeeds),
-      });
-
-      const noticeEl = this.shadowRoot?.querySelector(".support-saved-notice");
-      if (noticeEl) {
-        noticeEl.removeAttribute("hidden");
-        setTimeout(() => noticeEl.setAttribute("hidden", "true"), 4000);
-      }
-      if (!res.ok) {
-        console.warn("PUT /support-needs returned status:", res.status);
-      }
-    } catch (err) {
-      console.warn("Failed saving support needs:", err);
-    }
-  }
-
-  // Render Methods
   private render(): void {
     if (!this.shadowRoot) return;
+
+    this.setAttribute("data-contrast", this.highContrast ? "high" : "normal");
+    this.setAttribute("data-size", this.textSize);
+    this.setAttribute("dir", this.currentLang === "ar" ? "rtl" : "ltr");
 
     this.shadowRoot.innerHTML = `
       <style>${STYLES}</style>
 
+      <!-- Live Announcer -->
+      <div id="live-announcer" class="sr-only" aria-live="polite" aria-atomic="true" style="position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); border:0;"></div>
+
       <!-- Floating Launcher Button -->
-      <button class="launcher" type="button" aria-expanded="${this.isOpen}" aria-controls="bridge-dialog" aria-haspopup="dialog">
+      <button class="launcher" type="button" id="launcher-btn" 
+              aria-expanded="${this.isOpen}" aria-controls="assistant-dialog" aria-haspopup="dialog">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
         </svg>
         <span>${this.t("launcherLabel")}</span>
       </button>
 
-      <!-- Accessible Dialog -->
-      <section id="bridge-dialog" class="panel" role="dialog" aria-modal="true" aria-labelledby="bridge-title" tabindex="-1" ${this.isOpen ? "" : "hidden"}>
+      <!-- Main Open Panel -->
+      <section id="assistant-dialog" class="panel" role="dialog" aria-modal="true" aria-labelledby="dialog-title" tabindex="-1" ${this.isOpen ? "" : "hidden"}>
         
-        <!-- Offline Warning Bar -->
-        ${this.isOffline ? `<div class="offline-bar" role="alert">${this.t("offlineNotice")}</div>` : ""}
+        ${this.isOffline ? `<div class="offline-bar" role="alert">${this.t("offlineBanner")}</div>` : ""}
 
         <!-- Header -->
         <header class="header">
           <div class="header-titles">
-            <h2 id="bridge-title" class="title">${this.t("appTitle")}</h2>
-            <p class="subtitle">${this.t("appSubtitle")}</p>
+            <h2 id="dialog-title" class="title">${this.t("appTitle")}</h2>
           </div>
           <div class="header-actions">
-            <!-- Language Toggle Button -->
-            <button class="lang-btn" type="button" aria-label="Switch Language / ቋንቋ ቀይር">
-              ${this.currentLang === "am" ? "English" : "አማርኛ"}
+            <!-- Language Switcher in native script -->
+            <button type="button" class="lang-toggle-btn" id="btn-lang-am" 
+                    aria-pressed="${this.currentLang === "am"}" aria-label="ቋንቋ ወደ አማርኛ ቀይር">
+              አማርኛ
+            </button>
+            <button type="button" class="lang-toggle-btn" id="btn-lang-en" 
+                    aria-pressed="${this.currentLang === "en"}" aria-label="Switch to English">
+              English
+            </button>
+            <!-- Settings Button -->
+            <button type="button" class="btn btn-secondary" id="btn-open-settings" aria-label="${this.t("settingsLabel")}" title="${this.t("settingsLabel")}" style="padding:0.4rem 0.6rem;">
+              ⚙️
             </button>
             <!-- Close Button -->
-            <button class="close-btn" type="button" aria-label="${this.t("closeLabel")}">
+            <button type="button" class="btn btn-secondary" id="btn-close-dialog" aria-label="${this.t("closeLabel")}" style="padding:0.4rem 0.6rem;">
               ✕
             </button>
           </div>
         </header>
 
-        <!-- Navigation Tabs -->
-        <nav class="nav-tabs" role="tablist" aria-label="Assistant Sections">
-          <button class="tab-btn" id="tab-chat" role="tab" aria-selected="${this.activeTab === "chat"}" aria-controls="panel-chat" type="button">
-            ${this.t("chatTab")}
-          </button>
-          <button class="tab-btn" id="tab-support" role="tab" aria-selected="${this.activeTab === "support"}" aria-controls="panel-support" type="button">
-            ${this.t("supportTab")}
-          </button>
-          <button class="tab-btn" id="tab-link" role="tab" aria-selected="${this.activeTab === "link"}" aria-controls="panel-link" type="button">
-            ${this.t("linkTab")}
-          </button>
-          <button class="tab-btn" id="tab-handoff" role="tab" aria-selected="${this.activeTab === "handoff"}" aria-controls="panel-handoff" type="button">
-            ${this.t("handoffTab")}
-          </button>
-        </nav>
-
-        <!-- Tab Panel Content Container -->
-        <div class="tab-panel-container" style="flex:1; display:flex; flex-direction:column; min-height:0;">
-          <!-- Dynamically populated by renderTabContent() -->
+        <!-- Body: Message List -->
+        <div class="chat-log" id="chat-log" role="log" aria-live="polite">
+          <!-- Populated by renderMessages() -->
         </div>
 
-      </section>
-    `;
+        <!-- Footer (Always Visible) -->
+        <footer class="footer">
+          <!-- Top Row: Input, Mic, Send -->
+          <form class="input-row" id="chat-form">
+            <input type="text" class="text-input" id="chat-input" 
+                   placeholder="${this.t("inputPlaceholder")}" 
+                   aria-label="${this.t("inputPlaceholder")}" 
+                   required autocomplete="off">
+            <button type="button" class="btn btn-secondary mic-btn" id="mic-btn" 
+                    aria-label="${this.t("micLabel")}" title="${this.t("micLabel")}">
+              🎤
+            </button>
+            <button type="submit" class="btn btn-primary" id="btn-send">
+              ${this.t("sendButton")}
+            </button>
+          </form>
 
-    this.renderTabContent();
-  }
+          <!-- Bottom Row: Talk to a person & Continue on Telegram -->
+          <div class="footer-actions-row">
+            <button type="button" class="btn btn-secondary btn-footer" id="btn-footer-handoff">
+              👤 ${this.t("talkToPersonButton")}
+            </button>
+            <div id="telegram-container" class="telegram-section">
+              <!-- Rendered by updateTelegramLinkUI() -->
+            </div>
+          </div>
+        </footer>
 
-  private renderTabContent(): void {
-    const container = this.shadowRoot?.querySelector(".tab-panel-container");
-    if (!container) return;
-
-    if (this.activeTab === "chat") {
-      container.innerHTML = `
-        <div id="panel-chat" class="tab-panel" role="tabpanel" aria-labelledby="tab-chat">
-          <!-- Chat Messages Live Region -->
-          <div class="chat-log" role="log" aria-live="polite" aria-relevant="additions text">
-            <!-- Populated by renderChatMessages() -->
+        <!-- Settings Dialog Modal Overlay -->
+        <div id="settings-dialog" class="settings-dialog" ${this.isSettingsOpen ? "" : "hidden"} role="region" aria-labelledby="settings-dialog-title">
+          <div class="settings-header">
+            <h3 id="settings-dialog-title" style="margin:0; font-size:1.125rem;">${this.t("settingsTitle")}</h3>
+            <button type="button" class="btn btn-secondary" id="btn-close-settings">
+              ${this.t("closeSettings")}
+            </button>
           </div>
 
-          <!-- Chat Input Footer -->
-          <footer class="chat-footer">
-            <div class="simple-mode-row">
-              <label style="display:flex; align-items:center; gap:0.375rem; cursor:pointer;" title="${this.t("simpleModeTitle")}">
-                <input type="checkbox" id="simple-mode-check" ${this.simpleMode ? "checked" : ""}>
-                <span>${this.t("simpleModeLabel")}</span>
-              </label>
-              <span class="transcription-status" style="margin-left:auto; font-size:0.75rem; color:var(--b-primary);" aria-live="polite"></span>
+          <!-- Text Size -->
+          <div class="settings-section">
+            <span class="settings-label">${this.t("textSizeLabel")}</span>
+            <div class="size-btn-group">
+              <button type="button" class="btn btn-secondary" id="btn-size-smaller" aria-pressed="${this.textSize === "smaller"}">
+                ${this.t("textSmaller")}
+              </button>
+              <button type="button" class="btn btn-secondary" id="btn-size-normal" aria-pressed="${this.textSize === "normal"}">
+                ${this.t("textNormal")}
+              </button>
+              <button type="button" class="btn btn-secondary" id="btn-size-larger" aria-pressed="${this.textSize === "larger"}">
+                ${this.t("textLarger")}
+              </button>
+            </div>
+          </div>
+
+          <!-- High Contrast -->
+          <div class="settings-section">
+            <label class="checkbox-row">
+              <input type="checkbox" id="chk-contrast" ${this.highContrast ? "checked" : ""}>
+              <span class="settings-label">${this.t("highContrastLabel")}</span>
+            </label>
+          </div>
+
+          <!-- Simple Mode -->
+          <div class="settings-section">
+            <label class="checkbox-row">
+              <input type="checkbox" id="chk-simple-mode" ${this.simpleMode ? "checked" : ""}>
+              <div>
+                <span class="settings-label">${this.t("simpleModeLabel")}</span>
+                <div style="font-size:0.75rem; color:var(--b-text-muted);">${this.t("simpleModeDesc")}</div>
+              </div>
+            </label>
+          </div>
+
+          <!-- Support Needs -->
+          <div class="settings-section" style="border-top:1px solid var(--b-border); padding-top:0.75rem;">
+            <span class="settings-label">${this.t("supportNeedsTitle")}</span>
+            <div style="font-size:0.75rem; color:var(--b-text-muted); margin-bottom:0.5rem;">
+              ${this.t("supportZeroProof")}
             </div>
 
-            <form class="chat-input-row" id="chat-form">
-              <input type="text" class="chat-input" id="chat-text-input" 
-                placeholder="${this.t("inputPlaceholder")}" 
-                aria-label="${this.t("inputPlaceholder")}" 
-                required autocomplete="off">
-              
-              <!-- Voice Input Button (Mic) -->
-              <button type="button" class="mic-btn" id="mic-btn" 
-                aria-label="${this.t("voiceInputLabel")}" 
-                aria-pressed="${this.isRecording}" 
-                title="${this.t("voiceInputLabel")}">
-                🎤
-              </button>
-
-              <!-- Send Button -->
-              <button type="submit" class="btn btn-primary" id="send-btn" aria-label="${this.t("sendButton")}">
-                ${this.t("sendButton")}
-              </button>
-            </form>
-          </footer>
-        </div>
-      `;
-      this.renderChatMessages();
-      this.setupChatTabListeners();
-    } else if (this.activeTab === "support") {
-      container.innerHTML = `
-        <div id="panel-support" class="tab-panel" role="tabpanel" aria-labelledby="tab-support">
-          <div class="scroll-body">
-            <h3 style="margin:0; font-size:1.125rem;">${this.t("supportTitle")}</h3>
-            
-            <!-- Zero Proof Banner -->
-            <div class="banner banner-info" role="note">
-              🛡️ <strong>${this.t("supportZeroProofBanner")}</strong>
-            </div>
-
-            <form id="support-form" class="checkbox-group">
-              <label class="checkbox-label">
+            <form id="support-form" style="display:flex; flex-direction:column; gap:0.5rem;">
+              <label class="checkbox-row">
                 <input type="checkbox" name="need" value="extra_time" 
-                  ${this.supportNeeds.needs.includes("extra_time") ? "checked" : ""}>
-                <span>${this.t("needExtraTime")}</span>
+                       ${this.supportNeeds.needs.includes("extra_time") ? "checked" : ""}>
+                <span style="font-size:0.875rem;">${this.t("needExtraTime")}</span>
               </label>
 
-              <label class="checkbox-label">
+              <label class="checkbox-row">
                 <input type="checkbox" name="need" value="screen_reader_help" 
-                  ${this.supportNeeds.needs.includes("screen_reader_help") ? "checked" : ""}>
-                <span>${this.t("needScreenReader")}</span>
+                       ${this.supportNeeds.needs.includes("screen_reader_help") ? "checked" : ""}>
+                <span style="font-size:0.875rem;">${this.t("needScreenReader")}</span>
               </label>
 
-              <label class="checkbox-label">
+              <label class="checkbox-row">
                 <input type="checkbox" name="need" value="written_instructions" 
-                  ${this.supportNeeds.needs.includes("written_instructions") ? "checked" : ""}>
-                <span>${this.t("needWritten")}</span>
+                       ${this.supportNeeds.needs.includes("written_instructions") ? "checked" : ""}>
+                <span style="font-size:0.875rem;">${this.t("needWritten")}</span>
               </label>
 
-              <label class="checkbox-label">
+              <label class="checkbox-row">
                 <input type="checkbox" name="need" value="other" 
-                  ${this.supportNeeds.needs.includes("other") || !!this.supportNeeds.other_text ? "checked" : ""}>
-                <span>${this.t("needOther")}</span>
+                       ${this.supportNeeds.needs.includes("other") || !!this.supportNeeds.other_text ? "checked" : ""}>
+                <span style="font-size:0.875rem;">${this.t("needOther")}</span>
               </label>
 
-              <textarea name="other_text" class="chat-input" style="min-height:4rem; margin-top:0.25rem;" 
-                placeholder="${this.t("otherPlaceholder")}">${this.supportNeeds.other_text || ""}</textarea>
+              <textarea name="other_text" class="text-input" style="min-height:3.5rem;" 
+                        placeholder="${this.t("otherPlaceholder")}">${this.supportNeeds.other_text || ""}</textarea>
 
-              <div style="margin-top:0.5rem;">
-                <label style="display:block; font-weight:600; margin-bottom:0.375rem;">
-                  ${this.t("contactModeTitle")}
-                </label>
-                <select name="contact_mode" class="chat-input" style="min-height:2.75rem;">
+              <label style="font-size:0.875rem; font-weight:600; margin-top:0.25rem;">
+                ${this.t("contactModeLabel")}
+                <select name="contact_mode" class="text-input" style="margin-top:0.25rem; min-height:2.5rem;">
                   <option value="text" ${this.supportNeeds.preferred_contact_mode === "text" ? "selected" : ""}>${this.t("modeText")}</option>
                   <option value="voice" ${this.supportNeeds.preferred_contact_mode === "voice" ? "selected" : ""}>${this.t("modeVoice")}</option>
                   <option value="video" ${this.supportNeeds.preferred_contact_mode === "video" ? "selected" : ""}>${this.t("modeVideo")}</option>
                   <option value="telegram" ${this.supportNeeds.preferred_contact_mode === "telegram" ? "selected" : ""}>${this.t("modeTelegram")}</option>
                 </select>
-              </div>
+              </label>
 
-              <div class="support-saved-notice status-announcement" hidden role="status">
+              <div id="support-saved-notice" hidden style="color:#166534; font-size:0.8125rem; font-weight:600;">
                 ✓ ${this.t("supportSavedNotice")}
               </div>
 
-              <button type="submit" class="btn btn-primary" style="margin-top:0.5rem;">
-                ${this.t("saveSupportButton")}
+              <button type="submit" class="btn btn-primary" style="margin-top:0.25rem;">
+                ${this.t("saveSupportBtn")}
               </button>
             </form>
           </div>
+
         </div>
-      `;
-      this.setupSupportTabListeners();
-    } else if (this.activeTab === "link") {
-      container.innerHTML = `
-        <div id="panel-link" class="tab-panel" role="tabpanel" aria-labelledby="tab-link">
-          <div class="scroll-body">
-            <h3 style="margin:0; font-size:1.125rem;">${this.t("linkTitle")}</h3>
 
-            <!-- Zero Proof Banner -->
-            <div class="banner banner-info" role="note">
-              🛡️ <strong>${this.t("linkZeroProofBanner")}</strong>
-            </div>
+      </section>
+    `;
 
-            <!-- Mode 1: Generate Code -->
-            <div style="display:flex; flex-direction:column; gap:0.5rem; border:1px solid var(--b-border); padding:0.875rem; border-radius:0.5rem;">
-              <h4 style="margin:0;">1. ${this.t("generateCodeButton")}</h4>
-              <p style="margin:0; font-size:0.875rem; color:var(--b-text-muted);">${this.t("codeExpiresNote")}</p>
-              
-              ${
-                this.currentLinkCode
-                  ? `<div class="code-display" aria-label="Your linking code is ${this.currentLinkCode.code}">${this.currentLinkCode.code}</div>`
-                  : `<button type="button" class="btn btn-primary" id="btn-generate-code">${this.t("generateCodeButton")}</button>`
-              }
-            </div>
-
-            <!-- Mode 2: Confirm Code from Telegram -->
-            <form id="link-confirm-form" style="display:flex; flex-direction:column; gap:0.5rem; border:1px solid var(--b-border); padding:0.875rem; border-radius:0.5rem;">
-              <h4 style="margin:0;">2. ${this.t("orEnterCode")}</h4>
-              <input type="text" id="confirm-code-input" class="chat-input" placeholder="${this.t("codePlaceholder")}" required pattern="[0-9]{6}" maxlength="6">
-              <button type="submit" class="btn btn-primary">${this.t("confirmCodeButton")}</button>
-            </form>
-
-            <div class="link-status status-announcement hidden" role="status"></div>
-          </div>
-        </div>
-      `;
-      this.setupLinkTabListeners();
-    } else if (this.activeTab === "handoff") {
-      container.innerHTML = `
-        <div id="panel-handoff" class="tab-panel" role="tabpanel" aria-labelledby="tab-handoff">
-          <div class="scroll-body">
-            <h3 style="margin:0; font-size:1.125rem;">${this.t("handoffTitle")}</h3>
-
-            ${
-              this.activeHandoff
-                ? `
-                <!-- Active Room Ready -->
-                <div class="banner banner-info" role="status">
-                  <h4 style="margin:0 0 0.5rem 0;">🎉 ${this.t("mentorReadyTitle")}</h4>
-                  <p style="margin:0 0 0.75rem 0; font-size:0.875rem;">${this.t("screenShareReminder")}</p>
-                  <a href="${this.activeHandoff.room_url}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="display:inline-flex; width:100%; text-align:center; justify-content:center;">
-                    ${this.t("joinRoomButton")}
-                  </a>
-                </div>
-
-                <div style="margin-top:1rem;">
-                  <button type="button" class="btn btn-danger" id="btn-leave-room" style="width:100%;">
-                    ${this.t("leaveRoomButton")}
-                  </button>
-                </div>
-              `
-                : `
-                <!-- Consent Explanation Banner -->
-                <div class="banner banner-warning" role="note">
-                  🔒 ${this.t("handoffConsentBanner")}
-                </div>
-
-                <form id="handoff-request-form" style="display:flex; flex-direction:column; gap:0.875rem;">
-                  <label class="checkbox-label" style="font-weight:600;">
-                    <input type="checkbox" id="handoff-consent" required>
-                    <span>${this.t("handoffConsentCheck")}</span>
-                  </label>
-
-                  <div>
-                    <label for="handoff-reason" style="display:block; font-size:0.875rem; margin-bottom:0.25rem; font-weight:600;">
-                      ${this.t("handoffReasonLabel")}
-                    </label>
-                    <textarea id="handoff-reason" class="chat-input" style="min-height:4.5rem;" placeholder="${this.t("handoffReasonPlaceholder")}"></textarea>
-                  </div>
-
-                  <div class="handoff-status" style="font-size:0.875rem; color:var(--b-primary);" aria-live="polite"></div>
-
-                  <button type="submit" class="btn btn-primary" style="min-height:3rem;">
-                    ${this.t("requestMentorButton")}
-                  </button>
-                </form>
-              `
-            }
-          </div>
-        </div>
-      `;
-      this.setupHandoffTabListeners();
-    }
+    this.renderMessages();
+    this.updateTelegramLinkUI();
+    this.bindEvents();
   }
 
-  private renderChatMessages(): void {
-    const chatLog = this.shadowRoot?.querySelector(".chat-log");
+  private renderMessages(): void {
+    const chatLog = this.shadowRoot?.querySelector("#chat-log");
     if (!chatLog) return;
 
     if (this.messages.length === 0) {
       chatLog.innerHTML = `
-        <div style="text-align:center; padding:2rem 1rem; color:var(--b-text-muted);">
-          <div style="font-size:2rem; margin-bottom:0.5rem;">👋</div>
-          <p style="margin:0; font-weight:600;">${this.t("appSubtitle")}</p>
+        <div class="empty-state">
+          <p style="margin:0; font-size:1rem; font-weight:600;">${this.t("emptyWelcome")}</p>
+          <div class="suggested-questions">
+            <span style="font-size:0.8125rem; font-weight:700; color:var(--b-text-muted);">${this.t("suggestedTitle")}</span>
+            <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ1"))}">
+              👉 ${this.escapeHtml(this.t("suggestedQ1"))}
+            </button>
+            <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ2"))}">
+              👉 ${this.escapeHtml(this.t("suggestedQ2"))}
+            </button>
+            <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ3"))}">
+              👉 ${this.escapeHtml(this.t("suggestedQ3"))}
+            </button>
+          </div>
         </div>
       `;
+
+      chatLog.querySelectorAll<HTMLButtonElement>(".btn-suggested").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const q = btn.getAttribute("data-q");
+          if (q) this.askQuestion(q);
+        });
+      });
       return;
     }
 
@@ -1634,30 +1688,60 @@ export class BridgeAssistant extends HTMLElement {
       .map((msg) => {
         if (msg.sender === "learner") {
           return `
-            <div class="message message-learner" id="${msg.id}">
-              <p class="message-text">${this.escapeHtml(msg.text)}</p>
+            <div class="msg-row msg-learner">
+              <p class="answer-text" style="margin:0;">${this.escapeHtml(msg.text)}</p>
             </div>
           `;
         }
 
-        // Assistant Message
+        // Assistant Message Card
         const hasCitations = msg.citations && msg.citations.length > 0;
-        const isRefusal = msg.offerHuman || msg.reason === "low_confidence";
+        const isRefusal = !!msg.isRefusal;
 
         return `
-          <div class="message message-assistant" id="${msg.id}">
-            <p class="message-text">${this.escapeHtml(msg.text)}</p>
+          <div class="msg-row msg-assistant" id="${msg.id}">
+            <h4 class="answer-heading">${this.escapeHtml(msg.heading || this.t("answerHeading"))}</h4>
+            <p class="answer-text">${this.escapeHtml(msg.text)}</p>
 
+            ${
+              isRefusal
+                ? `
+                <div class="not-verified-box" role="alert">
+                  <div>${this.t("notVerifiedNotice")}</div>
+                  <div style="display:flex; gap:0.375rem; flex-wrap:wrap;">
+                    <button type="button" class="btn btn-primary btn-talk-person" data-msg-id="${msg.id}" style="font-size:0.8125rem; min-height:2.25rem;">
+                      👤 ${this.t("talkToPersonButton")}
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-try-another" style="font-size:0.8125rem; min-height:2.25rem;">
+                      ${this.t("tryAnotherQuestion")}
+                    </button>
+                  </div>
+                </div>
+              `
+                : ""
+            }
+
+            <!-- Listen & Make Simpler action buttons -->
+            <div class="answer-actions">
+              <button type="button" class="btn btn-secondary btn-listen" data-msg-id="${msg.id}">
+                ${msg.isAudioPlaying ? `⏸️ ${this.t("pauseButton")}` : `🔊 ${this.t("listenButton")}`}
+              </button>
+              <button type="button" class="btn btn-secondary btn-simpler" data-msg-id="${msg.id}">
+                💡 ${this.t("makeSimplerButton")}
+              </button>
+            </div>
+
+            <!-- Citations / Sources with readable names -->
             ${
               hasCitations
                 ? `
-                <div class="citations">
-                  <div class="citations-title">${this.t("sourcesTitle")}</div>
+                <div class="sources-box">
+                  <div class="sources-title">${this.t("sourcesTitle")}</div>
                   ${msg.citations!
                     .map(
                       (c) => `
-                    <a href="${this.escapeHtml(c.url)}" target="_blank" rel="noopener noreferrer" class="citation-link">
-                      🔗 ${this.escapeHtml(c.title)} - ${this.escapeHtml(c.heading)}
+                    <a href="${this.escapeHtml(c.url)}" target="_blank" rel="noopener noreferrer" class="source-link">
+                      📖 ${this.escapeHtml(c.title || c.heading)}
                     </a>
                   `
                     )
@@ -1666,35 +1750,6 @@ export class BridgeAssistant extends HTMLElement {
               `
                 : ""
             }
-
-            ${
-              isRefusal
-                ? `
-                <div class="refusal-box" style="margin-top:0.5rem; padding:0.5rem; border-radius:0.5rem; background:rgba(239,68,68,0.06); border:1px solid rgba(239,68,68,0.2);">
-                  <button type="button" class="btn btn-primary btn-talk-person" data-msg-id="${msg.id}" style="font-size:0.8125rem; min-height:2.25rem; width:100%;">
-                    👤 ${this.t("talkToPersonButton")}
-                  </button>
-                </div>
-              `
-                : ""
-            }
-
-            <!-- Read-Aloud Toolbar (Sound-off equivalence: text is always visible above) -->
-            <div class="audio-controls">
-              <button type="button" class="btn btn-audio-play" data-msg-id="${msg.id}" aria-label="${this.t("readAloud")}" style="min-height:2.25rem; font-size:0.8125rem;">
-                ${msg.isAudioPlaying ? `⏸️ ${this.t("pause")}` : `🔊 ${this.t("readAloud")}`}
-              </button>
-              <label style="font-size:0.75rem; display:flex; align-items:center; gap:0.25rem;">
-                <span>${this.t("speed")}:</span>
-                <select class="speed-select" data-msg-id="${msg.id}">
-                  <option value="0.75">0.75x</option>
-                  <option value="1" selected>1x</option>
-                  <option value="1.25">1.25x</option>
-                  <option value="1.5">1.5x</option>
-                </select>
-              </label>
-            </div>
-
           </div>
         `;
       })
@@ -1702,21 +1757,26 @@ export class BridgeAssistant extends HTMLElement {
 
     if (this.isThinking) {
       chatLog.innerHTML += `
-        <div class="message message-assistant" style="font-style:italic; color:var(--b-text-muted);">
-          ⏳ ${this.t("thinking")}
+        <div class="live-status-indicator">
+          ⏳ ${this.t("lookingInCourse")}
         </div>
       `;
     }
 
-    // Attach listeners for dynamic elements inside chat log
-    chatLog.querySelectorAll<HTMLButtonElement>(".btn-audio-play").forEach((btn) => {
+    // Attach listeners for dynamic answer buttons
+    chatLog.querySelectorAll<HTMLButtonElement>(".btn-listen").forEach((btn) => {
       btn.addEventListener("click", () => {
         const msgId = btn.getAttribute("data-msg-id");
         const msg = this.messages.find((m) => m.id === msgId);
-        if (!msg) return;
-        const select = chatLog.querySelector<HTMLSelectElement>(`.speed-select[data-msg-id="${msgId}"]`);
-        const speed = select ? parseFloat(select.value) : 1;
-        this.handleReadAloud(msg, speed);
+        if (msg) this.handleListen(msg);
+      });
+    });
+
+    chatLog.querySelectorAll<HTMLButtonElement>(".btn-simpler").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const msgId = btn.getAttribute("data-msg-id");
+        const msg = this.messages.find((m) => m.id === msgId);
+        if (msg) this.askQuestion(`Explain simpler: ${msg.text}`, true);
       });
     });
 
@@ -1724,23 +1784,33 @@ export class BridgeAssistant extends HTMLElement {
       btn.addEventListener("click", () => {
         const msgId = btn.getAttribute("data-msg-id");
         const msg = this.messages.find((m) => m.id === msgId);
-        this.activeTab = "handoff";
-        this.render();
-        if (msg) {
-          const reasonInput = this.shadowRoot?.querySelector<HTMLTextAreaElement>("#handoff-reason");
-          if (reasonInput) reasonInput.value = `Regarding question: ${msg.text}`;
+        this.requestHandoff(msg ? `Refusal regarding question: ${msg.text}` : undefined);
+      });
+    });
+
+    chatLog.querySelectorAll<HTMLButtonElement>(".btn-try-another").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const input = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-input");
+        if (input) {
+          input.value = "";
+          input.focus();
         }
       });
     });
+
+    chatLog.scrollTop = chatLog.scrollHeight;
   }
 
-  private setupListeners(): void {
+  private bindEvents(): void {
     if (!this.shadowRoot) return;
 
-    const launcher = this.shadowRoot.querySelector<HTMLButtonElement>(".launcher")!;
-    const dialog = this.shadowRoot.querySelector<HTMLElement>("[role=dialog]")!;
-    const closeBtn = this.shadowRoot.querySelector<HTMLButtonElement>(".close-btn")!;
-    const langBtn = this.shadowRoot.querySelector<HTMLButtonElement>(".lang-btn")!;
+    const launcher = this.shadowRoot.querySelector<HTMLButtonElement>("#launcher-btn")!;
+    const dialog = this.shadowRoot.querySelector<HTMLElement>("#assistant-dialog")!;
+    const closeBtn = this.shadowRoot.querySelector<HTMLButtonElement>("#btn-close-dialog")!;
+    const langAm = this.shadowRoot.querySelector<HTMLButtonElement>("#btn-lang-am")!;
+    const langEn = this.shadowRoot.querySelector<HTMLButtonElement>("#btn-lang-en")!;
+    const openSettingsBtn = this.shadowRoot.querySelector<HTMLButtonElement>("#btn-open-settings")!;
+    const closeSettingsBtn = this.shadowRoot.querySelector<HTMLButtonElement>("#btn-close-settings")!;
 
     // Open/Close Dialog
     const closeDialog = (): void => {
@@ -1760,109 +1830,112 @@ export class BridgeAssistant extends HTMLElement {
 
     closeBtn.addEventListener("click", closeDialog);
 
-    // Escape Key
-    dialog.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") closeDialog();
+    dialog.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        if (this.isSettingsOpen) {
+          this.isSettingsOpen = false;
+          const settingsDialog = this.shadowRoot?.querySelector("#settings-dialog");
+          if (settingsDialog) settingsDialog.setAttribute("hidden", "true");
+        } else {
+          closeDialog();
+        }
+      }
     });
 
-    // Language Toggle
-    langBtn.addEventListener("click", () => {
-      const nextLang: SupportedLanguage = this.currentLang === "am" ? "en" : "am";
-      this.setLanguage(nextLang);
+    // Native Script Language Buttons
+    langAm.addEventListener("click", () => this.setLanguage("am"));
+    langEn.addEventListener("click", () => this.setLanguage("en"));
+
+    // Settings Modal
+    openSettingsBtn.addEventListener("click", () => {
+      this.isSettingsOpen = true;
+      const settingsDialog = this.shadowRoot?.querySelector("#settings-dialog");
+      if (settingsDialog) {
+        settingsDialog.removeAttribute("hidden");
+        const focusable = settingsDialog.querySelector<HTMLElement>("button, input");
+        if (focusable) focusable.focus();
+      }
     });
 
-    // Navigation Tabs
-    this.shadowRoot.querySelectorAll<HTMLButtonElement>(".tab-btn").forEach((tabBtn) => {
-      tabBtn.addEventListener("click", () => {
-        const targetTab = tabBtn.id.replace("tab-", "") as "chat" | "support" | "link" | "handoff";
-        this.activeTab = targetTab;
-        this.shadowRoot?.querySelectorAll(".tab-btn").forEach((b) => b.setAttribute("aria-selected", "false"));
-        tabBtn.setAttribute("aria-selected", "true");
-        this.renderTabContent();
-      });
+    closeSettingsBtn.addEventListener("click", () => {
+      this.isSettingsOpen = false;
+      const settingsDialog = this.shadowRoot?.querySelector("#settings-dialog");
+      if (settingsDialog) settingsDialog.setAttribute("hidden", "true");
+      openSettingsBtn.focus();
     });
-  }
 
-  private setupChatTabListeners(): void {
-    const chatForm = this.shadowRoot?.querySelector<HTMLFormElement>("#chat-form");
-    const textInput = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-text-input");
-    const micBtn = this.shadowRoot?.querySelector<HTMLButtonElement>("#mic-btn");
-    const simpleCheck = this.shadowRoot?.querySelector<HTMLInputElement>("#simple-mode-check");
+    // Text Size Settings
+    this.shadowRoot.querySelector("#btn-size-smaller")?.addEventListener("click", () => {
+      this.textSize = "smaller";
+      localStorage.setItem("savanna_bridge_text_size", "smaller");
+      this.render();
+    });
+    this.shadowRoot.querySelector("#btn-size-normal")?.addEventListener("click", () => {
+      this.textSize = "normal";
+      localStorage.setItem("savanna_bridge_text_size", "normal");
+      this.render();
+    });
+    this.shadowRoot.querySelector("#btn-size-larger")?.addEventListener("click", () => {
+      this.textSize = "larger";
+      localStorage.setItem("savanna_bridge_text_size", "larger");
+      this.render();
+    });
 
-    if (simpleCheck) {
-      simpleCheck.addEventListener("change", () => {
-        this.simpleMode = simpleCheck.checked;
+    // Contrast Toggle
+    const chkContrast = this.shadowRoot.querySelector<HTMLInputElement>("#chk-contrast");
+    if (chkContrast) {
+      chkContrast.addEventListener("change", () => {
+        this.highContrast = chkContrast.checked;
+        localStorage.setItem("savanna_bridge_contrast", this.highContrast ? "high" : "normal");
+        this.render();
       });
     }
 
-    if (chatForm && textInput) {
+    // Simple Mode Toggle
+    const chkSimple = this.shadowRoot.querySelector<HTMLInputElement>("#chk-simple-mode");
+    if (chkSimple) {
+      chkSimple.addEventListener("change", () => {
+        this.simpleMode = chkSimple.checked;
+      });
+    }
+
+    // Support Form
+    const supportForm = this.shadowRoot.querySelector<HTMLFormElement>("#support-form");
+    if (supportForm) {
+      supportForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const data = new FormData(supportForm);
+        const selectedNeeds = data.getAll("need") as string[];
+        const otherText = (data.get("other_text") as string) || "";
+        const contactMode = (data.get("contact_mode") as "text" | "voice" | "video" | "telegram") || "text";
+        this.saveSupportNeeds(selectedNeeds, otherText, contactMode);
+      });
+    }
+
+    // Chat Form Submit
+    const chatForm = this.shadowRoot.querySelector<HTMLFormElement>("#chat-form");
+    const chatInput = this.shadowRoot.querySelector<HTMLInputElement>("#chat-input");
+    const micBtn = this.shadowRoot.querySelector<HTMLButtonElement>("#mic-btn");
+
+    if (chatForm && chatInput) {
       chatForm.addEventListener("submit", (e) => {
         e.preventDefault();
-        const text = textInput.value;
-        textInput.value = "";
+        const text = chatInput.value;
+        chatInput.value = "";
         this.askQuestion(text);
       });
     }
 
-    if (micBtn && textInput) {
+    if (micBtn && chatInput) {
       micBtn.addEventListener("click", () => {
-        this.toggleVoiceInput(textInput);
+        this.toggleVoiceInput(chatInput);
       });
     }
-  }
 
-  private setupSupportTabListeners(): void {
-    const form = this.shadowRoot?.querySelector<HTMLFormElement>("#support-form");
-    if (!form) return;
-
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const formData = new FormData(form);
-      const selectedNeeds = formData.getAll("need") as string[];
-      const otherText = (formData.get("other_text") as string) || "";
-      const contactMode = (formData.get("contact_mode") as "text" | "voice" | "video" | "telegram") || "text";
-
-      this.saveSupportNeeds(selectedNeeds, otherText, contactMode);
+    // Footer Talk to a Person Button
+    this.shadowRoot.querySelector("#btn-footer-handoff")?.addEventListener("click", () => {
+      this.requestHandoff();
     });
-  }
-
-  private setupLinkTabListeners(): void {
-    const genBtn = this.shadowRoot?.querySelector<HTMLButtonElement>("#btn-generate-code");
-    if (genBtn) {
-      genBtn.addEventListener("click", () => {
-        this.startAccountLink();
-      });
-    }
-
-    const confirmForm = this.shadowRoot?.querySelector<HTMLFormElement>("#link-confirm-form");
-    if (confirmForm) {
-      confirmForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const codeInput = this.shadowRoot?.querySelector<HTMLInputElement>("#confirm-code-input");
-        if (codeInput && codeInput.value) {
-          this.confirmAccountLink(codeInput.value);
-        }
-      });
-    }
-  }
-
-  private setupHandoffTabListeners(): void {
-    const form = this.shadowRoot?.querySelector<HTMLFormElement>("#handoff-request-form");
-    if (form) {
-      form.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const reasonInput = this.shadowRoot?.querySelector<HTMLTextAreaElement>("#handoff-reason");
-        const reason = reasonInput?.value || "";
-        this.requestHandoff(reason);
-      });
-    }
-
-    const leaveBtn = this.shadowRoot?.querySelector<HTMLButtonElement>("#btn-leave-room");
-    if (leaveBtn) {
-      leaveBtn.addEventListener("click", () => {
-        this.closeHandoff();
-      });
-    }
   }
 
   private escapeHtml(text: string): string {
@@ -1872,6 +1945,10 @@ export class BridgeAssistant extends HTMLElement {
   }
 }
 
+// Register both custom elements for full compatibility
 if (!customElements.get("bridge-assistant")) {
   customElements.define("bridge-assistant", BridgeAssistant);
+}
+if (!customElements.get("db-assistant")) {
+  customElements.define("db-assistant", BridgeAssistant);
 }

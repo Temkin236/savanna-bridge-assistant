@@ -4,6 +4,7 @@ services:
   api:
     build:
       context: ./api
+    command: uvicorn savanna_bridge.main:app --host 0.0.0.0 --port 8000 --reload
     environment:
       AI_PROVIDER: ${AI_PROVIDER:-offline}
       ADDIS_API_KEY: ${ADDIS_API_KEY:-}
@@ -17,6 +18,8 @@ services:
       DATABASE_URL: ${DATABASE_URL:-sqlite:////data/savanna_bridge.db}
       DB_PATH: /data/savanna_bridge.db
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      BOT_API_SECRET: ${BOT_API_SECRET:-change-me-bot-secret}
+      TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME:-savannah_assistant3_bot}
     ports:
       - "${API_PORT:-8000}:8000"
     volumes:
@@ -60,6 +63,8 @@ services:
     environment:
       API_BASE_URL: ${API_BASE_URL:-http://api:8000}
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME:-savannah_assistant3_bot}
+      BOT_API_SECRET: ${BOT_API_SECRET:-change-me-bot-secret}
       SMS_DRIVER: ${SMS_DRIVER:-mock}
       AT_USERNAME: ${AT_USERNAME:-sandbox}
       AT_API_KEY: ${AT_API_KEY:-}
@@ -68,6 +73,7 @@ services:
         condition: service_healthy
     volumes:
       - ./tests:/tests:ro
+      - ./channels/bot:/app
     healthcheck:
       test:
         - CMD
@@ -97,6 +103,8 @@ services:
       dockerfile: demo-host/Dockerfile
     ports:
       - "${DEMO_PORT:-4173}:80"
+    volumes:
+      - ./demo-host:/usr/share/nginx/html:ro
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "-", "http://localhost/health.html"]
       interval: 5s
@@ -109,12 +117,14 @@ services:
     working_dir: /work
     volumes:
       - ./:/work
-    command: /bin/bash -lc "npm ci --prefix tests && npm run axe --prefix tests"
+    command: /bin/bash -lc "npm ci --prefix tests && npm run verify --prefix tests"
     environment:
       DEMO_BASE_URL: http://demo-host
       CONSOLE_BASE_URL: http://console
       PUBLIC_API_BASE_URL: http://api:8000
     depends_on:
+      api:
+        condition: service_healthy
       demo-host:
         condition: service_healthy
       console:
@@ -124,6 +134,8 @@ services:
     build:
       context: ./channels/bot
     profiles: [test]
+    env_file:
+      - .env
     working_dir: /work
     volumes:
       - ./channels:/work:ro

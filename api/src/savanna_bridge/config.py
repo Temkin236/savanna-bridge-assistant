@@ -26,6 +26,8 @@ DB_PATH: str = os.getenv("DB_PATH", DEFAULT_DB_PATH)
 
 # Security and auth
 SECRET_KEY: str = os.getenv("SECRET_KEY", "savanna-bridge-hackathon-2026-secret-key")
+BOT_API_SECRET: str = os.getenv("BOT_API_SECRET", "change-me-bot-secret")
+TELEGRAM_BOT_USERNAME: str = os.getenv("TELEGRAM_BOT_USERNAME", "savannah_assistant3_bot")
 TOKEN_EXPIRY_MINUTES: int = int(os.getenv("TOKEN_EXPIRY_MINUTES", "60"))
 RATE_LIMIT_PER_MINUTE: int = int(os.getenv("RATE_LIMIT_PER_MINUTE", "60"))
 CORS_ORIGINS: list[str] = [

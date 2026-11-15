@@ -19,3 +19,13 @@ for (const target of [
   });
 }
 
+test("Savanna demo with open assistant widget has no critical or serious axe findings", async ({ page }) => {
+  await page.goto(`${demoBase}/savanna/`);
+  await page.locator("bridge-assistant .launcher").click();
+  await page.waitForTimeout(300);
+  const results = await new AxeBuilder({ page }).analyze();
+  const blockers = results.violations.filter((item) =>
+    item.impact === "critical" || item.impact === "serious"
+  );
+  expect(blockers, JSON.stringify(blockers, null, 2)).toEqual([]);
+});

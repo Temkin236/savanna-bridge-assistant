@@ -61,6 +61,10 @@
       .drawer-panel {
         transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
       }
+      .drawer-hidden {
+        pointer-events: none;
+        visibility: hidden;
+      }
       .drawer-hidden .drawer-backdrop {
         opacity: 0;
         pointer-events: none;
@@ -109,10 +113,11 @@
           <!-- Live Status & Agent Config -->
           <div class="flex items-center gap-4">
             <!-- Connection Status -->
-            <div id="connectionStatus" role="status" class="hidden sm:flex items-center gap-2 text-xs font-medium text-gray-600 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200">
+            <div id="connectionStatus" class="hidden sm:flex items-center gap-2 text-xs font-medium text-gray-600 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200">
               <span class="w-2 h-2 rounded-full bg-emerald-500 live-dot"></span>
               <span id="connectionText">Checking connection...</span>
             </div>
+            <div id="actionStatus" role="status" aria-live="polite" class="sr-only"></div>
 
             <!-- Agent Identity Selector -->
             <div class="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1">
@@ -121,7 +126,7 @@
               </div>
               <div class="flex flex-col">
                 <label for="agentRef" class="sr-only">Active Agent Name</label>
-                <span class="text-[10px] text-gray-400 font-semibold uppercase leading-tight">Agent ID</span>
+                <span class="text-[10px] text-gray-600 font-semibold uppercase leading-tight">Agent ID</span>
                 <input
                   type="text"
                   id="agentRef"
@@ -132,20 +137,21 @@
               </div>
             </div>
 
-            <!-- API Base URL Hidden Accessible Binding -->
-            <label for="apiEndpoint" class="sr-only">API Base URL</label>
-            <input type="hidden" id="apiEndpoint" value="http://localhost:8000" />
+            <!-- API Base URL Accessible Binding -->
+            <label for="apiEndpoint" class="sr-only">API Base URL:</label>
+            <input type="text" id="apiEndpoint" value="http://localhost:8000" aria-label="API Base URL:" class="sr-only" />
 
             <!-- Refresh Button -->
             <button
               id="refreshBtn"
               type="button"
+              aria-label="Refresh Queue"
               class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-semibold rounded-md shadow-sm transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
-              <span>Refresh</span>
+              <span>Refresh Queue</span>
             </button>
           </div>
         </div>
@@ -210,6 +216,8 @@
           <button
             type="button"
             id="tabAll"
+            role="tab"
+            aria-selected="true"
             onclick="switchTab('all')"
             class="tab-btn flex-1 sm:flex-initial px-3.5 py-1.5 text-xs font-medium rounded transition-all bg-white text-gray-900 shadow-xs"
           >
@@ -218,6 +226,8 @@
           <button
             type="button"
             id="tabWaiting"
+            role="tab"
+            aria-selected="false"
             onclick="switchTab('waiting')"
             class="tab-btn flex-1 sm:flex-initial px-3.5 py-1.5 text-xs font-medium rounded transition-all text-gray-600 hover:text-gray-900"
           >
@@ -226,6 +236,8 @@
           <button
             type="button"
             id="tabClaimed"
+            role="tab"
+            aria-selected="false"
             onclick="switchTab('claimed')"
             class="tab-btn flex-1 sm:flex-initial px-3.5 py-1.5 text-xs font-medium rounded transition-all text-gray-600 hover:text-gray-900"
           >
@@ -389,7 +401,10 @@
       let activeTab = "all"; // 'all' | 'waiting' | 'claimed'
       let activeDrawerHandoff = null;
 
-      const API_URL = "http://localhost:8000";
+      function getApiUrl() {
+        const input = document.getElementById("apiEndpoint");
+        return (input && input.value) ? input.value.trim().replace(/\/$/, "") : "http://localhost:8000";
+      }
 
       const connectionStatus = document.getElementById("connectionStatus");
       const connectionText = document.getElementById("connectionText");
@@ -438,12 +453,14 @@
         document.querySelectorAll(".tab-btn").forEach((btn) => {
           btn.classList.remove("bg-white", "text-gray-900", "shadow-xs");
           btn.classList.add("text-gray-600");
+          btn.setAttribute("aria-selected", "false");
         });
 
         const activeBtn = document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`);
         if (activeBtn) {
           activeBtn.classList.add("bg-white", "text-gray-900", "shadow-xs");
           activeBtn.classList.remove("text-gray-600");
+          activeBtn.setAttribute("aria-selected", "true");
         }
         renderQueue();
       }
@@ -465,7 +482,7 @@
       async function fetchQueue() {
         try {
           // Fetch queue from API (status=active returns waiting + claimed)
-          const res = await fetch(`${API_URL}/handoff/queue`);
+          const res = await fetch(`${getApiUrl()}/handoff/queue`);
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const data = await res.json();
           currentHandoffs = data.items || [];
@@ -531,7 +548,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               <h3 class="text-sm font-semibold text-gray-800">No requests in this view</h3>
-              <p class="text-xs text-gray-400 mt-1">Learners requesting support will appear here automatically.</p>
+              <p class="text-xs text-gray-600 mt-1">Learners requesting support will appear here automatically.</p>
             </div>
           `;
           return;
@@ -569,14 +586,14 @@
               <div class="flex items-start justify-between gap-2">
                 <div>
                   <div class="flex items-center gap-2">
-                    <span class="font-mono text-xs font-bold text-gray-900">#${escapeHtml(item.id.replace("handoff_", ""))}</span>
-                    <span class="text-[11px] text-gray-400 font-medium">${timeAgo(item.created_at)}</span>
+                    <h3 class="font-mono text-xs font-bold text-gray-900">Learner Request #${escapeHtml(item.id)}</h3>
+                    <span class="text-[11px] text-gray-600 font-medium">${timeAgo(item.created_at)}</span>
                   </div>
                   <div class="flex items-center gap-1.5 mt-1">
-                    <span class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider bg-gray-100 px-1.5 py-0.5 rounded">
+                    <span class="text-[11px] font-semibold text-gray-700 uppercase tracking-wider bg-gray-100 px-1.5 py-0.5 rounded">
                       ${escapeHtml(card.language || "en").toUpperCase()}
                     </span>
-                    <span class="text-[11px] font-semibold text-gray-500 capitalize bg-gray-100 px-1.5 py-0.5 rounded flex items-center gap-1">
+                    <span class="text-[11px] font-semibold text-gray-700 capitalize bg-gray-100 px-1.5 py-0.5 rounded flex items-center gap-1">
                       ${card.contact_mode === "voice" ? "🎙️ Voice" : card.contact_mode === "video" ? "📹 Video" : "💬 Text"}
                     </span>
                   </div>
@@ -588,7 +605,7 @@
 
               <!-- Context Message Box -->
               <div class="bg-slate-50 border border-slate-200/80 rounded-lg p-3">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">Issue / Context</span>
+                <span class="text-[10px] font-bold text-gray-600 uppercase tracking-wider block mb-1">Issue / Context</span>
                 <p class="text-xs font-medium text-gray-800 line-clamp-3 leading-relaxed">
                   ${escapeHtml(card.context || "Learner requested a live mentor.")}
                 </p>
@@ -596,9 +613,9 @@
 
               <!-- Declared Needs -->
               <div>
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1.5">Support Preferences</span>
+                <span class="text-[10px] font-bold text-gray-600 uppercase tracking-wider block mb-1.5">Support Preferences</span>
                 <div class="flex flex-wrap gap-1">
-                  ${needsPills || '<span class="text-xs text-gray-400 italic">None specified</span>'}
+                  ${needsPills || '<span class="text-xs text-gray-600 italic">None specified</span>'}
                 </div>
               </div>
             </div>
@@ -616,13 +633,14 @@
               ${!isClaimed ? `
                 <button
                   type="button"
+                  aria-label="Claim this Request"
                   onclick="claimHandoff('${item.id}')"
                   class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-semibold rounded-md shadow-xs transition-colors"
                 >
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>Claim Request</span>
+                  <span>Claim this Request</span>
                 </button>
               ` : `
                 <div class="flex items-center gap-1.5">
@@ -637,7 +655,7 @@
                   <button
                     type="button"
                     onclick="closeHandoff('${item.id}')"
-                    class="inline-flex items-center px-2 py-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors text-xs font-medium"
+                    class="inline-flex items-center px-2 py-1.5 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors text-xs font-medium"
                     title="Close Request"
                   >
                     Close
@@ -654,12 +672,19 @@
       async function claimHandoff(id) {
         const agent = getAgentRef();
         try {
-          const res = await fetch(`${API_URL}/handoff/${id}/claim`, {
+          const res = await fetch(`${getApiUrl()}/handoff/${id}/claim`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ agent_ref: agent }),
           });
           if (res.ok) {
+            const actionStatus = document.getElementById("actionStatus");
+            if (actionStatus) {
+              actionStatus.textContent = `Claimed request #${id}`;
+            }
+            if (connectionText) {
+              connectionText.textContent = `Claimed request #${id}`;
+            }
             await fetchQueue();
             openDrawerById(id);
           } else {
@@ -673,7 +698,7 @@
       async function closeHandoff(id) {
         if (!confirm("Are you sure you want to resolve and close this request?")) return;
         try {
-          const res = await fetch(`${API_URL}/handoff/${id}/close`, {
+          const res = await fetch(`${getApiUrl()}/handoff/${id}/close`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({}),
@@ -718,7 +743,7 @@
         // Needs List
         drawerNeedsList.innerHTML = (card.support_needs || [])
           .map(n => `<span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-emerald-100 text-emerald-800">${escapeHtml(n.replace(/_/g, " "))}</span>`)
-          .join(" ") || '<span class="text-xs text-gray-400">None specified</span>';
+          .join(" ") || '<span class="text-xs text-gray-600">None specified</span>';
 
         // Room Link
         drawerRoomLink.href = item.room_url;
@@ -777,7 +802,7 @@
         if (!msg) return;
 
         try {
-          const res = await fetch(`${API_URL}/handoff/${id}/reply`, {
+          const res = await fetch(`${getApiUrl()}/handoff/${id}/reply`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ agent_ref: getAgentRef(), message: msg }),

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Independent Host - Blank Page Verification</title>
+  </head>
+  <body>
+    <main>
+      <h1>Independent Host (No Bootstrap, No Savanna CSS)</h1>
+      <p>This blank page verifies that the assistant module works on any external host with a single script tag.</p>
+    </main>
+
+    <!-- 1. Load the module (Classic IIFE script - no CORS module restrictions) -->
+    <script src="/widget/widget.iife.js" defer></script>
+
+    <!-- 2. Mount custom element as db-assistant or bridge-assistant -->
+    <db-assistant lang="am" api="http://localhost:8000" content="course_demo"></db-assistant>
+
+    <!-- 3. Host optionally listens to bubbling custom events -->
+    <script>
+      document.addEventListener("db-assistant:question", (e) => {
+        console.log("Host captured db-assistant:question event:", e.detail);
+      });
+      document.addEventListener("db-assistant:escalated", (e) => {
+        console.log("Host captured db-assistant:escalated event:", e.detail);
+      });
+    </script>
+  </body>
+</html>
+

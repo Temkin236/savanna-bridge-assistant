@@ -28,11 +28,15 @@ from aiogram.types import (
     ReplyKeyboardMarkup,
 )
 from audio_helper import ogg_opus_to_wav
-from dotenv import load_dotenv
 
-# Load .env from repository root
-env_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".env"))
-load_dotenv(env_path)
+try:
+    from dotenv import load_dotenv
+
+    # Load .env from repository root
+    env_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".env"))
+    load_dotenv(env_path)
+except ImportError:
+    pass
 
 # Configuration
 API_BASE_URL: str = os.getenv("API_BASE_URL", "http://localhost:8000").rstrip("/")
@@ -40,6 +44,8 @@ if os.path.exists("/.dockerenv") and "localhost" in API_BASE_URL:
     API_BASE_URL = "http://api:8000"
 
 BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
+TELEGRAM_BOT_USERNAME: str = os.getenv("TELEGRAM_BOT_USERNAME", "savannah_assistant3_bot").strip()
+BOT_API_SECRET: str = os.getenv("BOT_API_SECRET", "change-me-bot-secret").strip()
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("savanna_bridge.bot")
@@ -155,18 +161,35 @@ def make_language_inline() -> InlineKeyboardMarkup:
 # --- Core API client helpers ---
 
 
-async def call_api(
-    method: str, path: str, json_data: dict[str, Any] | None = None
-) -> dict[str, Any] | None:
+async def call_api_raw(
+    method: str,
+    path: str,
+    json_data: dict[str, Any] | None = None,
+    headers: dict[str, str] | None = None,
+) -> tuple[int, dict[str, Any]]:
     url = f"{API_BASE_URL}{path}"
     try:
         async with httpx.AsyncClient(timeout=15.0) as client:
-            res = await client.request(method, url, json=json_data)
-            if res.status_code in (200, 201):
-                return res.json()
-            logger.warning("API call %s %s returned status %d", method, path, res.status_code)
+            res = await client.request(method, url, json=json_data, headers=headers)
+            try:
+                body = res.json()
+            except Exception:
+                body = {"detail": res.text}
+            return res.status_code, body
     except Exception as e:
         logger.error("API call %s %s failed: %s", method, path, e)
+        return 500, {"detail": str(e)}
+
+
+async def call_api(
+    method: str,
+    path: str,
+    json_data: dict[str, Any] | None = None,
+    headers: dict[str, str] | None = None,
+) -> dict[str, Any] | None:
+    status, body = await call_api_raw(method, path, json_data=json_data, headers=headers)
+    if 200 <= status < 300:
+        return body
     return None
 
 
@@ -177,6 +200,49 @@ router = Router()
 
 @router.message(Command("start"))
 async def handle_start(message: types.Message) -> None:
+    args = message.text.split() if message.text else []
+    if len(args) > 1 and args[1].strip():
+        token = args[1].strip()
+        user_id = message.from_user.id if message.from_user else 0
+        state = get_user_state(user_id)
+        lang = state.get("language", "en")
+
+        headers = {"X-Bot-Secret": BOT_API_SECRET}
+        status_code, res = await call_api_raw(
+            "POST",
+            "/api/v1/link/confirm",
+            {"token": token, "telegram_chat_id": str(user_id)},
+            headers=headers,
+        )
+
+        if status_code == 200 and res.get("linked"):
+            state["linked"] = True
+            if res.get("learner_ref"):
+                state["learner_ref"] = res["learner_ref"]
+            success_msgs = {
+                "am": "የኮርስ ክፍለ-ጊዜዎ ተገናኝቷል። ማንኛውንም ጥያቄ በጽሑፍ ይጠይቁ ወይም 'ከሰው ጋር ተገናኝ' የሚለውን ይጫኑ።",
+                "om": "Kutaan barnootaa keessan walqabateera. Gaaffii keessan barreeffamaan gaafadhaa ykn 'Nama Waliin Dubbadhu' kan jedhu tuqaa.",
+                "ti": "ናይ ኮርስ ክፍለ-ግዜኹም ተላጊቡ ኣሎ። ዝኾነ ሕቶ ብጽሑፍ ሕተቱ ወይ 'ምስ ሰብ ተራኸብ' ዝብል ጠውቑ።",
+                "ar": "تم ربط جلستك بنجاح. اطرح سؤالك بنص عادي أو اضغط 'التحدث مع شخص'.",
+                "en": "Connected to your course session. Ask any question in plain text or tap Talk to a person.",
+            }
+            await send_safe_message(
+                message,
+                success_msgs.get(lang, success_msgs["en"]),
+                reply_markup=make_main_keyboard(lang, state["lite_mode"]),
+            )
+            return
+        else:
+            fail_msgs = {
+                "am": "ይህ ሊንክ ጊዜው አልፏል ወይም አስቀድሞ ስራ ላይ ውሏል። እባክዎ በድረ-ገጹ ረዳት ውስጥ 'በቴሌግራም ቀጥል' የሚለውን ተጭነው አዲስ ሊንክ ያግኙ።",
+                "om": "Liankiin kun yeroon isaa darbeera ykn duraan hojiirra ooleera. Mee gargaaraa weebsaayitii irraa 'Continue on Telegram' tuquun liankii haaraa argadhaa.",
+                "ti": "እዚ ሊንክ ግዜኡ ሓሊፉ ወይ ድሮ ተጠቒምኩምሉ ኣለኹም። በጃኹም ኣብ መርበብ ሓበሬታ 'በቴሌግራም ቀጥል' ጠዊቕኩም ሓዲሽ ሊንክ ውሰዱ።",
+                "ar": "هذا الرابط منتهي الصلاحية أو تم استخدامه مسبقاً. يرجى فتح المساعد على الموقع والضغط على 'المتابعة عبر تيليجرام' للحصول على رابط جديد.",
+                "en": "This link has expired or was already used. Please open the assistant on the website and tap Continue on Telegram to get a new link.",
+            }
+            await send_safe_message(message, fail_msgs.get(lang, fail_msgs["en"]))
+            return
+
     welcome_text = (
         "👋 **እንኳን ወደ ሳቫና ብሪጅ ረዳት በደህና መጡ!**\n"
         "Welcome to the **Savanna Bridge Assistant**.\n"
@@ -1052,7 +1118,7 @@ async def handle_text_question(message: types.Message) -> None:
 
     res = await call_api(
         "POST",
-        "/ask",
+        "/api/v1/ask",
         {
             "question": text,
             "language": lang,
@@ -1061,12 +1127,23 @@ async def handle_text_question(message: types.Message) -> None:
         },
     )
     if not res:
+        res = await call_api(
+            "POST",
+            "/ask",
+            {
+                "question": text,
+                "language": lang,
+                "simple_mode": state["lite_mode"],
+                "channel": "telegram",
+            },
+        )
+    if not res:
         err_msg = {
-            "am": "⚠️ አገልግሎቱ ለጊዜው አልተገኘም።",
-            "om": "⚠️ Tajaajilli yeroof hin jiru.",
-            "ti": "⚠️ ኣገልግሎት ንግዚኡ ኣይርከብን።",
-            "ar": "⚠️ الخدمة غير متوفرة مؤقتاً.",
-            "en": "⚠️ Assistant temporarily unavailable.",
+            "am": "አገልግሎቱ ለጊዜው አልተገኘም። እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።",
+            "om": "Tajaajilli yeroof hin jiru. Mee xiqqoo booda irra deebi'aa yaalaa.",
+            "ti": "ኣገልግሎት ንግዚኡ ኣይርከብን። በጃኹም ድሓር ደጊምኩም ፈትኑ።",
+            "ar": "الخدمة غير متوفرة مؤقتاً. يرجى المحاولة لاحقاً.",
+            "en": "Assistant is temporarily unavailable. Please try again later.",
         }
         await send_safe_message(message, err_msg.get(lang, err_msg["en"]))
         return
@@ -1078,11 +1155,11 @@ async def handle_text_question(message: types.Message) -> None:
     reply_msg = f"{answer_text}"
     if citations:
         cit_labels = {
-            "am": ("\n\n📚 **ዋቢዎች:**", "ገጽ"),
-            "om": ("\n\n📚 **Wabiiwwan:**", "Fuula"),
-            "ti": ("\n\n📚 **መወከሲታት:**", "ገጽ"),
-            "ar": ("\n\n📚 **المراجع:**", "صفحة"),
-            "en": ("\n\n📚 **Citations:**", "Page"),
+            "am": ("\n\n**ዋቢዎች:**", "ገጽ"),
+            "om": ("\n\n**Wabiiwwan:**", "Fuula"),
+            "ti": ("\n\n**መወከሲታት:**", "ገጽ"),
+            "ar": ("\n\n**المراجع:**", "صفحة"),
+            "en": ("\n\n**Citations:**", "Page"),
         }
         cit_hdr, page_str = cit_labels.get(lang, cit_labels["en"])
         reply_msg += cit_hdr
@@ -1092,11 +1169,11 @@ async def handle_text_question(message: types.Message) -> None:
     reply_markup = None
     if offer_human:
         btn_labels = {
-            "am": "👥 ከሰው ጋር ተገናኝ",
-            "om": "👥 Nama Waliin Dubbadhu",
-            "ti": "👥 ምስ ሰብ ተራኸብ",
-            "ar": "👥 التحدث مع شخص",
-            "en": "👥 Talk to a person",
+            "am": "ከሰው ጋር ተገናኝ",
+            "om": "Nama Waliin Dubbadhu",
+            "ti": "ምስ ሰብ ተራኸብ",
+            "ar": "التحدث مع شخص",
+            "en": "Talk to a person",
         }
         reply_markup = InlineKeyboardMarkup(
             inline_keyboard=[
@@ -1126,8 +1203,6 @@ def get_dispatcher() -> Dispatcher:
 async def setup_bot_commands(bot: Bot) -> None:
     commands = [
         BotCommand(command="start", description="Start assistant & choose language"),
-        BotCommand(command="link", description="Get a one-time code to link your account"),
-        BotCommand(command="confirm", description="Confirm linking code (e.g. /confirm 123456)"),
         BotCommand(command="help", description="View all available commands and help"),
         BotCommand(command="handoff", description="Talk to a human mentor / get live help"),
         BotCommand(command="deadlines", description="View upcoming course deadlines"),

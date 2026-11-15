@@ -16,6 +16,13 @@
     </main>
     <bridge-assistant data-api="http://localhost:8000" data-course="jobs" data-lang="en"></bridge-assistant>
     <script type="module" src="/widget/widget.js"></script>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const apiParam = params.get("api");
+      if (apiParam) {
+        document.querySelectorAll("bridge-assistant").forEach((el) => el.setAttribute("data-api", apiParam));
+      }
+    </script>
     <!-- This generic host proves the architecture is not Savanna-specific. -->
   </body>
 </html>

@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import contextlib
 import json
+import secrets
 import sqlite3
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from savanna_bridge.config import DB_PATH
+from savanna_bridge.config import DB_PATH, TELEGRAM_BOT_USERNAME
 from savanna_bridge.models import (
     AlertSubscription,
     Handoff,
@@ -29,15 +31,25 @@ def init_db(db_path: str = DB_PATH) -> None:
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS links (
                 link_id TEXT PRIMARY KEY,
+                token TEXT,
                 code TEXT NOT NULL,
                 session_id TEXT NOT NULL,
                 channel TEXT NOT NULL,
                 learner_ref TEXT,
+                telegram_chat_id TEXT,
+                linked INTEGER NOT NULL DEFAULT 0,
                 expires_at TEXT NOT NULL,
                 used INTEGER NOT NULL DEFAULT 0,
                 created_at TEXT NOT NULL
             )
         """)
+        for col_name, col_type in [
+            ("token", "TEXT"),
+            ("telegram_chat_id", "TEXT"),
+            ("linked", "INTEGER NOT NULL DEFAULT 0"),
+        ]:
+            with contextlib.suppress(sqlite3.OperationalError):
+                cursor.execute(f"ALTER TABLE links ADD COLUMN {col_name} {col_type}")
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS support_needs (
                 learner_ref TEXT PRIMARY KEY,
@@ -108,18 +120,28 @@ class Database:
         init_db(self.db_path)
 
     def create_link(
-        self, link_id: str, code: str, session_id: str, channel: str, learner_ref: str | None = None
+        self,
+        link_id: str,
+        code: str,
+        session_id: str,
+        channel: str,
+        learner_ref: str | None = None,
+        token: str | None = None,
     ) -> dict[str, Any]:
-        expires_at = (datetime.now(UTC) + timedelta(minutes=10)).isoformat()
+        token = token or secrets.token_urlsafe(32)[:32]
+        expires_in = 600
+        expires_at = (datetime.now(UTC) + timedelta(seconds=expires_in)).isoformat()
         created_at = datetime.now(UTC).isoformat()
+        deep_link = f"https://t.me/{TELEGRAM_BOT_USERNAME}?start={token}"
         with get_connection(self.db_path) as conn:
             conn.execute(
                 """
-                INSERT INTO links (link_id, code, session_id, channel, learner_ref, expires_at, used, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, 0, ?)
+                INSERT INTO links (link_id, token, code, session_id, channel, learner_ref, expires_at, used, created_at, linked)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, 0)
                 """,
                 (
                     link_id,
+                    token,
                     code,
                     session_id,
                     channel,
@@ -130,12 +152,72 @@ class Database:
             )
             conn.commit()
         return {
+            "token": token,
+            "deep_link": deep_link,
+            "expires_in": expires_in,
             "link_id": link_id,
             "code": code,
             "expires_at": expires_at,
             "single_use": True,
+            "channel": channel,
             "mocked": False,
         }
+
+    def get_link_status(self, token: str) -> dict[str, Any]:
+        with get_connection(self.db_path) as conn:
+            row = conn.execute(
+                "SELECT * FROM links WHERE token = ? OR link_id = ? ORDER BY created_at DESC LIMIT 1",
+                (token, token),
+            ).fetchone()
+            if not row:
+                return {"linked": False, "channel": None}
+            now_iso = datetime.now(UTC).isoformat()
+            if not row["linked"] and row["expires_at"] < now_iso:
+                return {"linked": False, "channel": None}
+            if row["linked"]:
+                return {"linked": True, "channel": "telegram"}
+            return {"linked": False, "channel": None}
+
+    def verify_and_consume_token_link(
+        self, token: str, telegram_chat_id: str | int | None = None
+    ) -> tuple[bool, str, str]:
+        """Returns (success, learner_ref, error_reason).
+        error_reason: "ok", "expired", "already_used", "not_found"
+        """
+        with get_connection(self.db_path) as conn:
+            row = conn.execute(
+                "SELECT * FROM links WHERE token = ? OR link_id = ? ORDER BY created_at DESC LIMIT 1",
+                (token, token),
+            ).fetchone()
+            if not row:
+                return False, "", "not_found"
+            if row["used"]:
+                return False, "", "already_used"
+            now_iso = datetime.now(UTC).isoformat()
+            if row["expires_at"] < now_iso:
+                return False, "", "expired"
+
+            chat_id_str = str(telegram_chat_id) if telegram_chat_id is not None else None
+            conn.execute(
+                "UPDATE links SET used = 1, linked = 1, telegram_chat_id = ? WHERE link_id = ?",
+                (chat_id_str, row["link_id"]),
+            )
+            conn.commit()
+            return True, row["learner_ref"], "ok"
+
+    def disconnect_link(
+        self, token: str | None = None, learner_ref: str | None = None
+    ) -> bool:
+        with get_connection(self.db_path) as conn:
+            if token:
+                conn.execute(
+                    "UPDATE links SET linked = 0 WHERE token = ? OR link_id = ?",
+                    (token, token),
+                )
+            if learner_ref:
+                conn.execute("UPDATE links SET linked = 0 WHERE learner_ref = ?", (learner_ref,))
+            conn.commit()
+            return True
 
     def verify_and_consume_link(self, link_id: str, code: str) -> tuple[bool, str, str]:
         """Returns (success, learner_ref, error_reason).
@@ -159,8 +241,8 @@ class Database:
             if row["code"] != code:
                 return False, "", "invalid_code"
 
-            # Consume code
-            conn.execute("UPDATE links SET used = 1 WHERE link_id = ?", (row["link_id"],))
+            # Consume code and mark linked
+            conn.execute("UPDATE links SET used = 1, linked = 1 WHERE link_id = ?", (row["link_id"],))
             conn.commit()
             return True, row["learner_ref"], "ok"
 
@@ -400,3 +482,34 @@ class Database:
                     {"question": "Explain Module 2.", "count": 5},
                 ]
             return [{"question": r["question"], "count": r["count"]} for r in rows]
+
+    def export_learner_data(self, learner_ref: str) -> dict[str, Any]:
+        """Export all data associated with a learner reference (GDPR / Privacy requirement)."""
+        with get_connection(self.db_path) as conn:
+            support = self.get_support_needs(learner_ref)
+            handoff_rows = conn.execute(
+                "SELECT id, status, card_json, room_url, agent_ref, created_at FROM handoffs WHERE learner_ref = ?",
+                (learner_ref,),
+            ).fetchall()
+            settings = self.get_notification_settings(learner_ref)
+            links = conn.execute(
+                "SELECT link_id, channel, expires_at, used, created_at FROM links WHERE learner_ref = ?",
+                (learner_ref,),
+            ).fetchall()
+            return {
+                "learner_ref": learner_ref,
+                "support_needs": support.model_dump() if support else None,
+                "handoffs": [dict(h) for h in handoff_rows],
+                "notification_settings": settings.model_dump() if settings else None,
+                "links": [dict(link_row) for link_row in links],
+            }
+
+    def delete_learner_data(self, learner_ref: str) -> bool:
+        """Permanently delete all stored data for this learner reference."""
+        with get_connection(self.db_path) as conn:
+            conn.execute("DELETE FROM support_needs WHERE learner_ref = ?", (learner_ref,))
+            conn.execute("DELETE FROM handoffs WHERE learner_ref = ?", (learner_ref,))
+            conn.execute("DELETE FROM notification_settings WHERE learner_ref = ?", (learner_ref,))
+            conn.execute("DELETE FROM links WHERE learner_ref = ?", (learner_ref,))
+            conn.commit()
+            return True

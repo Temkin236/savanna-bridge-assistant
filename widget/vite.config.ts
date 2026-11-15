@@ -6,8 +6,8 @@ export default defineConfig({
     lib: {
       entry: resolve(__dirname, "src/bridge-assistant.ts"),
       name: "SavannaBridgeAssistant",
-      formats: ["es"],
-      fileName: () => "widget.js",
+      formats: ["es", "iife"],
+      fileName: (format) => (format === "iife" ? "widget.iife.js" : "widget.js"),
     },
     target: "es2020",
     sourcemap: true,

@@ -5,8 +5,8 @@ from __future__ import annotations
 import json
 import logging
 import os
-import urllib.request
 import urllib.error
+import urllib.request
 
 from adapters.base import ContentChunk
 from savanna_bridge.ai.base import AIProvider
@@ -21,7 +21,13 @@ class CloudProvider(AIProvider):
 
     def __init__(self) -> None:
         self._offline_fallback = OfflineFaqProvider()
-        self.api_key = os.getenv("CLOUD_API_KEY") or os.getenv("GOOGLE_AI_API") or os.getenv("GOOGLE_API_KEY") or ""
+        self.api_key = (
+            os.getenv("CLOUD_AI_API_KEY")
+            or os.getenv("CLOUD_API_KEY")
+            or os.getenv("GOOGLE_AI_API")
+            or os.getenv("GOOGLE_API_KEY")
+            or ""
+        )
         self.model = os.getenv("CLOUD_MODEL", "gemini-1.5-flash")
 
     @property

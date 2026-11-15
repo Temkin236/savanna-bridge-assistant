@@ -9,6 +9,7 @@ import base64
 import contextlib
 import logging
 import random
+import secrets
 import struct
 import time
 from datetime import UTC, datetime, timedelta
@@ -20,6 +21,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from adapters.base import ContentChunk
 from adapters.jobs import JobPostingSource
 from adapters.learner import MockLearnerDirectory
 from adapters.notifications import (
@@ -31,7 +33,11 @@ from adapters.savanna import SavannaStaticSource
 from savanna_bridge import __version__
 from savanna_bridge.ai.factory import get_ai_provider
 from savanna_bridge.auth import create_widget_token, verify_widget_token
-from savanna_bridge.config import CONFIDENCE_THRESHOLD, CORS_ORIGINS, DB_PATH
+from savanna_bridge.config import (
+    BOT_API_SECRET,
+    CONFIDENCE_THRESHOLD,
+    DB_PATH,
+)
 from savanna_bridge.database import Database
 from savanna_bridge.models import (
     AccommodationDraft,
@@ -42,10 +48,13 @@ from savanna_bridge.models import (
     AlertSubscription,
     Answer,
     AskRequest,
+    ContentIngestRequest,
     DeadlineListResponse,
     ErrorDetail,
     ErrorResponse,
+    EscalationRequest,
     Handoff,
+    HandoffCard,
     HandoffReply,
     HandoffReplyRequest,
     HandoffRequest,
@@ -54,10 +63,14 @@ from savanna_bridge.models import (
     Language,
     LinkConfirmRequest,
     LinkConfirmResponse,
+    LinkDisconnectRequest,
+    LinkDisconnectResponse,
     LinkStartRequest,
     LinkStartResponse,
+    LinkStatusResponse,
     ModuleListResponse,
     NotificationSettings,
+    SmsInboundRequest,
     SupportNeeds,
     SynthesisRequest,
     SynthesisResult,
@@ -118,12 +131,13 @@ async def log_and_rate_limit(request: Request, call_next: Any) -> Response:
     origin = request.headers.get("origin", "-")
     user_agent = request.headers.get("user-agent", "-")
     logger.info(
-        "--> [%s] %s %s from %s (Origin: %s)",
+        "--> [%s] %s %s from %s (Origin: %s, UA: %s)",
         req_id,
         request.method,
         request.url.path,
         client_ip,
         origin,
+        user_agent,
     )
 
     # Rate limit check (exclude health checks)
@@ -232,6 +246,7 @@ def verify_optional_token(x_widget_token: str | None = Header(None)) -> dict[str
 
 
 @app.get("/health", response_model=Health, tags=["System"])
+@app.get("/api/v1/health", response_model=Health, tags=["System"])
 def get_health() -> Health:
     ai = get_ai_provider()
     return Health(
@@ -251,6 +266,7 @@ def generate_token(session_id: str = "web_demo", course_id: str = "course_demo")
 
 
 @app.post("/ask", response_model=Answer, tags=["Tutor"])
+@app.post("/api/v1/ask", response_model=Answer, tags=["Tutor"])
 def ask(payload: AskRequest, _token: Any = Depends(verify_optional_token)) -> Answer:
     ai = get_ai_provider()
     user_lang = payload.language
@@ -360,23 +376,137 @@ def ask(payload: AskRequest, _token: Any = Depends(verify_optional_token)) -> An
     )
 
 
+@app.post("/api/v1/content", status_code=status.HTTP_201_CREATED, tags=["Content"])
+@app.post("/content", status_code=status.HTTP_201_CREATED, tags=["Content"])
+def ingest_content(payload: ContentIngestRequest) -> dict[str, Any]:
+    """Ingest course lessons from the host to index into the BM25 retrieval engine."""
+    chunks = [
+        ContentChunk(
+            chunk_id=c.chunk_id or f"chunk_{uuid4().hex[:8]}",
+            course_id=c.course_id or payload.course_id or "default",
+            title=c.title,
+            heading=c.heading,
+            text=c.text,
+            url=c.url,
+            page=c.page,
+            language=c.language,
+        )
+        for c in payload.chunks
+    ]
+    total = retrieval_engine.add_chunks(chunks)
+    return {
+        "status": "indexed",
+        "count": len(chunks),
+        "total_chunks": total,
+    }
+
+
+@app.post("/sms/inbound", response_class=Response, tags=["Channels"])
+@app.post("/api/v1/sms/inbound", response_class=Response, tags=["Channels"])
+def sms_inbound(payload: SmsInboundRequest) -> Response:
+    """SMS webhook receiving inbound text message, returning max 160 characters plain text."""
+    ai = get_ai_provider()
+    user_question = payload.text.strip()
+    matches, confidence = retrieval_engine.search(user_question, Language.EN, top_k=2)
+    if not matches or confidence < CONFIDENCE_THRESHOLD:
+        reply = "Savanna: Question not found in course. Call or text support for a human tutor."
+    else:
+        chunks = [m[0] for m in matches]
+        answer_text = ai.generate_answer(
+            question=user_question,
+            context_chunks=chunks,
+            language=Language.EN,
+            simple_mode=True,
+        )
+        reply = answer_text.strip().replace("\n", " ")
+        if len(reply) > 160:
+            reply = reply[:157] + "..."
+    return Response(content=reply, media_type="text/plain")
+
+
 @app.post("/link/start", response_model=LinkStartResponse, tags=["Linking"])
-def link_start(payload: LinkStartRequest) -> LinkStartResponse:
+@app.post("/api/v1/link/start", response_model=LinkStartResponse, tags=["Linking"])
+def link_start(payload: LinkStartRequest | None = None) -> LinkStartResponse:
+    session_id = payload.session_id if payload else "web_session"
+    channel = payload.channel if payload else "telegram"
+    learner_ref = payload.learner_reference if payload else None
     link_id = f"link_{uuid4().hex[:8]}"
     code = f"{random.randint(100000, 999999)}"
+    token = secrets.token_urlsafe(32)[:32]
     link_data = db.create_link(
         link_id=link_id,
         code=code,
-        session_id=payload.session_id,
-        channel=payload.channel,
-        learner_ref=payload.learner_reference,
+        session_id=session_id,
+        channel=channel,
+        learner_ref=learner_ref,
+        token=token,
     )
     return LinkStartResponse(**link_data)
 
 
+@app.get("/api/v1/link/status", response_model=LinkStatusResponse, tags=["Linking"])
+@app.get("/link/status", response_model=LinkStatusResponse, tags=["Linking"])
+def link_status(token: str, request: Request) -> LinkStatusResponse:
+    """Check linking status for a given token. Rate limited."""
+    client_ip = request.client.host if request.client else "127.0.0.1"
+    allowed, retry_after = rate_limiter.is_allowed(f"link_status_{client_ip}")
+    if not allowed:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Rate limit exceeded. Please wait before polling link status.",
+            headers={"Retry-After": str(retry_after)},
+        )
+    res = db.get_link_status(token)
+    return LinkStatusResponse(**res)
+
+
 @app.post("/link/confirm", response_model=LinkConfirmResponse, tags=["Linking"])
-def link_confirm(payload: LinkConfirmRequest) -> LinkConfirmResponse:
-    success, learner_ref, reason = db.verify_and_consume_link(payload.link_id, payload.code)
+@app.post("/api/v1/link/confirm", response_model=LinkConfirmResponse, tags=["Linking"])
+def link_confirm(
+    payload: LinkConfirmRequest,
+    x_bot_secret: str | None = Header(None, alias="X-Bot-Secret"),
+) -> LinkConfirmResponse:
+    # If token or telegram_chat_id is provided, enforce X-Bot-Secret authentication
+    if payload.token is not None or payload.telegram_chat_id is not None or x_bot_secret is not None:
+        if not x_bot_secret or x_bot_secret != BOT_API_SECRET:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Forbidden: Invalid or missing X-Bot-Secret header.",
+            )
+        token_to_verify = payload.token or payload.link_id or ""
+        success, learner_ref, reason = db.verify_and_consume_token_link(
+            token=token_to_verify,
+            telegram_chat_id=payload.telegram_chat_id,
+        )
+        if not success:
+            if reason == "not_found":
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Unknown or invalid linking token.",
+                )
+            elif reason == "already_used":
+                raise HTTPException(
+                    status_code=status.HTTP_410_GONE,
+                    detail="Linking token has already been used.",
+                )
+            elif reason == "expired":
+                raise HTTPException(
+                    status_code=status.HTTP_410_GONE,
+                    detail="Linking token has expired. Please request a fresh one.",
+                )
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid linking request.",
+            )
+        return LinkConfirmResponse(
+            linked=True,
+            channel="telegram",
+            learner_ref=learner_ref,
+            mocked=False,
+        )
+
+    # Legacy 6-digit code flow
+    success, learner_ref, reason = db.verify_and_consume_link(payload.link_id or "", payload.code or "")
     if not success:
         if reason in ("expired", "already_used"):
             raise HTTPException(
@@ -387,16 +517,39 @@ def link_confirm(payload: LinkConfirmRequest) -> LinkConfirmResponse:
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid linking code. Please check and try again.",
         )
-    return LinkConfirmResponse(linked=True, learner_ref=learner_ref, mocked=False)
+    return LinkConfirmResponse(
+        linked=True,
+        channel="telegram",
+        learner_ref=learner_ref,
+        mocked=False,
+    )
+
+
+@app.post("/api/v1/link/disconnect", response_model=LinkDisconnectResponse, tags=["Linking"])
+@app.post("/link/disconnect", response_model=LinkDisconnectResponse, tags=["Linking"])
+def link_disconnect(
+    payload: LinkDisconnectRequest | None = None,
+    _token: Any = Depends(verify_optional_token),
+) -> LinkDisconnectResponse:
+    token = payload.token if payload else None
+    learner_ref = payload.learner_ref if payload else None
+    db.disconnect_link(token=token, learner_ref=learner_ref)
+    return LinkDisconnectResponse(
+        disconnected=True,
+        message="Telegram account disconnected successfully.",
+    )
 
 
 @app.get("/support-needs", response_model=SupportNeeds, tags=["Support"])
+@app.get("/api/v1/support-needs", response_model=SupportNeeds, tags=["Support"])
 def get_support_needs(_token: Any = Depends(verify_optional_token)) -> SupportNeeds:
     return db.get_support_needs("default")
 
 
 @app.put("/support-needs", response_model=SupportNeeds, tags=["Support"])
 @app.post("/support-needs", response_model=SupportNeeds, tags=["Support"])
+@app.put("/api/v1/support-needs", response_model=SupportNeeds, tags=["Support"])
+@app.post("/api/v1/support-needs", response_model=SupportNeeds, tags=["Support"])
 def put_support_needs(
     payload: SupportNeeds, _token: Any = Depends(verify_optional_token)
 ) -> SupportNeeds:
@@ -404,6 +557,7 @@ def put_support_needs(
 
 
 @app.post("/handoff", response_model=Handoff, status_code=status.HTTP_201_CREATED, tags=["Handoff"])
+@app.post("/api/v1/handoff", response_model=Handoff, status_code=status.HTTP_201_CREATED, tags=["Handoff"])
 def create_handoff(
     payload: HandoffRequest, _token: Any = Depends(verify_optional_token)
 ) -> Handoff:
@@ -420,6 +574,48 @@ def create_handoff(
         room_url=room_url,
         learner_ref=payload.learner_ref,
     )
+
+
+@app.post("/api/v1/escalations", status_code=status.HTTP_201_CREATED, tags=["Handoff"])
+@app.post("/escalations", status_code=status.HTTP_201_CREATED, tags=["Handoff"])
+def create_escalation(
+    payload: EscalationRequest, _token: Any = Depends(verify_optional_token)
+) -> dict[str, Any]:
+    """Create an escalation ticket for live human mentor assistance (Technical Guide contract)."""
+    handoff_id = f"handoff_{uuid4().hex[:8]}"
+    room_url = f"https://meet.jit.si/savanna-bridge-demo-{handoff_id}"
+    card = payload.card
+    if not card and payload.conversation:
+        last_turn = (
+            payload.conversation[-1].get("text", "General question")
+            if payload.conversation
+            else "Help needed"
+        )
+        card = HandoffCard(
+            context=f"Escalation: {last_turn[:80]}",
+            language=Language.EN,
+            support_needs=[],
+            contact_mode="text",
+        )
+    elif not card:
+        card = HandoffCard(
+            context="Learner requested mentor help",
+            language=Language.EN,
+            support_needs=[],
+            contact_mode="text",
+        )
+    record = db.create_handoff(
+        handoff_id=handoff_id,
+        card=card,
+        room_url=room_url,
+        learner_ref=payload.learner_ref,
+    )
+    return {
+        "ticketId": record.id,
+        "handoff_id": record.id,
+        "room_url": record.room_url,
+        "status": record.status,
+    }
 
 
 @app.get("/handoff/queue", tags=["Handoff"])
@@ -467,6 +663,7 @@ def close_handoff(handoff_id: str) -> Handoff:
 
 
 @app.get("/jobs", response_model=JobListResponse, tags=["Jobs"])
+@app.get("/api/v1/jobs", response_model=JobListResponse, tags=["Jobs"])
 def list_jobs(field: str | None = None, support_need: str | None = None) -> JobListResponse:
     jobs = job_source.get_jobs(field=field, support_need=support_need)
     return JobListResponse(items=jobs)
@@ -589,6 +786,7 @@ def draft_accommodation(payload: AccommodationDraftRequest) -> AccommodationDraf
 
 
 @app.post("/speech/transcribe", response_model=Transcription, tags=["Speech"])
+@app.post("/api/v1/speech/transcribe", response_model=Transcription, tags=["Speech"])
 def transcribe_speech(payload: TranscriptionRequest) -> Transcription:
     ai = get_ai_provider()
     audio_bytes = b""
@@ -612,6 +810,7 @@ def transcribe_speech(payload: TranscriptionRequest) -> Transcription:
 
 
 @app.post("/speech/synthesize", response_model=SynthesisResult, tags=["Speech"])
+@app.post("/api/v1/speech/synthesize", response_model=SynthesisResult, tags=["Speech"])
 def synthesize_speech(payload: SynthesisRequest) -> SynthesisResult:
     ai = get_ai_provider()
     audio_url = ai.synthesize(text=payload.text, language=payload.language, speed=payload.speed)
@@ -659,6 +858,7 @@ _DEMO_AUDIO = _generate_demo_audio()
 
 
 @app.get("/media/tts/{filename}", tags=["Speech"])
+@app.get("/api/v1/media/tts/{filename}", tags=["Speech"])
 def get_media_tts(filename: str) -> Response:
     media_type = "audio/ogg" if filename.endswith(".ogg") else "audio/wav"
     return Response(
@@ -675,3 +875,22 @@ def get_teacher_stats() -> TeacherStats:
         questions=stats,
         privacy="Aggregated counts only; no learner names or message histories.",
     )
+
+
+@app.get("/api/v1/me/export", tags=["Privacy"])
+@app.get("/me/export", tags=["Privacy"])
+def export_me(
+    learner_ref: str = "web_demo", _token: Any = Depends(verify_optional_token)
+) -> dict[str, Any]:
+    """Export all stored data associated with this learner (GDPR / privacy compliance)."""
+    return db.export_learner_data(learner_ref)
+
+
+@app.delete("/api/v1/me", tags=["Privacy"])
+@app.delete("/me", tags=["Privacy"])
+def delete_me(
+    learner_ref: str = "web_demo", _token: Any = Depends(verify_optional_token)
+) -> dict[str, Any]:
+    """Permanently delete all stored data for this learner."""
+    db.delete_learner_data(learner_ref)
+    return {"deleted": True, "message": "All learner data has been permanently deleted."}

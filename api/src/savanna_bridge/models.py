@@ -5,7 +5,7 @@ from __future__ import annotations
 from enum import StrEnum
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class Language(StrEnum):
@@ -52,28 +52,50 @@ class Answer(BaseModel):
 
 
 class LinkStartRequest(BaseModel):
-    session_id: str
-    channel: Literal["web", "telegram"]
+    session_id: str = "web_session"
+    channel: Literal["web", "telegram"] = "telegram"
     learner_reference: str | None = None
 
 
 class LinkStartResponse(BaseModel):
+    token: str
+    deep_link: str
+    expires_in: int = 600
     link_id: str
     code: str
     expires_at: str
-    single_use: bool
+    single_use: bool = True
+    channel: str = "telegram"
     mocked: bool | None = None
 
 
+class LinkStatusResponse(BaseModel):
+    linked: bool
+    channel: Literal["telegram"] | None = None
+
+
 class LinkConfirmRequest(BaseModel):
-    link_id: str
-    code: str
+    token: str | None = None
+    telegram_chat_id: str | int | None = None
+    link_id: str | None = None
+    code: str | None = None
 
 
 class LinkConfirmResponse(BaseModel):
     linked: bool
+    channel: str | None = "telegram"
     learner_ref: str
     mocked: bool | None = None
+
+
+class LinkDisconnectRequest(BaseModel):
+    token: str | None = None
+    learner_ref: str | None = None
+
+
+class LinkDisconnectResponse(BaseModel):
+    disconnected: bool = True
+    message: str = "Telegram account disconnected successfully."
 
 
 class SupportNeeds(BaseModel):
@@ -256,3 +278,32 @@ class ErrorDetail(BaseModel):
 
 class ErrorResponse(BaseModel):
     error: ErrorDetail
+
+
+class SmsInboundRequest(BaseModel):
+    from_number: str = Field(..., alias="from")
+    text: str
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class ContentChunkInput(BaseModel):
+    chunk_id: str | None = None
+    course_id: str = "default"
+    title: str = "Course Material"
+    heading: str
+    text: str
+    url: str = "https://learning.example.org"
+    page: int = 1
+    language: str = "en"
+
+
+class ContentIngestRequest(BaseModel):
+    course_id: str | None = None
+    chunks: list[ContentChunkInput]
+
+
+class EscalationRequest(BaseModel):
+    conversation: list[dict[str, Any]] | None = None
+    card: HandoffCard | None = None
+    learner_ref: str | None = None

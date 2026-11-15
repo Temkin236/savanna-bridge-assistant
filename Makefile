@@ -1,4 +1,19 @@
-.PHONY: up down mock-api test integration axe verify lint logs ps setup
+.PHONY: up down mock-api test integration axe verify lint logs ps setup quick full
+
+quick:
+ifeq ($(F),widget)
+	cd widget && npm run build
+else ifeq ($(F),api)
+	docker compose run --rm api ruff check .
+	docker compose run --rm api pytest -q $(if $(T),$(T),tests/test_bootstrap.py)
+else ifeq ($(F),channels)
+	docker compose run --rm --entrypoint "/bin/sh -lc" channels-tests "pip install --no-cache-dir pytest -q && pytest -q -o cache_dir=/tmp/.pytest_cache $(if $(T),$(T),tests/)"
+else
+	@echo "Usage: make quick F=api|widget|channels [T=test_file]"
+endif
+
+full: verify
+
 
 up:
 	docker compose up --build -d

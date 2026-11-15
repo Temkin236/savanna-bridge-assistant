@@ -73,7 +73,7 @@ paths:
     post:
       tags: [Linking]
       operationId: startAccountLink
-      summary: Create an expiring one-time account link code
+      summary: Create an expiring one-time account link code and deep link
       requestBody:
         required: true
         content:
@@ -82,7 +82,7 @@ paths:
               $ref: "#/components/schemas/LinkStartRequest"
       responses:
         "200":
-          description: One-time code created
+          description: One-time token and deep link created
           content:
             application/json:
               schema:
@@ -90,11 +90,61 @@ paths:
         "400":
           $ref: "#/components/responses/BadRequest"
 
+  /api/v1/link/start:
+    post:
+      tags: [Linking]
+      operationId: startAccountLinkV1
+      summary: Create an expiring one-time account link token and Telegram deep link
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LinkStartRequest"
+      responses:
+        "200":
+          description: Single-use token and Telegram deep link returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LinkStartResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /api/v1/link/status:
+    get:
+      tags: [Linking]
+      operationId: getLinkStatus
+      summary: Poll status of Telegram account linking for a token
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+          example: "a8B9cD_eF1gH2iJ3kL4mN5oP6qR7sT8u"
+      responses:
+        "200":
+          description: Current link status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LinkStatusResponse"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
   /link/confirm:
     post:
       tags: [Linking]
       operationId: confirmAccountLink
-      summary: Consume a one-time account link code
+      summary: Consume a one-time account link code or token
+      parameters:
+        - name: X-Bot-Secret
+          in: header
+          required: false
+          schema:
+            type: string
+          description: Secret header required when confirming via bot.
       requestBody:
         required: true
         content:
@@ -110,12 +160,89 @@ paths:
                 $ref: "#/components/schemas/LinkConfirmResponse"
         "400":
           $ref: "#/components/responses/BadRequest"
-        "410":
-          description: Code expired or was already used
+        "403":
+          description: Invalid or missing X-Bot-Secret header
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+        "404":
+          description: Unknown token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "410":
+          description: Token or code expired or was already used
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/link/confirm:
+    post:
+      tags: [Linking]
+      operationId: confirmAccountLinkV1
+      summary: Bot confirms account link with X-Bot-Secret
+      parameters:
+        - name: X-Bot-Secret
+          in: header
+          required: true
+          schema:
+            type: string
+          example: "change-me-bot-secret"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LinkConfirmRequest"
+      responses:
+        "200":
+          description: Session linked successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LinkConfirmResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          description: Invalid or missing X-Bot-Secret header
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Unknown token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "410":
+          description: Token expired or already used
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/link/disconnect:
+    post:
+      tags: [Linking]
+      operationId: disconnectAccountLink
+      summary: Disconnect linked Telegram account
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LinkDisconnectRequest"
+      responses:
+        "200":
+          description: Account disconnected successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LinkDisconnectResponse"
 
   /support-needs:
     get:
@@ -544,6 +671,182 @@ paths:
               schema:
                 $ref: "#/components/schemas/TeacherStats"
 
+  /sms/inbound:
+    post:
+      tags: [Channels]
+      operationId: smsInbound
+      summary: Handle inbound SMS from gateway or webhook
+      description: Returns plain text up to 160 characters.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [from, text]
+              properties:
+                from:
+                  type: string
+                  example: "+251911223344"
+                text:
+                  type: string
+                  example: "What is module 2?"
+      responses:
+        "200":
+          description: Plain text reply of at most 160 characters
+          content:
+            text/plain:
+              schema:
+                type: string
+                maxLength: 160
+              example: "Module 2 explains how to listen, clarify a customer's need, and respond clearly."
+
+  /api/v1/content:
+    post:
+      tags: [Content]
+      operationId: ingestContent
+      summary: Host sends course lessons or modules to be indexed
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [chunks]
+              properties:
+                course_id:
+                  type: string
+                  example: "course_demo"
+                chunks:
+                  type: array
+                  items:
+                    type: object
+                    required: [heading, text]
+                    properties:
+                      title:
+                        type: string
+                        example: "Customer Service Foundations"
+                      heading:
+                        type: string
+                        example: "Module 3 - Handling Inquiries"
+                      text:
+                        type: string
+                        example: "Inquiries must be documented and addressed within 24 hours."
+                      url:
+                        type: string
+                        example: "https://learning.example.org/module-3"
+                      page:
+                        type: integer
+                        example: 3
+                      language:
+                        type: string
+                        example: "en"
+      responses:
+        "201":
+          description: Content indexed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "indexed"
+                  count:
+                    type: integer
+                    example: 1
+                  total_chunks:
+                    type: integer
+                    example: 7
+
+  /api/v1/escalations:
+    post:
+      tags: [Handoff]
+      operationId: createEscalation
+      summary: Create escalation ticket for live human mentor
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                conversation:
+                  type: array
+                  items:
+                    type: object
+                learner_ref:
+                  type: string
+                  example: "learner_01"
+      responses:
+        "201":
+          description: Escalation created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ticketId:
+                    type: string
+                    example: "handoff_01"
+                  handoff_id:
+                    type: string
+                    example: "handoff_01"
+                  room_url:
+                    type: string
+                    example: "https://meet.jit.si/savanna-bridge-demo-handoff_01"
+                  status:
+                    type: string
+                    example: "waiting"
+
+  /api/v1/me/export:
+    get:
+      tags: [Privacy]
+      operationId: exportLearnerData
+      summary: Export all data held about the learner (GDPR/privacy)
+      security: []
+      responses:
+        "200":
+          description: Exported learner data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  learner_ref:
+                    type: string
+                    example: "web_demo"
+                  support_needs:
+                    type: object
+                  handoffs:
+                    type: array
+                    items:
+                      type: object
+
+  /api/v1/me:
+    delete:
+      tags: [Privacy]
+      operationId: deleteLearnerData
+      summary: Permanently delete all learner data
+      security: []
+      responses:
+        "200":
+          description: Data permanently deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "All learner data has been permanently deleted."
+
 components:
   securitySchemes:
     WidgetToken:
@@ -747,39 +1050,85 @@ components:
 
     LinkStartResponse:
       type: object
-      required: [link_id, code, expires_at, single_use]
+      required: [token, deep_link, expires_in]
       properties:
+        token:
+          type: string
+          description: 32 random URL-safe characters, single use, bound to widget session.
+          example: "a8B9cD_eF1gH2iJ3kL4mN5oP6qR7sT8u"
+        deep_link:
+          type: string
+          format: uri
+          description: Direct Telegram bot deep link to start account linking.
+          example: "https://t.me/savannah_assistant3_bot?start=a8B9cD_eF1gH2iJ3kL4mN5oP6qR7sT8u"
+        expires_in:
+          type: integer
+          description: Expiry time in seconds (10 minutes).
+          example: 600
         link_id:
           type: string
+          example: link_01
         code:
           type: string
           pattern: "^[0-9]{6}$"
+          example: "482913"
         expires_at:
           type: string
           format: date-time
+          example: "2026-11-14T10:40:00+03:00"
         single_use:
           type: boolean
+          example: true
         mocked:
           type: boolean
+          example: false
       example:
+        token: "a8B9cD_eF1gH2iJ3kL4mN5oP6qR7sT8u"
+        deep_link: "https://t.me/savannah_assistant3_bot?start=a8B9cD_eF1gH2iJ3kL4mN5oP6qR7sT8u"
+        expires_in: 600
         link_id: link_01
         code: "482913"
         expires_at: "2026-11-14T10:40:00+03:00"
         single_use: true
-        mocked: true
+        mocked: false
+
+    LinkStatusResponse:
+      type: object
+      required: [linked]
+      properties:
+        linked:
+          type: boolean
+          example: false
+        channel:
+          type: string
+          enum: [telegram]
+          nullable: true
+          example: null
+      example:
+        linked: false
+        channel: null
 
     LinkConfirmRequest:
       type: object
-      required: [link_id, code]
       properties:
+        token:
+          type: string
+          description: 32-character URL-safe single-use token.
+          example: "a8B9cD_eF1gH2iJ3kL4mN5oP6qR7sT8u"
+        telegram_chat_id:
+          type: string
+          description: Telegram chat ID of the user.
+          example: "123456789"
         link_id:
           type: string
+          example: link_01
         code:
           type: string
           pattern: "^[0-9]{6}$"
+          example: "482913"
       example:
-        link_id: link_01
-        code: "482913"
+        token: "a8B9cD_eF1gH2iJ3kL4mN5oP6qR7sT8u"
+        telegram_chat_id: "123456789"
 
     LinkConfirmResponse:
       type: object
@@ -787,14 +1136,44 @@ components:
       properties:
         linked:
           type: boolean
+        channel:
+          type: string
+          example: "telegram"
         learner_ref:
           type: string
         mocked:
           type: boolean
       example:
         linked: true
+        channel: "telegram"
         learner_ref: learner_demo_01
-        mocked: true
+        mocked: false
+
+    LinkDisconnectRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          example: "a8B9cD_eF1gH2iJ3kL4mN5oP6qR7sT8u"
+        learner_ref:
+          type: string
+          example: "learner_01"
+      example:
+        token: "a8B9cD_eF1gH2iJ3kL4mN5oP6qR7sT8u"
+
+    LinkDisconnectResponse:
+      type: object
+      required: [disconnected, message]
+      properties:
+        disconnected:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Telegram account disconnected successfully."
+      example:
+        disconnected: true
+        message: "Telegram account disconnected successfully."
 
     SupportNeed:
       type: string
