@@ -518,6 +518,25 @@ async def handle_confirm(message: types.Message) -> None:
         await send_safe_message(message, fail_msgs.get(lang, fail_msgs["en"]))
 
 
+@router.message(Command("unlink"))
+async def handle_unlink(message: types.Message) -> None:
+    user_id = message.from_user.id if message.from_user else 0
+    state = get_user_state(user_id)
+    lang = state.get("language", "en")
+    state["linked"] = False
+    await call_api("POST", "/link/revoke", {"link_id": f"link_{user_id}"})
+    await call_api("POST", "/link/disconnect", {"learner_ref": state["learner_ref"]})
+    unlink_msgs = {
+        "am": "🔓 መለያዎ በተሳካ ሁኔታ ተለያይቷል። የግል ምርጫዎችዎ ከእንግዲህ አይመሳሰሉም።",
+        "om": "🔓 Herregni keessan wal-gadhiiseera. Filannoowwan keessan gara fuulduraatti wal hin simatan.",
+        "ti": "🔓 ኣካውንትኩም ተፈላልዩ ኣሎ። ምርጫታትኩም ድሕሪ ሕጂ ኣይመሳሰሉን እዮም።",
+        "ar": "🔓 تم إلغاء ربط حسابك بنجاح. لن تتم مزامنة تفضيلاتك بعد الآن.",
+        "en": "🔓 Account unlinked successfully. Your preferences will no longer sync with the web assistant.",
+    }
+    await send_safe_message(message, unlink_msgs.get(lang, unlink_msgs["en"]))
+
+
+
 @router.message(Command("handoff"))
 @router.message(
     F.text.in_({"👥 ከሰው ጋር ተገናኝ", "👥 Talk to a Person", "👥 Nama Waliin Dubbadhu", "👥 ምስ ሰብ ተራኸብ", "👥 التحدث مع شخص"})

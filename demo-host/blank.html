@@ -2,30 +2,95 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Independent Host - Blank Page Verification</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Independent Host Integration Demo — Savanna Bridge Assistant</title>
+    <style>
+      :root {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        color: #1f2937;
+        background-color: #f9fafb;
+      }
+      body {
+        margin: 0;
+        padding: 2rem;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      header {
+        border-bottom: 2px solid #e5e7eb;
+        padding-bottom: 1rem;
+        margin-bottom: 1.5rem;
+      }
+      h1 {
+        margin: 0 0 0.5rem 0;
+        color: #111827;
+      }
+      p {
+        line-height: 1.6;
+      }
+      .code-snippet {
+        background: #1e293b;
+        color: #f8fafc;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        overflow-x: auto;
+        font-family: monospace;
+        font-size: 0.9rem;
+      }
+      .status-pill {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        background: #ecfdf5;
+        color: #065f46;
+        border-radius: 9999px;
+        font-weight: 600;
+        font-size: 0.85rem;
+      }
+    </style>
   </head>
   <body>
+    <header>
+      <span class="status-pill">Independent Platform Test</span>
+      <h1>External Host Integration Demo</h1>
+      <p>This blank third-party page demonstrates embedding the Savanna Bridge Assistant via the standard <code>&lt;db-assistant&gt;</code> custom element alias with zero framework dependencies.</p>
+    </header>
+
     <main>
-      <h1>Independent Host (No Bootstrap, No Savanna CSS)</h1>
-      <p>This blank page verifies that the assistant module works on any external host with a single script tag.</p>
+      <section>
+        <h2>Integration Snippet Used on This Page</h2>
+        <pre class="code-snippet">&lt;!-- 1. Include the assistant widget bundle --&gt;
+&lt;script type="module" src="/widget/widget.js"&gt;&lt;/script&gt;
+
+&lt;!-- 2. Mount the assistant using the backward-compatible alias --&gt;
+&lt;db-assistant api-base="http://localhost:8000" course-id="alx-fe-2026" lang="en"&gt;&lt;/db-assistant&gt;</pre>
+      </section>
+
+      <section style="margin-top: 2rem;">
+        <h2>Event Listeners Check</h2>
+        <p>Host platforms can listen to assistant events. Try asking a question or escalating below:</p>
+        <div id="events-log" style="background:#fff; border:1px solid #d1d5db; border-radius:0.5rem; padding:1rem; min-height:80px; font-family:monospace; font-size:0.85rem;" aria-live="polite">
+          Listening for &lt;db-assistant&gt; events...
+        </div>
+      </section>
     </main>
 
-    <!-- 1. Load the module (Classic IIFE script - no CORS module restrictions) -->
-    <script src="/widget/widget.iife.js" defer></script>
+    <!-- Embedded db-assistant -->
+    <script type="module" src="/widget/widget.js"></script>
+    <db-assistant id="host-assistant" api-base="http://localhost:8000" course-id="alx-fe-2026" lang="en"></db-assistant>
 
-    <!-- 2. Mount custom element as db-assistant or bridge-assistant -->
-    <db-assistant lang="am" api="http://localhost:8000" content="course_demo"></db-assistant>
-
-    <!-- 3. Host listens to custom events -->
     <script>
-      document.addEventListener("db-assistant:question", (e) => {
-        console.log("Host captured db-assistant:question event:", e.detail);
-      });
-      document.addEventListener("db-assistant:escalated", (e) => {
-        console.log("Host captured db-assistant:escalated event:", e.detail);
-      });
+      const log = document.getElementById("events-log");
+      function logEvent(name, detail) {
+        const item = document.createElement("div");
+        item.style.padding = "4px 0";
+        item.style.borderBottom = "1px solid #f3f4f6";
+        item.textContent = `[${new Date().toLocaleTimeString()}] Event: ${name} -> ${JSON.stringify(detail)}`;
+        log.appendChild(item);
+      }
+      window.addEventListener("db-assistant:question", (e) => logEvent("db-assistant:question", e.detail));
+      window.addEventListener("db-assistant:answer", (e) => logEvent("db-assistant:answer", e.detail));
+      window.addEventListener("db-assistant:escalated", (e) => logEvent("db-assistant:escalated", e.detail));
     </script>
   </body>
 </html>
-

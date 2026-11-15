@@ -1566,7 +1566,8 @@ class x extends HTMLElement {
   }
 }
 customElements.get("bridge-assistant") || customElements.define("bridge-assistant", x);
-customElements.get("db-assistant") || customElements.define("db-assistant", x);
+customElements.get("db-assistant") || customElements.define("db-assistant", class extends x {
+});
 export {
   x as BridgeAssistant
 };

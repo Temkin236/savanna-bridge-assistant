@@ -1950,5 +1950,6 @@ if (!customElements.get("bridge-assistant")) {
   customElements.define("bridge-assistant", BridgeAssistant);
 }
 if (!customElements.get("db-assistant")) {
-  customElements.define("db-assistant", BridgeAssistant);
+  customElements.define("db-assistant", class extends BridgeAssistant {});
 }
+

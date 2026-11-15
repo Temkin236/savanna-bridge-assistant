@@ -47,6 +47,8 @@ def init_db(db_path: str = DB_PATH) -> None:
             ("token", "TEXT"),
             ("telegram_chat_id", "TEXT"),
             ("linked", "INTEGER NOT NULL DEFAULT 0"),
+            ("attempts", "INTEGER NOT NULL DEFAULT 0"),
+            ("revoked", "INTEGER NOT NULL DEFAULT 0"),
         ]:
             with contextlib.suppress(sqlite3.OperationalError):
                 cursor.execute(f"ALTER TABLE links ADD COLUMN {col_name} {col_type}")
@@ -235,16 +237,43 @@ class Database:
                 return False, "", "not_found"
             if row["used"]:
                 return False, "", "already_used"
+
+            # Check revocation
+            revoked = False
+            with contextlib.suppress(Exception):
+                revoked = bool(row["revoked"])
+            if revoked:
+                return False, "", "revoked"
+
+            # Check attempt limit
+            attempts = 0
+            with contextlib.suppress(Exception):
+                attempts = int(row["attempts"])
+            if attempts >= 5:
+                return False, "", "too_many_attempts"
+
             now_iso = datetime.now(UTC).isoformat()
             if row["expires_at"] < now_iso:
                 return False, "", "expired"
             if row["code"] != code:
+                with contextlib.suppress(Exception):
+                    conn.execute("UPDATE links SET attempts = attempts + 1 WHERE link_id = ?", (row["link_id"],))
+                    conn.commit()
+                if attempts + 1 >= 5:
+                    return False, "", "too_many_attempts"
                 return False, "", "invalid_code"
 
             # Consume code and mark linked
             conn.execute("UPDATE links SET used = 1, linked = 1 WHERE link_id = ?", (row["link_id"],))
             conn.commit()
             return True, row["learner_ref"], "ok"
+
+    def revoke_link(self, link_id: str) -> bool:
+        """Revoke an active linking code before expiry."""
+        with get_connection(self.db_path) as conn:
+            cursor = conn.execute("UPDATE links SET revoked = 1 WHERE link_id = ?", (link_id,))
+            conn.commit()
+            return cursor.rowcount > 0
 
     def get_support_needs(self, learner_ref: str = "default") -> SupportNeeds:
         with get_connection(self.db_path) as conn:

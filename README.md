@@ -456,6 +456,19 @@ Assuming 3,000 active learners asking an average of 20 questions per month:
 
 ---
 
+## Official Hackathon Documentation
+
+- [Implementation Audit (Phase 0 Baseline)](docs/IMPLEMENTATION_AUDIT.md)
+- [Platform Integration Guide](docs/INTEGRATION.md)
+- [System Architecture & Data Flows](docs/ARCHITECTURE.md)
+- [WCAG 2.2 AA Accessibility Report](docs/WCAG_REPORT.md)
+- [Performance & Low-Bandwidth Report](docs/PERFORMANCE_REPORT.md)
+- [Security & Privacy Architecture](docs/SECURITY_AND_PRIVACY.md)
+- [Official Judging Demonstration Script](docs/JUDGING_DEMO.md)
+- [Final Implementation Report](docs/FINAL_IMPLEMENTATION_REPORT.md)
+
+---
+
 ## Libraries and Their Licences
 
 | Library / Component | Version | Licence | Purpose |

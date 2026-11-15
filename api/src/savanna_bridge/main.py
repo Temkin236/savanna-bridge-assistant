@@ -20,6 +20,7 @@ from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response, 
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 
 from adapters.base import ContentChunk
 from adapters.jobs import JobPostingSource
@@ -78,8 +79,10 @@ from savanna_bridge.models import (
     Transcription,
     TranscriptionRequest,
 )
+from savanna_bridge.language import LanguageGuard, LanguageRegistry
 from savanna_bridge.rate_limiter import RateLimiter
 from savanna_bridge.retrieval import RetrievalEngine
+from savanna_bridge.tenant import TenantRegistry
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
@@ -508,10 +511,10 @@ def link_confirm(
     # Legacy 6-digit code flow
     success, learner_ref, reason = db.verify_and_consume_link(payload.link_id or "", payload.code or "")
     if not success:
-        if reason in ("expired", "already_used"):
+        if reason in ("expired", "already_used", "revoked", "too_many_attempts"):
             raise HTTPException(
                 status_code=status.HTTP_410_GONE,
-                detail="This code has expired or was already used. Request a fresh one.",
+                detail="This code has expired, been revoked, or reached attempt limits. Request a fresh one.",
             )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -614,6 +617,7 @@ def create_escalation(
         "ticketId": record.id,
         "handoff_id": record.id,
         "room_url": record.room_url,
+        "roomUrl": record.room_url,
         "status": record.status,
     }
 
@@ -894,3 +898,46 @@ def delete_me(
     """Permanently delete all stored data for this learner."""
     db.delete_learner_data(learner_ref)
     return {"deleted": True, "message": "All learner data has been permanently deleted."}
+
+
+# --- Track 3 Enhancements Endpoints ---
+
+
+class LinkRevokeRequest(BaseModel):
+    link_id: str
+
+
+@app.post("/api/v1/link/revoke", tags=["Linking"])
+@app.post("/link/revoke", tags=["Linking"])
+def link_revoke(
+    payload: LinkRevokeRequest, _token: Any = Depends(verify_optional_token)
+) -> dict[str, Any]:
+    revoked = db.revoke_link(payload.link_id)
+    return {"revoked": revoked, "link_id": payload.link_id}
+
+
+
+@app.get("/api/v1/tenants", tags=["System"])
+@app.get("/tenants", tags=["System"])
+def get_tenants() -> list[dict[str, Any]]:
+    """Multi-tenant institution configuration list."""
+    return TenantRegistry.list_tenants()
+
+
+@app.get("/api/v1/languages", tags=["System"])
+@app.get("/languages", tags=["System"])
+def get_languages() -> list[dict[str, Any]]:
+    """Supported multilingual registry metadata."""
+    return [
+        {
+            "code": lang.code,
+            "displayName": lang.display_name,
+            "nativeName": lang.native_name,
+            "direction": lang.direction,
+            "supportsStt": lang.supports_stt,
+            "supportsTts": lang.supports_tts,
+            "ethiopicScript": lang.ethiopic_script,
+        }
+        for lang in LanguageRegistry.all_languages()
+    ]
+
