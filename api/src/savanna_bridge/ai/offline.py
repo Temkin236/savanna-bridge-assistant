@@ -106,8 +106,13 @@ class OfflineFaqProvider(AIProvider):
                 clean_heading = re.sub(r"[#*`_]+", "", c.heading or "").strip()
                 clean_heading = re.sub(r"\s+", " ", clean_heading).strip()
 
-                lines = [re.sub(r"^[#*•\-_>\s]+", "", l).strip() for l in (c.text or "").split("\n")]
-                clean_text = " ".join([l for l in lines if l and not l.startswith("http")])
+                lines = [
+                    re.sub(r"^[#*•\-_>\s]+", "", line).strip()
+                    for line in (c.text or "").split("\n")
+                ]
+                clean_text = " ".join(
+                    line for line in lines if line and not line.startswith("http")
+                )
                 clean_text = re.sub(r"\s+", " ", clean_text).strip()
 
                 sentences = [
@@ -144,7 +149,7 @@ class OfflineFaqProvider(AIProvider):
 
             if not points:
                 fallback_lines = [re.sub(r"[#*`_]+", "", c.text).strip() for c in context_chunks[:3]]
-                points = [f"• {l}" for l in fallback_lines if l]
+                points = [f"• {line}" for line in fallback_lines if line]
 
             if language == Language.AM:
                 summary_text = f"የ{clean_title} ማጠቃለያ፡\n\n" + "\n".join(points[:5])
@@ -427,15 +432,8 @@ class OfflineFaqProvider(AIProvider):
         elif language == Language.AR:
             return "ما موضوع هذه الدورة؟ اشرحها لي."
         elif language == Language.TI:
-<<<<<<< Updated upstream
-            return "ብዛዕባ ሞጁል 2 ግለጹለይ።"
-        elif language == Language.AR:
-            return "يرجى شرح الوحدة الثانية."
-        return "Please explain Module 2."
-=======
             return "እዚ ኮርስ ብዛዕባ እንታይ እዩ? ግለጹለይ።"
         return "What is this course about? Explain this lesson to me."
->>>>>>> Stashed changes
 
     def synthesize(self, text: str, language: Language, speed: float = 1.0) -> str:
         return "http://localhost:8000/media/tts/demo.ogg"
