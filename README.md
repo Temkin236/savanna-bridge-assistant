@@ -369,8 +369,8 @@ Jobs are marked up with structured JSON-LD directly within the host page at [dem
 The system currently supports:
 - **English (`en`)**: Complete offline BM25 and cloud generation.
 - **Amharic (`am`, አማርኛ)**: Complete offline BM25 extraction with Ge'ez punctuation normalizer and Addis AI/Gemini generation.
-- **Afaan Oromo (`om`) & Tigrinya (`ti`)**: *Experimental* via Addis AI SDK cloud translations; UI strings translated.
-- **Arabic (`ar`)**: Right-to-left (`dir="rtl"`) CSS logical property layout support.
+- **Afaan Oromo (`om`) & Tigrinya (`ti`)**: Grounded course chunks and Addis AI SDK translations; UI strings translated.
+- **Arabic (`ar`)**: Right-to-left (`dir="rtl"`) CSS logical property layout and Gemini translations.
 
 ### Adding a New Language (e.g., Somali `so`)
 
@@ -450,7 +450,6 @@ Assuming 3,000 active learners asking an average of 20 questions per month:
 
 ### What is Not Finished / Experimental
 - [ ] **Co-Designer Live Session**: Stand-in rehearsal protocols completed on Windows NVDA and Android Chrome; live co-designer session with an assigned participant is pending mentor desk scheduling.
-- [ ] **Afaan Oromo & Tigrinya Offline Retrieval**: Currently experimental via Addis AI cloud translation; offline BM25 dictionary index is populated for English and Amharic only.
 - [ ] **Production LMS Integration**: Demonstrated with bundled mock learner directory (deadlines and modules are test fixtures).
 - [ ] **Android Screen Sharing Fallback**: Mobile Chrome does not support `getDisplayMedia`; helper receives current URL, heading anchor, and active element details instead of live video stream.
 

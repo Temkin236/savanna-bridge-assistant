@@ -91,9 +91,7 @@ class AddisAiProvider(AIProvider):
         if direct:
             return direct
 
-        from savanna_bridge.language import LanguageGuard
-
-        return LanguageGuard._neural_translate(text, src, tgt)
+        return text
 
     def generate_answer(
         self,
