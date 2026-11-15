@@ -60,16 +60,12 @@ test.describe("Widget testing on demo-host", () => {
     const savedNotice = page.locator("bridge-assistant .support-saved-notice");
     await expect(savedNotice).toBeVisible();
 
-    // 7. Test barrier-free account linking code generation
-    await page.locator("bridge-assistant #tab-link").click();
-    const generateBtn = page.locator("bridge-assistant #btn-generate-code");
-    if (await generateBtn.isVisible()) {
-      await generateBtn.click();
-    }
-    const codeDisplay = page.locator("bridge-assistant .code-display");
-    await expect(codeDisplay).toBeVisible();
-    const codeText = await codeDisplay.innerText();
-    expect(codeText).toMatch(/^\d{6}$/);
+    // 7. Test Continue on Telegram button in footer
+    await page.locator("bridge-assistant #tab-chat").click();
+    const tgLink = page.locator("bridge-assistant #tg-deep-link");
+    await expect(tgLink).toBeVisible();
+    const tgHref = await tgLink.getAttribute("href");
+    expect(tgHref).toContain("t.me");
   });
 
   test("widget on demo-host initiates a consented handoff that appears in the agent console and can be claimed", async ({

@@ -1610,7 +1610,7 @@ export class BridgeAssistant extends HTMLElement {
     preferred_contact_mode: "text",
   };
 
-  private activeTab: "chat" | "support" | "link" | "handoff" = "chat";
+  private activeTab: "chat" | "support" | "handoff" = "chat";
 
   // Persistent Accessibility & Voice Preferences (Configure Once, Access Everywhere)
   private accessibilityPrefs: AccessibilityPreferences = {
@@ -3188,10 +3188,6 @@ export class BridgeAssistant extends HTMLElement {
             ${ICONS.heart}
             <span>${this.t("supportTab")}</span>
           </button>
-          <button type="button" class="tab-btn" id="tab-link" role="tab" aria-selected="${this.activeTab === "link"}" aria-controls="pane-link">
-            ${ICONS.link}
-            <span>${this.t("linkTab")}</span>
-          </button>
           <button type="button" class="tab-btn" id="tab-handoff" role="tab" aria-selected="${this.activeTab === "handoff"}" aria-controls="pane-handoff">
             ${ICONS.headphones}
             <span>${this.t("handoffTab")}</span>
@@ -3342,22 +3338,7 @@ export class BridgeAssistant extends HTMLElement {
           </div>
         </div>
 
-        <!-- Pane 3: Barrier-Free Account Linking -->
-        <div id="pane-link" class="tab-panel" role="tabpanel" ${this.activeTab === "link" ? "" : "hidden"} style="${this.activeTab === "link" ? "display:block; overflow-y:auto; padding:1rem;" : "display:none;"}">
-          <div class="settings-card">
-            <div class="settings-card-title">${ICONS.link} <span>${this.t("linkTab")}</span></div>
-            <div class="settings-card-desc">
-              ${this.t("supportZeroProof")}
-            </div>
-            <button type="button" class="btn btn-primary" id="btn-generate-code" style="width:100%; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-              ${ICONS.key} <span>${this.t("generateCodeBtn")}</span>
-            </button>
-            <div class="code-display" id="code-display" style="display:none; font-size:1.75rem; font-weight:700; letter-spacing:0.25em; text-align:center; padding:1rem; background:var(--b-surface-alt); border:2px dashed var(--b-primary); border-radius:0.75rem; margin-top:0.875rem; color:var(--b-primary);">
-            </div>
-          </div>
-        </div>
-
-        <!-- Pane 4: Consented Live Help Handoff -->
+        <!-- Pane 3: Consented Live Help Handoff -->
         <div id="pane-handoff" class="tab-panel" role="tabpanel" ${this.activeTab === "handoff" ? "" : "hidden"} style="${this.activeTab === "handoff" ? "display:block; overflow-y:auto; padding:1rem;" : "display:none;"}">
           <div class="settings-card">
             <div class="settings-card-title">${ICONS.headphones} <span>${this.t("handoffTab")}</span></div>
@@ -3863,16 +3844,15 @@ export class BridgeAssistant extends HTMLElement {
       openSettingsBtn.focus();
     });
 
-    // Main Navigation Tabs Switching (Chat, Support, Link, Handoff)
+    // Main Navigation Tabs Switching (Chat, Support, Handoff)
     const mainTabs = [
       { id: "chat", btn: this.shadowRoot.querySelector<HTMLButtonElement>("#tab-chat"), pane: this.shadowRoot.querySelector<HTMLElement>("#pane-chat") },
       { id: "support", btn: this.shadowRoot.querySelector<HTMLButtonElement>("#tab-support"), pane: this.shadowRoot.querySelector<HTMLElement>("#pane-support") },
-      { id: "link", btn: this.shadowRoot.querySelector<HTMLButtonElement>("#tab-link"), pane: this.shadowRoot.querySelector<HTMLElement>("#pane-link") },
       { id: "handoff", btn: this.shadowRoot.querySelector<HTMLButtonElement>("#tab-handoff"), pane: this.shadowRoot.querySelector<HTMLElement>("#pane-handoff") },
     ];
 
     const switchMainTab = (index: number) => {
-      this.activeTab = mainTabs[index].id as "chat" | "support" | "link" | "handoff";
+      this.activeTab = mainTabs[index].id as "chat" | "support" | "handoff";
       mainTabs.forEach((t, i) => {
         const selected = i === index;
         t.btn?.setAttribute("aria-selected", selected ? "true" : "false");

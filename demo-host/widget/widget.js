@@ -1,7 +1,7 @@
 var z = Object.defineProperty;
-var N = (y, m, e) => m in y ? z(y, m, { enumerable: !0, configurable: !0, writable: !0, value: e }) : y[m] = e;
-var r = (y, m, e) => N(y, typeof m != "symbol" ? m + "" : m, e);
-const l = {
+var N = (y, f, e) => f in y ? z(y, f, { enumerable: !0, configurable: !0, writable: !0, value: e }) : y[f] = e;
+var r = (y, f, e) => N(y, typeof f != "symbol" ? f + "" : f, e);
+const d = {
   launcher: '<svg class="icon-inline" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M8 10h.01M12 10h.01M16 10h.01"></path></svg>',
   settings: '<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>',
   close: '<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
@@ -2375,7 +2375,7 @@ class q extends HTMLElement {
       ${!this.isOpen && this.showAutoplayBanner ? `
         <div class="voice-activation-banner" role="alert" style="position:fixed; bottom:5.5rem; right:1.5rem; max-width:320px; z-index:99999; box-shadow:0 8px 24px rgba(0,0,0,0.18);">
           <div style="display:flex; align-items:center; gap:0.5rem;">
-            ${l.sound}
+            ${d.sound}
             <span>${this.t("voiceActivationPrompt")}</span>
           </div>
           <div style="display:flex; align-items:center; gap:0.375rem; margin-top:0.375rem;">
@@ -2383,7 +2383,7 @@ class q extends HTMLElement {
               ${this.t("voiceActivationBtn")}
             </button>
             <button type="button" class="btn btn-secondary btn-icon-only" id="btn-dismiss-voice-banner-floating" style="min-height:1.75rem; width:1.75rem; padding:0;" aria-label="Dismiss">
-              ${l.close}
+              ${d.close}
             </button>
           </div>
         </div>
@@ -2439,19 +2439,15 @@ class q extends HTMLElement {
         <!-- Navigation Tabs on Main Assistant Dialog -->
         <nav class="nav-tabs" role="tablist" aria-label="Assistant sections">
           <button type="button" class="tab-btn" id="tab-chat" role="tab" aria-selected="${this.activeTab === "chat"}" aria-controls="pane-chat">
-            ${l.launcher}
+            ${d.launcher}
             <span>${this.t("chatTab")}</span>
           </button>
           <button type="button" class="tab-btn" id="tab-support" role="tab" aria-selected="${this.activeTab === "support"}" aria-controls="pane-support">
-            ${l.heart}
+            ${d.heart}
             <span>${this.t("supportTab")}</span>
           </button>
-          <button type="button" class="tab-btn" id="tab-link" role="tab" aria-selected="${this.activeTab === "link"}" aria-controls="pane-link">
-            ${l.link}
-            <span>${this.t("linkTab")}</span>
-          </button>
           <button type="button" class="tab-btn" id="tab-handoff" role="tab" aria-selected="${this.activeTab === "handoff"}" aria-controls="pane-handoff">
-            ${l.headphones}
+            ${d.headphones}
             <span>${this.t("handoffTab")}</span>
           </button>
         </nav>
@@ -2464,7 +2460,7 @@ class q extends HTMLElement {
           ${this.showAutoplayBanner ? `
             <div class="voice-activation-banner" role="alert" style="margin:0.5rem 1rem; padding:0.625rem 0.875rem; background:#eff6ff; border:1px solid #bfdbfe; border-radius:0.5rem; display:flex; align-items:center; justify-content:space-between; gap:0.5rem; font-size:0.8125rem; color:#1e40af;">
               <div style="display:flex; align-items:center; gap:0.5rem;">
-                ${l.sound}
+                ${d.sound}
                 <span>${this.t("voiceActivationPrompt")}</span>
               </div>
               <div style="display:flex; align-items:center; gap:0.375rem;">
@@ -2472,7 +2468,7 @@ class q extends HTMLElement {
                   ${this.t("voiceActivationBtn")}
                 </button>
                 <button type="button" class="btn btn-secondary btn-icon-only" id="btn-dismiss-voice-banner" style="min-height:1.75rem; width:1.75rem; padding:0;" aria-label="Dismiss">
-                  ${l.close}
+                  ${d.close}
                 </button>
               </div>
             </div>
@@ -2487,9 +2483,9 @@ class q extends HTMLElement {
                 </span>
               </div>
               <div class="reading-btns">
-                ${this.isReadingPaused ? `<button type="button" class="btn btn-secondary btn-icon-only" id="btn-reading-resume" aria-label="${this.t("resumeReading")}" title="${this.t("resumeReading")}">${l.play}</button>` : `<button type="button" class="btn btn-secondary btn-icon-only" id="btn-reading-pause" aria-label="${this.t("pauseReading")}" title="${this.t("pauseReading")}">${l.pause}</button>`}
+                ${this.isReadingPaused ? `<button type="button" class="btn btn-secondary btn-icon-only" id="btn-reading-resume" aria-label="${this.t("resumeReading")}" title="${this.t("resumeReading")}">${d.play}</button>` : `<button type="button" class="btn btn-secondary btn-icon-only" id="btn-reading-pause" aria-label="${this.t("pauseReading")}" title="${this.t("pauseReading")}">${d.pause}</button>`}
                 <button type="button" class="btn btn-danger btn-icon-only" id="btn-reading-stop" aria-label="${this.t("stopReading")}" title="${this.t("stopReading")}" style="background:#fee2e2; color:#991b1b; border:1px solid #fca5a5;">
-                  ${l.stop}
+                  ${d.stop}
                 </button>
               </div>
             </div>
@@ -2511,18 +2507,18 @@ class q extends HTMLElement {
                      required autocomplete="off">
               <button type="button" class="btn btn-secondary mic-btn btn-icon-only" id="mic-btn" 
                       aria-label="${this.t("micLabel")}" title="${this.t("micLabel")}">
-                ${l.mic}
+                ${d.mic}
               </button>
               <button type="submit" class="btn btn-primary" id="btn-send" data-id="btn-send" style="display:inline-flex; align-items:center; gap:0.375rem;">
                 <span>${this.t("sendButton")}</span>
-                ${l.send}
+                ${d.send}
               </button>
             </form>
 
             <!-- Bottom Row: Talk to a person & Continue on Telegram -->
             <div class="footer-actions-row">
               <button type="button" class="btn btn-secondary btn-footer btn-talk-person" id="btn-footer-handoff" style="display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-                ${l.user}
+                ${d.user}
                 <span>${this.t("talkToPersonButton")}</span>
               </button>
               <div id="telegram-container" class="telegram-section">
@@ -2535,7 +2531,7 @@ class q extends HTMLElement {
         <!-- Pane 2: Support Preferences (Zero Proof Required) -->
         <div id="pane-support" class="tab-panel" role="tabpanel" ${this.activeTab === "support" ? "" : "hidden"} style="${this.activeTab === "support" ? "display:block; overflow-y:auto; padding:1rem;" : "display:none;"}">
           <div class="settings-card">
-            <div class="settings-card-title">${l.heart} <span>${this.t("supportNeedsTitle")}</span></div>
+            <div class="settings-card-title">${d.heart} <span>${this.t("supportNeedsTitle")}</span></div>
             <div class="settings-card-desc">
               ${this.t("supportZeroProof")}
             </div>
@@ -2587,7 +2583,7 @@ class q extends HTMLElement {
               </label>
 
               <div id="support-saved-notice" class="support-saved-notice" hidden style="color:#166534; font-size:0.8125rem; font-weight:600; display:inline-flex; align-items:center; gap:0.375rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:0.5rem; padding:0.5rem 0.75rem;">
-                ${l.check} <span>${this.t("supportSavedNotice")}</span>
+                ${d.check} <span>${this.t("supportSavedNotice")}</span>
               </div>
 
               <button type="submit" class="btn btn-primary" style="margin-top:0.25rem;">
@@ -2597,25 +2593,10 @@ class q extends HTMLElement {
           </div>
         </div>
 
-        <!-- Pane 3: Barrier-Free Account Linking -->
-        <div id="pane-link" class="tab-panel" role="tabpanel" ${this.activeTab === "link" ? "" : "hidden"} style="${this.activeTab === "link" ? "display:block; overflow-y:auto; padding:1rem;" : "display:none;"}">
-          <div class="settings-card">
-            <div class="settings-card-title">${l.link} <span>${this.t("linkTab")}</span></div>
-            <div class="settings-card-desc">
-              ${this.t("supportZeroProof")}
-            </div>
-            <button type="button" class="btn btn-primary" id="btn-generate-code" style="width:100%; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-              ${l.key} <span>${this.t("generateCodeBtn")}</span>
-            </button>
-            <div class="code-display" id="code-display" style="display:none; font-size:1.75rem; font-weight:700; letter-spacing:0.25em; text-align:center; padding:1rem; background:var(--b-surface-alt); border:2px dashed var(--b-primary); border-radius:0.75rem; margin-top:0.875rem; color:var(--b-primary);">
-            </div>
-          </div>
-        </div>
-
-        <!-- Pane 4: Consented Live Help Handoff -->
+        <!-- Pane 3: Consented Live Help Handoff -->
         <div id="pane-handoff" class="tab-panel" role="tabpanel" ${this.activeTab === "handoff" ? "" : "hidden"} style="${this.activeTab === "handoff" ? "display:block; overflow-y:auto; padding:1rem;" : "display:none;"}">
           <div class="settings-card">
-            <div class="settings-card-title">${l.headphones} <span>${this.t("handoffTab")}</span></div>
+            <div class="settings-card-title">${d.headphones} <span>${this.t("handoffTab")}</span></div>
             <div class="settings-card-desc">
               ${this.t("appSubtitle")}
             </div>
@@ -2632,7 +2613,7 @@ class q extends HTMLElement {
                        placeholder="${this.t("handoffReasonPlaceholder")}">
               </label>
               <button type="submit" class="btn btn-primary" id="btn-submit-handoff" style="display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-                ${l.users} <span>${this.t("requestMentorBtn")}</span>
+                ${d.users} <span>${this.t("requestMentorBtn")}</span>
               </button>
             </form>
             <div id="handoff-room-box" style="margin-top:0.5rem;"></div>
@@ -2652,7 +2633,7 @@ class q extends HTMLElement {
           <div id="pane-general" class="settings-pane" style="overflow-y:auto; flex:1; padding:0.5rem 0;">
             <!-- Text Size Card -->
             <div class="settings-card">
-              <div class="settings-card-title">${l.type} <span>${this.t("textSizeLabel")}</span></div>
+              <div class="settings-card-title">${d.type} <span>${this.t("textSizeLabel")}</span></div>
               <div class="size-btn-group">
                 <button type="button" class="size-btn" id="btn-size-smaller" aria-pressed="${this.textSize === "smaller"}" aria-label="A- Smaller text">
                   A- <span>${this.t("textSmaller")}</span>
@@ -2668,7 +2649,7 @@ class q extends HTMLElement {
 
             <!-- Accessibility Card -->
             <div class="settings-card">
-              <div class="settings-card-title">${l.contrast} <span>Display & Accessibility</span></div>
+              <div class="settings-card-title">${d.contrast} <span>Display & Accessibility</span></div>
               
               <!-- High Contrast -->
               <label class="toggle-row">
@@ -2692,7 +2673,7 @@ class q extends HTMLElement {
 
             <!-- Voice Accessibility & Screen Reader Suite -->
             <div class="settings-card">
-              <div class="settings-card-title">${l.sound} <span>${this.t("voicePrefsTitle")}</span></div>
+              <div class="settings-card-title">${d.sound} <span>${this.t("voicePrefsTitle")}</span></div>
 
               <!-- Master Voice Toggle -->
               <label class="toggle-row">
@@ -2742,14 +2723,14 @@ class q extends HTMLElement {
               <div style="display:flex; flex-direction:column; gap:0.375rem; margin-top:0.25rem;">
                 <div style="display:flex; gap:0.375rem; flex-wrap:wrap;">
                   <button type="button" class="btn btn-secondary" id="btn-read-page" style="flex:1; min-height:2.25rem; font-size:0.8125rem; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-                    ${l.sound} <span>${this.t("readPageBtn")}</span>
+                    ${d.sound} <span>${this.t("readPageBtn")}</span>
                   </button>
                   <button type="button" class="btn btn-secondary" id="btn-read-section" style="flex:1; min-height:2.25rem; font-size:0.8125rem; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-                    ${l.sound} <span>${this.t("readSectionBtn")}</span>
+                    ${d.sound} <span>${this.t("readSectionBtn")}</span>
                   </button>
                 </div>
                 <button type="button" class="btn btn-secondary" id="btn-test-voice" style="min-height:2rem; font-size:0.75rem; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-                  ${l.play} <span>${this.t("testVoiceBtn")}</span>
+                  ${d.play} <span>${this.t("testVoiceBtn")}</span>
                 </button>
               </div>
 
@@ -2785,7 +2766,7 @@ class q extends HTMLElement {
               <!-- Replay Onboarding Wizard -->
               <div style="border-top:1px solid var(--b-border); margin:0.5rem 0;"></div>
               <button type="button" class="btn btn-secondary" id="btn-replay-onboarding" style="width:100%; min-height:2.25rem; font-size:0.8125rem; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-                ${l.sparkles} <span>${this.t("replayOnboardBtn")}</span>
+                ${d.sparkles} <span>${this.t("replayOnboardBtn")}</span>
               </button>
             </div>
 
@@ -2797,7 +2778,7 @@ class q extends HTMLElement {
                   <div style="font-size:0.75rem; color:#7f1d1d;">Reset conversation and erase stored history</div>
                 </div>
                 <button type="button" class="btn btn-danger" id="btn-clear-chat" style="font-size:0.8125rem; min-height:2.25rem; padding:0.375rem 0.75rem;">
-                  ${l.trash} <span>${this.t("clearChatBtn")}</span>
+                  ${d.trash} <span>${this.t("clearChatBtn")}</span>
                 </button>
               </div>
             </div>
@@ -2814,10 +2795,10 @@ class q extends HTMLElement {
       <div class="onboarding-card" id="onboarding-card" role="region" aria-label="${this.t("onboardTitle")}" style="margin:0 0 1rem 0; padding:1rem; background:var(--b-surface); border:2px solid var(--b-primary); border-radius:0.75rem;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
           <h3 id="onboard-title" style="margin:0; font-size:1rem; font-weight:700; color:var(--b-text); display:flex; align-items:center; gap:0.5rem;">
-            ${l.sparkles} <span>${this.t("onboardTitle")}</span>
+            ${d.sparkles} <span>${this.t("onboardTitle")}</span>
           </h3>
           <button type="button" class="btn btn-secondary btn-icon-only" id="btn-onboard-close" aria-label="${this.t("onboardSkipBtn")}" title="${this.t("onboardSkipBtn")}" style="min-height:2rem; width:2rem; padding:0;">
-            ${l.close}
+            ${d.close}
           </button>
         </div>
         
@@ -3006,50 +2987,49 @@ class q extends HTMLElement {
     const e = this.shadowRoot.querySelector("#launcher-btn"), a = this.shadowRoot.querySelector("#assistant-dialog"), t = this.shadowRoot.querySelector("#btn-close-dialog"), i = this.shadowRoot.querySelector("#btn-open-settings"), n = this.shadowRoot.querySelector("#btn-close-settings");
     e.addEventListener("click", () => {
       this.isOpen ? this.closeAssistant() : (this.previousFocus = document.activeElement, this.openAssistant());
-    }), t.addEventListener("click", () => this.closeAssistant()), a.addEventListener("keydown", (c) => {
-      if (c.key === "Escape")
+    }), t.addEventListener("click", () => this.closeAssistant()), a.addEventListener("keydown", (l) => {
+      if (l.key === "Escape")
         if (this.isSettingsOpen) {
           this.isSettingsOpen = !1;
-          const d = this.shadowRoot?.querySelector("#settings-dialog");
-          d && d.setAttribute("hidden", "true");
+          const c = this.shadowRoot?.querySelector("#settings-dialog");
+          c && c.setAttribute("hidden", "true");
         } else
           this.closeAssistant();
     }), this.shadowRoot.querySelector("#btn-lang-en")?.addEventListener("click", () => this.setLanguage("en")), this.shadowRoot.querySelector("#btn-lang-am")?.addEventListener("click", () => this.setLanguage("am")), this.shadowRoot.querySelector("#btn-lang-om")?.addEventListener("click", () => this.setLanguage("om")), this.shadowRoot.querySelector("#btn-lang-ar")?.addEventListener("click", () => this.setLanguage("ar")), this.shadowRoot.querySelector(".lang-btn")?.addEventListener("click", () => {
       this.setLanguage(this.currentLang === "en" ? "am" : "en");
     }), i.addEventListener("click", () => {
       this.isSettingsOpen = !0;
-      const c = this.shadowRoot?.querySelector("#settings-dialog");
-      if (c) {
-        c.removeAttribute("hidden");
-        const d = c.querySelector("button, input");
-        d && d.focus();
+      const l = this.shadowRoot?.querySelector("#settings-dialog");
+      if (l) {
+        l.removeAttribute("hidden");
+        const c = l.querySelector("button, input");
+        c && c.focus();
       }
     }), n.addEventListener("click", () => {
       this.isSettingsOpen = !1;
-      const c = this.shadowRoot?.querySelector("#settings-dialog");
-      c && c.setAttribute("hidden", "true"), i.focus();
+      const l = this.shadowRoot?.querySelector("#settings-dialog");
+      l && l.setAttribute("hidden", "true"), i.focus();
     });
     const s = [
       { id: "chat", btn: this.shadowRoot.querySelector("#tab-chat"), pane: this.shadowRoot.querySelector("#pane-chat") },
       { id: "support", btn: this.shadowRoot.querySelector("#tab-support"), pane: this.shadowRoot.querySelector("#pane-support") },
-      { id: "link", btn: this.shadowRoot.querySelector("#tab-link"), pane: this.shadowRoot.querySelector("#pane-link") },
       { id: "handoff", btn: this.shadowRoot.querySelector("#tab-handoff"), pane: this.shadowRoot.querySelector("#pane-handoff") }
-    ], o = (c) => {
-      this.activeTab = s[c].id, s.forEach((u, b) => {
-        const f = b === c;
-        u.btn?.setAttribute("aria-selected", f ? "true" : "false"), u.pane && (u.pane.hidden = !f, u.pane.style.display = f ? u.id === "chat" ? "flex" : "block" : "none");
+    ], o = (l) => {
+      this.activeTab = s[l].id, s.forEach((u, b) => {
+        const m = b === l;
+        u.btn?.setAttribute("aria-selected", m ? "true" : "false"), u.pane && (u.pane.hidden = !m, u.pane.style.display = m ? u.id === "chat" ? "flex" : "block" : "none");
       });
-      const d = s[c].btn;
-      d && (d.focus(), this.announce(d.textContent?.trim() + " tab selected"));
+      const c = s[l].btn;
+      c && (c.focus(), this.announce(c.textContent?.trim() + " tab selected"));
     };
-    s.forEach(({ btn: c }, d) => {
-      c?.addEventListener("click", () => o(d)), c?.addEventListener("keydown", (u) => {
+    s.forEach(({ btn: l }, c) => {
+      l?.addEventListener("click", () => o(c)), l?.addEventListener("keydown", (u) => {
         const b = u;
-        b.key === "ArrowRight" ? (b.preventDefault(), o((d + 1) % s.length)) : b.key === "ArrowLeft" && (b.preventDefault(), o((d - 1 + s.length) % s.length));
+        b.key === "ArrowRight" ? (b.preventDefault(), o((c + 1) % s.length)) : b.key === "ArrowLeft" && (b.preventDefault(), o((c - 1 + s.length) % s.length));
       });
-    }), this.shadowRoot.querySelectorAll(".btn-talk-person, #btn-footer-handoff").forEach((c) => {
-      c.addEventListener("click", (d) => {
-        d.preventDefault();
+    }), this.shadowRoot.querySelectorAll(".btn-talk-person, #btn-footer-handoff").forEach((l) => {
+      l.addEventListener("click", (c) => {
+        c.preventDefault();
         const u = s.findIndex((b) => b.id === "handoff");
         u >= 0 && o(u);
       });
@@ -3073,16 +3053,16 @@ class q extends HTMLElement {
       this.autoReadSpeech = v.checked, localStorage.setItem("savanna_bridge_auto_read", this.autoReadSpeech ? "true" : "false"), !this.autoReadSpeech && this.isSpeaking && this.stopSpeaking();
     });
     const T = this.shadowRoot.querySelector("#support-form");
-    T && T.addEventListener("submit", (c) => {
-      c.preventDefault();
-      const d = new FormData(T), u = d.getAll("need"), b = d.get("other_text") || "", f = d.get("contact_mode") || "text";
-      this.saveSupportNeeds(u, b, f);
+    T && T.addEventListener("submit", (l) => {
+      l.preventDefault();
+      const c = new FormData(T), u = c.getAll("need"), b = c.get("other_text") || "", m = c.get("contact_mode") || "text";
+      this.saveSupportNeeds(u, b, m);
     });
     const _ = this.shadowRoot.querySelector("#chat-form"), k = this.shadowRoot.querySelector("#chat-input"), A = this.shadowRoot.querySelector("#mic-btn");
-    _ && k && _.addEventListener("submit", (c) => {
-      c.preventDefault();
-      const d = k.value;
-      k.value = "", this.askQuestion(d);
+    _ && k && _.addEventListener("submit", (l) => {
+      l.preventDefault();
+      const c = k.value;
+      k.value = "", this.askQuestion(c);
     }), A && k && A.addEventListener("click", () => {
       this.toggleVoiceInput(k);
     });
@@ -3093,15 +3073,15 @@ class q extends HTMLElement {
     const C = () => {
       this.showAutoplayBanner = !1, this.render();
     };
-    this.shadowRoot.querySelector("#btn-dismiss-voice-banner")?.addEventListener("click", C), this.shadowRoot.querySelector("#btn-dismiss-voice-banner-floating")?.addEventListener("click", C), this.shadowRoot.querySelector("#btn-reading-pause")?.addEventListener("click", () => this.pausePageReading()), this.shadowRoot.querySelector("#btn-reading-resume")?.addEventListener("click", () => this.resumePageReading()), this.shadowRoot.querySelector("#btn-reading-stop")?.addEventListener("click", () => this.stopPageReading()), ["en", "am", "om", "ti", "ar"].forEach((c) => {
-      this.shadowRoot?.querySelector(`#onboard-lang-${c}`)?.addEventListener("click", () => {
-        this.setLanguage(c);
+    this.shadowRoot.querySelector("#btn-dismiss-voice-banner")?.addEventListener("click", C), this.shadowRoot.querySelector("#btn-dismiss-voice-banner-floating")?.addEventListener("click", C), this.shadowRoot.querySelector("#btn-reading-pause")?.addEventListener("click", () => this.pausePageReading()), this.shadowRoot.querySelector("#btn-reading-resume")?.addEventListener("click", () => this.resumePageReading()), this.shadowRoot.querySelector("#btn-reading-stop")?.addEventListener("click", () => this.stopPageReading()), ["en", "am", "om", "ti", "ar"].forEach((l) => {
+      this.shadowRoot?.querySelector(`#onboard-lang-${l}`)?.addEventListener("click", () => {
+        this.setLanguage(l);
       });
     });
-    const R = (c) => {
-      if (c) {
-        const d = this.shadowRoot?.querySelector("#onboard-chk-voice")?.checked ?? !0, u = this.shadowRoot?.querySelector("#onboard-chk-screen-reader")?.checked ?? !1, b = this.shadowRoot?.querySelector("#onboard-chk-keyboard-nav")?.checked ?? !1, f = this.shadowRoot?.querySelector("#onboard-chk-contrast")?.checked ?? !1, E = this.shadowRoot?.querySelector("#onboard-chk-large-text")?.checked ?? !1;
-        this.accessibilityPrefs.voice_enabled = d, this.accessibilityPrefs.screen_reader_mode = u, this.accessibilityPrefs.keyboard_navigation = b, this.accessibilityPrefs.high_contrast = f, this.accessibilityPrefs.large_text = E ? "larger" : "normal", this.highContrast = f, E && (this.textSize = "larger", localStorage.setItem("savanna_bridge_text_size", "larger"));
+    const R = (l) => {
+      if (l) {
+        const c = this.shadowRoot?.querySelector("#onboard-chk-voice")?.checked ?? !0, u = this.shadowRoot?.querySelector("#onboard-chk-screen-reader")?.checked ?? !1, b = this.shadowRoot?.querySelector("#onboard-chk-keyboard-nav")?.checked ?? !1, m = this.shadowRoot?.querySelector("#onboard-chk-contrast")?.checked ?? !1, E = this.shadowRoot?.querySelector("#onboard-chk-large-text")?.checked ?? !1;
+        this.accessibilityPrefs.voice_enabled = c, this.accessibilityPrefs.screen_reader_mode = u, this.accessibilityPrefs.keyboard_navigation = b, this.accessibilityPrefs.high_contrast = m, this.accessibilityPrefs.large_text = E ? "larger" : "normal", this.highContrast = m, E && (this.textSize = "larger", localStorage.setItem("savanna_bridge_text_size", "larger"));
       }
       this.accessibilityPrefs.onboarded = !0, this.onboardingDismissed = !0, this.savePreferences(), this.render(), this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_welcome && this.triggerSpokenWelcome();
     };
@@ -3110,13 +3090,13 @@ class q extends HTMLElement {
     x && x.addEventListener("change", () => {
       this.accessibilityPrefs.voice_enabled = x.checked, this.savePreferences(), this.announce(x.checked ? "Voice accessibility enabled" : "Voice accessibility disabled");
     });
-    const $ = this.shadowRoot.querySelector("#chk-auto-welcome");
-    $ && $.addEventListener("change", () => {
-      this.accessibilityPrefs.auto_welcome = $.checked, this.savePreferences();
-    });
-    const P = this.shadowRoot.querySelector("#chk-auto-tts");
+    const P = this.shadowRoot.querySelector("#chk-auto-welcome");
     P && P.addEventListener("change", () => {
-      this.accessibilityPrefs.auto_tts = P.checked, this.savePreferences();
+      this.accessibilityPrefs.auto_welcome = P.checked, this.savePreferences();
+    });
+    const $ = this.shadowRoot.querySelector("#chk-auto-tts");
+    $ && $.addEventListener("change", () => {
+      this.accessibilityPrefs.auto_tts = $.checked, this.savePreferences();
     });
     const M = [
       { id: "#btn-rate-075", rate: 0.75 },
@@ -3124,11 +3104,11 @@ class q extends HTMLElement {
       { id: "#btn-rate-125", rate: 1.25 },
       { id: "#btn-rate-150", rate: 1.5 }
     ];
-    M.forEach(({ id: c, rate: d }) => {
-      this.shadowRoot?.querySelector(c)?.addEventListener("click", () => {
-        this.accessibilityPrefs.speech_rate = d, this.savePreferences(), M.forEach((u) => {
-          this.shadowRoot?.querySelector(u.id)?.setAttribute("aria-pressed", u.rate === d ? "true" : "false");
-        }), this.announce(`Speech rate set to ${d}x`);
+    M.forEach(({ id: l, rate: c }) => {
+      this.shadowRoot?.querySelector(l)?.addEventListener("click", () => {
+        this.accessibilityPrefs.speech_rate = c, this.savePreferences(), M.forEach((u) => {
+          this.shadowRoot?.querySelector(u.id)?.setAttribute("aria-pressed", u.rate === c ? "true" : "false");
+        }), this.announce(`Speech rate set to ${c}x`);
       });
     }), this.shadowRoot.querySelector("#btn-read-page")?.addEventListener("click", () => this.readPageAloud()), this.shadowRoot.querySelector("#btn-read-section")?.addEventListener("click", () => this.readSectionAloud()), this.shadowRoot.querySelector("#btn-test-voice")?.addEventListener("click", () => {
       this.speakText(this.t("welcomeSpoken"));
@@ -3157,6 +3137,6 @@ customElements.get("bridge-assistant") || customElements.define("bridge-assistan
 customElements.get("db-assistant") || customElements.define("db-assistant", q);
 export {
   q as BridgeAssistant,
-  l as ICONS
+  d as ICONS
 };
 //# sourceMappingURL=widget.js.map
