@@ -42,6 +42,7 @@ from savanna_bridge.config import (
 from savanna_bridge.database import Database
 from savanna_bridge.language import LanguageGuard, LanguageRegistry
 from savanna_bridge.models import (
+    AccessibilityProfile,
     AccommodationDraft,
     AccommodationDraftRequest,
     AlertMatchItem,
@@ -575,6 +576,25 @@ def put_support_needs(
     payload: SupportNeeds, _token: Any = Depends(verify_optional_token)
 ) -> SupportNeeds:
     return db.set_support_needs("default", payload)
+
+
+@app.get("/accessibility-profile", response_model=AccessibilityProfile, tags=["Support"])
+@app.get("/api/v1/accessibility-profile", response_model=AccessibilityProfile, tags=["Support"])
+def get_accessibility_profile(
+    learner_ref: str = "default",
+    _token: Any = Depends(verify_optional_token),
+) -> AccessibilityProfile:
+    return db.get_accessibility_profile(learner_ref)
+
+
+@app.put("/accessibility-profile", response_model=AccessibilityProfile, tags=["Support"])
+@app.post("/accessibility-profile", response_model=AccessibilityProfile, tags=["Support"])
+@app.put("/api/v1/accessibility-profile", response_model=AccessibilityProfile, tags=["Support"])
+@app.post("/api/v1/accessibility-profile", response_model=AccessibilityProfile, tags=["Support"])
+def set_accessibility_profile(
+    payload: AccessibilityProfile, _token: Any = Depends(verify_optional_token)
+) -> AccessibilityProfile:
+    return db.set_accessibility_profile(payload)
 
 
 @app.post("/handoff", response_model=Handoff, status_code=status.HTTP_201_CREATED, tags=["Handoff"])

@@ -108,6 +108,27 @@ class SupportNeeds(BaseModel):
     preferred_contact_mode: Literal["text", "voice", "video", "telegram"] = "text"
 
 
+class AccessibilityProfile(BaseModel):
+    learner_ref: str = "default"
+    language: Language = Language.EN
+    voice_enabled: bool = False
+    auto_welcome: bool = False
+    auto_tts: bool = False
+    speech_rate: float = 1.0
+    voice_input_enabled: bool = True
+    screen_reader_mode: bool = False
+    keyboard_navigation: bool = False
+    high_contrast: bool = False
+    large_text: Literal["smaller", "normal", "larger"] = "normal"
+    simple_mode: bool = False
+    sync_enabled: bool = True
+    needs: list[str] = Field(default_factory=list)
+    other_text: str | None = ""
+    preferred_contact_mode: Literal["text", "voice", "video", "telegram"] = "text"
+    onboarded: bool = False
+    updated_at: str | None = None
+
+
 class HandoffCard(BaseModel):
     language: Language = Language.EN
     context: str

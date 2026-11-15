@@ -11,6 +11,7 @@ from typing import Any
 
 from savanna_bridge.config import DB_PATH, TELEGRAM_BOT_USERNAME
 from savanna_bridge.models import (
+    AccessibilityProfile,
     AlertSubscription,
     Handoff,
     HandoffCard,
@@ -108,6 +109,13 @@ def init_db(db_path: str = DB_PATH) -> None:
                 question TEXT PRIMARY KEY,
                 count INTEGER NOT NULL DEFAULT 1,
                 last_asked TEXT NOT NULL
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS accessibility_profiles (
+                learner_ref TEXT PRIMARY KEY,
+                profile_json TEXT NOT NULL,
+                updated_at TEXT NOT NULL
             )
         """)
         conn.commit()
@@ -311,6 +319,40 @@ class Database:
             )
             conn.commit()
         return needs
+
+    def get_accessibility_profile(self, learner_ref: str = "default") -> AccessibilityProfile:
+        with get_connection(self.db_path) as conn:
+            row = conn.execute(
+                "SELECT * FROM accessibility_profiles WHERE learner_ref = ?", (learner_ref,)
+            ).fetchone()
+            if not row:
+                return AccessibilityProfile(learner_ref=learner_ref)
+            try:
+                data = json.loads(row["profile_json"])
+                return AccessibilityProfile(**data)
+            except Exception:
+                return AccessibilityProfile(learner_ref=learner_ref)
+
+    def set_accessibility_profile(self, profile: AccessibilityProfile) -> AccessibilityProfile:
+        now_iso = datetime.now(UTC).isoformat()
+        profile.updated_at = now_iso
+        with get_connection(self.db_path) as conn:
+            conn.execute(
+                """
+                INSERT INTO accessibility_profiles (learner_ref, profile_json, updated_at)
+                VALUES (?, ?, ?)
+                ON CONFLICT(learner_ref) DO UPDATE SET
+                    profile_json=excluded.profile_json,
+                    updated_at=excluded.updated_at
+                """,
+                (
+                    profile.learner_ref,
+                    json.dumps(profile.model_dump()),
+                    now_iso,
+                ),
+            )
+            conn.commit()
+        return profile
 
     def create_handoff(
         self, handoff_id: str, card: HandoffCard, room_url: str, learner_ref: str | None = None
