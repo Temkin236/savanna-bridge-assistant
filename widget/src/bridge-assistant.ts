@@ -621,6 +621,10 @@ const STYLES = `
     transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s ease;
   }
 
+  .panel[hidden] {
+    display: none !important;
+  }
+
   /* Header */
   .header {
     padding: 0.625rem 0.875rem;
@@ -1214,6 +1218,9 @@ const STYLES = `
       border-radius: 0 !important;
       border: none !important;
       box-shadow: none !important;
+    }
+    .panel[hidden] {
+      display: none !important;
     }
     .launcher {
       bottom: 1rem !important;
@@ -2619,16 +2626,29 @@ export class BridgeAssistant extends HTMLElement {
     // Open/Close Dialog
     const closeDialog = (): void => {
       this.isOpen = false;
+      this.isSettingsOpen = false;
       dialog.hidden = true;
+      dialog.setAttribute("hidden", "true");
+      dialog.style.display = "none";
+      const settingsDialog = this.shadowRoot?.querySelector<HTMLElement>("#settings-dialog");
+      if (settingsDialog) {
+        settingsDialog.hidden = true;
+        settingsDialog.setAttribute("hidden", "true");
+        settingsDialog.style.display = "none";
+      }
       launcher.setAttribute("aria-expanded", "false");
       this.announce("Savanna Bridge Assistant closed.");
       (this.previousFocus ?? launcher).focus();
     };
 
-    launcher.addEventListener("click", () => {
+    launcher.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       this.previousFocus = document.activeElement as HTMLElement | null;
       this.isOpen = true;
       dialog.hidden = false;
+      dialog.removeAttribute("hidden");
+      dialog.style.display = "flex";
       launcher.setAttribute("aria-expanded", "true");
       this.announce("Savanna Bridge Assistant opened. Use Tab to navigate or Escape to close.");
       const chatInput = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-text-input");
@@ -2639,17 +2659,29 @@ export class BridgeAssistant extends HTMLElement {
       }
     });
 
-    closeBtn.addEventListener("click", closeDialog);
+    closeBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      closeDialog();
+    });
+
+    const closeSettings = (): void => {
+      this.isSettingsOpen = false;
+      const settingsDialog = this.shadowRoot?.querySelector<HTMLElement>("#settings-dialog");
+      if (settingsDialog) {
+        settingsDialog.hidden = true;
+        settingsDialog.setAttribute("hidden", "true");
+        settingsDialog.style.display = "none";
+      }
+      this.announce("Settings closed.");
+      openSettingsBtn.focus();
+    };
 
     // Keyboard Trap and Shortcuts for Screen Reader Accessibility (NVDA / TalkBack)
     dialog.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
         if (this.isSettingsOpen) {
-          this.isSettingsOpen = false;
-          const settingsDialog = this.shadowRoot?.querySelector("#settings-dialog");
-          if (settingsDialog) settingsDialog.setAttribute("hidden", "true");
-          openSettingsBtn.focus();
-          this.announce("Settings closed.");
+          closeSettings();
         } else {
           closeDialog();
         }
@@ -2695,23 +2727,25 @@ export class BridgeAssistant extends HTMLElement {
     });
 
     // Settings Modal
-    openSettingsBtn.addEventListener("click", () => {
+    openSettingsBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       this.isSettingsOpen = true;
-      const settingsDialog = this.shadowRoot?.querySelector("#settings-dialog");
+      const settingsDialog = this.shadowRoot?.querySelector<HTMLElement>("#settings-dialog");
       if (settingsDialog) {
+        settingsDialog.hidden = false;
         settingsDialog.removeAttribute("hidden");
+        settingsDialog.style.display = "flex";
         this.announce("Settings opened.");
         const focusable = settingsDialog.querySelector<HTMLElement>("button, input");
         if (focusable) focusable.focus();
       }
     });
 
-    closeSettingsBtn.addEventListener("click", () => {
-      this.isSettingsOpen = false;
-      const settingsDialog = this.shadowRoot?.querySelector("#settings-dialog");
-      if (settingsDialog) settingsDialog.setAttribute("hidden", "true");
-      this.announce("Settings closed.");
-      openSettingsBtn.focus();
+    closeSettingsBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      closeSettings();
     });
 
     // Settings Tabs Switching with ARIA pattern and Arrow key support

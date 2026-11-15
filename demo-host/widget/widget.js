@@ -1,7 +1,7 @@
-var B = Object.defineProperty;
-var R = (y, b, e) => b in y ? B(y, b, { enumerable: !0, configurable: !0, writable: !0, value: e }) : y[b] = e;
-var d = (y, b, e) => R(y, typeof b != "symbol" ? b + "" : b, e);
-const s = {
+var R = Object.defineProperty;
+var _ = (y, b, e) => b in y ? R(y, b, { enumerable: !0, configurable: !0, writable: !0, value: e }) : y[b] = e;
+var d = (y, b, e) => _(y, typeof b != "symbol" ? b + "" : b, e);
+const o = {
   launcher: '<svg class="icon-inline" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M8 10h.01M12 10h.01M16 10h.01"></path></svg>',
   settings: '<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>',
   close: '<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
@@ -414,7 +414,7 @@ const s = {
     copyRoomBtn: "نسخ الرابط",
     linkCodeCopied: "تم نسخ الرابط بنجاح!"
   }
-}, _ = `
+}, A = `
   :host {
     --b-font: var(--bs-body-font-family, system-ui, -apple-system, "Noto Sans Ethiopic", "Nyala", sans-serif);
     --b-bg: var(--bs-body-bg, #ffffff);
@@ -567,6 +567,10 @@ const s = {
     z-index: 2147483640;
     overflow: hidden;
     transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s ease;
+  }
+
+  .panel[hidden] {
+    display: none !important;
   }
 
   /* Header */
@@ -1163,6 +1167,9 @@ const s = {
       border: none !important;
       box-shadow: none !important;
     }
+    .panel[hidden] {
+      display: none !important;
+    }
     .launcher {
       bottom: 1rem !important;
       right: 1rem !important;
@@ -1192,7 +1199,7 @@ const s = {
     }
   }
 `;
-class $ extends HTMLElement {
+class C extends HTMLElement {
   constructor() {
     super(...arguments);
     d(this, "isOpen", !1);
@@ -1376,7 +1383,7 @@ class $ extends HTMLElement {
     e && (this.isTelegramLinked ? (e.innerHTML = `
         <div style="display:flex; align-items:center; gap:0.375rem; width:100%;">
           <span style="font-size:0.8125rem; font-weight:600; color:#166534; flex:1; display:inline-flex; align-items:center; gap:0.375rem;">
-            ${s.check} <span>${this.t("connectedToTelegram")}</span>
+            ${o.check} <span>${this.t("connectedToTelegram")}</span>
           </span>
           <button type="button" class="btn btn-secondary" id="btn-disconnect-tg" style="font-size:0.75rem; min-height:2.25rem; padding:0.25rem 0.5rem;">
             ${this.t("disconnectTelegram")}
@@ -1388,7 +1395,7 @@ class $ extends HTMLElement {
            class="btn btn-secondary btn-footer" id="tg-deep-link" 
            aria-label="${this.t("continueOnTelegramAria")}"
            style="display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-          ${s.telegram}
+          ${o.telegram}
           <span>${this.t("continueOnTelegram")}</span>
         </a>
         <div class="telegram-privacy-note">${this.t("telegramPrivacyNotice")}</div>
@@ -1452,14 +1459,14 @@ class $ extends HTMLElement {
         let n = "";
         a.onstart = () => {
           this.isRecording = !0, this.updateMicButtonUI(), this.announce(this.t("recordingState"));
-        }, a.onresult = (o) => {
-          let c = "";
-          for (let p = o.resultIndex; p < o.results.length; ++p)
-            o.results[p].isFinal ? n += o.results[p][0].transcript : c += o.results[p][0].transcript;
-          const u = (n || c).trim();
+        }, a.onresult = (r) => {
+          let h = "";
+          for (let p = r.resultIndex; p < r.results.length; ++p)
+            r.results[p].isFinal ? n += r.results[p][0].transcript : h += r.results[p][0].transcript;
+          const u = (n || h).trim();
           u && (e.value = u);
-        }, a.onerror = async (o) => {
-          console.warn("Speech recognition error:", o.error), this.isRecording = !1, this.updateMicButtonUI(), o.error !== "no-speech" && o.error !== "aborted" && await this.startMediaRecorderFallback(e);
+        }, a.onerror = async (r) => {
+          console.warn("Speech recognition error:", r.error), this.isRecording = !1, this.updateMicButtonUI(), r.error !== "no-speech" && r.error !== "aborted" && await this.startMediaRecorderFallback(e);
         }, a.onend = () => {
           this.isRecording = !1, this.updateMicButtonUI(), e.value && (this.announce(this.t("voicePreviewNotice")), e.focus());
         }, a.start();
@@ -1513,18 +1520,18 @@ class $ extends HTMLElement {
         }, i.onerror = p;
       });
       i.readAsDataURL(e);
-      const o = await n, c = await fetch(`${this.apiBase}/api/v1/speech/transcribe`, {
+      const r = await n, h = await fetch(`${this.apiBase}/api/v1/speech/transcribe`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          audio_base64: o,
+          audio_base64: r,
           media_type: t,
           language: this.currentLang,
           retain: !1
         })
       });
-      if (c.ok) {
-        const u = await c.json();
+      if (h.ok) {
+        const u = await h.json();
         u.transcript && (a.value = (a.value ? a.value + " " : "") + u.transcript, a.focus(), this.announce(this.t("voicePreviewNotice")));
       }
     } catch {
@@ -1591,8 +1598,8 @@ class $ extends HTMLElement {
       const n = document.querySelector("main") || document.querySelector("article") || document.querySelector(".content") || document.body;
       if (n)
         try {
-          const o = n.cloneNode(!0);
-          o.querySelectorAll("script, style, db-assistant, bridge-assistant, noscript, nav, footer, header").forEach((c) => c.remove()), i = (o.textContent || "").replace(/\s+/g, " ").trim().slice(0, 15e3);
+          const r = n.cloneNode(!0);
+          r.querySelectorAll("script, style, db-assistant, bridge-assistant, noscript, nav, footer, header").forEach((h) => h.remove()), i = (r.textContent || "").replace(/\s+/g, " ").trim().slice(0, 15e3);
         } catch {
           i = "";
         }
@@ -1618,7 +1625,7 @@ class $ extends HTMLElement {
     this.messages.push(i), this.isThinking = !0, this.announce(this.t("lookingInCourse")), this.renderMessages();
     const n = this.extractPlatformContext();
     try {
-      let o = await fetch(`${this.apiBase}/api/v1/ask`, {
+      let r = await fetch(`${this.apiBase}/api/v1/ask`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1633,7 +1640,7 @@ class $ extends HTMLElement {
           section: n.section
         })
       });
-      if (!o.ok && o.status === 404 && (o = await fetch(`${this.apiBase}/ask`, {
+      if (!r.ok && r.status === 404 && (r = await fetch(`${this.apiBase}/ask`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1647,14 +1654,14 @@ class $ extends HTMLElement {
           page_content: n.page_content,
           section: n.section
         })
-      })), this.isThinking = !1, o.ok) {
-        const c = await o.json(), u = !!c.offer_human || c.reason === "low_confidence", p = {
+      })), this.isThinking = !1, r.ok) {
+        const h = await r.json(), u = !!h.offer_human || h.reason === "low_confidence", p = {
           id: `msg_${Date.now()}_assistant`,
           sender: "assistant",
-          text: c.answer,
+          text: h.answer,
           heading: this.t("answerHeading"),
-          citations: c.citations || [],
-          offerHuman: c.offer_human,
+          citations: h.citations || [],
+          offerHuman: h.offer_human,
           isRefusal: u,
           originalQuestion: a
         };
@@ -1669,8 +1676,8 @@ class $ extends HTMLElement {
     } catch {
       this.isThinking = !1;
       try {
-        const o = JSON.parse(localStorage.getItem("db_assistant_offline_queue") || "[]");
-        o.push({ question: a, language: this.currentLang, timestamp: Date.now() }), localStorage.setItem("db_assistant_offline_queue", JSON.stringify(o));
+        const r = JSON.parse(localStorage.getItem("db_assistant_offline_queue") || "[]");
+        r.push({ question: a, language: this.currentLang, timestamp: Date.now() }), localStorage.setItem("db_assistant_offline_queue", JSON.stringify(r));
       } catch {
       }
       this.messages.push({
@@ -1725,18 +1732,18 @@ class $ extends HTMLElement {
           roomUrl: n,
           offerHuman: !1
         });
-        const o = this.shadowRoot?.querySelector("#handoff-room-box");
-        o && (o.innerHTML = `
+        const r = this.shadowRoot?.querySelector("#handoff-room-box");
+        r && (r.innerHTML = `
             <div style="padding:0.75rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:0.5rem; margin-top:0.75rem;">
               <p style="margin:0 0 0.5rem 0; font-size:0.875rem; font-weight:600; color:#166534; display:flex; align-items:center; gap:0.375rem;">
-                ${s.celebrate} <span>${this.t("handoffReadyTitle")}</span>
+                ${o.celebrate} <span>${this.t("handoffReadyTitle")}</span>
               </p>
               <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
                 <a href="${n}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="text-decoration:none; display:inline-flex; align-items:center; gap:0.375rem;">
-                  ${s.video} <span>${this.t("joinRoomButton")}</span>
+                  ${o.video} <span>${this.t("joinRoomButton")}</span>
                 </a>
                 <button type="button" class="btn btn-secondary btn-copy-room" data-url="${this.escapeHtml(n)}" style="font-size:0.8125rem; min-height:2.25rem; display:inline-flex; align-items:center; gap:0.375rem;">
-                  ${s.copy} <span>${this.t("copyRoomBtn")}</span>
+                  ${o.copy} <span>${this.t("copyRoomBtn")}</span>
                 </button>
               </div>
             </div>
@@ -1755,7 +1762,7 @@ class $ extends HTMLElement {
   }
   render() {
     this.shadowRoot && (this.setAttribute("data-contrast", this.highContrast ? "high" : "normal"), this.setAttribute("data-size", this.textSize), this.setAttribute("dir", this.currentLang === "ar" ? "rtl" : "ltr"), this.setAttribute("lang", this.currentLang), this.shadowRoot.innerHTML = `
-      <style>${_}</style>
+      <style>${A}</style>
 
       <!-- Live Announcer for Screen Readers (TalkBack / NVDA) -->
       <div id="live-announcer" class="sr-only" aria-live="polite" aria-atomic="true" style="position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); border:0;"></div>
@@ -1764,7 +1771,7 @@ class $ extends HTMLElement {
       <button class="launcher" type="button" id="launcher-btn" 
               aria-expanded="${this.isOpen}" aria-controls="assistant-dialog" aria-haspopup="dialog"
               aria-label="${this.t("launcherLabel")}">
-        ${s.launcher}
+        ${o.launcher}
         <span>${this.t("launcherLabel")}</span>
       </button>
 
@@ -1803,11 +1810,11 @@ class $ extends HTMLElement {
             </div>
             <!-- Settings Button -->
             <button type="button" class="btn btn-secondary btn-icon-only" id="btn-open-settings" aria-label="${this.t("settingsLabel")}" title="${this.t("settingsLabel")}">
-              ${s.settings}
+              ${o.settings}
             </button>
             <!-- Close Button -->
             <button type="button" class="btn btn-secondary btn-icon-only" id="btn-close-dialog" aria-label="${this.t("closeLabel")}" title="${this.t("closeLabel")}">
-              ${s.close}
+              ${o.close}
             </button>
           </div>
         </header>
@@ -1827,18 +1834,18 @@ class $ extends HTMLElement {
                    required autocomplete="off">
             <button type="button" class="btn btn-secondary mic-btn btn-icon-only" id="mic-btn" 
                     aria-label="${this.t("micLabel")}" title="${this.t("micLabel")}">
-              ${s.mic}
+              ${o.mic}
             </button>
             <button type="submit" class="btn btn-primary" id="send-btn" data-id="btn-send" style="display:inline-flex; align-items:center; gap:0.375rem;">
               <span>${this.t("sendButton")}</span>
-              ${s.send}
+              ${o.send}
             </button>
           </form>
 
           <!-- Bottom Row: Talk to a person & Continue on Telegram -->
           <div class="footer-actions-row">
             <button type="button" class="btn btn-secondary btn-footer btn-talk-person" id="btn-footer-handoff" style="display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-              ${s.user}
+              ${o.user}
               <span>${this.t("talkToPersonButton")}</span>
             </button>
             <div id="telegram-container" class="telegram-section">
@@ -1851,30 +1858,30 @@ class $ extends HTMLElement {
         <div id="settings-dialog" class="settings-dialog" ${this.isSettingsOpen ? "" : "hidden"} role="dialog" aria-modal="true" aria-labelledby="settings-dialog-title">
           <div class="settings-header">
             <div class="settings-title-group">
-              ${s.settings}
+              ${o.settings}
               <h3 id="settings-dialog-title" class="settings-heading">${this.t("settingsTitle")}</h3>
             </div>
             <button type="button" class="btn btn-secondary btn-icon-only" id="btn-close-settings" aria-label="${this.t("closeSettings")}" title="${this.t("closeSettings")}">
-              ${s.close}
+              ${o.close}
             </button>
           </div>
 
           <!-- Settings Tab Buttons -->
           <div class="settings-tabs" role="tablist">
             <button type="button" class="settings-tab-btn btn-primary" id="tab-general" role="tab" aria-selected="true">
-              ${s.sliders}
+              ${o.sliders}
               <span>${this.t("generalTab")}</span>
             </button>
             <button type="button" class="settings-tab-btn btn-secondary" id="tab-support" role="tab" aria-selected="false">
-              ${s.heart}
+              ${o.heart}
               <span>${this.t("supportTab")}</span>
             </button>
             <button type="button" class="settings-tab-btn btn-secondary" id="tab-link" role="tab" aria-selected="false">
-              ${s.link}
+              ${o.link}
               <span>${this.t("linkTab")}</span>
             </button>
             <button type="button" class="settings-tab-btn btn-secondary" id="tab-handoff" role="tab" aria-selected="false">
-              ${s.headphones}
+              ${o.headphones}
               <span>${this.t("handoffTab")}</span>
             </button>
           </div>
@@ -1883,7 +1890,7 @@ class $ extends HTMLElement {
           <div id="pane-general" class="settings-pane">
             <!-- Text Size Card -->
             <div class="settings-card">
-              <div class="settings-card-title">${s.type} <span>${this.t("textSizeLabel")}</span></div>
+              <div class="settings-card-title">${o.type} <span>${this.t("textSizeLabel")}</span></div>
               <div class="size-btn-group">
                 <button type="button" class="size-btn" id="btn-size-smaller" aria-pressed="${this.textSize === "smaller"}">
                   A- <span>${this.t("textSmaller")}</span>
@@ -1899,7 +1906,7 @@ class $ extends HTMLElement {
 
             <!-- Accessibility Card -->
             <div class="settings-card">
-              <div class="settings-card-title">${s.contrast} <span>Display & Accessibility</span></div>
+              <div class="settings-card-title">${o.contrast} <span>Display & Accessibility</span></div>
               
               <!-- High Contrast -->
               <label class="toggle-row">
@@ -1929,7 +1936,7 @@ class $ extends HTMLElement {
                   <div style="font-size:0.75rem; color:#7f1d1d;">Reset conversation and erase stored history</div>
                 </div>
                 <button type="button" class="btn btn-danger" id="btn-clear-chat" style="font-size:0.8125rem; min-height:2.25rem; padding:0.375rem 0.75rem;">
-                  ${s.trash} <span>${this.t("clearChatBtn")}</span>
+                  ${o.trash} <span>${this.t("clearChatBtn")}</span>
                 </button>
               </div>
             </div>
@@ -1938,7 +1945,7 @@ class $ extends HTMLElement {
           <!-- Tab Content 2: Support Preferences -->
           <div id="pane-support" class="settings-pane" style="display:none;">
             <div class="settings-card">
-              <div class="settings-card-title">${s.heart} <span>${this.t("supportNeedsTitle")}</span></div>
+              <div class="settings-card-title">${o.heart} <span>${this.t("supportNeedsTitle")}</span></div>
               <div class="settings-card-desc">
                 ${this.t("supportZeroProof")}
               </div>
@@ -1990,7 +1997,7 @@ class $ extends HTMLElement {
                 </label>
 
                 <div id="support-saved-notice" class="support-saved-notice" hidden style="color:#166534; font-size:0.8125rem; font-weight:600; display:inline-flex; align-items:center; gap:0.375rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:0.5rem; padding:0.5rem 0.75rem;">
-                  ${s.check} <span>${this.t("supportSavedNotice")}</span>
+                  ${o.check} <span>${this.t("supportSavedNotice")}</span>
                 </div>
 
                 <button type="submit" class="btn btn-primary" style="margin-top:0.25rem;">
@@ -2003,12 +2010,12 @@ class $ extends HTMLElement {
           <!-- Tab Content 3: Account Linking -->
           <div id="pane-link" class="settings-pane" style="display:none;">
             <div class="settings-card">
-              <div class="settings-card-title">${s.link} <span>${this.t("linkTab")}</span></div>
+              <div class="settings-card-title">${o.link} <span>${this.t("linkTab")}</span></div>
               <div class="settings-card-desc">
                 ${this.t("supportZeroProof")}
               </div>
               <button type="button" class="btn btn-primary" id="btn-generate-code" style="width:100%; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-                ${s.key} <span>${this.t("generateCodeBtn")}</span>
+                ${o.key} <span>${this.t("generateCodeBtn")}</span>
               </button>
               <div class="code-display" id="code-display" style="display:none; font-size:1.75rem; font-weight:700; letter-spacing:0.25em; text-align:center; padding:1rem; background:var(--b-surface-alt); border:2px dashed var(--b-primary); border-radius:0.75rem; margin-top:0.875rem; color:var(--b-primary);">
               </div>
@@ -2018,7 +2025,7 @@ class $ extends HTMLElement {
           <!-- Tab Content 4: Live Help Handoff -->
           <div id="pane-handoff" class="settings-pane" style="display:none;">
             <div class="settings-card">
-              <div class="settings-card-title">${s.headphones} <span>${this.t("handoffTab")}</span></div>
+              <div class="settings-card-title">${o.headphones} <span>${this.t("handoffTab")}</span></div>
               <div class="settings-card-desc">
                 ${this.t("appSubtitle")}
               </div>
@@ -2035,7 +2042,7 @@ class $ extends HTMLElement {
                          placeholder="${this.t("handoffReasonPlaceholder")}">
                 </label>
                 <button type="submit" class="btn btn-primary" id="btn-submit-handoff" style="display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-                  ${s.users} <span>${this.t("requestMentorBtn")}</span>
+                  ${o.users} <span>${this.t("requestMentorBtn")}</span>
                 </button>
               </form>
               <div id="handoff-room-box" style="margin-top:0.5rem;"></div>
@@ -2057,13 +2064,13 @@ class $ extends HTMLElement {
           <div class="suggested-questions">
             <span style="font-size:0.8125rem; font-weight:700; color:var(--b-text-muted);">${this.t("suggestedTitle")}</span>
             <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ1"))}" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
-              ${s.arrowRight} <span>${this.escapeHtml(this.t("suggestedQ1"))}</span>
+              ${o.arrowRight} <span>${this.escapeHtml(this.t("suggestedQ1"))}</span>
             </button>
             <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ2"))}" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
-              ${s.arrowRight} <span>${this.escapeHtml(this.t("suggestedQ2"))}</span>
+              ${o.arrowRight} <span>${this.escapeHtml(this.t("suggestedQ2"))}</span>
             </button>
             <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ3"))}" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
-              ${s.arrowRight} <span>${this.escapeHtml(this.t("suggestedQ3"))}</span>
+              ${o.arrowRight} <span>${this.escapeHtml(this.t("suggestedQ3"))}</span>
             </button>
           </div>
         </div>
@@ -2091,14 +2098,14 @@ class $ extends HTMLElement {
             ${t.isHandoff ? `
                 <div class="handoff-card" style="margin-top:0.75rem; padding:0.75rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:0.5rem;">
                   <p style="margin:0 0 0.5rem 0; font-size:0.875rem; font-weight:600; color:#166534; display:flex; align-items:center; gap:0.375rem;">
-                    ${s.celebrate} <span>${this.t("handoffReadyTitle")}</span>
+                    ${o.celebrate} <span>${this.t("handoffReadyTitle")}</span>
                   </p>
                   <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
                     <a href="${this.escapeHtml(t.roomUrl || this.activeHandoff?.room_url || "https://meet.jit.si/savanna-bridge-demo")}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" id="btn-join-room-card" style="text-decoration:none; display:inline-flex; align-items:center; gap:0.375rem;">
-                      ${s.video} <span>${this.t("joinRoomButton")}</span>
+                      ${o.video} <span>${this.t("joinRoomButton")}</span>
                     </a>
                     <button type="button" class="btn btn-secondary btn-copy-room" data-url="${this.escapeHtml(t.roomUrl || this.activeHandoff?.room_url || "https://meet.jit.si/savanna-bridge-demo")}" style="font-size:0.8125rem; min-height:2.25rem; display:inline-flex; align-items:center; gap:0.375rem;">
-                      ${s.copy} <span>${this.t("copyRoomBtn")}</span>
+                      ${o.copy} <span>${this.t("copyRoomBtn")}</span>
                     </button>
                   </div>
                   <div style="font-size:0.75rem; color:#15803d; margin-top:0.5rem;">${this.t("androidFallbackNote")}</div>
@@ -2110,7 +2117,7 @@ class $ extends HTMLElement {
                   <div>${this.t("notVerifiedNotice")}</div>
                   <div style="display:flex; gap:0.375rem; flex-wrap:wrap; margin-top:0.5rem;">
                     <button type="button" class="btn btn-primary btn-talk-person" data-msg-id="${t.id}" style="font-size:0.8125rem; min-height:2.25rem; display:inline-flex; align-items:center; gap:0.375rem;">
-                      ${s.user} <span>${this.t("talkToPersonButton")}</span>
+                      ${o.user} <span>${this.t("talkToPersonButton")}</span>
                     </button>
                     <button type="button" class="btn btn-secondary btn-try-another" style="font-size:0.8125rem; min-height:2.25rem;">
                       ${this.t("tryAnotherQuestion")}
@@ -2122,11 +2129,11 @@ class $ extends HTMLElement {
             <!-- Listen & Make Simpler action buttons -->
             <div class="answer-actions">
               <button type="button" class="btn btn-secondary btn-listen" data-msg-id="${t.id}" style="display:inline-flex; align-items:center; gap:0.375rem;">
-                ${t.isAudioPlaying ? s.pause : s.listen}
+                ${t.isAudioPlaying ? o.pause : o.listen}
                 <span>${t.isAudioPlaying ? this.t("pauseButton") : this.t("listenButton")}</span>
               </button>
               <button type="button" class="btn btn-secondary btn-simpler" data-msg-id="${t.id}" style="display:inline-flex; align-items:center; gap:0.375rem;">
-                ${s.lightbulb}
+                ${o.lightbulb}
                 <span>${this.t("makeSimplerButton")}</span>
               </button>
             </div>
@@ -2136,9 +2143,9 @@ class $ extends HTMLElement {
                 <div class="sources-box">
                   <div class="sources-title">${this.t("sourcesTitle")}</div>
                   ${t.citations.map(
-          (o) => `
-                    <a href="${this.escapeHtml(o.url)}" target="_blank" rel="noopener noreferrer" class="source-link citation-link" style="display:inline-flex; align-items:center; gap:0.375rem;">
-                      ${s.book} <span>${this.escapeHtml(o.title || o.heading)}</span>
+          (r) => `
+                    <a href="${this.escapeHtml(r.url)}" target="_blank" rel="noopener noreferrer" class="source-link citation-link" style="display:inline-flex; align-items:center; gap:0.375rem;">
+                      ${o.book} <span>${this.escapeHtml(r.title || r.heading)}</span>
                     </a>
                   `
         ).join("")}
@@ -2148,7 +2155,7 @@ class $ extends HTMLElement {
         `;
       }).join(""), this.isThinking && (e.innerHTML += `
         <div class="live-status-indicator" style="display:inline-flex; align-items:center; gap:0.375rem;">
-          ${s.spinner} <span>${this.t("lookingInCourse")}</span>
+          ${o.spinner} <span>${this.t("lookingInCourse")}</span>
         </div>
       `), e.querySelectorAll(".btn-listen").forEach((t) => {
         t.addEventListener("click", () => {
@@ -2183,77 +2190,80 @@ class $ extends HTMLElement {
   }
   bindEvents() {
     if (!this.shadowRoot) return;
-    const e = this.shadowRoot.querySelector("#launcher-btn"), t = this.shadowRoot.querySelector("#assistant-dialog"), a = this.shadowRoot.querySelector("#btn-close-dialog"), i = this.shadowRoot.querySelector("#btn-open-settings"), n = this.shadowRoot.querySelector("#btn-close-settings"), o = () => {
-      this.isOpen = !1, t.hidden = !0, e.setAttribute("aria-expanded", "false"), this.announce("Savanna Bridge Assistant closed."), (this.previousFocus ?? e).focus();
+    const e = this.shadowRoot.querySelector("#launcher-btn"), t = this.shadowRoot.querySelector("#assistant-dialog"), a = this.shadowRoot.querySelector("#btn-close-dialog"), i = this.shadowRoot.querySelector("#btn-open-settings"), n = this.shadowRoot.querySelector("#btn-close-settings"), r = () => {
+      this.isOpen = !1, this.isSettingsOpen = !1, t.hidden = !0, t.setAttribute("hidden", "true"), t.style.display = "none";
+      const s = this.shadowRoot?.querySelector("#settings-dialog");
+      s && (s.hidden = !0, s.setAttribute("hidden", "true"), s.style.display = "none"), e.setAttribute("aria-expanded", "false"), this.announce("Savanna Bridge Assistant closed."), (this.previousFocus ?? e).focus();
     };
-    e.addEventListener("click", () => {
-      this.previousFocus = document.activeElement, this.isOpen = !0, t.hidden = !1, e.setAttribute("aria-expanded", "true"), this.announce("Savanna Bridge Assistant opened. Use Tab to navigate or Escape to close.");
-      const r = this.shadowRoot?.querySelector("#chat-text-input");
-      r ? setTimeout(() => r.focus(), 60) : t.focus();
-    }), a.addEventListener("click", o), t.addEventListener("keydown", (r) => {
-      if (r.key === "Escape") {
-        if (this.isSettingsOpen) {
-          this.isSettingsOpen = !1;
-          const l = this.shadowRoot?.querySelector("#settings-dialog");
-          l && l.setAttribute("hidden", "true"), i.focus(), this.announce("Settings closed.");
-        } else
-          o();
+    e.addEventListener("click", (s) => {
+      s.preventDefault(), s.stopPropagation(), this.previousFocus = document.activeElement, this.isOpen = !0, t.hidden = !1, t.removeAttribute("hidden"), t.style.display = "flex", e.setAttribute("aria-expanded", "true"), this.announce("Savanna Bridge Assistant opened. Use Tab to navigate or Escape to close.");
+      const l = this.shadowRoot?.querySelector("#chat-text-input");
+      l ? setTimeout(() => l.focus(), 60) : t.focus();
+    }), a.addEventListener("click", (s) => {
+      s.preventDefault(), s.stopPropagation(), r();
+    });
+    const h = () => {
+      this.isSettingsOpen = !1;
+      const s = this.shadowRoot?.querySelector("#settings-dialog");
+      s && (s.hidden = !0, s.setAttribute("hidden", "true"), s.style.display = "none"), this.announce("Settings closed."), i.focus();
+    };
+    t.addEventListener("keydown", (s) => {
+      if (s.key === "Escape") {
+        this.isSettingsOpen ? h() : r();
         return;
       }
-      if (r.key === "Tab") {
+      if (s.key === "Tab") {
         const l = this.isSettingsOpen ? this.shadowRoot?.querySelector("#settings-dialog") : t;
         if (!l) return;
-        const h = Array.from(
+        const c = Array.from(
           l.querySelectorAll(
             'button:not([disabled]):not([hidden]), [href]:not([disabled]), input:not([disabled]):not([hidden]), select:not([disabled]):not([hidden]), textarea:not([disabled]):not([hidden]), [tabindex]:not([tabindex="-1"])'
           )
-        ).filter((C) => C.offsetParent !== null);
-        if (h.length === 0) return;
-        const m = h[0], g = h[h.length - 1], L = this.shadowRoot?.activeElement || document.activeElement;
-        r.shiftKey && L === m ? (r.preventDefault(), g.focus()) : !r.shiftKey && L === g && (r.preventDefault(), m.focus());
+        ).filter((B) => B.offsetParent !== null);
+        if (c.length === 0) return;
+        const m = c[0], g = c[c.length - 1], $ = this.shadowRoot?.activeElement || document.activeElement;
+        s.shiftKey && $ === m ? (s.preventDefault(), g.focus()) : !s.shiftKey && $ === g && (s.preventDefault(), m.focus());
       }
-    }), this.shadowRoot.querySelectorAll(".lang-toggle-btn").forEach((r) => {
-      r.addEventListener("click", () => {
-        const l = r.id.replace("btn-lang-", "");
+    }), this.shadowRoot.querySelectorAll(".lang-toggle-btn").forEach((s) => {
+      s.addEventListener("click", () => {
+        const l = s.id.replace("btn-lang-", "");
         l && this.setLanguage(l);
       });
-    }), i.addEventListener("click", () => {
-      this.isSettingsOpen = !0;
-      const r = this.shadowRoot?.querySelector("#settings-dialog");
-      if (r) {
-        r.removeAttribute("hidden"), this.announce("Settings opened.");
-        const l = r.querySelector("button, input");
-        l && l.focus();
+    }), i.addEventListener("click", (s) => {
+      s.preventDefault(), s.stopPropagation(), this.isSettingsOpen = !0;
+      const l = this.shadowRoot?.querySelector("#settings-dialog");
+      if (l) {
+        l.hidden = !1, l.removeAttribute("hidden"), l.style.display = "flex", this.announce("Settings opened.");
+        const c = l.querySelector("button, input");
+        c && c.focus();
       }
-    }), n.addEventListener("click", () => {
-      this.isSettingsOpen = !1;
-      const r = this.shadowRoot?.querySelector("#settings-dialog");
-      r && r.setAttribute("hidden", "true"), this.announce("Settings closed."), i.focus();
+    }), n.addEventListener("click", (s) => {
+      s.preventDefault(), s.stopPropagation(), h();
     });
-    const c = [
+    const u = [
       { btn: this.shadowRoot.querySelector("#tab-general"), pane: this.shadowRoot.querySelector("#pane-general") },
       { btn: this.shadowRoot.querySelector("#tab-support"), pane: this.shadowRoot.querySelector("#pane-support") },
       { btn: this.shadowRoot.querySelector("#tab-link"), pane: this.shadowRoot.querySelector("#pane-link") },
       { btn: this.shadowRoot.querySelector("#tab-handoff"), pane: this.shadowRoot.querySelector("#pane-handoff") }
-    ], u = (r) => {
-      c.forEach((h, m) => {
-        const g = m === r;
-        h.btn?.setAttribute("aria-selected", g ? "true" : "false"), h.btn?.classList.toggle("btn-primary", g), h.btn?.classList.toggle("btn-secondary", !g), h.pane && (h.pane.style.display = g ? "block" : "none");
+    ], p = (s) => {
+      u.forEach((c, m) => {
+        const g = m === s;
+        c.btn?.setAttribute("aria-selected", g ? "true" : "false"), c.btn?.classList.toggle("btn-primary", g), c.btn?.classList.toggle("btn-secondary", !g), c.pane && (c.pane.style.display = g ? "block" : "none");
       });
-      const l = c[r].btn;
+      const l = u[s].btn;
       l && (l.focus(), this.announce(l.textContent?.trim() + " tab selected"));
     };
-    c.forEach(({ btn: r }, l) => {
-      r?.addEventListener("click", () => u(l)), r?.addEventListener("keydown", (h) => {
-        const m = h;
+    u.forEach(({ btn: s }, l) => {
+      s?.addEventListener("click", () => p(l)), s?.addEventListener("keydown", (c) => {
+        const m = c;
         if (m.key === "ArrowRight") {
           m.preventDefault();
-          const g = (l + 1) % c.length;
-          u(g);
+          const g = (l + 1) % u.length;
+          p(g);
         } else if (m.key === "ArrowLeft") {
           m.preventDefault();
-          const g = (l - 1 + c.length) % c.length;
-          u(g);
+          const g = (l - 1 + u.length) % u.length;
+          p(g);
         }
       });
     }), this.shadowRoot.querySelector("#btn-size-smaller")?.addEventListener("click", () => {
@@ -2263,36 +2273,36 @@ class $ extends HTMLElement {
     }), this.shadowRoot.querySelector("#btn-size-larger")?.addEventListener("click", () => {
       this.textSize = "larger", this.setAttribute("data-size", "larger"), localStorage.setItem("savanna_bridge_text_size", "larger"), this.updateSizeButtons();
     });
-    const p = this.shadowRoot.querySelector("#chk-contrast");
-    p && p.addEventListener("change", () => {
-      this.highContrast = p.checked, this.setAttribute("data-contrast", this.highContrast ? "high" : "normal"), localStorage.setItem("savanna_bridge_contrast", this.highContrast ? "high" : "normal");
-    });
-    const v = this.shadowRoot.querySelector("#chk-simple-mode");
+    const v = this.shadowRoot.querySelector("#chk-contrast");
     v && v.addEventListener("change", () => {
-      this.simpleMode = v.checked, localStorage.setItem("savanna_bridge_simple_mode", this.simpleMode ? "true" : "false");
+      this.highContrast = v.checked, this.setAttribute("data-contrast", this.highContrast ? "high" : "normal"), localStorage.setItem("savanna_bridge_contrast", this.highContrast ? "high" : "normal");
+    });
+    const k = this.shadowRoot.querySelector("#chk-simple-mode");
+    k && k.addEventListener("change", () => {
+      this.simpleMode = k.checked, localStorage.setItem("savanna_bridge_simple_mode", this.simpleMode ? "true" : "false");
     }), this.shadowRoot.querySelector("#btn-clear-chat")?.addEventListener("click", () => {
       this.clearChat();
     }), this.shadowRoot.querySelector("#btn-generate-code")?.addEventListener("click", () => {
       this.generateLinkCode();
     });
-    const w = this.shadowRoot.querySelector("#handoff-request-form");
-    w && w.addEventListener("submit", (r) => {
-      r.preventDefault();
+    const S = this.shadowRoot.querySelector("#handoff-request-form");
+    S && S.addEventListener("submit", (s) => {
+      s.preventDefault();
       const l = this.shadowRoot?.querySelector("#handoff-reason");
       this.requestHandoff(l?.value || void 0);
     });
-    const k = this.shadowRoot.querySelector("#support-form");
-    k && k.addEventListener("submit", (r) => {
-      r.preventDefault();
-      const l = new FormData(k), h = l.getAll("need"), m = l.get("other_text") || "", g = l.get("contact_mode") || "text";
-      this.saveSupportNeeds(h, m, g);
+    const w = this.shadowRoot.querySelector("#support-form");
+    w && w.addEventListener("submit", (s) => {
+      s.preventDefault();
+      const l = new FormData(w), c = l.getAll("need"), m = l.get("other_text") || "", g = l.get("contact_mode") || "text";
+      this.saveSupportNeeds(c, m, g);
     });
-    const S = this.shadowRoot.querySelector("#chat-form"), x = this.shadowRoot.querySelector("#chat-text-input, #chat-input"), T = this.shadowRoot.querySelector("#mic-btn");
-    S && x && S.addEventListener("submit", (r) => {
-      r.preventDefault();
+    const T = this.shadowRoot.querySelector("#chat-form"), x = this.shadowRoot.querySelector("#chat-text-input, #chat-input"), L = this.shadowRoot.querySelector("#mic-btn");
+    T && x && T.addEventListener("submit", (s) => {
+      s.preventDefault();
       const l = x.value;
       x.value = "", this.askQuestion(l);
-    }), T && x && T.addEventListener("click", () => {
+    }), L && x && L.addEventListener("click", () => {
       this.toggleVoiceInput(x);
     }), this.shadowRoot.querySelector("#btn-footer-handoff")?.addEventListener("click", () => {
       this.requestHandoff();
@@ -2303,11 +2313,11 @@ class $ extends HTMLElement {
     return t.textContent = e, t.innerHTML;
   }
 }
-customElements.get("bridge-assistant") || customElements.define("bridge-assistant", $);
-customElements.get("db-assistant") || customElements.define("db-assistant", class extends $ {
+customElements.get("bridge-assistant") || customElements.define("bridge-assistant", C);
+customElements.get("db-assistant") || customElements.define("db-assistant", class extends C {
 });
 export {
-  $ as BridgeAssistant,
-  s as ICONS
+  C as BridgeAssistant,
+  o as ICONS
 };
 //# sourceMappingURL=widget.js.map
