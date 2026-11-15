@@ -193,6 +193,14 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     clearChatBtn: "Clear conversation",
     generateCodeBtn: "Generate 6-digit code",
     yourCodeIs: "Your 6-digit code:",
+    enterCodeLabel: "Enter 6-digit code from Telegram:",
+    submitCodeBtn: "Link with Code",
+    codePlaceholder: "e.g. 123456",
+    codeLinkSuccess: "Account successfully linked!",
+    codeLinkError: "Invalid or expired code. Please try again.",
+    haveCodePrompt: "Have a Telegram link code?",
+    hideCodePrompt: "Hide code entry",
+    codeInstructions: "Send this 6-digit code to the Telegram bot with: /confirm <code>",
     handoffConsentCheck: "I consent to connect with a human mentor",
     handoffReasonLabel: "What do you need help with? (optional)",
     handoffReasonPlaceholder: "e.g., I need help with Module 2 exercise...",
@@ -330,6 +338,14 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     clearChatBtn: "ውይይቱን አጽዳ",
     generateCodeBtn: "ባለ 6 አሃዝ ኮድ ፍጠር",
     yourCodeIs: "የእርስዎ ባለ 6 አሃዝ ኮድ፡",
+    enterCodeLabel: "ከቴሌግራም የተገኘውን ባለ 6 አሃዝ ኮድ ያስገቡ፡",
+    submitCodeBtn: "በኮድ አገናኝ",
+    codePlaceholder: "ምሳሌ፡ 123456",
+    codeLinkSuccess: "መለያዎ በተሳካ ሁኔታ ተገናኝቷል!",
+    codeLinkError: "የተሳሳተ ወይም ጊዜው ያለፈበት ኮድ። እባክዎ እንደገና ይሞክሩ።",
+    haveCodePrompt: "የቴሌግራም ማገናኛ ኮድ አለዎት?",
+    hideCodePrompt: "የኮድ መግቢያውን ደብቅ",
+    codeInstructions: "ይህንን ባለ 6 አሃዝ ኮድ ወደ ቴሌግራም ቦት ይላኩ፡ /confirm <ኮድ>",
     handoffConsentCheck: "ከሰው አማካሪ ጋር ለመገናኘት እስማማለሁ",
     handoffReasonLabel: "በምን ላይ እርዳታ ይፈልጋሉ? (አማራጭ)",
     handoffReasonPlaceholder: "ምሳሌ፡ በሞጁል 2 መልመጃ ላይ እገዛ እፈልጋለሁ...",
@@ -467,6 +483,14 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     clearChatBtn: "Haquu",
     generateCodeBtn: "Koodii uumi",
     yourCodeIs: "Koodii keessan:",
+    enterCodeLabel: "Koodii dijiitii 6 Telegiraamii irraa galchaa:",
+    submitCodeBtn: "Koodiin walqunnamsiisi",
+    codePlaceholder: "fkn: 123456",
+    codeLinkSuccess: "Herregni milkaa'inaan walqabateera!",
+    codeLinkError: "Koodiin dogoggora ykn yeroon isaa darbeera. Mee irra deebi'aa yaalaa.",
+    haveCodePrompt: "Koodii walqunnamsiisaa qabduu?",
+    hideCodePrompt: "Koodii galchuu dhoksi",
+    codeInstructions: "Koodii dijiitii 6 kana boottii Telegiraamiitti ergaa: /confirm <koodii>",
     handoffConsentCheck: "Gorsaa waliin walqunnamuuf walii galeera",
     handoffReasonLabel: "Waan gargaarsa barbaaddan:",
     handoffReasonPlaceholder: "fkn: Kutaa 2ffaa...",
@@ -604,6 +628,14 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     clearChatBtn: "ኣጽርዮ",
     generateCodeBtn: "ኮድ ፍጠር",
     yourCodeIs: "ናይ ስድሽተ ኣሃዝ ኮድኩም፡",
+    enterCodeLabel: "ካብ ቴሌግራም ዝረኸብክምዎ ናይ 6 ኣሃዝ ኮድ የእትዉ፡",
+    submitCodeBtn: "ብኮድ ኣላግብ",
+    codePlaceholder: "ኣብነት፡ 123456",
+    codeLinkSuccess: "ኣካውንትኩም ብዓወት ተላጊቡ ኣሎ!",
+    codeLinkError: "ዘይትክክል ወይ ዝሓለፎ ኮድ። በጃኹም ደጊምኩም ፈትኑ።",
+    haveCodePrompt: "ናይ ቴሌግራም መላገቢ ኮድ ኣለኩም ድዩ?",
+    hideCodePrompt: "መእተዊ ኮድ ሕባእ",
+    codeInstructions: "ነዚ ናይ 6 ኣሃዝ ኮድ ናብ ቴሌግራም ቦት ስደድዎ፡ /confirm <ኮድ>",
     handoffConsentCheck: "ምስ መካሪ ንምርኻብ ተሰማሚዐ ኣለኹ",
     handoffReasonLabel: "እንታይ ሓገዝ የድልየኩም?",
     handoffReasonPlaceholder: "ንኣብነት፡ ኣብ ሞጁል 2...",
@@ -741,6 +773,14 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     clearChatBtn: "مسح المحادثة",
     generateCodeBtn: "توليد رمز مكون من 6 أرقام",
     yourCodeIs: "رمزك المكون من 6 أرقام:",
+    enterCodeLabel: "أدخل الرمز المكون من 6 أرقام من تيليجرام:",
+    submitCodeBtn: "ربط بالرمز",
+    codePlaceholder: "مثال: 123456",
+    codeLinkSuccess: "تم ربط الحساب بنجاح!",
+    codeLinkError: "رمز غير صالح أو منتهي الصلاحية. يرجى المحاولة مرة أخرى.",
+    haveCodePrompt: "هل لديك رمز ربط من تيليجرام؟",
+    hideCodePrompt: "إخفاء إدخال الرمز",
+    codeInstructions: "أرسل هذا الرمز إلى بوت تيليجرام باستخدام: /confirm <الرمز>",
     handoffConsentCheck: "أوافق على التواصل مع مرشد بشري",
     handoffReasonLabel: "ما الذي تحتاج إلى مساعدة فيه؟ (اختياري)",
     handoffReasonPlaceholder: "مثال: أحتاج مساعدة في تمرين الوحدة 2...",
@@ -1453,6 +1493,47 @@ const STYLES = `
     gap: 0.375rem;
   }
 
+  .settings-card {
+    background: var(--b-surface);
+    border: 1px solid var(--b-border);
+    border-radius: 0.75rem;
+    padding: 0.875rem 1rem;
+    margin-bottom: 0.875rem;
+  }
+  .settings-card-title {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    margin-bottom: 0.375rem;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+  .settings-card-desc {
+    font-size: 0.8125rem;
+    color: var(--b-text-muted);
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+  }
+  .code-display {
+    font-family: monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-align: center;
+    padding: 0.75rem;
+    background: var(--b-surface-alt, #f8fafc);
+    border: 2px dashed var(--b-primary);
+    border-radius: 0.5rem;
+    color: var(--b-primary);
+    user-select: all;
+  }
+  .link-code-box {
+    background: var(--b-surface-alt, #f8fafc);
+    border: 1px solid var(--b-border);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.625rem;
+  }
+
   .settings-label {
     font-weight: 700;
     font-size: 0.875rem;
@@ -1766,6 +1847,7 @@ export class BridgeAssistant extends HTMLElement {
   private telegramToken: string | null = null;
   private telegramDeepLink: string = "https://t.me/savannah_assistant3_bot";
   private isTelegramLinked = false;
+  private isLinkCodeInputVisible = false;
   private telegramPollTimer: number | null = null;
 
   // Settings dialog visibility
@@ -2016,15 +2098,77 @@ export class BridgeAssistant extends HTMLElement {
       });
       if (res.ok) {
         const data = await res.json();
+        this.telegramToken = data.token;
+        this.telegramDeepLink = data.deep_link || this.telegramDeepLink;
         const codeDisplay = this.shadowRoot?.querySelector<HTMLElement>("#code-display");
         if (codeDisplay) {
           codeDisplay.textContent = data.code || data.token;
           codeDisplay.style.display = "block";
           this.announce(`${this.t("yourCodeIs")} ${data.code || data.token}`);
         }
+        const codeInstr = this.shadowRoot?.querySelector<HTMLElement>("#code-instructions");
+        if (codeInstr) {
+          codeInstr.style.display = "block";
+        }
+        this.onTelegramLinkClicked();
       }
     } catch (err) {
       console.warn("Failed to generate link code", err);
+    }
+  }
+
+  private async confirmLinkCode(code: string, feedbackEl?: HTMLElement | null): Promise<boolean> {
+    const cleanCode = code.trim().replace(/\s+/g, "");
+    if (!cleanCode) return false;
+
+    if (feedbackEl) {
+      feedbackEl.style.display = "block";
+      feedbackEl.style.color = "var(--b-text-muted)";
+      feedbackEl.textContent = "Verifying code...";
+    }
+
+    try {
+      const res = await fetch(`${this.apiBase}/api/v1/link/confirm`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: cleanCode }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.linked) {
+          this.isTelegramLinked = true;
+          this.isLinkCodeInputVisible = false;
+          if (this.telegramPollTimer) {
+            window.clearInterval(this.telegramPollTimer);
+            this.telegramPollTimer = null;
+          }
+          if (feedbackEl) {
+            feedbackEl.style.color = "#166534";
+            feedbackEl.textContent = `✓ ${this.t("codeLinkSuccess")}`;
+          }
+          this.announce(this.t("codeLinkSuccess"));
+          setTimeout(() => {
+            this.updateTelegramLinkUI();
+            this.updateLinkCodeUI();
+            this.render();
+          }, 600);
+          return true;
+        }
+      }
+
+      if (feedbackEl) {
+        feedbackEl.style.color = "#dc2626";
+        feedbackEl.textContent = `⚠️ ${this.t("codeLinkError")}`;
+      }
+      return false;
+    } catch (err) {
+      console.warn("Error confirming link code:", err);
+      if (feedbackEl) {
+        feedbackEl.style.color = "#dc2626";
+        feedbackEl.textContent = `⚠️ ${this.t("codeLinkError")}`;
+      }
+      return false;
     }
   }
 
@@ -2711,6 +2855,59 @@ export class BridgeAssistant extends HTMLElement {
     this.isTelegramLinked = false;
     await this.fetchTelegramStartLink();
     this.updateTelegramLinkUI();
+    this.updateLinkCodeUI();
+    this.render();
+  }
+
+  private updateLinkCodeUI(): void {
+    const container = this.shadowRoot?.querySelector("#link-code-container");
+    if (!container) return;
+
+    if (this.isTelegramLinked) {
+      container.innerHTML = "";
+      return;
+    }
+
+    container.innerHTML = `
+      <div style="display:flex; justify-content:center; margin-top:0.25rem;">
+        <button type="button" class="btn-toggle-link-code" id="btn-toggle-link-code" style="background:none; border:none; color:var(--b-primary); font-size:0.75rem; text-decoration:underline; cursor:pointer; padding:0.125rem 0;">
+          ${this.isLinkCodeInputVisible ? "▲ " + this.t("hideCodePrompt") : "🔗 " + this.t("haveCodePrompt")}
+        </button>
+      </div>
+      ${
+        this.isLinkCodeInputVisible
+          ? `
+        <div class="link-code-box" style="margin-top:0.375rem;">
+          <div style="font-size:0.75rem; font-weight:600; margin-bottom:0.25rem; color:var(--b-text);">${this.t("enterCodeLabel")}</div>
+          <form id="footer-code-form" style="display:flex; gap:0.25rem;">
+            <input type="text" id="footer-input-code" class="text-input" placeholder="${this.t("codePlaceholder")}" maxlength="8" style="min-height:2.25rem; font-size:0.9375rem; font-weight:700; letter-spacing:0.15em; text-align:center; padding:0.25rem 0.5rem; flex:1;" required autocomplete="off" />
+            <button type="submit" class="btn btn-primary" id="btn-footer-submit-code" style="min-height:2.25rem; font-size:0.75rem; padding:0.25rem 0.625rem; white-space:nowrap;">
+              ${this.t("submitCodeBtn")}
+            </button>
+          </form>
+          <div id="footer-code-msg" style="font-size:0.6875rem; font-weight:600; margin-top:0.25rem; text-align:center; display:none;"></div>
+        </div>
+      `
+          : ""
+      }
+    `;
+
+    container.querySelector("#btn-toggle-link-code")?.addEventListener("click", () => {
+      this.isLinkCodeInputVisible = !this.isLinkCodeInputVisible;
+      this.updateLinkCodeUI();
+    });
+
+    const form = container.querySelector<HTMLFormElement>("#footer-code-form");
+    if (form) {
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const input = container.querySelector<HTMLInputElement>("#footer-input-code");
+        const msg = container.querySelector<HTMLElement>("#footer-code-msg");
+        if (input && input.value) {
+          this.confirmLinkCode(input.value, msg);
+        }
+      });
+    }
   }
 
   private updateTelegramLinkUI(): void {
@@ -3770,6 +3967,22 @@ export class BridgeAssistant extends HTMLElement {
     const q = questionText.trim();
     if (!q || this.isThinking) return;
 
+    // Check if user entered a 6-digit linking code or /confirm <code> directly in chat
+    const codeMatch = q.match(/^(?:\/confirm|\/link)?\s*([0-9]{6})$/i);
+    if (codeMatch) {
+      const code = codeMatch[1];
+      const success = await this.confirmLinkCode(code);
+      if (success) {
+        this.messages.push({
+          id: `msg_link_${Date.now()}`,
+          sender: "assistant",
+          text: `✅ ${this.t("codeLinkSuccess")}`,
+        });
+        this.renderMessages();
+        return;
+      }
+    }
+
     this.stopSpeaking();
 
     // Auto-detect language of question if different from current selection
@@ -4129,6 +4342,10 @@ export class BridgeAssistant extends HTMLElement {
                 <!-- Rendered by updateTelegramLinkUI() -->
               </div>
             </div>
+            <!-- Space to enter / toggle link code -->
+            <div id="link-code-container" class="link-code-section" style="width:100%;">
+              <!-- Rendered by updateLinkCodeUI() -->
+            </div>
           </footer>
         </div>
 
@@ -4384,6 +4601,55 @@ export class BridgeAssistant extends HTMLElement {
               </button>
             </div>
 
+            <!-- Account & Telegram Linking Card -->
+            <div class="settings-card" id="card-account-linking">
+              <div class="settings-card-title">${ICONS.link} <span>${this.t("linkTab")}</span></div>
+              <div class="settings-card-desc">
+                ${this.t("supportZeroProof")}
+              </div>
+
+              ${this.isTelegramLinked ? `
+                <div style="display:flex; align-items:center; justify-content:space-between; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:0.5rem; padding:0.625rem 0.75rem; margin-bottom:0.75rem;">
+                  <span style="font-size:0.875rem; font-weight:600; color:#166534;">✓ ${this.t("connectedToTelegram")}</span>
+                  <button type="button" class="btn btn-secondary btn-sm" id="btn-settings-disconnect-tg" style="font-size:0.75rem;">
+                    ${this.t("disconnectTelegram")}
+                  </button>
+                </div>
+              ` : `
+                <!-- Enter Code from Telegram -->
+                <form id="settings-code-form" style="margin-bottom:0.875rem;">
+                  <label style="display:block; font-size:0.8125rem; font-weight:600; margin-bottom:0.375rem;">
+                    ${this.t("enterCodeLabel")}
+                  </label>
+                  <div style="display:flex; gap:0.375rem;">
+                    <input type="text" id="settings-input-code" class="text-input" placeholder="${this.t("codePlaceholder")}" maxlength="8" style="font-size:1rem; font-weight:700; letter-spacing:0.15em; text-align:center; flex:1;" required autocomplete="off" />
+                    <button type="submit" class="btn btn-primary" id="btn-settings-submit-code" style="white-space:nowrap; padding:0 0.875rem;">
+                      ${this.t("submitCodeBtn")}
+                    </button>
+                  </div>
+                  <div id="settings-code-msg" style="font-size:0.75rem; font-weight:600; margin-top:0.375rem; display:none;"></div>
+                </form>
+
+                <div style="display:flex; align-items:center; gap:0.5rem; margin:0.75rem 0;">
+                  <div style="flex:1; border-top:1px solid var(--b-border);"></div>
+                  <span style="font-size:0.75rem; color:var(--b-text-muted); font-weight:600;">OR</span>
+                  <div style="flex:1; border-top:1px solid var(--b-border);"></div>
+                </div>
+
+                <!-- Generate Code for Telegram -->
+                <div>
+                  <button type="button" class="btn btn-secondary" id="btn-generate-code" style="width:100%; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
+                    ${ICONS.link} <span>${this.t("generateCodeBtn")}</span>
+                  </button>
+                  <div class="code-display" id="code-display" style="display:none; font-size:1.5rem; font-weight:700; letter-spacing:0.25em; text-align:center; padding:0.75rem; background:var(--b-surface-alt, #f8fafc); border:2px dashed var(--b-primary); border-radius:0.5rem; margin-top:0.625rem; color:var(--b-primary);">
+                  </div>
+                  <div id="code-instructions" style="display:none; font-size:0.75rem; color:var(--b-text-muted); text-align:center; margin-top:0.375rem;">
+                    ${this.t("codeInstructions")}
+                  </div>
+                </div>
+              `}
+            </div>
+
             <!-- Clear Chat Card -->
             <div class="settings-card" style="border-color:#fecaca; background:#fff5f5;">
               <div style="display:flex; justify-content:space-between; align-items:center; gap:0.5rem; flex-wrap:wrap;">
@@ -4404,6 +4670,7 @@ export class BridgeAssistant extends HTMLElement {
 
     this.renderMessages();
     this.updateTelegramLinkUI();
+    this.updateLinkCodeUI();
     this.updateVoiceStatusUI();
     this.bindEvents();
   }
@@ -4986,6 +5253,24 @@ export class BridgeAssistant extends HTMLElement {
         }
       });
     }
+
+    // Settings Code Form
+    const settingsCodeForm = this.shadowRoot.querySelector<HTMLFormElement>("#settings-code-form");
+    if (settingsCodeForm) {
+      settingsCodeForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const input = this.shadowRoot?.querySelector<HTMLInputElement>("#settings-input-code");
+        const msg = this.shadowRoot?.querySelector<HTMLElement>("#settings-code-msg");
+        if (input && input.value) {
+          this.confirmLinkCode(input.value, msg);
+        }
+      });
+    }
+
+    // Settings Disconnect Telegram
+    this.shadowRoot.querySelector("#btn-settings-disconnect-tg")?.addEventListener("click", () => {
+      this.disconnectTelegram();
+    });
 
     // Clear Chat Button
     this.shadowRoot.querySelector("#btn-clear-chat")?.addEventListener("click", () => {
