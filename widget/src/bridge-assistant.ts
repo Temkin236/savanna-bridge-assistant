@@ -48,6 +48,8 @@ export interface ChatMessage {
   originalQuestion?: string;
   audioUrl?: string;
   isAudioPlaying?: boolean;
+  isAudioPaused?: boolean;
+  isReadingPage?: boolean;
 }
 
 export interface SupportNeedsData {
@@ -87,6 +89,9 @@ export const ICONS = {
   key: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 2l-2 2m-1.5 1.5L14 9l-1.5-1.5-3 3L8 9 5 12l3 3 4.5-4.5"></path><circle cx="7.5" cy="16.5" r="4.5"></circle></svg>`,
   listen: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`,
   pause: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>`,
+  stop: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg>`,
+  replay: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>`,
+  volume: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`,
   lightbulb: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="9" y1="18" x2="15" y2="18"></line><line x1="10" y1="22" x2="14" y2="22"></line><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5.76.76 1.23 1.52 1.41 2.5"></path></svg>`,
   book: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>`,
   arrowRight: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>`,
@@ -102,7 +107,6 @@ export const ICONS = {
   sound: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`,
   volumeMute: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>`,
   play: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`,
-  stop: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect></svg>`,
   speed: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`,
   sync: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>`,
   sparkles: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>`,
@@ -156,7 +160,8 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     lookingInCourse: "Looking in the course...",
     answerHeading: "Answer",
     listenButton: "Listen",
-    pauseButton: "Stop",
+    pauseButton: "Pause",
+    stopButton: "Stop",
     replayButton: "Replay",
     makeSimplerButton: "Make simpler",
     sourcesTitle: "Course sources:",
@@ -231,6 +236,19 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     onboardingSkip: "Skip for now",
     onboardingReplay: "Setup Tour / Onboarding",
     voiceTab: "Voice & Audio",
+    pageContextBadge: "Current Lesson:",
+    explainLessonBtn: "Explain this lesson",
+    summarizePageBtn: "Summarize this page",
+    readingAloudHeading: "Reading page aloud",
+    speakingIndicator: "Speaking...",
+    listeningIndicator: "Listening...",
+    wakeWordSetting: "Voice activation (Wake word 'Help')",
+    wakeWordDesc: "Say 'Help' to automatically open assistant and start speaking",
+    navigatedToNotice: "Navigated to new lesson:",
+    followupTitle: "💡 Follow-up questions:",
+    followupQ1: "💡 Explain with examples",
+    followupQ2: "➡️ What to know before next lesson?",
+    followupQ3: "📝 Quiz me on this topic",
   },
   am: {
     appTitle: "የሳቫና ብሪጅ ረዳት",
@@ -280,7 +298,8 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     answerHeading: "መልስ",
     listenButton: "አዳምጥ",
     pauseButton: "አቁም",
-    replayButton: "እንደገና አጫውት",
+    stopButton: "አቁም",
+    replayButton: "ደግመህ አጫውት",
     makeSimplerButton: "ቀለል አድርግ",
     sourcesTitle: "የኮርስ ምንጮች፡",
     talkToPersonButton: "ከሰው ጋር ተነጋገር",
@@ -354,6 +373,19 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     onboardingSkip: "ለጊዜው እለፈው",
     onboardingReplay: "የመጀመሪያ ቅንብር መመሪያ",
     voiceTab: "ድምጽ እና ማዳመጥ",
+    pageContextBadge: "ወቅታዊ ትምህርት፡",
+    explainLessonBtn: "ይህንን ትምህርት አስረዳኝ",
+    summarizePageBtn: "ይህንን ገጽ አጠቃልል",
+    readingAloudHeading: "ገጹን ጮክ ብሎ በማንበብ ላይ",
+    speakingIndicator: "እየተናገረ ነው...",
+    listeningIndicator: "እያዳመጠ ነው...",
+    wakeWordSetting: "የድምጽ ማግበር (የማንቂያ ቃል 'እርዳታ' / 'Help')",
+    wakeWordDesc: "ረዳቱን በራስ-ሰር ለመክፈትና ለማናገር 'እርዳታ' ወይም 'Help' ይበሉ",
+    navigatedToNotice: "ወደ አዲስ ትምህርት ገጽ ተቀይሯል፡",
+    followupTitle: "💡 ተከታይ ጥያቄዎች፡",
+    followupQ1: "💡 በምሳሌዎች አስረዳኝ",
+    followupQ2: "➡️ ወደ ቀጣዩ ትምህርት ከመሄዴ በፊት ምን ልወቅ?",
+    followupQ3: "📝 ግንዛቤዬን ፈትነኝ",
   },
   om: {
     appTitle: "Gargaaraa Savanna Bridge",
@@ -403,7 +435,8 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     answerHeading: "Deebii",
     listenButton: "Dhaggeeffadhu",
     pauseButton: "Dhaabi",
-    replayButton: "Irra deebi'i",
+    stopButton: "Dhaabi",
+    replayButton: "Irra deebi'ii taphachiisi",
     makeSimplerButton: "Salphisi",
     sourcesTitle: "Madda barnootaa:",
     talkToPersonButton: "Nama waliin dubbadhu",
@@ -477,6 +510,19 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     onboardingSkip: "Ammaaf darbi",
     onboardingReplay: "Daawwannaa Qindaa'inaa",
     voiceTab: "Sagalee & Dhaggeeffannaa",
+    pageContextBadge: "Kutaa Barnootaa Ammaa:",
+    explainLessonBtn: "Barnoota kana naaf ibsi",
+    summarizePageBtn: "Fuula kana naaf gabaabsi",
+    readingAloudHeading: "Fuula kana sagaleedhaan dubbisaa jira",
+    speakingIndicator: "Dubbataa jira...",
+    listeningIndicator: "Dhaggeeffachaa jira...",
+    wakeWordSetting: "Sagaleen kakaasuu (Jechama 'Gargaarsa' / 'Help')",
+    wakeWordDesc: "Gargaaraa ofumaan banuuf 'Gargaarsa' ykn 'Help' jedhaa",
+    navigatedToNotice: "Gara barnoota haaraatti jijjiirameera:",
+    followupTitle: "💡 Gaaffilee itti aanan:",
+    followupQ1: "💡 Fakkeenyotaan naaf ibsi",
+    followupQ2: "➡️ Barnoota itti aanuuf maal beekuun qaba?",
+    followupQ3: "📝 Hubannoo koo na qori",
   },
   ti: {
     appTitle: "ናይ ሳቫና ብሪጅ ሓጋዚ",
@@ -526,7 +572,8 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     answerHeading: "መልሲ",
     listenButton: "ስማዕ",
     pauseButton: "ኣዕርፍ",
-    replayButton: "ደጊምካ ስማዕ",
+    stopButton: "ኣቁም",
+    replayButton: "ደጊምካ ኣጻውት",
     makeSimplerButton: "ቀሊል ግበሮ",
     sourcesTitle: "ምንጭታት ኮርስ፡",
     talkToPersonButton: "ምስ ሰብ ተዛረብ",
@@ -600,6 +647,19 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     onboardingSkip: "ንሕጂ ሕለፎ",
     onboardingReplay: "ናይ መጀመርታ መምርሒ",
     voiceTab: "ድምጽን ምስማዕን",
+    pageContextBadge: "ህሉው ትምህርቲ፡",
+    explainLessonBtn: "እዚ ትምህርቲ ኣብርሃለይ",
+    summarizePageBtn: "እዚ ገጽ ኣጠቃልሎ",
+    readingAloudHeading: "ገጽ ብድምጺ ምንባብ",
+    speakingIndicator: "ይዛረብ ኣሎ...",
+    listeningIndicator: "ይሰምዕ ኣሎ...",
+    wakeWordSetting: "ብድምጺ ምኽፋት ('ሓገዝ' / 'Help')",
+    wakeWordDesc: "ንሓጋዚ ንምኽፋት 'ሓገዝ' ወይ 'Help' በሉ",
+    navigatedToNotice: "ናብ ሓድሽ ትምህርቲ ተቐይሩ፡",
+    followupTitle: "💡 ቀጸልቲ ሕቶታት፡",
+    followupQ1: "💡 ብኣብነታት ኣረድኣኒ",
+    followupQ2: "➡️ ናብ ዝቕጽል ትምህርቲ ቅድሚ ምኻደይ እንታይ ክፈልጥ ኣለኒ?",
+    followupQ3: "📝 ግንዛበይ ፈትነኒ",
   },
   ar: {
     appTitle: "مساعد سافانا بريدج",
@@ -648,8 +708,9 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     lookingInCourse: "جاري البحث في محتوى الدورة...",
     answerHeading: "الإجابة",
     listenButton: "استماع",
-    pauseButton: "إيقاف",
-    replayButton: "إعادة",
+    pauseButton: "إيقاف مؤقت",
+    stopButton: "إيقاف",
+    replayButton: "إعادة التشغيل",
     makeSimplerButton: "تبسيط الشرح",
     sourcesTitle: "مصادر الدورة:",
     talkToPersonButton: "التحدث مع شخص",
@@ -723,6 +784,19 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     onboardingSkip: "تخطي الآن",
     onboardingReplay: "دليل الإعداد الأولي",
     voiceTab: "الصوت والقراءة",
+    pageContextBadge: "الدرس الحالي:",
+    explainLessonBtn: "اشرح لي هذا الدرس",
+    summarizePageBtn: "لخص هذه الصفحة",
+    readingAloudHeading: "قراءة محتوى الصفحة بصوت عالٍ",
+    speakingIndicator: "جاري التحدث...",
+    listeningIndicator: "جاري الاستماع...",
+    wakeWordSetting: "التفعيل الصوتي (كلمة التنبيه 'مساعدة' / 'Help')",
+    wakeWordDesc: "قل 'مساعدة' أو 'Help' لفتح المساعد تلقائياً والتحدث مباشرة",
+    navigatedToNotice: "تم الانتقال إلى درس جديد:",
+    followupTitle: "💡 أسئلة متابعة مقترحة:",
+    followupQ1: "💡 اشرح بالأمثلة",
+    followupQ2: "➡️ ماذا يجب أن أفهم قبل الدرس التالي؟",
+    followupQ3: "📝 اختبر فهمي لهذا الموضوع",
   },
 };
 
@@ -1139,6 +1213,8 @@ const STYLES = `
   .answer-text {
     margin: 0 0 0.5rem 0;
     word-break: break-word;
+    line-height: 1.5;
+    white-space: pre-wrap;
   }
 
   .answer-actions {
@@ -1162,6 +1238,46 @@ const STYLES = `
     padding-top: 0.5rem;
     border-top: 1px solid var(--b-border);
     font-size: 0.8125rem;
+  }
+
+  .followup-box {
+    margin-top: 0.625rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed var(--b-border);
+  }
+
+  .followup-title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--b-text-muted);
+    margin-bottom: 0.375rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .followup-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+  }
+
+  .btn-followup {
+    font-size: 0.8125rem !important;
+    padding: 0.25rem 0.625rem !important;
+    min-height: 2rem !important;
+    border-radius: 1rem !important;
+    background: #f8fafc !important;
+    border: 1px solid #cbd5e1 !important;
+    color: var(--b-text) !important;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+
+  .btn-followup:hover {
+    background: #e2e8f0 !important;
+    border-color: var(--b-primary) !important;
+    color: var(--b-primary) !important;
   }
 
   .sources-title {
@@ -1194,6 +1310,53 @@ const STYLES = `
     padding: 0.5rem 0.875rem;
     font-style: italic;
     color: var(--b-text-muted);
+  }
+
+  .page-context-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    background: var(--b-surface-alt);
+    border: 1px solid var(--b-border);
+    padding: 0.375rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.8125rem;
+    color: var(--b-primary);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .speaking-indicator-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1d4ed8;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    animation: sb-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .listening-indicator-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    animation: sb-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes sb-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
   }
 
   /* Footer (Always Visible) */
@@ -1587,6 +1750,14 @@ export class BridgeAssistant extends HTMLElement {
   private activeRecognition: any = null;
   private wakeWordRecognizer: any = null;
   private activeAudio: HTMLAudioElement | null = null;
+  private activeUtterance: any = null;
+  private readingWatchdogTimer: any = null;
+  private currentReading: {
+    msgId: string;
+    items: Array<{ text: string; element: HTMLElement | null }>;
+    currentIndex: number;
+    isPaused: boolean;
+  } | null = null;
 
   private messages: ChatMessage[] = [];
   private sessionId = `sess_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
@@ -1637,6 +1808,14 @@ export class BridgeAssistant extends HTMLElement {
   private popstateListener: (() => void) | null = null;
 
   private previousFocus: HTMLElement | null = null;
+
+  // Page Context & Voice Activation State
+  private lastPageUrl = "";
+  private lastPageTitle = "";
+  private lastPageSection = "";
+  private navCheckTimer: number | null = null;
+  private voiceActivationEnabled = false;
+  private wakeWordRecognition: any = null;
 
   // Attributes: supports both guide plain attributes (lang, api, content) and data-*
   get apiBase(): string {
@@ -1689,6 +1868,10 @@ export class BridgeAssistant extends HTMLElement {
     this.attachShadow({ mode: "open" });
     this.render();
     this.setupNetworkMonitor();
+    this.setupPageNavigationMonitor();
+    if (this.voiceActivationEnabled) {
+      this.setupWakeWordDetector();
+    }
 
     // Universal compatibility: track SPA navigation without re-initializing widget
     this.popstateListener = () => {
@@ -1727,14 +1910,23 @@ export class BridgeAssistant extends HTMLElement {
       try { this.wakeWordRecognizer.stop(); } catch {}
       this.wakeWordRecognizer = null;
     }
+    if (this.wakeWordRecognition) {
+      try { this.wakeWordRecognition.stop(); } catch {}
+      this.wakeWordRecognition = null;
+    }
     this.stopSpeaking();
     if (this.popstateListener) {
       window.removeEventListener("popstate", this.popstateListener);
       this.popstateListener = null;
     }
+    if (this.navCheckTimer) {
+      window.clearInterval(this.navCheckTimer);
+      this.navCheckTimer = null;
+    }
     if (this.isReadingPage) {
       this.stopPageReading();
     }
+    this.stopPageReadingHighlight();
   }
 
   private t(key: string): string {
@@ -1914,6 +2106,9 @@ export class BridgeAssistant extends HTMLElement {
         this.simpleMode = savedSimple === "true";
         this.accessibilityPrefs.simple_mode = this.simpleMode;
       }
+
+      const savedWake = localStorage.getItem("savanna_bridge_wake_word");
+      if (savedWake) this.voiceActivationEnabled = savedWake === "true";
     } catch {
       // Ignore storage errors
     }
@@ -2113,24 +2308,71 @@ export class BridgeAssistant extends HTMLElement {
 
   private extractPlatformContext(): { page_url: string; page_title: string; page_content: string; section: string } {
     const page_url = typeof window !== "undefined" ? window.location.href : "";
-    const page_title = typeof document !== "undefined" ? document.title || "Savanna Platform" : "Savanna Platform";
-    
-    let section = "Current Lesson";
+    let page_title = typeof document !== "undefined" ? document.title || "Savanna Platform" : "Savanna Platform";
+    let section = "The Future of the VA Industry";
+
     if (typeof document !== "undefined") {
-      const heading = document.querySelector("h1, h2, [aria-current='page'], .active-lesson, .module-title");
+      // Find course title if on dashboard or course page
+      const courseTitleEl = document.querySelector(
+        ".curriculum-switcher-label span, .curriculum-title, .course-header h1, h1.course-name"
+      );
+      if (courseTitleEl && courseTitleEl.textContent?.trim()) {
+        page_title = courseTitleEl.textContent.trim();
+      } else if (page_title.includes("|")) {
+        page_title = page_title.split("|")[0].replace(/^Concept page:\s*/i, "").trim();
+      }
+
+      // Find active lesson heading
+      const heading = document.querySelector(
+        ".homepage-card h5, .formatted-content h5, .active-lesson, [aria-current='page'], #curriculum_navigation_content .active, .card-title, h2, h1"
+      );
       if (heading && heading.textContent) {
-        section = heading.textContent.trim();
+        section = heading.textContent.trim().replace(/^[\s\n\r]+|[\s\n\r]+$/g, "");
       }
     }
 
     let page_content = "";
     if (typeof document !== "undefined") {
-      const mainEl = document.querySelector("main") || document.querySelector("article") || document.querySelector(".content") || document.body;
+      const mainEl =
+        document.querySelector("#curriculum_navigation_content") ||
+        document.querySelector("#static-track-host") ||
+        document.querySelector(".homepage-card:not(.d-none)") ||
+        document.querySelector(".formatted-content") ||
+        document.querySelector("article") ||
+        document.querySelector("main") ||
+        document.querySelector(".card-body") ||
+        document.querySelector(".content") ||
+        document.body;
+
       if (mainEl) {
         try {
           const clone = mainEl.cloneNode(true) as HTMLElement;
-          clone.querySelectorAll("script, style, db-assistant, bridge-assistant, noscript, nav, footer, header").forEach((el) => el.remove());
-          page_content = (clone.textContent || "").replace(/\s+/g, " ").trim().slice(0, 15000);
+          clone
+            .querySelectorAll(
+              "script, style, db-assistant, bridge-assistant, noscript, nav, footer, header, #sidebar, .sidebar, button, input"
+            )
+            .forEach((el) => el.remove());
+
+          const blocks: string[] = [];
+          clone.querySelectorAll("h1, h2, h3, h4, h5, p, li").forEach((node) => {
+            const txt = (node.textContent || "").replace(/\s+/g, " ").trim();
+            if (txt) {
+              const tag = node.tagName.toLowerCase();
+              if (tag.startsWith("h")) {
+                blocks.push(`\n${txt}\n`);
+              } else if (tag === "li") {
+                blocks.push(`• ${txt}`);
+              } else {
+                blocks.push(txt);
+              }
+            }
+          });
+
+          if (blocks.length > 0) {
+            page_content = blocks.join("\n\n").slice(0, 15000);
+          } else {
+            page_content = (clone.textContent || "").replace(/\s+/g, " ").trim().slice(0, 15000);
+          }
         } catch {
           page_content = "";
         }
@@ -2359,13 +2601,17 @@ export class BridgeAssistant extends HTMLElement {
   }
 
   public openAssistant(): void {
+    if (this.isOpen) return;
     this.isOpen = true;
     const dialog = this.shadowRoot?.querySelector<HTMLElement>("#assistant-dialog");
     const launcher = this.shadowRoot?.querySelector<HTMLButtonElement>("#launcher-btn");
     if (dialog && launcher) {
+      dialog.hidden = false;
       dialog.removeAttribute("hidden");
+      dialog.style.display = "flex";
       launcher.setAttribute("aria-expanded", "true");
       dialog.focus();
+      this.announce("Savanna Bridge Assistant opened.");
     }
   }
 
@@ -2744,10 +2990,10 @@ export class BridgeAssistant extends HTMLElement {
           if (detected !== this.currentLang) {
             this.setLanguage(detected, false);
           }
-          inputEl.value = (inputEl.value ? inputEl.value + " " : "") + data.transcript;
-          inputEl.focus();
+          inputEl.value = "";
           this.playEarcon("transcribed");
           this.announce(this.t("voicePreviewNotice"));
+          await this.askQuestion(data.transcript, false, true);
         }
       }
     } catch (err) {
@@ -2933,9 +3179,594 @@ export class BridgeAssistant extends HTMLElement {
     this.updateVoiceStatusUI();
   }
 
+  // --- TTS Audio & Read Aloud Controls ---
+
+  private ensureHighlightStyles(): void {
+    if (typeof document === "undefined") return;
+    if (!document.getElementById("sb-reading-highlight-styles")) {
+      const style = document.createElement("style");
+      style.id = "sb-reading-highlight-styles";
+      style.textContent = `
+        .sb-reading-highlight {
+          background-color: rgba(254, 240, 138, 0.9) !important;
+          outline: 3.5px solid #eab308 !important;
+          box-shadow: 0 0 16px rgba(234, 179, 8, 0.5) !important;
+          border-radius: 6px !important;
+          padding: 4px 8px !important;
+          transition: background-color 0.25s ease, outline 0.25s ease, box-shadow 0.25s ease !important;
+        }
+        .answer-para-item {
+          transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+        .answer-para-item:hover {
+          background-color: rgba(254, 240, 138, 0.25);
+          border-radius: 4px;
+        }
+        .active-reading-para {
+          background-color: rgba(254, 240, 138, 0.35) !important;
+          border-left: 4px solid #eab308 !important;
+          border-radius: 4px !important;
+          padding-left: 0.5rem !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }
+
+  private highlightElement(el: HTMLElement | null): void {
+    this.ensureHighlightStyles();
+    this.stopPageReadingHighlight();
+    if (el) {
+      el.classList.add("sb-reading-highlight");
+
+      // If element is inside an overflow-clipped card or preview container (e.g. Savanna dashboard card with height:400px & overflow-y-hidden),
+      // ensure the parent expands or scrolls so the highlighted paragraph is 100% visible!
+      let parent = el.parentElement;
+      while (parent && parent !== document.body) {
+        const computed = window.getComputedStyle(parent);
+        if (
+          computed.overflowY === "hidden" ||
+          computed.overflow === "hidden" ||
+          parent.classList.contains("overflow-y-hidden") ||
+          parent.style.height === "400px" ||
+          parent.getAttribute("style")?.includes("400px")
+        ) {
+          parent.style.overflowY = "visible";
+          parent.style.height = "auto";
+          parent.style.maxHeight = "none";
+          parent.classList.remove("overflow-y-hidden", "pe-none");
+        }
+        parent = parent.parentElement;
+      }
+
+      try {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      } catch {}
+    }
+  }
+
+  private stopPageReadingHighlight(): void {
+    if (typeof document !== "undefined") {
+      document.querySelectorAll(".sb-reading-highlight").forEach((node) => {
+        node.classList.remove("sb-reading-highlight");
+      });
+    }
+  }
+
+  private getReadablePageElements(): HTMLElement[] {
+    if (typeof document === "undefined") return [];
+    
+    // Selectors covering all major LMS and educational platforms:
+    // Canvas LMS: #content, .user_content, .show-content, #wiki_page_show
+    // Moodle: #region-main, .course-content, .activity-information, .format-topics, .format-weeks
+    // Blackboard: #content-frame, .vcr-content, .contentBox
+    // Coursera / edX: [role="main"], main, article, .rc-ItemContent
+    // Savanna: #curriculum_navigation_content, #static-track-host, .formatted-content, .homepage-card
+    // WordPress LMS / Generic: .lesson-content, .course-content, .entry-content, main, article, .card-body
+    const containerSelectors = [
+      "#curriculum_navigation_content",
+      "#static-track-host:not([hidden])",
+      "#static-track-host",
+      "[role='main']",
+      "main",
+      "article",
+      ".course-content",
+      ".lesson-content",
+      ".activity-information",
+      "#region-main",
+      ".user_content",
+      ".formatted-content",
+      ".homepage-card:not(.d-none) .card-body:not(.d-none)",
+      ".homepage-card:not(.d-none)",
+      ".card-body",
+      "#content",
+      ".content",
+      "body",
+    ];
+
+    let foundElements: HTMLElement[] = [];
+    for (const sel of containerSelectors) {
+      const container = document.querySelector<HTMLElement>(sel);
+      if (!container) continue;
+
+      const candidates = Array.from(
+        container.querySelectorAll<HTMLElement>("p, h1, h2, h3, h4, h5, li, blockquote, pre")
+      ).filter((el) => {
+        // Exclude UI controls, assistants, sidebars, navigation, footers, scripts
+        if (el.closest("bridge-assistant, db-assistant, nav, footer, header, #sidebar, .sidebar, script, style, noscript, dialog, .modal, template")) {
+          return false;
+        }
+        // Exclude elements that are hidden or in inactive tabs
+        if (el.offsetParent === null && el.offsetWidth === 0 && el.offsetHeight === 0) {
+          return false;
+        }
+        const text = el.textContent?.trim() || "";
+        return text.length > 15;
+      });
+
+      if (candidates.length > 0) {
+        foundElements = candidates;
+        break;
+      }
+    }
+
+    if (foundElements.length === 0 && document.body) {
+      foundElements = Array.from(
+        document.body.querySelectorAll<HTMLElement>("p, h2, h3, h4, h5")
+      ).filter((el) => {
+        if (el.closest("bridge-assistant, db-assistant, nav, footer, header, #sidebar, .sidebar, script, style, template")) return false;
+        return (el.textContent?.trim() || "").length > 15;
+      });
+    }
+
+    return foundElements;
+  }
+
+  private startSequentialReading(msg: ChatMessage, startIndex: number = 0): void {
+    if (this.readingWatchdogTimer) {
+      clearTimeout(this.readingWatchdogTimer);
+      this.readingWatchdogTimer = null;
+    }
+    this.activeUtterance = null;
+    (window as any).__activeUtterance = null;
+
+    if (this.activeAudio) {
+      this.activeAudio.pause();
+      this.activeAudio = null;
+    }
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+
+    const pageElements = this.getReadablePageElements();
+
+    // Split message into paragraphs/sections, ignoring follow-up suggestions
+    const rawParagraphs = msg.text
+      .split(/\n\s*\n|\n/)
+      .map((p) => p.trim())
+      .filter((p) => {
+        if (!p || p.length < 5) return false;
+        if (
+          /^(Would you like|የሚከተሉትን|Maal gochuu|هل ترغب|•\s*Explain|•\s*Quiz|•\s*What|•\s*ይህንን|•\s*ወደ|•\s*ግንዛቤ|•\s*Yaada|•\s*Barnoota|•\s*Hubannoo|•\s*أشرح|•\s*أوضح|•\s*أطرح)/i.test(
+            p
+          )
+        ) {
+          return false;
+        }
+        return true;
+      });
+
+    const paragraphs = rawParagraphs.length > 0 ? rawParagraphs : [msg.text];
+
+    let lastMatchedIdx = -1;
+    const items = paragraphs.map((para, i) => {
+      const cleanPara = para.replace(/[#*•_`]/g, " ").replace(/\s+/g, " ").trim().toLowerCase();
+      const isIntro = /^(this course|this lesson|summary of|የዚህ|ይህ ትምህርት|barnoonni|يشرح|ملخص)/i.test(cleanPara);
+      const searchSnippet = cleanPara.slice(0, 35);
+      
+      let matchedEl: HTMLElement | null = null;
+      let matchedIdx = -1;
+
+      // Try finding the matching element starting forward from lastMatchedIdx
+      for (let idx = 0; idx < pageElements.length; idx++) {
+        const el = pageElements[idx];
+        const elText = (el.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+        if (
+          (searchSnippet.length > 10 && elText.includes(searchSnippet)) ||
+          (cleanPara.length > 20 && elText.includes(cleanPara.slice(10, 45))) ||
+          (elText.length > 15 && cleanPara.includes(elText.slice(0, 35)))
+        ) {
+          // If advancing sequentially, prioritize elements after the last one used
+          if (idx > lastMatchedIdx || matchedIdx === -1) {
+            matchedEl = el;
+            matchedIdx = idx;
+            if (idx > lastMatchedIdx) break;
+          }
+        }
+      }
+
+      // If no text match found, advance sequentially through page elements!
+      if (!matchedEl) {
+        if (isIntro && pageElements.length > 0) {
+          matchedEl = pageElements[0];
+          matchedIdx = 0;
+        } else {
+          const nextIdx = lastMatchedIdx + 1;
+          if (nextIdx < pageElements.length) {
+            matchedEl = pageElements[nextIdx];
+            matchedIdx = nextIdx;
+          } else if (i < pageElements.length) {
+            matchedEl = pageElements[i];
+            matchedIdx = i;
+          }
+        }
+      }
+
+      if (matchedIdx !== -1) {
+        lastMatchedIdx = matchedIdx;
+      }
+
+      return {
+        text: para,
+        element: matchedEl || null,
+      };
+    });
+
+    this.currentReading = {
+      msgId: msg.id,
+      items,
+      currentIndex: startIndex,
+      isPaused: false,
+    };
+
+    msg.isAudioPlaying = true;
+    msg.isAudioPaused = false;
+    this.renderMessages();
+    this.playNextReadingItem(msg);
+  }
+
+  private playNextReadingItem(msg: ChatMessage): void {
+    if (this.readingWatchdogTimer) {
+      clearTimeout(this.readingWatchdogTimer);
+      this.readingWatchdogTimer = null;
+    }
+
+    if (!this.currentReading || this.currentReading.msgId !== msg.id || this.currentReading.isPaused) {
+      return;
+    }
+
+    if (this.currentReading.currentIndex >= this.currentReading.items.length) {
+      this.stopPageReadingHighlight();
+      msg.isAudioPlaying = false;
+      msg.isAudioPaused = false;
+      this.currentReading = null;
+      this.activeUtterance = null;
+      (window as any).__activeUtterance = null;
+      this.renderMessages();
+      return;
+    }
+
+    const currentItem = this.currentReading.items[this.currentReading.currentIndex];
+
+    // Advance highlight smoothly to the current paragraph and scroll it into view!
+    if (currentItem.element) {
+      this.highlightElement(currentItem.element);
+    } else {
+      this.stopPageReadingHighlight();
+    }
+
+    // Update UI so the active paragraph in the widget shows the reading indicator
+    this.renderMessages();
+
+    const cleanSpoken = currentItem.text.replace(/[#*•_`]/g, " ").replace(/\s+/g, " ").trim();
+    if (!cleanSpoken) {
+      this.currentReading.currentIndex++;
+      this.playNextReadingItem(msg);
+      return;
+    }
+
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      try {
+        window.speechSynthesis.resume();
+      } catch {}
+
+      const advanceNext = () => {
+        if (this.readingWatchdogTimer) {
+          clearTimeout(this.readingWatchdogTimer);
+          this.readingWatchdogTimer = null;
+        }
+        this.activeUtterance = null;
+        (window as any).__activeUtterance = null;
+
+        if (!this.currentReading || this.currentReading.msgId !== msg.id || this.currentReading.isPaused) {
+          return;
+        }
+        // Advance to next paragraph sequentially!
+        this.currentReading.currentIndex++;
+        this.playNextReadingItem(msg);
+      };
+
+      const u = new SpeechSynthesisUtterance(cleanSpoken);
+      // Retain strong reference to prevent Chromium garbage collection of utterance during speech!
+      this.activeUtterance = u;
+      (window as any).__activeUtterance = u;
+
+      const langMap: Record<SupportedLanguage, string> = {
+        en: "en-US",
+        am: "am-ET",
+        om: "om-ET",
+        ti: "ti-ET",
+        ar: "ar-SA",
+      };
+      u.lang = langMap[this.currentLang] || "en-US";
+      u.rate = 1.0;
+
+      u.onstart = () => {
+        msg.isAudioPlaying = true;
+        msg.isAudioPaused = false;
+      };
+
+      u.onend = () => {
+        advanceNext();
+      };
+
+      u.onerror = (e) => {
+        console.warn("TTS segment error:", e);
+        advanceNext();
+      };
+
+      // Watchdog timer: If Chrome drops onend or speech gets stuck, automatically advance to next paragraph!
+      const words = cleanSpoken.split(/\s+/).filter(Boolean).length;
+      const estimatedDurationMs = Math.min(14000, Math.max(3000, Math.ceil((words / 2.0) * 1000) + 1200));
+      this.readingWatchdogTimer = setTimeout(() => {
+        advanceNext();
+      }, estimatedDurationMs);
+
+      // Short delay ensures window.speechSynthesis.cancel() has completed before speak() is scheduled
+      setTimeout(() => {
+        try {
+          window.speechSynthesis.speak(u);
+        } catch {
+          advanceNext();
+        }
+      }, 40);
+    } else {
+      msg.isAudioPlaying = false;
+      msg.isAudioPaused = false;
+      this.stopPageReadingHighlight();
+      this.renderMessages();
+    }
+  }
+
+  private async handleListen(msg: ChatMessage): Promise<void> {
+    if (this.readingWatchdogTimer) {
+      clearTimeout(this.readingWatchdogTimer);
+      this.readingWatchdogTimer = null;
+    }
+
+    if (msg.isAudioPlaying) {
+      if (this.currentReading && this.currentReading.msgId === msg.id) {
+        this.currentReading.isPaused = true;
+      }
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.pause();
+      }
+      if (this.activeAudio && !this.activeAudio.paused) {
+        this.activeAudio.pause();
+      }
+      msg.isAudioPlaying = false;
+      msg.isAudioPaused = true;
+      this.renderMessages();
+      this.announce(this.t("pauseButton"));
+      return;
+    }
+
+    if (msg.isAudioPaused) {
+      if (this.currentReading && this.currentReading.msgId === msg.id) {
+        this.currentReading.isPaused = false;
+        msg.isAudioPlaying = true;
+        msg.isAudioPaused = false;
+        if ("speechSynthesis" in window && window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+        } else {
+          this.playNextReadingItem(msg);
+        }
+        this.renderMessages();
+        this.announce(this.t("listenButton"));
+        return;
+      }
+      if (this.activeAudio && this.activeAudio.paused) {
+        this.activeAudio.play().catch(() => this.startSequentialReading(msg, 0));
+        msg.isAudioPlaying = true;
+        msg.isAudioPaused = false;
+        this.renderMessages();
+        this.announce(this.t("listenButton"));
+        return;
+      }
+    }
+
+    this.startSequentialReading(msg, 0);
+  }
+
+  private handleStop(msg: ChatMessage): void {
+    if (this.readingWatchdogTimer) {
+      clearTimeout(this.readingWatchdogTimer);
+      this.readingWatchdogTimer = null;
+    }
+    this.activeUtterance = null;
+    (window as any).__activeUtterance = null;
+
+    if (this.currentReading) {
+      this.currentReading.isPaused = true;
+      this.currentReading = null;
+    }
+    if (this.activeAudio) {
+      this.activeAudio.pause();
+      this.activeAudio.currentTime = 0;
+      this.activeAudio = null;
+    }
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+    this.stopPageReadingHighlight();
+    msg.isAudioPlaying = false;
+    msg.isAudioPaused = false;
+    this.renderMessages();
+    this.announce(this.t("stopButton"));
+  }
+
+  private handleReplay(msg: ChatMessage): void {
+    this.handleStop(msg);
+    setTimeout(() => {
+      this.startSequentialReading(msg, 0);
+    }, 120);
+  }
+
+  private fallbackTTS(text: string, msg?: ChatMessage): void {
+    if (msg) {
+      this.startSequentialReading(msg, 0);
+    } else {
+      const dummyMsg: ChatMessage = {
+        id: `msg_tts_${Date.now()}`,
+        sender: "assistant",
+        text,
+      };
+      this.startSequentialReading(dummyMsg, 0);
+    }
+  }
+
+  // --- Page Navigation and Context Monitoring ---
+
+  private setupPageNavigationMonitor(): void {
+    if (typeof window === "undefined") return;
+
+    const updateContext = () => {
+      const currentUrl = window.location.href;
+      const currentTitle = document.title || "";
+      const currentCtx = this.extractPlatformContext();
+
+      const changed =
+        (this.lastPageUrl && this.lastPageUrl !== currentUrl) ||
+        (this.lastPageSection && this.lastPageSection !== currentCtx.section);
+
+      if (changed) {
+        this.stopPageReadingHighlight();
+        if (this.activeAudio) {
+          this.activeAudio.pause();
+          this.activeAudio = null;
+        }
+        if ("speechSynthesis" in window) {
+          window.speechSynthesis.cancel();
+        }
+        this.announce(`${this.t("navigatedToNotice")} ${currentCtx.section}`);
+        if (this.messages.length === 0) {
+          this.renderMessages();
+        }
+      }
+
+      this.lastPageUrl = currentUrl;
+      this.lastPageTitle = currentTitle;
+      this.lastPageSection = currentCtx.section;
+    };
+
+    window.addEventListener("popstate", updateContext);
+    window.addEventListener("hashchange", updateContext);
+
+    const originalPush = history.pushState;
+    if (originalPush) {
+      history.pushState = function (...args) {
+        const ret = originalPush.apply(this, args);
+        setTimeout(updateContext, 50);
+        return ret;
+      };
+    }
+    const originalReplace = history.replaceState;
+    if (originalReplace) {
+      history.replaceState = function (...args) {
+        const ret = originalReplace.apply(this, args);
+        setTimeout(updateContext, 50);
+        return ret;
+      };
+    }
+
+    this.navCheckTimer = window.setInterval(updateContext, 1500);
+    updateContext();
+  }
+
+  // --- Voice Activation & Wake Word ("Help") ---
+
+  private setupWakeWordDetector(): void {
+    if (typeof window === "undefined") return;
+    const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRec) return;
+
+    try {
+      this.wakeWordRecognition = new SpeechRec();
+      this.wakeWordRecognition.continuous = true;
+      this.wakeWordRecognition.interimResults = false;
+      this.wakeWordRecognition.lang =
+        this.currentLang === "ar"
+          ? "ar-SA"
+          : this.currentLang === "am"
+            ? "am-ET"
+            : this.currentLang === "om"
+              ? "om-ET"
+              : "en-US";
+
+      this.wakeWordRecognition.onresult = (e: any) => {
+        const last = e.results[e.results.length - 1];
+        if (!last || !last[0]) return;
+        const phrase = (last[0].transcript || "").trim().toLowerCase();
+        if (
+          phrase.includes("help") ||
+          phrase.includes("እርዳታ") ||
+          phrase.includes("gargaarsa") ||
+          phrase.includes("مساعدة")
+        ) {
+          this.triggerVoiceActivation();
+        }
+      };
+
+      this.wakeWordRecognition.onerror = () => {
+        if (this.voiceActivationEnabled && !this.isRecording) {
+          setTimeout(() => {
+            try {
+              this.wakeWordRecognition?.start();
+            } catch {}
+          }, 1000);
+        }
+      };
+
+      this.wakeWordRecognition.onend = () => {
+        if (this.voiceActivationEnabled && !this.isRecording) {
+          setTimeout(() => {
+            try {
+              this.wakeWordRecognition?.start();
+            } catch {}
+          }, 500);
+        }
+      };
+
+      this.wakeWordRecognition.start();
+    } catch (err) {
+      console.warn("Wake word detector error:", err);
+    }
+  }
+
+  private triggerVoiceActivation(): void {
+    this.openAssistant();
+    const chatInput = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-text-input");
+    if (chatInput) {
+      setTimeout(() => {
+        this.toggleVoiceInput(chatInput);
+      }, 250);
+    }
+  }
+
   // --- Q&A / Ask ---
 
-  public async askQuestion(questionText: string, forceSimple = false): Promise<void> {
+  public async askQuestion(questionText: string, forceSimple = false, fromVoice = false): Promise<void> {
     const q = questionText.trim();
     if (!q || this.isThinking) return;
 
@@ -3010,8 +3841,11 @@ export class BridgeAssistant extends HTMLElement {
         this.saveChatState();
         this.renderMessages();
 
-        // Automatically read response aloud in appropriate language
-        if (this.autoReadSpeech || (this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_tts)) {
+        if (fromVoice) {
+          setTimeout(() => {
+            this.handleListen(assistantMsg);
+          }, 300);
+        } else if (this.autoReadSpeech || (this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_tts)) {
           this.speakResponse(assistantMsg);
         }
       } else {
@@ -3175,7 +4009,7 @@ export class BridgeAssistant extends HTMLElement {
             </button>
             <!-- 5-Language Segmented Selector in Native Scripts with WCAG 2.5.3 Compliant Labels -->
             <div class="lang-group" role="group" aria-label="Language selection">
-              <button type="button" class="lang-toggle-btn" id="btn-lang-en" 
+              <button type="button" class="lang-toggle-btn lang-btn" id="btn-lang-en" 
                       aria-pressed="${this.currentLang === "en"}" 
                       aria-label="EN - English">EN</button>
               <button type="button" class="lang-toggle-btn" id="btn-lang-am" 
@@ -3439,6 +4273,16 @@ export class BridgeAssistant extends HTMLElement {
                 </div>
                 <input type="checkbox" id="chk-simple-mode" class="toggle-switch" aria-label="${this.t("simpleModeLabel")}" ${this.simpleMode ? "checked" : ""}>
               </label>
+
+              <!-- Wake Word Voice Activation -->
+              <div style="border-top:1px solid var(--b-border); margin:0.5rem 0;"></div>
+              <label class="toggle-row">
+                <div class="toggle-info">
+                  <span class="toggle-title">${this.t("wakeWordSetting")}</span>
+                  <span class="toggle-desc">${this.t("wakeWordDesc")}</span>
+                </div>
+                <input type="checkbox" id="chk-wake-word" class="toggle-switch" ${this.voiceActivationEnabled ? "checked" : ""}>
+              </label>
             </div>
 
             <!-- Voice Accessibility & Screen Reader Suite -->
@@ -3658,26 +4502,42 @@ export class BridgeAssistant extends HTMLElement {
     ` : "";
 
     if (this.messages.length === 0) {
+      const sectionName = this.lastPageSection || "The Future of the VA Industry";
       chatLog.innerHTML = `
         ${onboardHtml}
         <div class="empty-state">
-          <p style="margin:0; font-size:1rem; font-weight:600;">${this.t("emptyWelcome")}</p>
+          <div class="page-context-pill">
+            ${ICONS.book} <span>${this.t("pageContextBadge")} <strong>${this.escapeHtml(sectionName)}</strong></span>
+          </div>
+          <p style="margin:0 0 0.5rem 0; font-size:1rem; font-weight:600;">${this.t("emptyWelcome")}</p>
           <div class="suggested-questions">
             <span style="font-size:0.8125rem; font-weight:700; color:var(--b-text-muted);">${this.t("suggestedTitle")}</span>
-            <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ1"))}">
-              👉 ${this.escapeHtml(this.t("suggestedQ1"))}
+            <button type="button" class="btn btn-suggested btn-quick-explain" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
+              ${ICONS.lightbulb} <span>${this.escapeHtml(this.t("explainLessonBtn"))}</span>
             </button>
-            <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ2"))}">
-              👉 ${this.escapeHtml(this.t("suggestedQ2"))}
+            <button type="button" class="btn btn-suggested btn-quick-summarize" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
+              ${ICONS.book} <span>${this.escapeHtml(this.t("summarizePageBtn"))}</span>
             </button>
-            <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ3"))}">
-              👉 ${this.escapeHtml(this.t("suggestedQ3"))}
+            <button type="button" class="btn btn-suggested btn-quick-read" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
+              ${ICONS.listen} <span>${this.escapeHtml(this.t("readPageBtn"))}</span>
+            </button>
+            <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ1"))}" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
+              ${ICONS.arrowRight} <span>${this.escapeHtml(this.t("suggestedQ1"))}</span>
             </button>
           </div>
         </div>
       `;
 
-      chatLog.querySelectorAll<HTMLButtonElement>(".btn-suggested").forEach((btn) => {
+      chatLog.querySelector<HTMLButtonElement>(".btn-quick-explain")?.addEventListener("click", () => {
+        this.askQuestion(this.t("explainLessonBtn"));
+      });
+      chatLog.querySelector<HTMLButtonElement>(".btn-quick-summarize")?.addEventListener("click", () => {
+        this.askQuestion(this.t("summarizePageBtn"));
+      });
+      chatLog.querySelector<HTMLButtonElement>(".btn-quick-read")?.addEventListener("click", () => {
+        this.askQuestion(this.t("readPageBtn"));
+      });
+      chatLog.querySelectorAll<HTMLButtonElement>(".btn-suggested[data-q]").forEach((btn) => {
         btn.addEventListener("click", () => {
           const q = btn.getAttribute("data-q");
           if (q) this.askQuestion(q);
@@ -3697,13 +4557,49 @@ export class BridgeAssistant extends HTMLElement {
         }
 
         // Assistant Message Card
-        const hasCitations = msg.citations && msg.citations.length > 0;
+        const uniqueCitations: Citation[] = [];
+        const seenCit = new Set<string>();
+        if (msg.citations) {
+          for (const cit of msg.citations) {
+            const rawLabel = cit.title || cit.heading || "";
+            const label = rawLabel.replace(/\s*\|\s*.*$/, "").replace(/^Concept page:\s*/i, "").trim();
+            if (label && !seenCit.has(label)) {
+              seenCit.add(label);
+              uniqueCitations.push({ ...cit, title: label });
+            }
+          }
+        }
+        const hasCitations = uniqueCitations.length > 0;
         const isRefusal = !!msg.isRefusal;
+        const headingText = msg.heading || (msg.isHandoff ? this.t("handoffReadyTitle") : this.t("answerHeading"));
+        const isThisReading = !!(this.currentReading && this.currentReading.msgId === msg.id);
+
+        const paragraphs = msg.text.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+        const renderedTextHtml = paragraphs
+          .map((p, idx) => {
+            const isActive = isThisReading && this.currentReading!.currentIndex === idx;
+            return `<div class="answer-para-item ${isActive ? "active-reading-para" : ""}" data-msg-id="${msg.id}" data-idx="${idx}" title="Click to read and highlight this paragraph" style="cursor:pointer; margin-bottom:0.625rem; line-height:1.5;">${this.escapeHtml(p)}</div>`;
+          })
+          .join("");
 
         return `
           <div class="msg-row msg-assistant" id="${msg.id}">
-            <h4 class="answer-heading">${this.escapeHtml(msg.heading || this.t("answerHeading"))}</h4>
-            <p class="answer-text">${this.escapeHtml(msg.text)}</p>
+            <h4 class="answer-heading">${this.escapeHtml(headingText)}</h4>
+            <div class="answer-text">${renderedTextHtml}</div>
+
+            ${
+              isThisReading
+                ? `
+                <div class="reading-nav-bar" style="display:flex; align-items:center; justify-content:space-between; margin:0.5rem 0; padding:0.375rem 0.625rem; background:#fef9c3; border:1px solid #facc15; border-radius:0.375rem; font-size:0.8125rem;">
+                  <span style="font-weight:600; color:#854d0e;">📖 Reading Paragraph ${this.currentReading!.currentIndex + 1} of ${this.currentReading!.items.length}</span>
+                  <div style="display:flex; gap:0.25rem;">
+                    <button type="button" class="btn btn-secondary btn-prev-para" data-msg-id="${msg.id}" style="padding:0.125rem 0.5rem; font-size:0.75rem;" ${this.currentReading!.currentIndex === 0 ? "disabled" : ""}>⏮ Prev</button>
+                    <button type="button" class="btn btn-secondary btn-next-para" data-msg-id="${msg.id}" style="padding:0.125rem 0.5rem; font-size:0.75rem;" ${this.currentReading!.currentIndex >= this.currentReading!.items.length - 1 ? "disabled" : ""}>Next ⏭</button>
+                  </div>
+                </div>
+              `
+                : ""
+            }
 
             ${isRefusal
             ? `
@@ -3722,14 +4618,24 @@ export class BridgeAssistant extends HTMLElement {
             : ""
           }
 
-            <!-- Listen & Make Simpler action buttons -->
+            <!-- Listen, Stop, Replay & Make Simpler action buttons -->
             <div class="answer-actions">
               <button type="button" class="btn btn-secondary btn-listen" data-msg-id="${msg.id}">
                 ${msg.isAudioPlaying ? `⏸️ ${this.t("pauseButton")}` : `🔊 ${this.t("listenButton")}`}
               </button>
-              <button type="button" class="btn btn-secondary btn-simpler" data-msg-id="${msg.id}">
-                💡 ${this.t("makeSimplerButton")}
+              <button type="button" class="btn btn-secondary btn-stop" data-msg-id="${msg.id}" style="display:inline-flex; align-items:center; gap:0.375rem;" ${msg.isAudioPlaying || msg.isAudioPaused ? "" : "hidden"}>
+                ${ICONS.stop}
+                <span>${this.t("stopButton")}</span>
               </button>
+              <button type="button" class="btn btn-secondary btn-replay" data-msg-id="${msg.id}" style="display:inline-flex; align-items:center; gap:0.375rem;">
+                ${ICONS.replay}
+                <span>${this.t("replayButton")}</span>
+              </button>
+              <button type="button" class="btn btn-secondary btn-simpler" data-msg-id="${msg.id}" style="display:inline-flex; align-items:center; gap:0.375rem;">
+                ${ICONS.lightbulb}
+                <span>${this.t("makeSimplerButton")}</span>
+              </button>
+              ${msg.isAudioPlaying ? `<span class="speaking-indicator-pill" role="status" aria-live="polite">${ICONS.volume} <span>${this.t("speakingIndicator")}</span></span>` : ""}
             </div>
 
             <!-- Citations / Sources with readable names -->
@@ -3737,19 +4643,43 @@ export class BridgeAssistant extends HTMLElement {
             ? `
                 <div class="sources-box">
                   <div class="sources-title">${this.t("sourcesTitle")}</div>
-                  ${msg.citations!
-              .map(
-                (c) => `
-                    <a href="${this.escapeHtml(c.url)}" target="_blank" rel="noopener noreferrer" class="source-link">
-                      📖 ${this.escapeHtml(c.title || c.heading)}
+                  ${uniqueCitations
+                    .map(
+                      (c) => `
+                    <a href="${this.escapeHtml(c.url)}" target="_blank" rel="noopener noreferrer" class="source-link citation-link" style="display:inline-flex; align-items:center; gap:0.375rem;">
+                      ${ICONS.book} <span>${this.escapeHtml(c.title || c.heading)}</span>
                     </a>
                   `
               )
               .join("")}
                 </div>
               `
-            : ""
-          }
+                : ""
+            }
+
+            <!-- Suggested Follow-up Questions -->
+            ${
+              !isRefusal && !msg.isHandoff
+                ? `
+                <div class="followup-box">
+                  <div class="followup-title">
+                    <span>${this.t("followupTitle")}</span>
+                  </div>
+                  <div class="followup-chips">
+                    <button type="button" class="btn btn-secondary btn-followup" data-query="${this.escapeHtml(this.t("followupQ1"))}">
+                      ${this.t("followupQ1")}
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-followup" data-query="${this.escapeHtml(this.t("followupQ2"))}">
+                      ${this.t("followupQ2")}
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-followup" data-query="${this.escapeHtml(this.t("followupQ3"))}">
+                      ${this.t("followupQ3")}
+                    </button>
+                  </div>
+                </div>
+              `
+                : ""
+            }
           </div>
         `;
       })
@@ -3763,7 +4693,48 @@ export class BridgeAssistant extends HTMLElement {
       `;
     }
 
+    if (this.isRecording) {
+      chatLog.innerHTML += `
+        <div class="live-status-indicator" style="display:inline-flex; align-items:center; gap:0.375rem;">
+          <span class="listening-indicator-pill">${ICONS.mic} <span>${this.t("listeningIndicator")}</span></span>
+        </div>
+      `;
+    }
+
     // Attach listeners for dynamic answer buttons
+    chatLog.querySelectorAll<HTMLElement>(".answer-para-item").forEach((el) => {
+      el.addEventListener("click", () => {
+        const msgId = el.getAttribute("data-msg-id");
+        const idx = parseInt(el.getAttribute("data-idx") || "0", 10);
+        const msg = this.messages.find((m) => m.id === msgId);
+        if (msg) {
+          this.startSequentialReading(msg, idx);
+        }
+      });
+    });
+
+    chatLog.querySelectorAll<HTMLButtonElement>(".btn-prev-para").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const msgId = btn.getAttribute("data-msg-id");
+        const msg = this.messages.find((m) => m.id === msgId);
+        if (msg && this.currentReading && this.currentReading.currentIndex > 0) {
+          this.currentReading.currentIndex--;
+          this.playNextReadingItem(msg);
+        }
+      });
+    });
+
+    chatLog.querySelectorAll<HTMLButtonElement>(".btn-next-para").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const msgId = btn.getAttribute("data-msg-id");
+        const msg = this.messages.find((m) => m.id === msgId);
+        if (msg && this.currentReading && this.currentReading.currentIndex < this.currentReading.items.length - 1) {
+          this.currentReading.currentIndex++;
+          this.playNextReadingItem(msg);
+        }
+      });
+    });
+
     chatLog.querySelectorAll<HTMLButtonElement>(".btn-listen").forEach((btn) => {
       btn.addEventListener("click", () => {
         const msgId = btn.getAttribute("data-msg-id");
@@ -3778,11 +4749,36 @@ export class BridgeAssistant extends HTMLElement {
       });
     });
 
+    chatLog.querySelectorAll<HTMLButtonElement>(".btn-stop").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const msgId = btn.getAttribute("data-msg-id");
+        const msg = this.messages.find((m) => m.id === msgId);
+        if (msg) this.handleStop(msg);
+      });
+    });
+
+    chatLog.querySelectorAll<HTMLButtonElement>(".btn-replay").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const msgId = btn.getAttribute("data-msg-id");
+        const msg = this.messages.find((m) => m.id === msgId);
+        if (msg) this.handleReplay(msg);
+      });
+    });
+
     chatLog.querySelectorAll<HTMLButtonElement>(".btn-simpler").forEach((btn) => {
       btn.addEventListener("click", () => {
         const msgId = btn.getAttribute("data-msg-id");
         const msg = this.messages.find((m) => m.id === msgId);
         if (msg) this.askQuestion(`Explain simpler: ${msg.text}`, true);
+      });
+    });
+
+    chatLog.querySelectorAll<HTMLButtonElement>(".btn-followup").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const query = btn.getAttribute("data-query");
+        if (query) {
+          this.askQuestion(query);
+        }
       });
     });
 
@@ -3805,6 +4801,9 @@ export class BridgeAssistant extends HTMLElement {
     });
 
     chatLog.scrollTop = chatLog.scrollHeight;
+    setTimeout(() => {
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }, 40);
   }
 
   private bindEvents(): void {
@@ -3840,14 +4839,22 @@ export class BridgeAssistant extends HTMLElement {
       }
     });
 
-    // 4-Language Switcher
-    this.shadowRoot.querySelector("#btn-lang-en")?.addEventListener("click", () => this.setLanguage("en"));
-    this.shadowRoot.querySelector("#btn-lang-am")?.addEventListener("click", () => this.setLanguage("am"));
-    this.shadowRoot.querySelector("#btn-lang-om")?.addEventListener("click", () => this.setLanguage("om"));
-    this.shadowRoot.querySelector("#btn-lang-ar")?.addEventListener("click", () => this.setLanguage("ar"));
+    // Language Buttons: Direct setLanguage call & toggle support for .lang-btn
+    this.shadowRoot.querySelectorAll<HTMLButtonElement>(".lang-toggle-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (btn.classList.contains("lang-btn") && btn.id === "btn-lang-en") {
+          const nextLang = this.currentLang === "en" ? "am" : "en";
+          this.setLanguage(nextLang);
+          return;
+        }
+        const langCode = btn.id.replace("btn-lang-", "") as SupportedLanguage;
+        if (langCode) {
+          this.setLanguage(langCode);
+        }
+      });
+    });
 
-    // Quick Language Toggle Button (.lang-btn)
-    this.shadowRoot.querySelector(".lang-btn")?.addEventListener("click", () => {
+    this.shadowRoot.querySelector("#btn-lang-toggle")?.addEventListener("click", () => {
       this.setLanguage(this.currentLang === "en" ? "am" : "en");
     });
 
@@ -3960,6 +4967,43 @@ export class BridgeAssistant extends HTMLElement {
         if (!this.autoReadSpeech && this.isSpeaking) {
           this.stopSpeaking();
         }
+      });
+    }
+
+    // Wake Word Toggle
+    const chkWakeWord = this.shadowRoot.querySelector<HTMLInputElement>("#chk-wake-word");
+    if (chkWakeWord) {
+      chkWakeWord.addEventListener("change", () => {
+        this.voiceActivationEnabled = chkWakeWord.checked;
+        localStorage.setItem("savanna_bridge_wake_word", this.voiceActivationEnabled ? "true" : "false");
+        if (this.voiceActivationEnabled) {
+          this.setupWakeWordDetector();
+        } else if (this.wakeWordRecognition) {
+          try {
+            this.wakeWordRecognition.stop();
+          } catch {}
+          this.wakeWordRecognition = null;
+        }
+      });
+    }
+
+    // Clear Chat Button
+    this.shadowRoot.querySelector("#btn-clear-chat")?.addEventListener("click", () => {
+      this.clearChat();
+    });
+
+    // Generate Link Code Button
+    this.shadowRoot.querySelector("#btn-generate-code")?.addEventListener("click", () => {
+      this.generateLinkCode();
+    });
+
+    // Handoff Request Form in Settings
+    const handoffForm = this.shadowRoot.querySelector<HTMLFormElement>("#handoff-request-form");
+    if (handoffForm) {
+      handoffForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const reasonInput = this.shadowRoot?.querySelector<HTMLInputElement>("#handoff-reason");
+        this.requestHandoff(reasonInput?.value || undefined);
       });
     }
 

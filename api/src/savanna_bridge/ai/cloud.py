@@ -104,32 +104,73 @@ class CloudProvider(AIProvider):
         language: Language,
         simple_mode: bool = False,
     ) -> str:
+        from savanna_bridge.language import LanguageGuard
+
+        if not context_chunks:
+            return self._offline_fallback.generate_answer(
+                question, context_chunks, language, simple_mode
+            )
+
+        # If read aloud request, return verbatim structured text
+        if LanguageGuard.is_read_aloud_query(question):
+            return self._offline_fallback.generate_answer(
+                question, context_chunks, language, simple_mode
+            )
+
         if not self.api_key:
             return self._offline_fallback.generate_answer(
                 question, context_chunks, language, simple_mode
             )
 
         context_text = "\n\n".join(
-            [f"--- Section: {c.heading} ---\n{c.content}" for c in context_chunks]
+            [f"--- Section: {c.heading} ---\n{getattr(c, 'text', getattr(c, 'content', ''))}" for c in context_chunks]
         )
         
         simplicity_instruction = (
             "Keep the response simple, short, and in very plain language."
-            if simple_mode
-            else "Provide a clear, accurate, and helpful response."
+            if simple_mode or LanguageGuard.is_simplify_query(question)
+            else "Provide a clear, accurate, and helpful educational response."
         )
 
-        lang_instruction = "Respond in Amharic (አማርኛ)." if language == Language.AM else (
-            "Respond in Afaan Oromo." if language == Language.OM else (
-                "Respond in Tigrinya." if language == Language.TI else (
-                    "Respond in Arabic." if language == Language.AR else "Respond in English."
+        task_instruction = (
+            "The learner is asking to read the page content aloud line by line. Present the educational text clearly line by line in its original sequence without omitting content."
+            if LanguageGuard.is_read_aloud_query(question)
+            else (
+                "The learner is asking for practical examples. Provide clear, concrete, practical examples that illustrate the concepts in the provided course material."
+                if LanguageGuard.is_example_query(question)
+                else (
+                    "The learner is asking what to understand before moving to the next lesson. Explain the key concepts, prerequisites, and foundational points they must master from this content before advancing."
+                    if LanguageGuard.is_prerequisite_query(question)
+                    else (
+                        "The learner is asking to be quizzed on this material. Create a 2-question quick interactive knowledge check based on this content to test their understanding, and invite them to answer."
+                        if LanguageGuard.is_quiz_query(question)
+                        else (
+                            "The learner is asking for a summary of this page/lesson. Provide a concise, well-structured summary of the key learning points in 3-5 clean bullet points. At the end, invite them to ask follow-up questions."
+                            if LanguageGuard.is_summary_query(question)
+                            else (
+                                "The learner is asking what this course or lesson is about. Explain the subject, key concepts, and practical skills from the provided content. At the end, invite them to ask follow-up questions."
+                                if LanguageGuard.is_page_overview_query(question)
+                                else "Answer the question directly based on the provided material."
+                            )
+                        )
+                    )
                 )
             )
         )
 
-        prompt = f"""You are the Savanna Bridge Assistant, an accessible tutor.
+        lang_instruction = "Respond in Amharic (አማርኛ) using proper Ethiopic script." if language == Language.AM else (
+            "Respond in Afaan Oromo using standard Latin orthography." if language == Language.OM else (
+                "Respond in Tigrinya using proper Ethiopic script." if language == Language.TI else (
+                    "Respond in Arabic (العربية) using proper Arabic script." if language == Language.AR else "Respond in English."
+                )
+            )
+        )
+
+        prompt = f"""You are the Savanna Bridge Assistant, an intelligent multilingual AI learning companion and tutor.
 You MUST base your answer strictly and solely on the provided Course Content below.
-Do not invent information. {simplicity_instruction}
+Do not invent information or outside facts.
+{task_instruction}
+{simplicity_instruction}
 {lang_instruction}
 
 Course Content:
