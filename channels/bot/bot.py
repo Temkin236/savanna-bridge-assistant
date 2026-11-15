@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import asyncio
 import base64
+import contextlib
 import logging
 import os
 from typing import Any
@@ -83,6 +84,15 @@ def get_user_state(user_id: int) -> dict[str, Any]:
             "learner_ref": f"tg_{user_id}",
             "last_job_id": None,
             "last_context": "Exploring courses on Telegram",
+            "notification_prefs": {
+                "deadlines": True,
+                "job_alerts": True,
+                "new_lessons": True,
+                "muted": False,
+                "low_bandwidth": True,
+            },
+            "platform_title": "Savanna Platform",
+            "platform_type": "course",
         }
     return USER_SESSIONS[user_id]
 
@@ -158,6 +168,67 @@ def make_language_inline() -> InlineKeyboardMarkup:
     )
 
 
+def make_notification_inline(prefs: dict[str, Any], lang: str = "en") -> InlineKeyboardMarkup:
+    deadlines = bool(prefs.get("deadlines", True))
+    jobs = bool(prefs.get("job_alerts", True))
+    lessons = bool(prefs.get("new_lessons", True))
+
+    d_icon = "🟢" if deadlines else "🔴"
+    j_icon = "🟢" if jobs else "🔴"
+    l_icon = "🟢" if lessons else "🔴"
+
+    texts = {
+        "am": {
+            "deadlines": f"📅 የጊዜ ገደቦች {d_icon}",
+            "jobs": f"💼 የሥራ ማሳወቂያዎች {j_icon}",
+            "lessons": f"📚 የትምህርት/መድረክ ዜናዎች {l_icon}",
+            "all": "🔔 ሁሉንም አብራ",
+            "done": "✅ መዝግብና ቀጥል",
+        },
+        "om": {
+            "deadlines": f"📅 Yeroo Xumuraa {d_icon}",
+            "jobs": f"💼 Beeksisa Hojii {j_icon}",
+            "lessons": f"📚 Barnootaa fi Oduu {l_icon}",
+            "all": "🔔 Hunda Bansi",
+            "done": "✅ Olkaa'iitii Itti Fufi",
+        },
+        "ti": {
+            "deadlines": f"📅 ናይ ምዝዛም ዕለት {d_icon}",
+            "jobs": f"💼 ናይ ስራሕ ዕድላት {j_icon}",
+            "lessons": f"📚 ትምህርቲን ዜናታትን {l_icon}",
+            "all": "🔔 ኩሉ ኣብርህ",
+            "done": "✅ ኣቐምጥ እሞ ቐጽል",
+        },
+        "ar": {
+            "deadlines": f"📅 المواعيد النهائية {d_icon}",
+            "jobs": f"💼 تنبيهات الوظائف {j_icon}",
+            "lessons": f"📚 الدروس والتحديثات {l_icon}",
+            "all": "🔔 تفعيل الكل",
+            "done": "✅ حفظ ومتابعة",
+        },
+        "en": {
+            "deadlines": f"📅 Deadlines & Milestones {d_icon}",
+            "jobs": f"💼 Job Alerts {j_icon}",
+            "lessons": f"📚 Lessons & Announcements {l_icon}",
+            "all": "🔔 Enable All",
+            "done": "✅ Save & Continue",
+        },
+    }
+    t = texts.get(lang, texts["en"])
+
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text=t["deadlines"], callback_data="notif_toggle_deadlines")],
+            [InlineKeyboardButton(text=t["jobs"], callback_data="notif_toggle_jobs")],
+            [InlineKeyboardButton(text=t["lessons"], callback_data="notif_toggle_lessons")],
+            [
+                InlineKeyboardButton(text=t["all"], callback_data="notif_enable_all"),
+                InlineKeyboardButton(text=t["done"], callback_data="notif_done"),
+            ],
+        ]
+    )
+
+
 # --- Core API client helpers ---
 
 
@@ -219,17 +290,67 @@ async def handle_start(message: types.Message) -> None:
             state["linked"] = True
             if res.get("learner_ref"):
                 state["learner_ref"] = res["learner_ref"]
+
+            platform_title = res.get("platform_title") or "Savanna"
+            platform_type = res.get("platform_type") or "course"
+            state["platform_title"] = platform_title
+            state["platform_type"] = platform_type
+            if res.get("course_id"):
+                state["course_id"] = res["course_id"]
+
+            prefs = state.get(
+                "notification_prefs",
+                {
+                    "deadlines": True,
+                    "job_alerts": True,
+                    "new_lessons": True,
+                    "muted": False,
+                    "low_bandwidth": True,
+                },
+            )
+            state["notification_prefs"] = prefs
+
             success_msgs = {
-                "am": "የኮርስ ክፍለ-ጊዜዎ ተገናኝቷል። ማንኛውንም ጥያቄ በጽሑፍ ይጠይቁ ወይም 'ከሰው ጋር ተገናኝ' የሚለውን ይጫኑ።",
-                "om": "Kutaan barnootaa keessan walqabateera. Gaaffii keessan barreeffamaan gaafadhaa ykn 'Nama Waliin Dubbadhu' kan jedhu tuqaa.",
-                "ti": "ናይ ኮርስ ክፍለ-ግዜኹም ተላጊቡ ኣሎ። ዝኾነ ሕቶ ብጽሑፍ ሕተቱ ወይ 'ምስ ሰብ ተራኸብ' ዝብል ጠውቑ።",
-                "ar": "تم ربط جلستك بنجاح. اطرح سؤالك بنص عادي أو اضغط 'التحدث مع شخص'.",
-                "en": "Connected to your course session. Ask any question in plain text or tap Talk to a person.",
+                "am": (
+                    f"✅ **ከ{platform_title} ክፍለ-ጊዜዎ ጋር ተገናኝቷል!**\n\n"
+                    f"🔔 **የማሳወቂያ ምርጫዎች**\n"
+                    f"ይህ ረዳት በበርካታ መድረኮች (ትምህርት፣ ሥራ፣ ስልጠና) ላይ ያገለግላል። "
+                    f"ለዚህ መድረክ በቴሌግራም ምን ዓይነት ማሳወቂያዎችን ማግኘት ይፈልጋሉ?\n\n"
+                    f"ከታች ያሉትን ቁልፎች በመጫን ምርጫዎችዎን ያብሩ/ያጥፉ፣ ሲጨርሱ **መዝግብና ቀጥል** የሚለውን ይጫኑ፡"
+                ),
+                "om": (
+                    f"✅ **Kutaan keessan {platform_title} waliin walqabateera!**\n\n"
+                    f"🔔 **Filannoo Beeksisaa**\n"
+                    f"Gargaaraan kun platformiiwwan hedduu (barnoota, carraa hojii, leenjii) tajaajila. "
+                    f"Platformii kanaaf beeksisa akkamii Telegram irratti argachuu barbaaddu?\n\n"
+                    f"Banuuf ykn cufuuf cuqqaallawwan armaan gadii tuqaa, yommuu xumurtan **Olkaa'iitii Itti Fufi** tuqaa:"
+                ),
+                "ti": (
+                    f"✅ **ምስ {platform_title} ክፍለ-ግዜኹም ተላጊቡ ኣሎ!**\n\n"
+                    f"🔔 **ናይ መተሓሳሰቢ ምርጫታት**\n"
+                    f"እዚ ረዳኢ ኣብ ዝተፈላለዩ መድረኻት (ትምህርቲ፣ ስራሕ፣ ስልጠና) የገልግል እዩ። "
+                    f"ነዚ መድረኽ ዝምልከት ኣብ ቴሌግራም እንታይ ዓይነት መተሓሳሰቢታት ክበጽሓኩም ትደልዩ?\n\n"
+                    f"ንምኽፋት ወይ ንምዕጻው ካብ ታሕቲ ዘለዉ መተሓሳሰቢታት ጠውቑ፣ ምስ ወደእኹም **ኣቐምጥ እሞ ቐጽል** ጠውቑ፡"
+                ),
+                "ar": (
+                    f"✅ **تم الاتصال بنجاح مع جلستك في {platform_title}!**\n\n"
+                    f"🔔 **تفضيلات الإشعارات**\n"
+                    f"يعمل هذا المساعد عبر منصات متعددة (دورات، فرص عمل، وتدريب). "
+                    f"ما هي التحديثات التي ترغب في تلقيها على تيليجرام لهذه المنصة؟\n\n"
+                    f"اضغط على الأزرار أدناه للتبديل، وعند الانتهاء اضغط على **حفظ ومتابعة**:"
+                ),
+                "en": (
+                    f"✅ **Connected to your session on {platform_title}!**\n\n"
+                    f"🔔 **Notification Preferences**\n"
+                    f"This assistant supports multiple platforms (courses, job alerts, training). "
+                    f"What updates would you like to receive on Telegram for this platform?\n\n"
+                    f"Tap the buttons below to customize your alerts, then tap **Save & Continue**:"
+                ),
             }
             await send_safe_message(
                 message,
                 success_msgs.get(lang, success_msgs["en"]),
-                reply_markup=make_main_keyboard(lang, state["lite_mode"]),
+                reply_markup=make_notification_inline(prefs, lang=lang),
             )
             return
         else:
@@ -295,6 +416,99 @@ async def handle_language_choice(callback: types.CallbackQuery) -> None:
         reply_markup=make_main_keyboard(lang=lang_code, lite=state["lite_mode"]),
     )
     await callback.answer()
+
+
+@router.callback_query(F.data.startswith("notif_toggle_"))
+async def handle_notif_toggle(callback: types.CallbackQuery) -> None:
+    user_id = callback.from_user.id
+    state = get_user_state(user_id)
+    lang = state.get("language", "en")
+    target = callback.data.replace("notif_toggle_", "")
+
+    key_map = {
+        "deadlines": "deadlines",
+        "jobs": "job_alerts",
+        "lessons": "new_lessons",
+    }
+    field = key_map.get(target)
+    prefs = state.get("notification_prefs", {})
+    if field:
+        prefs[field] = not bool(prefs.get(field, True))
+        state["notification_prefs"] = prefs
+        learner_ref = state.get("learner_ref", f"tg_{user_id}")
+        await call_api("PUT", f"/notification-settings?learner_ref={learner_ref}", prefs)
+
+    await callback.answer()
+    if callback.message:
+        with contextlib.suppress(Exception):
+            await callback.message.edit_reply_markup(
+                reply_markup=make_notification_inline(prefs, lang=lang)
+            )
+
+
+@router.callback_query(F.data == "notif_enable_all")
+async def handle_notif_enable_all(callback: types.CallbackQuery) -> None:
+    user_id = callback.from_user.id
+    state = get_user_state(user_id)
+    lang = state.get("language", "en")
+    prefs = state.get("notification_prefs", {})
+    prefs["deadlines"] = True
+    prefs["job_alerts"] = True
+    prefs["new_lessons"] = True
+    prefs["muted"] = False
+    state["notification_prefs"] = prefs
+    learner_ref = state.get("learner_ref", f"tg_{user_id}")
+    await call_api("PUT", f"/notification-settings?learner_ref={learner_ref}", prefs)
+
+    await callback.answer("All notifications enabled!")
+    if callback.message:
+        with contextlib.suppress(Exception):
+            await callback.message.edit_reply_markup(
+                reply_markup=make_notification_inline(prefs, lang=lang)
+            )
+
+
+@router.callback_query(F.data == "notif_done")
+async def handle_notif_done(callback: types.CallbackQuery) -> None:
+    user_id = callback.from_user.id
+    state = get_user_state(user_id)
+    lang = state.get("language", "en")
+    platform_title = state.get("platform_title") or "Platform"
+
+    done_msgs = {
+        "am": (
+            f"🎉 **የማሳወቂያ ምርጫዎችዎ ለ{platform_title} ተቀምጠዋል!**\n\n"
+            f"በማንኛውም ጊዜ በ /settings ወይም በምናሌው መቀየር ይችላሉ። "
+            f"አሁን ማንኛውንም ጥያቄ በጽሑፍ ወይም በድምጽ ይጠይቁ ወይም 'ከሰው ጋር ተገናኝ' የሚለውን ይጫኑ።"
+        ),
+        "om": (
+            f"🎉 **Filannoowwan beeksisaa {platform_title} keessanii olkaa'amaniiru!**\n\n"
+            f"Yeroo barbaaddanitti /settings ykn baafata fayyadamuun jijjiiruu dandeessu. "
+            f"Amma gaaffii keessan barreeffamaan ykn sagaleedhaan gaafadhaa ykn 'Nama Waliin Dubbadhu' tuqaa."
+        ),
+        "ti": (
+            f"🎉 **ናይ {platform_title} መተሓሳሰቢ ምርጫታትኩም ተዓቂቦም ኣለዉ!**\n\n"
+            f"ኣብ ዝኾነ ግዜ ብ /settings ወይ ብመንዩ ክትቅይርዎም ትኽእሉ ኢኹም። "
+            f"ሕጂ ዝኾነ ሕቶ ብጽሑፍ ወይ ብድምጺ ሕተቱ ወይ 'ምስ ሰብ ተራኸብ' ዝብል ጠውቑ።"
+        ),
+        "ar": (
+            f"🎉 **تم حفظ تفضيلات الإشعارات الخاصة بك لمنصة {platform_title}!**\n\n"
+            f"يمكنك تغييرها في أي وقت عبر /settings أو من القائمة. "
+            f"اطرح الآن أي سؤال نصياً أو صوتياً أو اضغط 'التحدث مع شخص'."
+        ),
+        "en": (
+            f"🎉 **Your notification preferences for {platform_title} have been saved!**\n\n"
+            f"You can adjust them anytime via /settings or the menu. "
+            f"Ask any question in plain text or voice, or tap Talk to a person."
+        ),
+    }
+    await callback.answer()
+    if callback.message:
+        await callback.message.answer(
+            done_msgs.get(lang, done_msgs["en"]),
+            parse_mode="Markdown",
+            reply_markup=make_main_keyboard(lang=lang, lite=state["lite_mode"]),
+        )
 
 
 @router.message(Command("help"))
@@ -499,14 +713,53 @@ async def handle_confirm(message: types.Message) -> None:
         state["linked"] = True
         if res.get("learner_ref"):
             state["learner_ref"] = res["learner_ref"]
+        platform_title = res.get("platform_title") or "Platform"
+        state["platform_title"] = platform_title
+        if res.get("course_id"):
+            state["course_id"] = res["course_id"]
+        prefs = state.get(
+            "notification_prefs",
+            {
+                "deadlines": True,
+                "job_alerts": True,
+                "new_lessons": True,
+                "muted": False,
+                "low_bandwidth": True,
+            },
+        )
+        state["notification_prefs"] = prefs
         ok_msgs = {
-            "am": "✅ መለያዎ በተሳካ ሁኔታ ተገናኝቷል! ምርጫዎችዎ አሁን ተመሳስለዋል።",
-            "om": "✅ Herregni keessan milkaa'inaan walqabateera! Filannoowwan keessan wal-simataniiru.",
-            "ti": "✅ ኣካውንትኩም ብዓወት ተላጊቡ ኣሎ! ምርጫታትኩም ሐዚ ተመሳሲሎም ኣለዉ።",
-            "ar": "✅ تم ربط حسابك بنجاح! تفضيلاتك متزامنة الآن.",
-            "en": "✅ Account successfully linked! Your preferences are now synchronized across web and Telegram.",
+            "am": (
+                f"✅ **መለያዎ በተሳካ ሁኔታ ተገናኝቷል ({platform_title})!**\n\n"
+                f"🔔 ለዚህ መድረክ በቴሌግራም ምን ዓይነት ማሳወቂያዎችን ማግኘት ይፈልጋሉ?\n"
+                f"ከታች ያሉትን ቁልፎች በመጫን ያስተካክሉ፡"
+            ),
+            "om": (
+                f"✅ **Herregni keessan milkaa'inaan walqabateera ({platform_title})!**\n\n"
+                f"🔔 Platformii kanaaf beeksisa akkamii barbaaddu?\n"
+                f"Cuqqaallawwan armaan gadii fayyadamaa:"
+            ),
+            "ti": (
+                f"✅ **ኣካውንትኩም ብዓወት ተላጊቡ ኣሎ ({platform_title})!**\n\n"
+                f"🔔 ነዚ መድረኽ ዝምልከት እንታይ ዓይነት መተሓሳሰቢታት ክበጽሓኩም ትደልዩ?\n"
+                f"ካብ ታሕቲ ዘለዉ መተሓሳሰቢታት ተጠቐሙ:"
+            ),
+            "ar": (
+                f"✅ **تم ربط حسابك بنجاح ({platform_title})!**\n\n"
+                f"🔔 ما هي التحديثات التي ترغب في تلقيها لهذه المنصة على تيليجرام؟\n"
+                f"استخدم الأزرار أدناه لتخصيص تنبيهاتك:"
+            ),
+            "en": (
+                f"✅ **Account successfully linked ({platform_title})!**\n\n"
+                f"🔔 What notifications would you like to receive on Telegram for this platform?\n"
+                f"Use the buttons below to customize alerts:"
+            ),
         }
-        await send_safe_message(message, ok_msgs.get(lang, ok_msgs["en"]))
+        await send_safe_message(
+            message,
+            ok_msgs.get(lang, ok_msgs["en"]),
+            reply_markup=make_notification_inline(prefs, lang=lang),
+        )
     else:
         fail_msgs = {
             "am": "❌ ኮዱ ትክክል አይደለም ወይም ጊዜው አልፏል። እባክዎ እንደገና ይሞክሩ።",
@@ -848,65 +1101,86 @@ async def handle_settings(message: types.Message) -> None:
     user_id = message.from_user.id if message.from_user else 0
     state = get_user_state(user_id)
     lang = state.get("language", "en")
+    learner_ref = state.get("learner_ref", f"tg_{user_id}")
+    platform_title = state.get("platform_title") or "Savanna"
 
-    res = await call_api("GET", "/notification-settings")
-    if not res:
-        res = {
-            "deadlines": True,
-            "new_lessons": True,
-            "job_alerts": True,
-            "muted": False,
-            "low_bandwidth": True,
-        }
+    res = await call_api("GET", f"/notification-settings?learner_ref={learner_ref}")
+    if not res or not isinstance(res, dict):
+        res = state.get(
+            "notification_prefs",
+            {
+                "deadlines": True,
+                "new_lessons": True,
+                "job_alerts": True,
+                "muted": False,
+                "low_bandwidth": True,
+            },
+        )
+    state["notification_prefs"] = res
 
     muted = res.get("muted", False)
     deadlines = res.get("deadlines", True)
     jobs = res.get("job_alerts", True)
+    lessons = res.get("new_lessons", True)
     bandwidth = res.get("low_bandwidth", True)
 
     settings_msgs = {
         "am": (
-            f"⚙️ **የማሳወቂያ ቅንብሮች**\n\n"
+            f"⚙️ **የማሳወቂያ ቅንብሮች ({platform_title})**\n\n"
             f"• ድምጽ አልባ: {'🔴 አዎ' if muted else '🟢 አይደለም'}\n"
             f"• የጊዜ ገደብ ማሳወቂያ: {'🟢 በርቷል' if deadlines else '🔴 ጠፍቷል'}\n"
             f"• የሥራ ማሳወቂያ: {'🟢 በርቷል' if jobs else '🔴 ጠፍቷል'}\n"
+            f"• የትምህርት/መድረክ ዜና: {'🟢 በርቷል' if lessons else '🔴 ጠፍቷል'}\n"
             f"• ዝቅተኛ ዳታ: {'🟢 በርቷል' if bandwidth else '🔴 ጠፍቷል'}\n\n"
-            f"ለመቀየር ይጠቀሙ:\n/mute - ድምጽ አልባ ለማድረግ\n/unmute - ድምጽ ለማብራት\n/lite - የዳታ ቁጠባን ለመቀየር"
+            f"ከታች ያሉትን ቁልፎች በመጫን ማሳወቂያዎችን ያብሩ/ያጥፉ፡\n"
+            f"/mute - ድምጽ አልባ ለማድረግ\n/unmute - ድምጽ ለማብራት\n/lite - የዳታ ቁጠባን ለመቀየር"
         ),
         "om": (
-            f"⚙️ **Qindaa'inoota Beeksisaa**\n\n"
+            f"⚙️ **Qindaa'inoota Beeksisaa ({platform_title})**\n\n"
             f"• Sagalee Cufuu: {'🔴 Eeyyee' if muted else '🟢 Lakki'}\n"
             f"• Beeksisa Yeroo Xumuraa: {'🟢 Hojjechaa Jira' if deadlines else '🔴 Dhaamameera'}\n"
             f"• Beeksisa Hojii: {'🟢 Hojjechaa Jira' if jobs else '🔴 Dhaamameera'}\n"
+            f"• Barnootaa fi Oduu: {'🟢 Hojjechaa Jira' if lessons else '🔴 Dhaamameera'}\n"
             f"• Quusannaa Daataa: {'🟢 Hojjechaa Jira' if bandwidth else '🔴 Dhaamameera'}\n\n"
-            f"Jijjiiruuf kanneen fayyadamaa:\n/mute - Sagalee cufuuf\n/unmute - Sagalee banuuf\n/lite - Quusannaa daataa jijjiiruuf"
+            f"Cuqqaallawwan armaan gadii fayyadamuun jijjiiraa:\n"
+            f"/mute - Sagalee cufuuf\n/unmute - Sagalee banuuf\n/lite - Quusannaa daataa jijjiiruuf"
         ),
         "ti": (
-            f"⚙️ **ቅጥዕታት መተሓሳሰቢ**\n\n"
+            f"⚙️ **ቅጥዕታት መተሓሳሰቢ ({platform_title})**\n\n"
             f"• ድምጺ ምዕጻው: {'🔴 እወ' if muted else '🟢 ኣይኮነን'}\n"
             f"• ናይ ዕለት መተሓሳሰቢ: {'🟢 ይሰርሕ ኣሎ' if deadlines else '🔴 ጠፊኡ'}\n"
             f"• ናይ ስራሕ መተሓሳሰቢ: {'🟢 ይሰርሕ ኣሎ' if jobs else '🔴 ጠፊኡ'}\n"
+            f"• ትምህርቲን ዜናታትን: {'🟢 ይሰርሕ ኣሎ' if lessons else '🔴 ጠፊኡ'}\n"
             f"• ውሑድ ዳታ: {'🟢 ይሰርሕ ኣሎ' if bandwidth else '🔴 ጠፊኡ'}\n\n"
-            f"ንምቕያር ተጠቐሙ:\n/mute - ድምጺ ንምዕጻው\n/unmute - ድምጺ ንምኽፋት\n/lite - ቍጠባ ዳታ ንምቕያር"
+            f"ንምቕያር ካብ ታሕቲ ዘለዉ መተሓሳሰቢታት ተጠቐሙ:\n"
+            f"/mute - ድምጺ ንምዕጻው\n/unmute - ድምጺ ንምኽፋት\n/lite - ቍጠባ ዳታ ንምቕያር"
         ),
         "ar": (
-            f"⚙️ **إعدادات الإشعارات**\n\n"
+            f"⚙️ **إعدادات الإشعارات ({platform_title})**\n\n"
             f"• كتم الصوت: {'🔴 نعم' if muted else '🟢 لا'}\n"
             f"• إشعارات المواعيد النهائية: {'🟢 مفعلة' if deadlines else '🔴 معطلة'}\n"
             f"• إشعارات الوظائف: {'🟢 مفعلة' if jobs else '🔴 معطلة'}\n"
+            f"• الدروس والتحديثات: {'🟢 مفعلة' if lessons else '🔴 معطلة'}\n"
             f"• وضع توفير البيانات: {'🟢 مفعل' if bandwidth else '🔴 معطل'}\n\n"
-            f"للتحكم بالإعدادات:\n/mute - لكتم الإشعارات\n/unmute - لإلغاء كتم الإشعارات\n/lite - لتبديل وضع توفير البيانات"
+            f"اضغط على الأزرار أدناه للتبديل:\n"
+            f"/mute - لكتم الإشعارات\n/unmute - لإلغاء كتم الإشعارات\n/lite - لتبديل وضع توفير البيانات"
         ),
         "en": (
-            f"⚙️ **Notification Settings**\n\n"
+            f"⚙️ **Notification Settings ({platform_title})**\n\n"
             f"• Muted: {'🔴 Yes' if muted else '🟢 No'}\n"
             f"• Deadlines Alert: {'🟢 Active' if deadlines else '🔴 Off'}\n"
             f"• Job Alerts: {'🟢 Active' if jobs else '🔴 Off'}\n"
+            f"• Lessons & Platform Updates: {'🟢 Active' if lessons else '🔴 Off'}\n"
             f"• Low Bandwidth: {'🟢 Active' if bandwidth else '🔴 Off'}\n\n"
-            f"Commands to toggle:\n/mute - Mute alerts\n/unmute - Unmute alerts\n/lite - Toggle low bandwidth"
+            f"Use the buttons below to toggle alerts:\n"
+            f"/mute - Mute alerts\n/unmute - Unmute alerts\n/lite - Toggle low bandwidth"
         ),
     }
-    await send_safe_message(message, settings_msgs.get(lang, settings_msgs["en"]))
+    await send_safe_message(
+        message,
+        settings_msgs.get(lang, settings_msgs["en"]),
+        reply_markup=make_notification_inline(res, lang=lang),
+    )
 
 
 @router.message(Command("mute"))

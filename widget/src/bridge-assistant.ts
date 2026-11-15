@@ -1791,8 +1791,24 @@ export class BridgeAssistant extends HTMLElement {
     this.announce(this.t("emptyWelcome"));
   }
 
+  private getPlatformInfo(): { title: string; url: string; type: string } {
+    const ctx = this.extractPlatformContext();
+    const title = ctx.page_title || (typeof document !== "undefined" ? document.title : "Web Session");
+    const url = ctx.page_url || (typeof window !== "undefined" ? window.location.href : "");
+    const combined = `${title} ${url} ${this.courseId}`.toLowerCase();
+
+    let type = "general";
+    if (combined.includes("job") || combined.includes("career") || combined.includes("internship") || combined.includes("hire") || combined.includes("work")) {
+      type = "jobs";
+    } else if (combined.includes("course") || combined.includes("lesson") || combined.includes("module") || combined.includes("learn") || combined.includes("student") || combined.includes("class")) {
+      type = "course";
+    }
+    return { title, url, type };
+  }
+
   private async generateLinkCode(): Promise<void> {
     try {
+      const platform = this.getPlatformInfo();
       const res = await fetch(`${this.apiBase}/api/v1/link/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1800,6 +1816,10 @@ export class BridgeAssistant extends HTMLElement {
           session_id: this.sessionId,
           channel: "web",
           learner_reference: `learner_${this.sessionId}`,
+          platform_title: platform.title,
+          platform_url: platform.url,
+          platform_type: platform.type,
+          course_id: this.courseId,
         }),
       });
       if (res.ok) {
@@ -2368,6 +2388,7 @@ export class BridgeAssistant extends HTMLElement {
 
   private async fetchTelegramStartLink(): Promise<void> {
     try {
+      const platform = this.getPlatformInfo();
       const res = await fetch(`${this.apiBase}/api/v1/link/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -2375,6 +2396,10 @@ export class BridgeAssistant extends HTMLElement {
           session_id: this.sessionId,
           channel: "web",
           learner_reference: `learner_${this.sessionId}`,
+          platform_title: platform.title,
+          platform_url: platform.url,
+          platform_type: platform.type,
+          course_id: this.courseId,
         }),
       });
       if (res.ok) {

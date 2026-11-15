@@ -50,6 +50,9 @@ def init_db(db_path: str = DB_PATH) -> None:
             ("linked", "INTEGER NOT NULL DEFAULT 0"),
             ("attempts", "INTEGER NOT NULL DEFAULT 0"),
             ("revoked", "INTEGER NOT NULL DEFAULT 0"),
+            ("platform_title", "TEXT"),
+            ("platform_type", "TEXT"),
+            ("course_id", "TEXT"),
         ]:
             with contextlib.suppress(sqlite3.OperationalError):
                 cursor.execute(f"ALTER TABLE links ADD COLUMN {col_name} {col_type}")
@@ -137,6 +140,9 @@ class Database:
         channel: str,
         learner_ref: str | None = None,
         token: str | None = None,
+        platform_title: str | None = None,
+        platform_type: str | None = None,
+        course_id: str | None = None,
     ) -> dict[str, Any]:
         token = token or secrets.token_urlsafe(32)[:32]
         expires_in = 600
@@ -146,8 +152,8 @@ class Database:
         with get_connection(self.db_path) as conn:
             conn.execute(
                 """
-                INSERT INTO links (link_id, token, code, session_id, channel, learner_ref, expires_at, used, created_at, linked)
-                VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, 0)
+                INSERT INTO links (link_id, token, code, session_id, channel, learner_ref, expires_at, used, created_at, linked, platform_title, platform_type, course_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, 0, ?, ?, ?)
                 """,
                 (
                     link_id,
@@ -158,6 +164,9 @@ class Database:
                     learner_ref or f"learner_{session_id}",
                     expires_at,
                     created_at,
+                    platform_title,
+                    platform_type,
+                    course_id,
                 ),
             )
             conn.commit()
@@ -190,8 +199,8 @@ class Database:
 
     def verify_and_consume_token_link(
         self, token: str, telegram_chat_id: str | int | None = None
-    ) -> tuple[bool, str, str]:
-        """Returns (success, learner_ref, error_reason).
+    ) -> tuple[bool, str, str, dict[str, Any]]:
+        """Returns (success, learner_ref, error_reason, metadata).
         error_reason: "ok", "expired", "already_used", "not_found"
         """
         with get_connection(self.db_path) as conn:
@@ -200,12 +209,12 @@ class Database:
                 (token, token),
             ).fetchone()
             if not row:
-                return False, "", "not_found"
+                return False, "", "not_found", {}
             if row["used"]:
-                return False, "", "already_used"
+                return False, "", "already_used", {}
             now_iso = datetime.now(UTC).isoformat()
             if row["expires_at"] < now_iso:
-                return False, "", "expired"
+                return False, "", "expired", {}
 
             chat_id_str = str(telegram_chat_id) if telegram_chat_id is not None else None
             conn.execute(
@@ -213,7 +222,13 @@ class Database:
                 (chat_id_str, row["link_id"]),
             )
             conn.commit()
-            return True, row["learner_ref"], "ok"
+            keys = row.keys()
+            meta = {
+                "platform_title": row["platform_title"] if "platform_title" in keys else None,
+                "platform_type": row["platform_type"] if "platform_type" in keys else None,
+                "course_id": row["course_id"] if "course_id" in keys else None,
+            }
+            return True, row["learner_ref"], "ok", meta
 
     def disconnect_link(
         self, token: str | None = None, learner_ref: str | None = None
@@ -229,8 +244,8 @@ class Database:
             conn.commit()
             return True
 
-    def verify_and_consume_link(self, link_id: str, code: str) -> tuple[bool, str, str]:
-        """Returns (success, learner_ref, error_reason).
+    def verify_and_consume_link(self, link_id: str, code: str) -> tuple[bool, str, str, dict[str, Any]]:
+        """Returns (success, learner_ref, error_reason, metadata).
 
         error_reason: "ok", "invalid_code", "expired", "already_used", "not_found"
         """
@@ -242,39 +257,45 @@ class Database:
                     (code,),
                 ).fetchone()
             if not row:
-                return False, "", "not_found"
+                return False, "", "not_found", {}
             if row["used"]:
-                return False, "", "already_used"
+                return False, "", "already_used", {}
 
             # Check revocation
             revoked = False
             with contextlib.suppress(Exception):
                 revoked = bool(row["revoked"])
             if revoked:
-                return False, "", "revoked"
+                return False, "", "revoked", {}
 
             # Check attempt limit
             attempts = 0
             with contextlib.suppress(Exception):
                 attempts = int(row["attempts"])
             if attempts >= 5:
-                return False, "", "too_many_attempts"
+                return False, "", "too_many_attempts", {}
 
             now_iso = datetime.now(UTC).isoformat()
             if row["expires_at"] < now_iso:
-                return False, "", "expired"
+                return False, "", "expired", {}
             if row["code"] != code:
                 with contextlib.suppress(Exception):
                     conn.execute("UPDATE links SET attempts = attempts + 1 WHERE link_id = ?", (row["link_id"],))
                     conn.commit()
                 if attempts + 1 >= 5:
-                    return False, "", "too_many_attempts"
-                return False, "", "invalid_code"
+                    return False, "", "too_many_attempts", {}
+                return False, "", "invalid_code", {}
 
             # Consume code and mark linked
             conn.execute("UPDATE links SET used = 1, linked = 1 WHERE link_id = ?", (row["link_id"],))
             conn.commit()
-            return True, row["learner_ref"], "ok"
+            keys = row.keys()
+            meta = {
+                "platform_title": row["platform_title"] if "platform_title" in keys else None,
+                "platform_type": row["platform_type"] if "platform_type" in keys else None,
+                "course_id": row["course_id"] if "course_id" in keys else None,
+            }
+            return True, row["learner_ref"], "ok", meta
 
     def revoke_link(self, link_id: str) -> bool:
         """Revoke an active linking code before expiry."""

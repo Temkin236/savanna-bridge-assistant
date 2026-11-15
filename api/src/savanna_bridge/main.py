@@ -16,7 +16,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Any
 from uuid import uuid4
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response, status
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, Response, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -452,6 +452,9 @@ def link_start(payload: LinkStartRequest | None = None) -> LinkStartResponse:
     session_id = payload.session_id if payload else "web_session"
     channel = payload.channel if payload else "telegram"
     learner_ref = payload.learner_reference if payload else None
+    platform_title = payload.platform_title if payload else None
+    platform_type = payload.platform_type if payload else None
+    course_id = payload.course_id if payload else None
     link_id = f"link_{uuid4().hex[:8]}"
     code = f"{random.randint(100000, 999999)}"
     token = secrets.token_urlsafe(32)[:32]
@@ -462,6 +465,9 @@ def link_start(payload: LinkStartRequest | None = None) -> LinkStartResponse:
         channel=channel,
         learner_ref=learner_ref,
         token=token,
+        platform_title=platform_title,
+        platform_type=platform_type,
+        course_id=course_id,
     )
     return LinkStartResponse(**link_data)
 
@@ -496,7 +502,7 @@ def link_confirm(
                 detail="Forbidden: Invalid or missing X-Bot-Secret header.",
             )
         token_to_verify = payload.token or payload.link_id or ""
-        success, learner_ref, reason = db.verify_and_consume_token_link(
+        success, learner_ref, reason, meta = db.verify_and_consume_token_link(
             token=token_to_verify,
             telegram_chat_id=payload.telegram_chat_id,
         )
@@ -525,10 +531,13 @@ def link_confirm(
             channel="telegram",
             learner_ref=learner_ref,
             mocked=False,
+            platform_title=meta.get("platform_title"),
+            platform_type=meta.get("platform_type"),
+            course_id=meta.get("course_id"),
         )
 
     # Legacy 6-digit code flow
-    success, learner_ref, reason = db.verify_and_consume_link(payload.link_id or "", payload.code or "")
+    success, learner_ref, reason, meta = db.verify_and_consume_link(payload.link_id or "", payload.code or "")
     if not success:
         if reason in ("expired", "already_used", "revoked", "too_many_attempts"):
             raise HTTPException(
@@ -544,6 +553,9 @@ def link_confirm(
         channel="telegram",
         learner_ref=learner_ref,
         mocked=False,
+        platform_title=meta.get("platform_title"),
+        platform_type=meta.get("platform_type"),
+        course_id=meta.get("course_id"),
     )
 
 
@@ -746,15 +758,22 @@ def match_alerts(payload: AlertMatchRequest) -> AlertMatchResponse:
 
 
 @app.get("/notification-settings", response_model=NotificationSettings, tags=["Alerts"])
-def get_notification_settings(_token: Any = Depends(verify_optional_token)) -> NotificationSettings:
-    return db.get_notification_settings("default")
+@app.get("/api/v1/notification-settings", response_model=NotificationSettings, tags=["Alerts"])
+def get_notification_settings(
+    learner_ref: str = Query("default"),
+    _token: Any = Depends(verify_optional_token),
+) -> NotificationSettings:
+    return db.get_notification_settings(learner_ref)
 
 
 @app.put("/notification-settings", response_model=NotificationSettings, tags=["Alerts"])
+@app.put("/api/v1/notification-settings", response_model=NotificationSettings, tags=["Alerts"])
 def put_notification_settings(
-    payload: NotificationSettings, _token: Any = Depends(verify_optional_token)
+    payload: NotificationSettings,
+    learner_ref: str = Query("default"),
+    _token: Any = Depends(verify_optional_token),
 ) -> NotificationSettings:
-    return db.set_notification_settings("default", payload)
+    return db.set_notification_settings(learner_ref, payload)
 
 
 @app.get("/learner/deadlines", response_model=DeadlineListResponse, tags=["Learner"])

@@ -59,6 +59,10 @@ class LinkStartRequest(BaseModel):
     session_id: str = "web_session"
     channel: Literal["web", "telegram"] = "telegram"
     learner_reference: str | None = None
+    platform_title: str | None = None
+    platform_url: str | None = None
+    platform_type: str | None = None
+    course_id: str | None = None
 
 
 class LinkStartResponse(BaseModel):
@@ -90,6 +94,9 @@ class LinkConfirmResponse(BaseModel):
     channel: str | None = "telegram"
     learner_ref: str
     mocked: bool | None = None
+    platform_title: str | None = None
+    platform_type: str | None = None
+    course_id: str | None = None
 
 
 class LinkDisconnectRequest(BaseModel):
