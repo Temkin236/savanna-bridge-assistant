@@ -80,8 +80,8 @@ from savanna_bridge.models import (
     TeacherStats,
     Transcription,
     TranscriptionRequest,
-    TranslateRequest,
-    TranslateResponse,
+    TranslationRequest,
+    TranslationResponse,
 )
 from savanna_bridge.rate_limiter import RateLimiter
 from savanna_bridge.retrieval import RetrievalEngine
@@ -378,8 +378,8 @@ def ask(payload: AskRequest, _token: Any = Depends(verify_optional_token)) -> An
         simple_mode=payload.simple_mode,
     )
 
-    # Translate an English-source answer back to the learner's selected language.
-    if user_lang in (Language.OM, Language.TI, Language.AR) and not any(
+    # If language was om or ti and was answered in English, translate back
+    if user_lang in (Language.OM, Language.TI) and not any(
         c.language == user_lang.value for c in chunks
     ):
         answer_text = ai.translate(answer_text, "en", user_lang.value)
@@ -393,23 +393,6 @@ def ask(payload: AskRequest, _token: Any = Depends(verify_optional_token)) -> An
         offer_human=False,
         reason="grounded",
         confidence=round(confidence, 2),
-        provider=ai.name,
-        mocked=ai.is_mocked,
-    )
-
-
-@app.post("/translate", response_model=TranslateResponse, tags=["Tutor"])
-@app.post("/api/v1/translate", response_model=TranslateResponse, tags=["Tutor"])
-def translate_text(payload: TranslateRequest) -> TranslateResponse:
-    """Translate through the language-routed provider with an explicit fallback label."""
-    ai = get_ai_provider()
-    translation = ai.translate(
-        payload.text, payload.source_language.value, payload.target_language.value
-    )
-    return TranslateResponse(
-        translation=translation,
-        source_language=payload.source_language,
-        target_language=payload.target_language,
         provider=ai.name,
         mocked=ai.is_mocked,
     )
@@ -881,6 +864,36 @@ def synthesize_speech(payload: SynthesisRequest) -> SynthesisResult:
         expires_at=expires_at,
         provider=ai.name,
         mocked=ai.is_mocked,
+    )
+
+
+@app.post("/translate", response_model=TranslationResponse, tags=["Translation"])
+@app.post("/api/v1/translate", response_model=TranslationResponse, tags=["Translation"])
+def translate_text(payload: TranslationRequest) -> TranslationResponse:
+    src = (payload.source_language or "en").lower().split("-")[0].strip()
+    tgt = (payload.target_language or "am").lower().split("-")[0].strip()
+
+    local_langs = {"am", "om", "ti", "so"}
+    if src in local_langs or tgt in local_langs:
+        from savanna_bridge.ai.addis import AddisAiProvider
+
+        provider_name = "addis"
+        provider = AddisAiProvider()
+    else:
+        from savanna_bridge.ai.cloud import CloudProvider
+
+        provider_name = "gemini"
+        provider = CloudProvider()
+
+    translated = provider.translate(payload.text, src, tgt)
+
+    return TranslationResponse(
+        translated_text=translated,
+        translation=translated,
+        source_language=src,
+        target_language=tgt,
+        provider=provider_name,
+        mocked=provider.is_mocked,
     )
 
 

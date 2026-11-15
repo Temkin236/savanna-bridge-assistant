@@ -21,7 +21,7 @@ def test_api_v1_health() -> None:
 def test_api_v1_ask_grounded() -> None:
     res = client.post(
         "/api/v1/ask",
-        json={"question": "Explain Module 2", "language": "en"},
+        json={"question": "What does Module 2 teach?", "language": "en"},
     )
     assert res.status_code == 200
     data = res.json()
@@ -32,7 +32,7 @@ def test_api_v1_ask_grounded() -> None:
 def test_sms_inbound_offline_grounded() -> None:
     res = client.post(
         "/sms/inbound",
-        json={"from": "+251911223344", "text": "Explain Module 2"},
+        json={"from": "+251911223344", "text": "What is shaping the future of VA work?"},
     )
     assert res.status_code == 200
     assert res.headers["content-type"].startswith("text/plain")
@@ -58,6 +58,7 @@ def test_link_revoke_and_attempt_limit() -> None:
     start_res = client.post("/link/start", json={"session_id": "sess_test", "channel": "web"})
     assert start_res.status_code == 200
     link_id = start_res.json()["link_id"]
+    _ = start_res.json()["code"]
 
     # 2. Test failed attempts increment
     for _ in range(4):
@@ -124,7 +125,7 @@ def test_tenants_and_languages_metadata() -> None:
     lang_res = client.get("/api/v1/languages")
     assert lang_res.status_code == 200
     languages = lang_res.json()
-    lang_codes = [language["code"] for language in languages]
+    lang_codes = [item["code"] for item in languages]
     assert "am" in lang_codes
     assert "ar" in lang_codes
     assert "om" in lang_codes
@@ -144,6 +145,30 @@ def test_language_guard_detection_and_normalization() -> None:
     assert LanguageGuard.normalize_ethiopian_phone("0911223344") == "+251911223344"
     assert LanguageGuard.normalize_ethiopian_phone("0711223344") == "+251711223344"
     assert LanguageGuard.normalize_ethiopian_phone("+251911223344") == "+251911223344"
+
+
+def test_translation_routes_and_endpoint() -> None:
+    # 1. Local language routes to Addis AI
+    am_res = client.post(
+        "/api/v1/translate",
+        json={"text": "Hello world", "source_language": "en", "target_language": "am"},
+    )
+    assert am_res.status_code == 200
+    am_data = am_res.json()
+    assert am_data["provider"] == "addis"
+    assert am_data["target_language"] == "am"
+    assert "translated_text" in am_data
+
+    # 2. English & Arabic routes to Gemini
+    ar_res = client.post(
+        "/api/v1/translate",
+        json={"text": "Hello world", "source_language": "en", "target_language": "ar"},
+    )
+    assert ar_res.status_code == 200
+    ar_data = ar_res.json()
+    assert ar_data["provider"] == "gemini"
+    assert ar_data["target_language"] == "ar"
+    assert "translated_text" in ar_data
 
 
 def test_accessibility_profile_crud_and_sync() -> None:

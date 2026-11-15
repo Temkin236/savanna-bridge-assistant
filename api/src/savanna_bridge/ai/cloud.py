@@ -33,7 +33,7 @@ class CloudProvider(AIProvider):
         )
         self.translate_key = os.getenv("GOOGLE_TRANSLATE_API_KEY") or shared_key
         self.speech_key = os.getenv("GOOGLE_SPEECH_API_KEY") or shared_key
-        self.model = os.getenv("CLOUD_MODEL", "gemini-3.8-flash")
+        self.model = os.getenv("CLOUD_MODEL", "gemini-2.5-flash")
         self.tts_model = os.getenv("GOOGLE_TTS_MODEL", "gemini-3.8-flash-tts")
         self.tts_voice = os.getenv("GOOGLE_TTS_VOICE", "Kore")
         self._last_call_mocked = not bool(
@@ -51,14 +51,19 @@ class CloudProvider(AIProvider):
     def detect_language(self, text: str) -> Language:
         return self._offline_fallback.detect_language(text)
 
-    def translate(self, text: str, source_lang: str, target_lang: str) -> str:
-        if source_lang == target_lang:
+    def translate_direct(self, text: str, source_lang: str, target_lang: str) -> str:
+        """Translate directly with Google Cloud Translation or Gemini."""
+        if not text or not text.strip():
+            return text
+        source = (source_lang or "en").lower().split("-")[0].strip()
+        target = (target_lang or "en").lower().split("-")[0].strip()
+        if source == target:
             self._last_call_mocked = False
             return text
 
         if self.translate_key:
             try:
-                translated = self._call_cloud_translate(text, source_lang, target_lang)
+                translated = self._call_cloud_translate(text, source, target)
                 if translated:
                     self._last_call_mocked = False
                     return translated
@@ -66,7 +71,7 @@ class CloudProvider(AIProvider):
                 logger.warning("Google Cloud Translation error: %s", exc)
 
         prompt = (
-            f"Translate the following text from {source_lang} to {target_lang}. "
+            f"Translate the following text from {source} to {target}. "
             f"Return only the direct translation:\n\n{text}"
         )
         try:
@@ -78,7 +83,29 @@ class CloudProvider(AIProvider):
             logger.warning("Gemini translation error: %s", exc)
 
         self._last_call_mocked = True
-        return self._offline_fallback.translate(text, source_lang, target_lang)
+        return ""
+
+    def translate(self, text: str, source_lang: str, target_lang: str) -> str:
+        source = (source_lang or "en").lower().split("-")[0].strip()
+        target = (target_lang or "en").lower().split("-")[0].strip()
+        if source == target:
+            self._last_call_mocked = False
+            return text
+
+        if {source, target} & {"am", "om", "ti", "so"}:
+            from savanna_bridge.ai.addis import AddisAiProvider
+
+            addis = AddisAiProvider()
+            translated = addis.translate(text, source, target)
+            self._last_call_mocked = addis.is_mocked
+            return translated
+
+        translated = self.translate_direct(text, source, target)
+        if translated:
+            return translated
+
+        self._last_call_mocked = True
+        return self._offline_fallback.translate(text, source, target)
 
     def generate_answer(
         self,

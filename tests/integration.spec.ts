@@ -46,6 +46,12 @@ test.describe("Savanna Bridge integration", () => {
     await written.check();
     await supportForm.locator('button[type="submit"]').click();
     await expect(page.locator("bridge-assistant #support-saved-notice")).toBeVisible();
+
+    await page.locator("bridge-assistant #tab-chat").click();
+    await expect(page.locator("bridge-assistant #tg-deep-link")).toHaveAttribute(
+      "href",
+      /t\.me/,
+    );
   });
 
   test("consented live-help request reaches the agent console and can be claimed", async ({

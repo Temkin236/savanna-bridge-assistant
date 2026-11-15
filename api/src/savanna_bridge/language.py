@@ -167,30 +167,41 @@ class LanguageGuard:
 
     @classmethod
     def translate(cls, text: str, source_lang: str, target_lang: str) -> str:
-        """Real neural translation between English, Amharic, Oromo, Tigrinya, Arabic, Somali."""
+        """Translate text using Addis AI for local languages and Gemini for English and Arabic."""
         if not text or not text.strip():
             return text
-        src = (source_lang or "auto").lower().split("-")[0].strip()
+        src = (source_lang or "en").lower().split("-")[0].strip()
         tgt = (target_lang or "en").lower().split("-")[0].strip()
         if src == tgt:
             return text
 
-        import json
-        import urllib.parse
-        import urllib.request
+        local_langs = {"am", "om", "ti", "so"}
 
-        try:
-            url = (
-                f"https://translate.googleapis.com/translate_a/single?client=gtx&sl={src}&tl={tgt}&dt=t&q="
-                + urllib.parse.quote(text)
-            )
-            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-            with urllib.request.urlopen(req, timeout=8) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-                if data and isinstance(data, list) and data[0]:
-                    translated = "".join([x[0] for x in data[0] if x and x[0]])
-                    if translated.strip():
-                        return translated.strip()
-        except Exception:
-            pass
+        # 1. Local languages: Route to Addis AI
+        if src in local_langs or tgt in local_langs:
+            try:
+                from savanna_bridge.ai.addis import AddisAiProvider
+
+                addis = AddisAiProvider()
+                res = addis.translate_direct(text, src, tgt)
+                if res and res.strip() and res.strip() != text.strip():
+                    return res.strip()
+            except Exception:
+                pass
+
+        # 2. English and Arabic: Route to Gemini
+        if (src in ("en", "ar") and tgt in ("en", "ar")) or (
+            src not in local_langs and tgt not in local_langs
+        ):
+            try:
+                from savanna_bridge.ai.cloud import CloudProvider
+
+                cloud = CloudProvider()
+                res = cloud.translate_direct(text, src, tgt)
+                if res and res.strip() and res.strip() != text.strip():
+                    return res.strip()
+            except Exception:
+                pass
+
+        # Return original text when translation is unchanged or provider is idle
         return text

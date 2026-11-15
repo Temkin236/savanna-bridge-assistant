@@ -175,6 +175,94 @@ class SavannaStaticSource(ContentSource):
                 page=3,
                 language="am",
             ),
+            # Afaan Oromo chunks
+            ContentChunk(
+                chunk_id="csf_om_01",
+                course_id="course_demo",
+                title="Bu'uuraalee Tajaajila Maamiltootaa",
+                heading="Kutaa 1 - Seensa fi Qajeelfamoota Bu'uuraa",
+                text=(
+                    "Qajeelfamni jalqabaa kabaja: maamila hunda kabajaan fi garraamummaadhaan keessummeessuu. "
+                    "Qajeelfamni lammaffaan xiyyeeffannoodhaan dhaggeeffachuu: deebii kennuu dura gaaffii maamilaa sirriitti dhaggeeffadhaa. "
+                    "Qorumsi barnootaa xumura kutaa barnootaa irratti kennama."
+                ),
+                url="https://learning.example.org/courses/course_demo/module-1",
+                page=1,
+                language="om",
+            ),
+            ContentChunk(
+                chunk_id="csf_om_02",
+                course_id="course_demo",
+                title="Bu'uuraalee Tajaajila Maamiltootaa",
+                heading="Kutaa 2 - Maamiltoota Waliin Qunnamtii Gochuu",
+                text=(
+                    "Kutaan 2 akkamitti dhaggeeffachuu, fedhii maamilaa adda baasuu, fi ifatti deebii kennuu barsiisa. "
+                    "Maamila osoo hin katin dhaggeeffadhaa. Hubannoo keessan mirkaneessuuf gaaffii maamilaa irra deebi'aa ibsaa. "
+                    "Qajeelfama gabaabaa fi ifa ta'e sadarkaa sadarkaadhaan kennaa. Jechoota dhimma keessaa hin fayyadominaa. "
+                    "Qajeelfama barruudhaan dhiheessaa yoo sagaleen ifa hin taane."
+                ),
+                url="https://learning.example.org/courses/course_demo/module-2",
+                page=2,
+                language="om",
+            ),
+            ContentChunk(
+                chunk_id="csf_om_03",
+                course_id="course_demo",
+                title="Bu'uuraalee Tajaajila Maamiltootaa",
+                heading="Kutaa 3 - Rakkoolee Maamiltootaa Furuu",
+                text=(
+                    "Kutaan 3 gaaffiiwwan walxaxoo akkamitti akka keessummeessaniifi yoom akka nama biraatti dabarsan ibsa. "
+                    "Rakkina tokko daqiiqaa shan keessatti furuu yoo hin dandeenye, to'ataaf dabarsaa. "
+                    "Maamilichi rakkina isaa irra deebiee akka hin dubbanneef gabaabaa rakkichaa dabarsaa."
+                ),
+                url="https://learning.example.org/courses/course_demo/module-3",
+                page=3,
+                language="om",
+            ),
+            # Arabic chunks
+            ContentChunk(
+                chunk_id="csf_ar_01",
+                course_id="course_demo",
+                title="أساسيات خدمة العملاء",
+                heading="الوحدة 1 - المقدمة والمبادئ الأساسية",
+                text=(
+                    "المبدأ الأول هو الاحترام: معاملة كل متدرب وعميل باحترام وتعاطف وتقدير. "
+                    "المبدأ الثاني هو الاستماع الفعال: الاستماع باهتمام وتركيز لسؤال العميل قبل البدء في الإجابة. "
+                    "تتضمن تقييمات الدورة اختبارات معرفية في نهاية كل وحدة تدريبية."
+                ),
+                url="https://learning.example.org/courses/course_demo/module-1",
+                page=1,
+                language="ar",
+            ),
+            ContentChunk(
+                chunk_id="csf_ar_02",
+                course_id="course_demo",
+                title="أساسيات خدمة العملاء",
+                heading="الوحدة 2 - التواصل الفعال مع العملاء",
+                text=(
+                    "توضح الوحدة الثانية كيفية الاستماع بعناية وتوضيح احتياجات العميل والاستجابة بوضوح ودقة. "
+                    "استمع بعناية دون مقاطعة العميل. أعد صياغة نقطة العميل للتأكد من الفهم الكامل. "
+                    "قدم تعليمات موجزة خطوة بخطوة وتجنب المصطلحات المعقدة. "
+                    "لأغراض سهولة الوصول، قدم دائماً تعليمات مكتوبة إذا كان الصوت غير واضح."
+                ),
+                url="https://learning.example.org/courses/course_demo/module-2",
+                page=2,
+                language="ar",
+            ),
+            ContentChunk(
+                chunk_id="csf_ar_03",
+                course_id="course_demo",
+                title="أساسيات خدمة العملاء",
+                heading="الوحدة 3 - إدارة المشكلات المعقدة والتصعيد",
+                text=(
+                    "تشرح الوحدة الثالثة كيفية التعامل مع المشكلات المعقدة ومتى يجب تصعيدها إلى مشرف الدعم. "
+                    "إذا تعذر حل مشكلة ما في غضون خمس دقائق، فقم بتصعيدها إلى المشرف المسؤول. "
+                    "لخص مشكلة العميل بدقة حتى لا يضطر العميل إلى تكرار شرحها مرة أخرى."
+                ),
+                url="https://learning.example.org/courses/course_demo/module-3",
+                page=3,
+                language="ar",
+            ),
         ]
 
     def parse_html_file(

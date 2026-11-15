@@ -46,24 +46,64 @@ class AddisAiProvider(AIProvider):
     def detect_language(self, text: str) -> Language:
         return self._offline_fallback.detect_language(text)
 
-    def translate(self, text: str, source_lang: str, target_lang: str) -> str:
-        if source_lang == target_lang:
+    def translate_direct(self, text: str, source_lang: str, target_lang: str) -> str:
+        """Call Addis AI translation directly for local Ethiopian languages."""
+        if not text or not text.strip():
+            return text
+        src = (source_lang or "en").lower().split("-")[0].strip()
+        tgt = (target_lang or "en").lower().split("-")[0].strip()
+        if src == tgt:
             self._last_call_mocked = False
             return text
-        if self._client:
+
+        if self._client and src in ("am", "om", "ti", "en") and tgt in ("am", "om", "ti", "en"):
             try:
-                res = self._client.translate.create(
-                    text=text,
-                    source_language=source_lang,
-                    target_language=target_lang,
-                )
-                translation = getattr(res, "translation", str(res))
-                self._last_call_mocked = False
-                return translation
+                try:
+                    res = self._client.translate.create(text=text, source=src, target=tgt)
+                except TypeError:
+                    res = self._client.translate.create(
+                        text=text,
+                        source_language=src,
+                        target_language=tgt,
+                    )
+                if isinstance(res, dict):
+                    translated = res.get("text") or res.get("translation")
+                    if translated and str(translated).strip():
+                        self._last_call_mocked = False
+                        return str(translated).strip()
+                elif hasattr(res, "text") and res.text:
+                    self._last_call_mocked = False
+                    return str(res.text).strip()
+                elif hasattr(res, "translation") and res.translation:
+                    self._last_call_mocked = False
+                    return str(res.translation).strip()
             except Exception as e:
-                logger.warning("AddisAI translation call failed: %s", e)
+                logger.warning("AddisAI translate call failed: %s", e)
         self._last_call_mocked = True
-        return self._offline_fallback.translate(text, source_lang, target_lang)
+        return ""
+
+    def translate(self, text: str, source_lang: str, target_lang: str) -> str:
+        """Translate text using Addis AI for local languages, delegating English/Arabic to Gemini."""
+        if not text or not text.strip():
+            return text
+        src = (source_lang or "en").lower().split("-")[0].strip()
+        tgt = (target_lang or "en").lower().split("-")[0].strip()
+        if src == tgt:
+            return text
+
+        # If English <-> Arabic, route to Gemini
+        if src in ("en", "ar") and tgt in ("en", "ar"):
+            from savanna_bridge.ai.cloud import CloudProvider
+
+            return CloudProvider().translate(text, src, tgt)
+
+        # For local languages, call Addis AI
+        direct = self.translate_direct(text, src, tgt)
+        if direct:
+            return direct
+
+        self._last_call_mocked = True
+        return self._offline_fallback.translate(text, src, tgt)
 
     def generate_answer(
         self,
@@ -73,7 +113,6 @@ class AddisAiProvider(AIProvider):
         simple_mode: bool = False,
     ) -> str:
         if not context_chunks:
-            self._last_call_mocked = True
             return self._offline_fallback.generate_answer(
                 question, context_chunks, language, simple_mode
             )

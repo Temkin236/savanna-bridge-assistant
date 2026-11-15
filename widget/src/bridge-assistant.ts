@@ -1,22 +1,29 @@
 /**
  * Savanna Bridge Assistant (<bridge-assistant> & <db-assistant>)
- * Multilingual, accessible learning and live help web component.
+ * Multilingual, accessible learning and live voice assistant web component.
  *
  * Implements:
- * - Simple production-ready layout:
- *   1. Header: title, language switch with native scripts (አማርኛ / English), Settings, Close.
- *   2. Body: message list. Empty state shows welcome + 3 suggested course questions.
- *   3. Footer: text input with Send, Mic, Talk to a person, and Continue on Telegram.
- *   4. Settings dialog: text size (smaller, normal, larger), high contrast, simple mode, support needs.
- * - One primary action per screen, plain words, no jargon, no icon-only buttons.
- * - Answer format: heading, text, Listen, Make simpler, source links with readable names.
- * - Loading: 'Looking in the course' announced once in aria-live.
- * - Not found: clear notice, offer Talk to a person & Try another question buttons.
- * - Offline: banner + 'Saved on this phone. It will send when you are online.' (localStorage queue).
- * - Telegram: deep_link <a> tag, polls status every 2s for 10m, announces 'Telegram connected', shows Disconnect.
- * - Visual: 44px touch targets, 4.5:1 contrast, rem units, visible focus, host CSS variable adoption.
- * - Events: db-assistant:question and db-assistant:escalated (CustomEvents).
- * - Aliased as <db-assistant> and <bridge-assistant>.
+ * 1. Multilingual Voice Assistant:
+ *    - Voice activation: saying "Help" (or "እርዳታ", "gargaarsa", "مساعدة") opens & listens.
+ *    - Existing launcher button remains fully visible and functional with clear hint.
+ *    - Voice-to-Text: captures speech, auto-detects language, transcribes in native script
+ *      (Ethiopic for Amharic, Latin for Oromo & English, Arabic script with RTL for Arabic).
+ *    - Transcription preview in chat input: learner reviews/edits before pressing Send.
+ *    - Text-to-Speech: automatically reads grounded answers aloud in natural matching voice,
+ *      filtering citations and metadata. Stop, replay, and auto-read toggle controls.
+ *    - Visual status: clear indicators for Listening (pulse dot), Processing (spinner),
+ *      and Speaking (sound wave animation).
+ *    - Accessibility: Web Audio earcons (rising/falling chimes), aria-live announcements,
+ *      keyboard shortcuts (Alt+Shift+V / Alt+Shift+A).
+ * 2. Universal Integration:
+ *    - Custom elements: <bridge-assistant> and <db-assistant>.
+ *    - Accepts both plain attributes (lang, api, content) and data-* attributes.
+ *    - Works on any site (blank page, LMS, or external portal).
+ * 3. Complete Existing Features:
+ *    - Telegram linking with deep link & polling.
+ *    - Human handoff escalation room.
+ *    - Settings dialog: text size, high contrast, simple mode, private accommodations.
+ *    - Offline queue with auto-sync.
  */
 
 export type SupportedLanguage = "am" | "en" | "om" | "ti" | "ar";
@@ -107,6 +114,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     appSubtitle: "Ask questions, adjust support, or connect with a mentor",
     closeLabel: "Close dialog",
     launcherLabel: "Help & Assistant",
+    wakeHint: "Say \"Help\" or tap to open",
     settingsLabel: "Settings",
     settingsTitle: "Assistant Settings",
     closeSettings: "Done",
@@ -117,6 +125,8 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     highContrastLabel: "High Contrast",
     simpleModeLabel: "Simple mode",
     simpleModeDesc: "Explain answers in shorter, simpler sentences",
+    autoReadSpeechLabel: "Read responses aloud automatically",
+    autoReadSpeechDesc: "Assistant will speak answers when they arrive",
     supportNeedsTitle: "Support Preferences",
     supportZeroProof: "No medical documentation or proof required. All preferences are private.",
     needExtraTime: "Extra response time for tests and questions",
@@ -139,14 +149,15 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     inputPlaceholder: "Ask a question about this course...",
     sendButton: "Send",
     micLabel: "Microphone (voice input)",
-    recordingState: "Listening... tap to finish",
-    transcribingState: "Transcribing audio...",
+    recordingState: "Listening... speak now",
+    transcribingState: "Processing speech...",
     voicePreviewNotice: "Voice transcribed. You can edit the text before sending.",
-    micError: "Microphone unavailable. Please type your question.",
+    micError: "Microphone unavailable. Please check microphone permissions or type your question.",
     lookingInCourse: "Looking in the course...",
     answerHeading: "Answer",
     listenButton: "Listen",
-    pauseButton: "Pause",
+    pauseButton: "Stop",
+    replayButton: "Replay",
     makeSimplerButton: "Make simpler",
     sourcesTitle: "Course sources:",
     talkToPersonButton: "Talk to a person",
@@ -165,6 +176,10 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     joinRoomButton: "Join Live Help Room ↗",
     leaveRoomButton: "Close Help Session",
     androidFallbackNote: "Android note: Browser screen sharing (getDisplayMedia) is not supported in Chrome on Android. Your mentor automatically sees your active lesson URL, section, and focused element.",
+    voiceListening: "Listening... Speak now",
+    voiceProcessing: "Processing speech...",
+    voiceSpeaking: "Reading response aloud...",
+    stopAudio: "Stop",
     chatTab: "Chat",
     generalTab: "Display & Audio",
     supportTab: "Support Needs",
@@ -222,6 +237,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     appSubtitle: "ጥያቄዎችን ይጠይቁ፣ ድጋፍዎን ያስተካክሉ፣ ወይም ከአማካሪ ጋር ይገናኙ",
     closeLabel: "መስኮቱን ዝጋ",
     launcherLabel: "እርዳታ እና ረዳት",
+    wakeHint: "\"እርዳታ\" ይበሉ ወይም ይንኩ",
     settingsLabel: "ቅንብሮች",
     settingsTitle: "የረዳት ቅንብሮች",
     closeSettings: "ጨርስ",
@@ -232,6 +248,8 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     highContrastLabel: "ከፍተኛ ንፅፅር",
     simpleModeLabel: "ቀላል ማብራሪያ",
     simpleModeDesc: "መልሶችን በአጫጭርና በቀላል ዓረፍተ ነገሮች አስረዳኝ",
+    autoReadSpeechLabel: "መልሶችን በድምጽ በራስ-ሰር አንብብ",
+    autoReadSpeechDesc: "መልሶች እንደደረሱ ረዳቱ በድምጽ ያነበዋል",
     supportNeedsTitle: "የግል የድጋፍ ፍላጎቶች",
     supportZeroProof: "ምንም ዓይነት የህክምና ማስረጃ ወይም ማረጋገጫ አያስፈልግም።",
     needExtraTime: "ለፈተናዎች እና ጥያቄዎች ተጨማሪ ጊዜ",
@@ -254,7 +272,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     inputPlaceholder: "ስለዚህ ኮርስ ጥያቄ ይጠይቁ...",
     sendButton: "ላክ",
     micLabel: "ማይክሮፎን (የድምጽ ግብዓት)",
-    recordingState: "እያዳመጥኩ ነው... ለማጠናቀቅ ይጫኑ",
+    recordingState: "እያዳመጥኩ ነው... አሁን ይናገሩ",
     transcribingState: "ድምጹን ወደ ጽሑፍ በመቀየር ላይ...",
     voicePreviewNotice: "ድምጽዎ ወደ ጽሑፍ ተቀይሯል። ከመላክዎ በፊት ማስተካከል ይችላሉ።",
     micError: "ማይክሮፎን ማግኘት አልተቻለም። እባክዎ ጥያቄዎን በጽሑፍ ያስገቡ።",
@@ -262,6 +280,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     answerHeading: "መልስ",
     listenButton: "አዳምጥ",
     pauseButton: "አቁም",
+    replayButton: "እንደገና አጫውት",
     makeSimplerButton: "ቀለል አድርግ",
     sourcesTitle: "የኮርስ ምንጮች፡",
     talkToPersonButton: "ከሰው ጋር ተነጋገር",
@@ -280,6 +299,10 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     joinRoomButton: "ወደ ስብሰባው ክፍል ግባ ↗",
     leaveRoomButton: "ክፍለ-ጊዜውን ዝጋ",
     androidFallbackNote: "የአንድሮይድ ማሳሰቢያ፡ በአንድሮይድ ክሮም ላይ የስክሪን ማጋራት አይደገፍም። አማካሪዎ እርስዎ ያሉበትን የትምህርት ገጽ እና ርዕስ በቀጥታ ይመለከታል።",
+    voiceListening: "እያዳመጥኩ ነው... አሁን ይናገሩ",
+    voiceProcessing: "ድምጹን ወደ ጽሑፍ በመቀየር ላይ...",
+    voiceSpeaking: "ረዳቱ መልሱን እያነበበ ነው...",
+    stopAudio: "አቁም",
     chatTab: "ውይይት",
     generalTab: "እይታ እና ድምጽ",
     supportTab: "የድጋፍ ፍላጎቶች",
@@ -336,7 +359,8 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     appTitle: "Gargaaraa Savanna Bridge",
     appSubtitle: "Gaaffii gaafadhaa, deeggarsa madaalsisaa, ykn gorsaa waliin walqunnamaa",
     closeLabel: "Cufi",
-    launcherLabel: "Gargaarsa",
+    launcherLabel: "Gargaarsa & Deeggarsa",
+    wakeHint: "\"Gargaarsa\" jedhaa ykn tuqaa",
     settingsLabel: "Qindaa'ina",
     settingsTitle: "Qindaa'ina Gargaaraa",
     closeSettings: "Xumuri",
@@ -347,6 +371,8 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     highContrastLabel: "Waliin-dhaabbii Olaanaa",
     simpleModeLabel: "Ibsa salphaa",
     simpleModeDesc: "Himoota gaggabaaboo fi salphaadhaan ibsi",
+    autoReadSpeechLabel: "Deebii ofumaan sagaleedhaan dubbisi",
+    autoReadSpeechDesc: "Deebiin akkuma dhufeen gargaaraan sagaleedhaan dubbisa",
     supportNeedsTitle: "Filannoo Deeggarsaa",
     supportZeroProof: "Waraqaan yaalaa hin barbaachisu. Filannoon keessan dhuunfaadha.",
     needExtraTime: "Qorumsaaf yeroo dabalataa",
@@ -369,14 +395,15 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     inputPlaceholder: "Waa'ee barnoota kanaa gaafadhaa...",
     sendButton: "Ergi",
     micLabel: "Maaykirofoonii",
-    recordingState: "Dhaggeeffachaa jira...",
+    recordingState: "Dhaggeeffachaa jira... dubbadhaa",
     transcribingState: "Sagalee jijjiiraa jira...",
-    voicePreviewNotice: "Sagaleen gara barruutti jijjiirameera.",
+    voicePreviewNotice: "Sagaleen gara barruutti jijjiirameera. Ergisaa dura sirreessuu dandeessu.",
     micError: "Maaykirofooniin hin argamne.",
     lookingInCourse: "Barnoota keessaa barbaadaa jira...",
     answerHeading: "Deebii",
     listenButton: "Dhaggeeffadhu",
     pauseButton: "Dhaabi",
+    replayButton: "Irra deebi'i",
     makeSimplerButton: "Salphisi",
     sourcesTitle: "Madda barnootaa:",
     talkToPersonButton: "Nama waliin dubbadhu",
@@ -395,6 +422,10 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     joinRoomButton: "Kutaa Seenaa ↗",
     leaveRoomButton: "Kutaa Dhiisaa",
     androidFallbackNote: "Iskiriinii qooduun Android irratti hin danda'amu.",
+    voiceListening: "Dhaggeeffachaa jira... Amma dubbadhaa",
+    voiceProcessing: "Sagalee gara barruutti jijjiiraa jira...",
+    voiceSpeaking: "Gargaaraan deebii dubbisaa jira...",
+    stopAudio: "Dhaabi",
     chatTab: "Haasaa",
     generalTab: "Mul'ina",
     supportTab: "Deeggarsa",
@@ -451,7 +482,8 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     appTitle: "ናይ ሳቫና ብሪጅ ሓጋዚ",
     appSubtitle: "ሕቶታት ሕተቱ፡ ድሌትኩም ኣመዓራርዩ፡ ወይ ምስ መካሪ ተራኸቡ",
     closeLabel: "ዕጾ",
-    launcherLabel: "ሓገዝ",
+    launcherLabel: "ሓገዝ & ሓጋዚ",
+    wakeHint: "\"ሓገዝ\" በሉ ወይ ንከፉ",
     settingsLabel: "ቅጥዕታት",
     settingsTitle: "ናይ ሓጋዚ ቅጥዕታት",
     closeSettings: "ወዲአ",
@@ -462,6 +494,8 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     highContrastLabel: "ላዕለዋይ ንጽጽር",
     simpleModeLabel: "ቀሊል መብርሂ",
     simpleModeDesc: "ብሓጸርቲ ሓረጋት ኣረድኣኒ",
+    autoReadSpeechLabel: "መልስታት ብድምጺ ብቐጥታ ኣንብብ",
+    autoReadSpeechDesc: "መልሲ ምስ መጸ ብድምጺ ይንበብ",
     supportNeedsTitle: "ናይ ውልቂ ሓገዝ ምርጫታት",
     supportZeroProof: "ሕክምናዊ መርትዖ ኣየድልን እዩ። ምርጫታትኩም ምስጢራዊ እዩ።",
     needExtraTime: "ተወሳኺ ግዜ ንፈተናታት",
@@ -484,7 +518,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     inputPlaceholder: "ብዛዕባዚ ኮርስ ሕቶ ሕተቱ...",
     sendButton: "ስደድ",
     micLabel: "ማይክሮፎን",
-    recordingState: "ይሰምዕ ኣለኹ...",
+    recordingState: "ይሰምዕ ኣለኹ... ሕጂ ተዛረቡ",
     transcribingState: "ናብ ጽሑፍ ይቕየር ኣሎ...",
     voicePreviewNotice: "ድምጽኹም ናብ ጽሑፍ ተቐዪሩ ኣሎ።",
     micError: "ማይክሮፎን ክርከብ ኣይተኻእለን።",
@@ -492,6 +526,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     answerHeading: "መልሲ",
     listenButton: "ስማዕ",
     pauseButton: "ኣዕርፍ",
+    replayButton: "ደጊምካ ስማዕ",
     makeSimplerButton: "ቀሊል ግበሮ",
     sourcesTitle: "ምንጭታት ኮርስ፡",
     talkToPersonButton: "ምስ ሰብ ተዛረብ",
@@ -510,6 +545,10 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     joinRoomButton: "ናብ ክፍሊ እቶ ↗",
     leaveRoomButton: "ክፍሊ ዕጾ",
     androidFallbackNote: "ኣብ አንድሮይድ ስክሪን ምክፋል ኣይድገፍን።",
+    voiceListening: "ይሰምዕ ኣለኹ... ሕጂ ተዛረቡ",
+    voiceProcessing: "ናብ ጽሑፍ ይቕየር ኣሎ...",
+    voiceSpeaking: "ሓጋዚ መልሲ የንብብ ኣሎ...",
+    stopAudio: "ኣቁም",
     chatTab: "ዕላል",
     generalTab: "ምርኣይ",
     supportTab: "ሓገዝ",
@@ -567,6 +606,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     appSubtitle: "اطرح أسئلة، خصص دعمك، أو تواصل مع مرشد",
     closeLabel: "إغلاق النافذة",
     launcherLabel: "المساعدة والمساعد",
+    wakeHint: "قل \"مساعدة\" أو اضغط للفتح",
     settingsLabel: "الإعدادات",
     settingsTitle: "إعدادات المساعد",
     closeSettings: "تم",
@@ -577,6 +617,8 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     highContrastLabel: "تباين عالٍ",
     simpleModeLabel: "شرح مبسط",
     simpleModeDesc: "اشرح بجمل أقصر وأبسط",
+    autoReadSpeechLabel: "قراءة الإجابات تلقائياً بصوت عالٍ",
+    autoReadSpeechDesc: "سيقوم المساعد بقراءة الإجابة فور وصولها",
     supportNeedsTitle: "تفضيلات الدعم",
     supportZeroProof: "لا يُطلب أي تشخيص أو وثائق طبية. جميع التفضيلات سرية.",
     needExtraTime: "وقت استجابة إضافي للاختبارات",
@@ -599,14 +641,15 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     inputPlaceholder: "اطرح سؤالاً حول هذه الدورة...",
     sendButton: "إرسال",
     micLabel: "الميكروفون (إدخال صوتي)",
-    recordingState: "جاري الاستماع... اضغط للإنهاء",
+    recordingState: "جاري الاستماع... تحدث الآن",
     transcribingState: "جاري تحويل الصوت إلى نص...",
     voicePreviewNotice: "تم تحويل الصوت إلى نص. يمكنك تعديله قبل الإرسال.",
-    micError: "الميكروفون غير متوفر.",
+    micError: "الميكروفون غير متوفر. يرجى التحقق من أذونات الميكروفون.",
     lookingInCourse: "جاري البحث في محتوى الدورة...",
     answerHeading: "الإجابة",
     listenButton: "استماع",
-    pauseButton: "إيقاف مؤقت",
+    pauseButton: "إيقاف",
+    replayButton: "إعادة",
     makeSimplerButton: "تبسيط الشرح",
     sourcesTitle: "مصادر الدورة:",
     talkToPersonButton: "التحدث مع شخص",
@@ -625,6 +668,10 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     joinRoomButton: "الانضمام للغرفة ↗",
     leaveRoomButton: "إغلاق الجلسة",
     androidFallbackNote: "ملاحظة أندرويد: مشاركة الشاشة عبر المتصفح غير مدعومة على متصفح Chrome لنظام أندرويد.",
+    voiceListening: "جاري الاستماع... تحدث الآن",
+    voiceProcessing: "جاري معالجة الصوت وتحويله إلى نص...",
+    voiceSpeaking: "المساعد يقرأ الإجابة بصوت عالٍ...",
+    stopAudio: "إيقاف",
     chatTab: "محادثة",
     generalTab: "العرض والصوت",
     supportTab: "احتياجات الدعم",
@@ -681,7 +728,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
 
 const STYLES = `
   :host {
-    --b-font: var(--bs-body-font-family, system-ui, -apple-system, "Noto Sans Ethiopic", "Nyala", sans-serif);
+    --b-font: var(--bs-body-font-family, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Ethiopic", "Noto Sans Arabic", "Nyala", sans-serif);
     --b-bg: var(--bs-body-bg, #ffffff);
     --b-text: var(--bs-body-color, #0f172a);
     --b-text-muted: #475569;
@@ -750,7 +797,7 @@ const STYLES = `
   button, .btn {
     min-height: 2.75rem;
     min-width: 2.75rem;
-    padding: 0.5rem 0.875rem;
+    padding: 0.5rem 0.75rem;
     font-family: inherit;
     font-size: 0.9375rem;
     font-weight: 600;
@@ -791,12 +838,6 @@ const STYLES = `
     border-color: var(--b-border);
   }
 
-  .btn-danger {
-    background: #dc2626;
-    color: #ffffff;
-    border-color: #dc2626;
-  }
-
   /* Floating Launcher Button */
   .launcher {
     position: fixed;
@@ -806,9 +847,12 @@ const STYLES = `
     color: #ffffff;
     border: 2px solid #ffffff;
     border-radius: 2rem;
-    padding: 0.625rem 1.25rem;
+    padding: 0.5rem 1.25rem;
     box-shadow: var(--b-shadow);
     font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
   }
   .launcher:hover {
     background: #991b1b;
@@ -868,45 +912,36 @@ const STYLES = `
   /* Open Panel */
   .panel {
     position: fixed;
-    inset: auto 1.25rem 5.25rem auto;
-    width: 410px;
-    max-width: calc(100vw - 2rem);
-    height: 620px;
-    max-height: calc(100dvh - 6.5rem);
+    inset: auto 1rem 5rem auto;
+    width: min(30rem, calc(100vw - 1.5rem));
+    height: min(46rem, calc(100vh - 6.5rem));
+    max-height: calc(100vh - 6.5rem);
     display: flex;
     flex-direction: column;
     background: var(--b-bg);
     color: var(--b-text);
-    border: 1px solid var(--b-border);
+    border: 2px solid var(--b-border);
     border-radius: var(--b-radius);
-    box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.15), 0 8px 10px -6px rgba(15, 23, 42, 0.1), 0 0 0 1px rgba(15, 23, 42, 0.05);
+    box-shadow: var(--b-shadow);
     z-index: 2147483640;
     overflow: hidden;
-    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s ease;
-  }
-
-  .panel[hidden] {
-    display: none !important;
   }
 
   /* Header */
   .header {
-    padding: 0.625rem 0.875rem;
+    padding: 0.5rem 0.75rem;
     border-bottom: 1px solid var(--b-border);
     background: var(--b-surface);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.5rem;
+    gap: 0.375rem;
     flex-shrink: 0;
   }
 
   .header-titles {
     flex: 1;
     min-width: 0;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
   }
 
   .title {
@@ -918,105 +953,30 @@ const STYLES = `
     text-overflow: ellipsis;
   }
 
-  .status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3125rem;
-    font-size: 0.6875rem;
-    color: #16a34a;
-    font-weight: 600;
-    background: #dcfce7;
-    padding: 0.125rem 0.4375rem;
-    border-radius: 1rem;
-    flex-shrink: 0;
-  }
-
-  .status-dot {
-    width: 0.375rem;
-    height: 0.375rem;
-    border-radius: 50%;
-    background-color: #22c55e;
-  }
-
   .header-actions {
     display: flex;
     align-items: center;
-    gap: 0.375rem;
-    flex-shrink: 0;
+    gap: 0.25rem;
+    flex-wrap: wrap;
   }
 
-  .btn-icon-only {
-    min-width: 2.25rem !important;
-    min-height: 2.25rem !important;
-    width: 2.25rem !important;
-    height: 2.25rem !important;
-    padding: 0 !important;
-    border-radius: 0.5rem !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-  }
-
-  .icon-inline {
-    display: inline-flex;
+  .lang-bar {
+    display: flex;
     align-items: center;
-    justify-content: center;
-    vertical-align: middle;
-    flex-shrink: 0;
-  }
-
-  @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-
-  .spin-icon {
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes pulse-recording {
-    0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
-    70% { box-shadow: 0 0 0 8px rgba(220, 38, 38, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: scale(0.98); }
-    to { opacity: 1; transform: scale(1); }
-  }
-
-  .lang-group {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.125rem;
-    background: var(--b-surface-alt);
-    padding: 0.125rem;
-    border-radius: 0.5rem;
-    border: 1px solid var(--b-border);
+    gap: 0.2rem;
   }
 
   .lang-toggle-btn {
-    font-size: 0.6875rem;
-    padding: 0.25rem 0.375rem;
-    min-height: 2rem;
-    min-width: 1.875rem;
-    border-radius: 0.375rem;
-    border: none;
-    background: transparent;
-    color: var(--b-text-muted);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-
-  .lang-toggle-btn:hover {
-    color: var(--b-text);
+    font-size: 0.8125rem;
+    padding: 0.375rem 0.5rem;
+    min-height: 2.5rem;
+    min-width: 2.5rem;
   }
 
   .lang-toggle-btn[aria-pressed="true"] {
-    background: var(--b-surface);
-    color: var(--b-primary);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    background: var(--b-primary);
+    color: var(--b-primary-contrast);
+    border-color: var(--b-primary);
     font-weight: 700;
   }
 
@@ -1028,6 +988,78 @@ const STYLES = `
     padding: 0.375rem 0.75rem;
     text-align: center;
     font-weight: 600;
+  }
+
+  /* Dynamic Voice Status Bar (Listening / Processing / Speaking) */
+  .voice-status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    border-bottom: 1px solid var(--b-border);
+    flex-shrink: 0;
+  }
+
+  .voice-status-bar.listening {
+    background: #fef2f2;
+    color: #991b1b;
+    border-color: #fecaca;
+  }
+
+  .voice-status-bar.processing {
+    background: #eff6ff;
+    color: #1e40af;
+    border-color: #bfdbfe;
+  }
+
+  .voice-status-bar.speaking {
+    background: #f0fdf4;
+    color: #166534;
+    border-color: #bbf7d0;
+  }
+
+  /* Pulsing red dot for listening */
+  .pulse-dot {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    background: #ef4444;
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    animation: pulse-ring 1.4s infinite;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  @keyframes pulse-ring {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+    70% { transform: scale(1.1); box-shadow: 0 0 0 7px rgba(239, 68, 68, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+  }
+
+  /* Sound bars animation for speaking */
+  .sound-bars {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    height: 14px;
+    flex-shrink: 0;
+  }
+  .sound-bars span {
+    width: 3px;
+    background-color: currentColor;
+    border-radius: 1px;
+    animation: sound-bounce 1s ease-in-out infinite;
+  }
+  .sound-bars span:nth-child(1) { height: 6px; animation-delay: 0.1s; }
+  .sound-bars span:nth-child(2) { height: 14px; animation-delay: 0.25s; }
+  .sound-bars span:nth-child(3) { height: 9px; animation-delay: 0.15s; }
+
+  @keyframes sound-bounce {
+    0%, 100% { transform: scaleY(0.4); }
+    50% { transform: scaleY(1); }
   }
 
   /* Body / Message List */
@@ -1066,15 +1098,11 @@ const STYLES = `
     font-weight: 500;
     padding: 0.625rem 0.875rem;
     line-height: 1.35;
-    border-radius: 0.625rem;
-    transition: all 0.15s ease;
   }
   .btn-suggested:hover {
     background: var(--b-surface);
     border-color: var(--b-primary);
     color: var(--b-primary);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   }
 
   /* Message items */
@@ -1089,18 +1117,16 @@ const STYLES = `
     background: var(--b-primary);
     color: var(--b-primary-contrast);
     padding: 0.625rem 0.875rem;
-    border-radius: 1rem 1rem 0.25rem 1rem;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    border-radius: 0.75rem 0.75rem 0.125rem 0.75rem;
   }
 
   .msg-assistant {
     align-self: flex-start;
-    background: var(--b-surface);
+    background: var(--b-surface-alt);
     color: var(--b-text);
     padding: 0.75rem 0.875rem;
-    border-radius: 1rem 1rem 1rem 0.25rem;
+    border-radius: 0.75rem 0.75rem 0.75rem 0.125rem;
     border: 1px solid var(--b-border);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   }
 
   .answer-heading {
@@ -1113,7 +1139,6 @@ const STYLES = `
   .answer-text {
     margin: 0 0 0.5rem 0;
     word-break: break-word;
-    line-height: 1.5;
   }
 
   .answer-actions {
@@ -1130,7 +1155,6 @@ const STYLES = `
     font-size: 0.8125rem;
     min-height: 2.25rem;
     padding: 0.25rem 0.625rem;
-    border-radius: 0.5rem;
   }
 
   .sources-box {
@@ -1156,10 +1180,10 @@ const STYLES = `
 
   .not-verified-box {
     margin-top: 0.5rem;
-    padding: 0.5rem 0.75rem;
+    padding: 0.5rem;
     background: #fef2f2;
     border: 1px solid #fecaca;
-    border-radius: 0.625rem;
+    border-radius: 0.5rem;
     color: #991b1b;
     display: flex;
     flex-direction: column;
@@ -1170,7 +1194,6 @@ const STYLES = `
     padding: 0.5rem 0.875rem;
     font-style: italic;
     color: var(--b-text-muted);
-    font-size: 0.875rem;
   }
 
   /* Footer (Always Visible) */
@@ -1192,56 +1215,21 @@ const STYLES = `
 
   .text-input {
     flex: 1;
-    min-width: 0;
     min-height: 2.75rem;
     padding: 0.5rem 0.75rem;
     border: 1px solid var(--b-border);
-    border-radius: 0.625rem;
+    border-radius: 0.5rem;
     font-family: inherit;
     font-size: 0.9375rem;
     background: var(--b-bg);
     color: var(--b-text);
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
-  }
-  .text-input:focus {
-    border-color: var(--b-primary);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-  }
-
-  #send-btn {
-    flex-shrink: 0 !important;
-    white-space: nowrap !important;
-    min-width: max-content !important;
-    padding: 0.5rem 1rem !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 0.375rem !important;
-    font-weight: 600 !important;
-    border-radius: 0.625rem !important;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08) !important;
-    transition: all 0.15s ease !important;
-    box-sizing: border-box !important;
-    line-height: 1.2 !important;
-  }
-  #send-btn:hover {
-    opacity: 0.92;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12) !important;
-  }
-  #send-btn:active {
-    transform: translateY(0);
-  }
-
-  :host([dir="rtl"]) #send-btn svg {
-    transform: scaleX(-1);
   }
 
   .mic-btn.recording {
-    background: #dc2626 !important;
+    background: #ef4444 !important;
     color: #ffffff !important;
-    border-color: #b91c1c !important;
-    animation: pulse-recording 1.5s infinite;
+    border-color: #ef4444 !important;
+    animation: pulse-ring 1.4s infinite;
   }
 
   .footer-actions-row {
@@ -1254,7 +1242,6 @@ const STYLES = `
     font-size: 0.8125rem;
     padding: 0.5rem 0.375rem;
     text-align: center;
-    border-radius: 0.5rem;
   }
 
   .telegram-section {
@@ -1270,19 +1257,17 @@ const STYLES = `
     line-height: 1.25;
   }
 
-  /* Settings Modal Dialog (Redesigned & Responsive) */
+  /* Settings Modal Dialog */
   .settings-dialog {
     position: absolute;
     inset: 0;
     background: var(--b-bg);
     color: var(--b-text);
-    z-index: 30;
+    z-index: 20;
     display: flex;
     flex-direction: column;
     padding: 1rem;
     overflow-y: auto;
-    scrollbar-width: thin;
-    animation: fadeIn 0.15s ease-out;
   }
 
   .settings-dialog[hidden] {
@@ -1293,183 +1278,78 @@ const STYLES = `
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.75rem;
-    padding-bottom: 0.625rem;
-    border-bottom: 1px solid var(--b-border);
-    flex-shrink: 0;
-  }
-
-  .settings-title-group {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .settings-heading {
-    margin: 0;
-    font-size: 1.0625rem;
-    font-weight: 700;
-    color: var(--b-text);
-  }
-
-  /* Settings Segmented Tab Bar */
-  .settings-tabs {
-    display: flex;
-    gap: 0.25rem;
     margin-bottom: 1rem;
-    background: var(--b-surface-alt);
-    padding: 0.25rem;
-    border-radius: 0.625rem;
-    border: 1px solid var(--b-border);
-    flex-shrink: 0;
+    border-bottom: 1px solid var(--b-border);
+    padding-bottom: 0.5rem;
   }
 
-  .settings-tab-btn {
-    flex: 1;
-    font-size: 0.8125rem !important;
-    min-height: 2.25rem !important;
-    padding: 0.375rem 0.5rem !important;
-    border-radius: 0.4375rem !important;
-    border: none !important;
-    font-weight: 600 !important;
-    background: transparent !important;
-    color: var(--b-text-muted) !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 0.375rem !important;
-    cursor: pointer !important;
-    transition: all 0.15s ease !important;
-  }
-
-  .settings-tab-btn:hover {
-    color: var(--b-text) !important;
-  }
-
-  .settings-tab-btn[aria-selected="true"],
-  .settings-tab-btn.btn-primary {
-    background: var(--b-surface) !important;
-    color: var(--b-primary) !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06) !important;
-  }
-
-  /* Settings Cards & Form Controls */
-  .settings-card {
-    background: var(--b-surface);
-    border: 1px solid var(--b-border);
-    border-radius: 0.75rem;
-    padding: 0.875rem 1rem;
-    margin-bottom: 0.75rem;
-  }
-
-  .settings-card-title {
+  .settings-section {
+    margin-bottom: 1rem;
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 0.375rem;
-    font-size: 0.875rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-    color: var(--b-text);
   }
 
-  .settings-card-desc {
-    font-size: 0.8125rem;
-    color: var(--b-text-muted);
-    margin-bottom: 0.75rem;
-    line-height: 1.4;
+  .settings-label {
+    font-weight: 700;
+    font-size: 0.875rem;
   }
 
   .size-btn-group {
     display: flex;
     gap: 0.375rem;
-    background: var(--b-surface-alt);
-    padding: 0.25rem;
-    border-radius: 0.5rem;
-    border: 1px solid var(--b-border);
   }
 
   .size-btn-group button {
     flex: 1;
-    min-height: 2.25rem;
-    font-size: 0.875rem;
-    border: none;
-    background: transparent;
-    border-radius: 0.375rem;
-    color: var(--b-text);
-    font-weight: 600;
-    transition: all 0.15s ease;
   }
 
   .size-btn-group button[aria-pressed="true"] {
-    background: var(--b-primary) !important;
-    color: var(--b-primary-contrast) !important;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  }
-
-  .toggle-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    padding: 0.375rem 0;
-    cursor: pointer;
-  }
-
-  .toggle-info {
-    flex: 1;
-  }
-
-  .toggle-title {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--b-text);
-    display: block;
-  }
-
-  .toggle-desc {
-    font-size: 0.75rem;
-    color: var(--b-text-muted);
-    line-height: 1.35;
-    margin-top: 0.125rem;
-    display: block;
-  }
-
-  .toggle-switch {
-    width: 1.25rem;
-    height: 1.25rem;
-    accent-color: var(--b-primary);
-    cursor: pointer;
-    flex-shrink: 0;
-  }
-
-  .checkbox-card {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.625rem;
-    padding: 0.625rem 0.75rem;
-    background: var(--b-surface-alt);
-    border: 1px solid var(--b-border);
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-
-  .checkbox-card:hover {
-    background: var(--b-surface);
+    background: var(--b-primary);
+    color: var(--b-primary-contrast);
     border-color: var(--b-primary);
   }
 
-  .checkbox-card input[type="checkbox"] {
-    width: 1.125rem;
-    height: 1.125rem;
-    margin-top: 0.125rem;
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+  }
+  .checkbox-row input[type="checkbox"] {
+    width: 1.25rem;
+    height: 1.25rem;
     accent-color: var(--b-primary);
-    flex-shrink: 0;
   }
 
-  .checkbox-card-content {
-    flex: 1;
-    font-size: 0.875rem;
+  /* Right-To-Left (RTL) for Arabic */
+  :host([dir="rtl"]) .header,
+  :host([dir="rtl"]) .input-row,
+  :host([dir="rtl"]) .footer-actions-row,
+  :host([dir="rtl"]) .suggested-questions,
+  :host([dir="rtl"]) .voice-status-bar {
+    direction: rtl;
+  }
+
+  :host([dir="rtl"]) .suggested-questions {
+    text-align: right;
+  }
+
+  :host([dir="rtl"]) .btn-suggested {
+    text-align: right;
+    justify-content: flex-end;
+  }
+
+  :host([dir="rtl"]) .msg-learner {
+    align-self: flex-start;
+    border-radius: 0.75rem 0.75rem 0.75rem 0.125rem;
+    text-align: right;
+  }
+
+  :host([dir="rtl"]) .msg-assistant {
+    align-self: flex-end;
+    border-radius: 0.75rem 0.75rem 0.125rem 0.75rem;
+    text-align: right;
   }
 
   /* Responsive Mobile Overhaul */
@@ -1693,13 +1573,19 @@ export class BridgeAssistant extends HTMLElement {
   private textSize: "smaller" | "normal" | "larger" = "normal";
   private highContrast = false;
   private simpleMode = false;
+  private autoReadSpeech = true;
   private isOffline = !navigator.onLine;
 
+  // Voice States
   private isThinking = false;
   private isRecording = false;
-  private speechRecognition: any = null;
+  private isProcessingSpeech = false;
+  private isSpeaking = false;
+
   private mediaRecorder: MediaRecorder | null = null;
   private audioChunks: Blob[] = [];
+  private activeRecognition: any = null;
+  private wakeWordRecognizer: any = null;
   private activeAudio: HTMLAudioElement | null = null;
 
   private messages: ChatMessage[] = [];
@@ -1724,7 +1610,7 @@ export class BridgeAssistant extends HTMLElement {
     preferred_contact_mode: "text",
   };
 
-  private activeTab: "chat" | "support" | "link" | "handoff" = "chat";
+  private activeTab: "chat" | "support" | "handoff" = "chat";
 
   // Persistent Accessibility & Voice Preferences (Configure Once, Access Everywhere)
   private accessibilityPrefs: AccessibilityPreferences = {
@@ -1754,31 +1640,24 @@ export class BridgeAssistant extends HTMLElement {
 
   // Attributes: supports both guide plain attributes (lang, api, content) and data-*
   get apiBase(): string {
-    return (
-      this.getAttribute("api") ||
-      this.getAttribute("data-api") ||
-      this.getAttribute("api-base") ||
-      "http://localhost:8000"
-    ).replace(/\/$/, "");
+    return this.getAttribute("api") || this.getAttribute("data-api") || "http://localhost:8000";
   }
 
   get courseId(): string {
-    return (
-      this.getAttribute("content") ||
-      this.getAttribute("data-course") ||
-      this.getAttribute("course-id") ||
-      "course_demo"
-    );
+    return this.getAttribute("content") || this.getAttribute("data-course") || "course_demo";
   }
 
   static get observedAttributes(): string[] {
-    return ["lang", "data-lang", "api", "data-api", "api-base", "content", "data-course", "course-id"];
+    return ["lang", "data-lang", "api", "data-api", "content", "data-course"];
   }
 
   attributeChangedCallback(name: string, oldValue: string, newValue: string): void {
     if (oldValue === newValue) return;
     if ((name === "lang" || name === "data-lang") && newValue in I18N) {
-      this.setLanguage(newValue as SupportedLanguage);
+      this.currentLang = newValue as SupportedLanguage;
+      if (this.shadowRoot) {
+        this.render();
+      }
     }
   }
 
@@ -1790,8 +1669,6 @@ export class BridgeAssistant extends HTMLElement {
     const attrLang = (this.getAttribute("lang") || this.getAttribute("data-lang")) as SupportedLanguage | null;
     const persistentLang = localStorage.getItem("savanna_bridge_preferred_lang") as SupportedLanguage | null;
     const cachedLang = sessionStorage.getItem("savanna_bridge_lang") as SupportedLanguage | null;
-    const docLang = document.documentElement.lang?.slice(0, 2) as SupportedLanguage | null;
-
     if (attrLang && attrLang in I18N) {
       this.currentLang = attrLang;
     } else if (this.accessibilityPrefs.language && this.accessibilityPrefs.language in I18N) {
@@ -1800,10 +1677,6 @@ export class BridgeAssistant extends HTMLElement {
       this.currentLang = persistentLang;
     } else if (cachedLang && cachedLang in I18N) {
       this.currentLang = cachedLang;
-    } else if (docLang && docLang in I18N) {
-      this.currentLang = docLang;
-    } else {
-      this.currentLang = "en";
     }
 
     if (this.accessibilityPrefs.keyboard_navigation) {
@@ -1829,6 +1702,10 @@ export class BridgeAssistant extends HTMLElement {
     this.fetchTelegramStartLink();
     this.fetchSupportNeeds();
 
+    // Initialize wake-word listener and global keyboard shortcuts
+    this.initWakeWordDetection();
+    this.initGlobalKeyboardShortcuts();
+
     // Synchronize preferences across websites if opted in
     if (this.accessibilityPrefs.sync_enabled) {
       this.syncPreferencesFromBackend();
@@ -1846,6 +1723,11 @@ export class BridgeAssistant extends HTMLElement {
       window.clearInterval(this.telegramPollTimer);
       this.telegramPollTimer = null;
     }
+    if (this.wakeWordRecognizer) {
+      try { this.wakeWordRecognizer.stop(); } catch {}
+      this.wakeWordRecognizer = null;
+    }
+    this.stopSpeaking();
     if (this.popstateListener) {
       window.removeEventListener("popstate", this.popstateListener);
       this.popstateListener = null;
@@ -1870,20 +1752,35 @@ export class BridgeAssistant extends HTMLElement {
     }
   }
 
-  private setLanguage(lang: SupportedLanguage): void {
-    if (this.currentLang === lang) return;
+  private getLangDisplayName(lang: SupportedLanguage = this.currentLang): string {
+    switch (lang) {
+      case "am": return "አማርኛ";
+      case "om": return "Afaan Oromoo";
+      case "ti": return "ትግርኛ";
+      case "ar": return "العربية";
+      default: return "English";
+    }
+  }
+
+  private setLanguage(lang: SupportedLanguage, fullRender = true): void {
     this.currentLang = lang;
+    sessionStorage.setItem("savanna_bridge_lang", lang);
     this.accessibilityPrefs.language = lang;
     this.savePreferences();
     this.setAttribute("lang", lang);
     this.setAttribute("dir", lang === "ar" ? "rtl" : "ltr");
-    // Clear chat on language change so that learner sees pure, non-mixed language experience
-    this.messages = [];
-    sessionStorage.removeItem("savanna_bridge_chat_history");
-    this.render();
-    this.announce(this.t("appTitle"));
-    if (this.accessibilityPrefs.voice_enabled) {
-      this.speakText(this.t("voiceWelcomeAnnouncement"));
+    if (fullRender) {
+      // Clear chat on language change so that learner sees pure, non-mixed language experience
+      this.messages = [];
+      sessionStorage.removeItem("savanna_bridge_chat_history");
+      this.render();
+      this.announce(this.t("appTitle"));
+      if (this.accessibilityPrefs.voice_enabled) {
+        this.speakText(this.t("voiceWelcomeAnnouncement"));
+      }
+    } else {
+      this.updateHeaderLanguageButtons();
+      this.updateVoiceStatusUI();
     }
   }
 
@@ -1917,6 +1814,18 @@ export class BridgeAssistant extends HTMLElement {
     } catch (err) {
       console.warn("Failed to generate link code", err);
     }
+  }
+
+  private updateHeaderLanguageButtons(): void {
+    const root = this.shadowRoot;
+    if (!root) return;
+    const langs: SupportedLanguage[] = ["en", "am", "om", "ti", "ar"];
+    langs.forEach((l) => {
+      const btn = root.querySelector<HTMLButtonElement>(`#btn-lang-${l}`);
+      if (btn) {
+        btn.setAttribute("aria-pressed", l === this.currentLang ? "true" : "false");
+      }
+    });
   }
 
   private setupNetworkMonitor(): void {
@@ -1978,6 +1887,8 @@ export class BridgeAssistant extends HTMLElement {
         this.accessibilityPrefs.large_text = savedSize;
       }
 
+      const savedAutoRead = localStorage.getItem("savanna_bridge_auto_read");
+      if (savedAutoRead !== null) this.autoReadSpeech = savedAutoRead === "true";
       const savedSimple = localStorage.getItem("savanna_bridge_simple_mode");
       if (savedSimple) {
         this.simpleMode = savedSimple === "true";
@@ -2071,6 +1982,7 @@ export class BridgeAssistant extends HTMLElement {
 
   public getBestVoice(lang: SupportedLanguage): SpeechSynthesisVoice | null {
     if (!("speechSynthesis" in window)) return null;
+    if (typeof window.speechSynthesis.getVoices !== "function") return null;
     const voices = window.speechSynthesis.getVoices();
     if (!voices || voices.length === 0) return null;
 
@@ -2178,6 +2090,37 @@ export class BridgeAssistant extends HTMLElement {
     }
   }
 
+  // --- Platform Context Extraction (Reads live page) ---
+
+  private extractPlatformContext(): { page_url: string; page_title: string; page_content: string; section: string } {
+    const page_url = typeof window !== "undefined" ? window.location.href : "";
+    const page_title = typeof document !== "undefined" ? document.title || "Savanna Platform" : "Savanna Platform";
+
+    let section = "Current Lesson";
+    if (typeof document !== "undefined") {
+      const heading = document.querySelector("h1, h2, [aria-current='page'], .active-lesson, .module-title");
+      if (heading && heading.textContent) {
+        section = heading.textContent.trim();
+      }
+    }
+
+    let page_content = "";
+    if (typeof document !== "undefined") {
+      const mainEl = document.querySelector("main") || document.querySelector("article") || document.querySelector(".content") || document.body;
+      if (mainEl) {
+        try {
+          const clone = mainEl.cloneNode(true) as HTMLElement;
+          clone.querySelectorAll("script, style, db-assistant, bridge-assistant, noscript, nav, footer, header").forEach((el) => el.remove());
+          page_content = (clone.textContent || "").replace(/\s+/g, " ").trim().slice(0, 15000);
+        } catch {
+          page_content = "";
+        }
+      }
+    }
+
+    return { page_url, page_title, page_content, section };
+  }
+
   public readPageAloud(): void {
     const context = this.extractPlatformContext();
     if (!context.page_content && !context.page_title) {
@@ -2273,6 +2216,161 @@ export class BridgeAssistant extends HTMLElement {
     }
   }
 
+  // --- Accessibility Earcons (Web Audio API) ---
+
+  private playEarcon(type: "start" | "stop" | "transcribed" | "wake"): void {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      const now = ctx.currentTime;
+      if (type === "wake" || type === "start") {
+        // Rising chime (440Hz -> 880Hz)
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.15);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+        osc.start(now);
+        osc.stop(now + 0.22);
+      } else if (type === "stop") {
+        // Falling chime (880Hz -> 440Hz)
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(880, now);
+        osc.frequency.exponentialRampToValueAtTime(440, now + 0.15);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+        osc.start(now);
+        osc.stop(now + 0.22);
+      } else if (type === "transcribed") {
+        // Confirm ping (587Hz -> 880Hz)
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(587.33, now);
+        osc.frequency.setValueAtTime(880, now + 0.08);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+        osc.start(now);
+        osc.stop(now + 0.2);
+      }
+    } catch {
+      // Ignore audio context autoplay limitations
+    }
+  }
+
+  // --- Wake Word Detection ("Help") ---
+
+  private initWakeWordDetection(): void {
+    const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRec) return;
+
+    try {
+      const recognizer = new SpeechRec();
+      recognizer.continuous = true;
+      recognizer.interimResults = true;
+      recognizer.lang = "en-US";
+
+      recognizer.onresult = (event: any) => {
+        if (this.isRecording) return;
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const text = (event.results[i][0]?.transcript || "").toLowerCase();
+          if (
+            text.includes("help") ||
+            text.includes("እርዳታ") ||
+            text.includes("እርዳኝ") ||
+            text.includes("gargaarsa") ||
+            text.includes("مساعدة") ||
+            text.includes("ساعدني")
+          ) {
+            this.onWakeWordTriggered();
+            break;
+          }
+        }
+      };
+
+      recognizer.onerror = () => {
+        // Background listener error; ignore
+      };
+
+      recognizer.onend = () => {
+        if (!this.isRecording && !this.isSpeaking && this.wakeWordRecognizer) {
+          try {
+            recognizer.start();
+          } catch {
+            // Ignore
+          }
+        }
+      };
+
+      recognizer.start();
+      this.wakeWordRecognizer = recognizer;
+    } catch (e) {
+      console.warn("Wake word background recognition notice:", e);
+    }
+  }
+
+  private onWakeWordTriggered(): void {
+    this.openAssistant();
+    this.playEarcon("wake");
+    this.announce(this.t("voiceListening"));
+    const inputEl = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-text-input");
+    if (inputEl) {
+      this.startVoiceRecording(inputEl);
+    }
+  }
+
+  private initGlobalKeyboardShortcuts(): void {
+    window.addEventListener("keydown", (e: KeyboardEvent) => {
+      // Alt + Shift + V or Alt + Shift + A toggles voice assistant listening
+      if (e.altKey && e.shiftKey && (e.key === "V" || e.key === "v" || e.key === "A" || e.key === "a")) {
+        e.preventDefault();
+        if (!this.isOpen) {
+          this.openAssistant();
+        }
+        const inputEl = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-text-input");
+        if (inputEl) {
+          this.toggleVoiceInput(inputEl);
+        }
+      }
+    });
+  }
+
+  public openAssistant(): void {
+    this.isOpen = true;
+    const dialog = this.shadowRoot?.querySelector<HTMLElement>("#assistant-dialog");
+    const launcher = this.shadowRoot?.querySelector<HTMLButtonElement>("#launcher-btn");
+    if (dialog && launcher) {
+      dialog.hidden = false;
+      dialog.removeAttribute("hidden");
+      dialog.style.display = "flex";
+      launcher.setAttribute("aria-expanded", "true");
+      this.announce("Savanna Bridge Assistant opened. Use Tab to navigate or Escape to close.");
+      const chatInput = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-text-input");
+      setTimeout(() => (chatInput ?? dialog).focus(), 60);
+    }
+  }
+
+  public closeAssistant(): void {
+    this.isOpen = false;
+    const dialog = this.shadowRoot?.querySelector<HTMLElement>("#assistant-dialog");
+    const launcher = this.shadowRoot?.querySelector<HTMLButtonElement>("#launcher-btn");
+    if (dialog && launcher) {
+      dialog.hidden = true;
+      dialog.setAttribute("hidden", "true");
+      dialog.style.display = "none";
+      launcher.setAttribute("aria-expanded", "false");
+      (this.previousFocus ?? launcher).focus();
+    }
+    this.stopSpeaking();
+    if (this.isRecording) {
+      this.stopVoiceRecording();
+    }
+  }
+
   // --- Telegram Link Methods ---
 
   private async fetchTelegramStartLink(): Promise<void> {
@@ -2358,8 +2456,8 @@ export class BridgeAssistant extends HTMLElement {
     if (this.isTelegramLinked) {
       container.innerHTML = `
         <div style="display:flex; align-items:center; gap:0.375rem; width:100%;">
-          <span style="font-size:0.8125rem; font-weight:600; color:#166534; flex:1; display:inline-flex; align-items:center; gap:0.375rem;">
-            ${ICONS.check} <span>${this.t("connectedToTelegram")}</span>
+          <span style="font-size:0.8125rem; font-weight:600; color:#166534; flex:1;">
+            ${ICONS.check} ${this.t("connectedToTelegram")}
           </span>
           <button type="button" class="btn btn-secondary" id="btn-disconnect-tg" style="font-size:0.75rem; min-height:2.25rem; padding:0.25rem 0.5rem;">
             ${this.t("disconnectTelegram")}
@@ -2426,7 +2524,28 @@ export class BridgeAssistant extends HTMLElement {
     }
   }
 
-  // --- Voice Input with Web Speech API & MediaRecorder Fallback ---
+  // --- Language Script Detection ---
+
+  public detectLanguage(text: string): SupportedLanguage {
+    // Ethiopic Unicode block (U+1200 - U+137F) -> Amharic (ፊደል)
+    if (/[\u1200-\u137F]/.test(text)) {
+      return "am";
+    }
+    // Arabic Unicode block (U+0600 - U+06FF) -> Arabic (العربية)
+    if (/[\u0600-\u06FF]/.test(text)) {
+      return "ar";
+    }
+    // Afaan Oromo indicators (Latin alphabet with Oromo particles/words)
+    if (
+      /\b(waa'ee|moojulii|akkam|maal|hojii|barnoota|gaaffii|deebii|galatoomi|akkamitti|eessa|barataa|barumsa)\b/i.test(text) ||
+      /\b[A-Za-z]+'[A-Za-z]+\b/.test(text)
+    ) {
+      return "om";
+    }
+    return "en";
+  }
+
+  // --- Voice-to-Text (Speech Recognition) ---
 
   private async toggleVoiceInput(inputEl: HTMLInputElement): Promise<void> {
     if (this.isRecording) {
@@ -2437,145 +2556,148 @@ export class BridgeAssistant extends HTMLElement {
   }
 
   private async startVoiceRecording(inputEl: HTMLInputElement): Promise<void> {
-    const SpeechRecognition =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (this.isSpeaking) {
+      this.stopSpeaking();
+    }
 
-    if (SpeechRecognition) {
+    if (this.wakeWordRecognizer) {
+      try { this.wakeWordRecognizer.stop(); } catch {}
+    }
+
+    this.isRecording = true;
+    this.isProcessingSpeech = false;
+    this.playEarcon("start");
+    this.announce(this.t("voiceListening"));
+    this.updateVoiceStatusUI();
+    this.updateMicButtonUI();
+
+    let speechRecDeliveredText = false;
+    const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (SpeechRec) {
       try {
-        if (this.speechRecognition) {
-          try {
-            this.speechRecognition.abort();
-          } catch {}
-        }
-        const recognition = new SpeechRecognition();
-        this.speechRecognition = recognition;
-        recognition.continuous = false;
-        recognition.interimResults = true;
+        this.activeRecognition = new SpeechRec();
+        this.activeRecognition.continuous = false;
+        this.activeRecognition.interimResults = true;
 
         const langMap: Record<SupportedLanguage, string> = {
           en: "en-US",
           am: "am-ET",
           om: "om-ET",
-          ti: "ti-ET",
           ar: "ar-SA",
+          ti: "ti-ET",
         };
-        recognition.lang = langMap[this.currentLang] || "en-US";
+        this.activeRecognition.lang = langMap[this.currentLang] || "en-US";
 
-        let finalTranscript = "";
-
-        recognition.onstart = () => {
-          this.isRecording = true;
-          this.updateMicButtonUI();
-          this.announce(this.t("recordingState"));
-        };
-
-        recognition.onresult = (event: any) => {
-          let interim = "";
-          for (let i = event.resultIndex; i < event.results.length; ++i) {
-            if (event.results[i].isFinal) {
-              finalTranscript += event.results[i][0].transcript;
-            } else {
-              interim += event.results[i][0].transcript;
-            }
+        this.activeRecognition.onresult = (event: any) => {
+          let fullTranscript = "";
+          for (let i = 0; i < event.results.length; i++) {
+            fullTranscript += event.results[i][0]?.transcript || "";
           }
-          const text = (finalTranscript || interim).trim();
+          const text = fullTranscript.trim();
           if (text) {
+            speechRecDeliveredText = true;
+            const detected = this.detectLanguage(text);
+            if (detected !== this.currentLang) {
+              this.setLanguage(detected, false);
+            }
             inputEl.value = text;
           }
         };
 
-        recognition.onerror = async (event: any) => {
-          console.warn("Speech recognition error:", event.error);
-          this.isRecording = false;
-          this.updateMicButtonUI();
-          if (event.error !== "no-speech" && event.error !== "aborted") {
-            // Fallback to MediaRecorder if SpeechRecognition permission denied or unavailable
-            await this.startMediaRecorderFallback(inputEl);
+        this.activeRecognition.onend = () => {
+          if (this.isRecording) {
+            this.stopVoiceRecording(speechRecDeliveredText);
           }
         };
 
-        recognition.onend = () => {
-          this.isRecording = false;
-          this.updateMicButtonUI();
-          if (inputEl.value) {
-            this.announce(this.t("voicePreviewNotice"));
-            inputEl.focus();
-          }
+        this.activeRecognition.onerror = (e: any) => {
+          console.warn("Active speech recognition error:", e.error);
         };
 
-        recognition.start();
-        return;
-      } catch (err) {
-        console.warn("SpeechRecognition start failed, falling back to MediaRecorder:", err);
+        this.activeRecognition.start();
+      } catch (e) {
+        console.warn("Active recognition init error, falling back to MediaRecorder", e);
       }
     }
 
-    await this.startMediaRecorderFallback(inputEl);
-  }
-
-  private async startMediaRecorderFallback(inputEl: HTMLInputElement): Promise<void> {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      alert(this.t("micError"));
-      return;
-    }
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      this.audioChunks = [];
-      const mimeType = MediaRecorder.isTypeSupported("audio/webm")
-        ? "audio/webm"
-        : MediaRecorder.isTypeSupported("audio/ogg")
-          ? "audio/ogg"
-          : "audio/wav";
-
-      this.mediaRecorder = new MediaRecorder(stream);
-      this.mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) this.audioChunks.push(e.data);
-      };
-      this.mediaRecorder.onstop = async () => {
-        stream.getTracks().forEach((t) => t.stop());
-        const blob = new Blob(this.audioChunks, { type: mimeType });
-        await this.sendAudioForTranscription(blob, mimeType, inputEl);
-      };
-
-      this.mediaRecorder.start();
-      this.isRecording = true;
-      this.updateMicButtonUI();
-      this.announce(this.t("recordingState"));
-    } catch {
-      alert(this.t("micError"));
-    }
-  }
-
-  private stopVoiceRecording(): void {
-    if (this.speechRecognition) {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       try {
-        this.speechRecognition.stop();
-      } catch {}
-      this.speechRecognition = null;
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        this.audioChunks = [];
+        const mimeType = MediaRecorder.isTypeSupported("audio/webm")
+          ? "audio/webm"
+          : MediaRecorder.isTypeSupported("audio/ogg")
+            ? "audio/ogg"
+            : "audio/wav";
+
+        this.mediaRecorder = new MediaRecorder(stream);
+        this.mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) this.audioChunks.push(e.data);
+        };
+        this.mediaRecorder.onstop = async () => {
+          stream.getTracks().forEach((t) => t.stop());
+          if (!speechRecDeliveredText && this.audioChunks.length > 0) {
+            const blob = new Blob(this.audioChunks, { type: mimeType });
+            await this.sendAudioForTranscription(blob, mimeType, inputEl);
+          }
+        };
+
+        this.mediaRecorder.start();
+      } catch (err) {
+        console.warn("MediaRecorder permission/init notice:", err);
+        if (!SpeechRec) {
+          alert(this.t("micError"));
+          this.isRecording = false;
+          this.updateMicButtonUI();
+          this.updateVoiceStatusUI();
+        }
+      }
     }
-    if (this.mediaRecorder && this.mediaRecorder.state !== "inactive") {
-      this.mediaRecorder.stop();
-    }
-    this.isRecording = false;
-    this.updateMicButtonUI();
   }
 
-  private updateMicButtonUI(): void {
-    const micBtn = this.shadowRoot?.querySelector<HTMLButtonElement>("#mic-btn");
-    if (!micBtn) return;
-    if (this.isRecording) {
-      micBtn.classList.add("recording");
-      micBtn.setAttribute("aria-pressed", "true");
-      micBtn.setAttribute("title", this.t("recordingState"));
-    } else {
-      micBtn.classList.remove("recording");
-      micBtn.setAttribute("aria-pressed", "false");
-      micBtn.setAttribute("title", this.t("micLabel"));
+  private stopVoiceRecording(hadDirectTranscript = false): void {
+    this.isRecording = false;
+    this.playEarcon("stop");
+
+    if (this.activeRecognition) {
+      try { this.activeRecognition.stop(); } catch {}
+      this.activeRecognition = null;
     }
+
+    if (this.mediaRecorder && this.mediaRecorder.state !== "inactive") {
+      if (!hadDirectTranscript) {
+        this.isProcessingSpeech = true;
+        this.announce(this.t("voiceProcessing"));
+        this.updateVoiceStatusUI();
+      }
+      this.mediaRecorder.stop();
+    } else {
+      this.isProcessingSpeech = false;
+      this.updateVoiceStatusUI();
+    }
+
+    this.updateMicButtonUI();
+
+    if (hadDirectTranscript) {
+      this.playEarcon("transcribed");
+      this.announce(this.t("voicePreviewNotice"));
+      const chatInput = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-text-input");
+      if (chatInput) chatInput.focus();
+    }
+
+    setTimeout(() => {
+      if (!this.isRecording && !this.isSpeaking && this.wakeWordRecognizer) {
+        try { this.wakeWordRecognizer.start(); } catch {}
+      }
+    }, 1200);
   }
 
   private async sendAudioForTranscription(blob: Blob, mediaType: string, inputEl: HTMLInputElement): Promise<void> {
-    this.announce(this.t("transcribingState"));
+    this.isProcessingSpeech = true;
+    this.updateVoiceStatusUI();
+    this.announce(this.t("voiceProcessing"));
+
     try {
       const reader = new FileReader();
       const base64Promise = new Promise<string>((resolve, reject) => {
@@ -2602,33 +2724,111 @@ export class BridgeAssistant extends HTMLElement {
       if (res.ok) {
         const data = await res.json();
         if (data.transcript) {
+          const detected = this.detectLanguage(data.transcript);
+          if (detected !== this.currentLang) {
+            this.setLanguage(detected, false);
+          }
           inputEl.value = (inputEl.value ? inputEl.value + " " : "") + data.transcript;
           inputEl.focus();
+          this.playEarcon("transcribed");
           this.announce(this.t("voicePreviewNotice"));
         }
       }
-    } catch {
-      // Transcription fallback
+    } catch (err) {
+      console.warn("Transcription fallback notice:", err);
+    } finally {
+      this.isProcessingSpeech = false;
+      this.updateVoiceStatusUI();
     }
   }
 
-  // --- TTS Audio ---
-
-  private async handleListen(msg: ChatMessage): Promise<void> {
-    if (this.activeAudio && !this.activeAudio.paused && msg.isAudioPlaying) {
-      this.activeAudio.pause();
-      msg.isAudioPlaying = false;
-      this.renderMessages();
-      this.announce(this.t("pauseButton"));
-      return;
+  private updateMicButtonUI(): void {
+    const micBtn = this.shadowRoot?.querySelector<HTMLButtonElement>("#mic-btn");
+    if (!micBtn) return;
+    if (this.isRecording) {
+      micBtn.classList.add("recording");
+      micBtn.setAttribute("aria-pressed", "true");
+      micBtn.setAttribute("title", this.t("recordingState"));
+    } else {
+      micBtn.classList.remove("recording");
+      micBtn.setAttribute("aria-pressed", "false");
+      micBtn.setAttribute("title", this.t("micLabel"));
     }
+  }
 
+  private updateVoiceStatusUI(): void {
+    const container = this.shadowRoot?.querySelector("#voice-status-container");
+    if (!container) return;
+
+    if (this.isRecording) {
+      container.innerHTML = `
+        <div class="voice-status-bar listening" role="status">
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <span class="pulse-dot"></span>
+            <span>${this.t("voiceListening")} (${this.getLangDisplayName()})</span>
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-stop-voice" style="min-height:2rem; padding:0.2rem 0.5rem; font-size:0.75rem;">
+            ${this.t("stopAudio")}
+          </button>
+        </div>
+      `;
+      container.querySelector("#btn-stop-voice")?.addEventListener("click", () => this.stopVoiceRecording());
+    } else if (this.isProcessingSpeech) {
+      container.innerHTML = `
+        <div class="voice-status-bar processing" role="status">
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <span class="pulse-dot" style="background:#2563eb;"></span>
+            <span>${this.t("voiceProcessing")} (${this.getLangDisplayName()})</span>
+          </div>
+        </div>
+      `;
+    } else if (this.isSpeaking) {
+      container.innerHTML = `
+        <div class="voice-status-bar speaking" role="status">
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <span class="sound-bars"><span></span><span></span><span></span></span>
+            <span>${this.t("voiceSpeaking")} (${this.getLangDisplayName()})</span>
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-stop-speech" style="min-height:2rem; padding:0.2rem 0.5rem; font-size:0.75rem;">
+            ${this.t("stopAudio")}
+          </button>
+        </div>
+      `;
+      container.querySelector("#btn-stop-speech")?.addEventListener("click", () => this.stopSpeaking());
+    } else {
+      container.innerHTML = "";
+    }
+  }
+
+  // --- Text-to-Speech (Voice Responses) ---
+
+  private cleanTextForSpeech(text: string): string {
+    return text
+      .replace(/\[\d+\]/g, "") // strip [1], [2] citations
+      .replace(/\bhttps?:\/\/\S+/gi, "") // strip URLs
+      .replace(/[#*_`~>]/g, "") // strip markdown
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  public async speakResponse(msg: ChatMessage): Promise<void> {
+    this.stopSpeaking();
+
+    const cleanText = this.cleanTextForSpeech(msg.text);
+    if (!cleanText) return;
+
+    this.isSpeaking = true;
+    msg.isAudioPlaying = true;
+    this.renderMessages();
+    this.updateVoiceStatusUI();
+
+    // Prefer language-aware server TTS (Addis AI / Google), then use browser speech.
     try {
       const res = await fetch(`${this.apiBase}/api/v1/speech/synthesize`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          text: msg.text,
+          text: cleanText,
           language: this.currentLang,
           speed: 1.0,
         }),
@@ -2636,96 +2836,59 @@ export class BridgeAssistant extends HTMLElement {
 
       if (res.ok) {
         const data = await res.json();
-        if (data.mocked || !data.audio_url) {
-          this.fallbackTTS(msg.text, msg);
+        if (!data.mocked && data.audio_url) {
+          const rawAudioUrl = String(data.audio_url);
+          const audioUrl = /^(https?:|data:|blob:)/.test(rawAudioUrl)
+            ? rawAudioUrl
+            : `${this.apiBase}${rawAudioUrl}`;
+          this.activeAudio = new Audio(audioUrl);
+          this.activeAudio.onended = () => this.finishSpeaking(msg);
+          this.activeAudio.onerror = () => this.fallbackTTS(cleanText, msg);
+          await this.activeAudio.play();
           return;
         }
-        if (this.activeAudio) this.activeAudio.pause();
-        const rawAudioUrl = String(data.audio_url);
-        const audioUrl = /^(https?:|data:|blob:)/.test(rawAudioUrl)
-          ? rawAudioUrl
-          : `${this.apiBase}${rawAudioUrl}`;
-        this.activeAudio = new Audio(audioUrl);
-        this.activeAudio.onended = () => {
-          msg.isAudioPlaying = false;
-          this.renderMessages();
-        };
-        this.activeAudio.play().catch(() => this.fallbackTTS(msg.text, msg));
+      }
+    } catch (error) {
+      console.warn("Server TTS unavailable; using browser speech fallback.", error);
+    }
+
+    this.fallbackTTS(cleanText, msg);
+  }
+
+  private fallbackTTS(text: string, msg: ChatMessage): void {
+    const started = this.speakText(text, {
+      onStart: () => {
+        this.isSpeaking = true;
         msg.isAudioPlaying = true;
         this.renderMessages();
-        this.announce(this.t("listenButton"));
-      } else {
-        this.fallbackTTS(msg.text, msg);
-      }
-    } catch {
-      this.fallbackTTS(msg.text, msg);
-    }
+        this.updateVoiceStatusUI();
+      },
+      onEnd: () => this.finishSpeaking(msg),
+      onError: () => this.finishSpeaking(msg),
+    });
+    if (!started) this.finishSpeaking(msg);
   }
 
-  private fallbackTTS(text: string, msg?: ChatMessage): void {
+  private finishSpeaking(msg: ChatMessage): void {
+    this.isSpeaking = false;
+    msg.isAudioPlaying = false;
+    this.activeAudio = null;
+    this.renderMessages();
+    this.updateVoiceStatusUI();
+  }
+
+  public stopSpeaking(): void {
     if ("speechSynthesis" in window) {
       window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      const langMap: Record<SupportedLanguage, string> = {
-        en: "en-US",
-        am: "am-ET",
-        om: "om-ET",
-        ti: "ti-ET",
-        ar: "ar-SA",
-      };
-      u.lang = langMap[this.currentLang] || "en-US";
-      u.onstart = () => {
-        if (msg) {
-          msg.isAudioPlaying = true;
-          this.renderMessages();
-        }
-        this.announce(this.t("listenButton"));
-      };
-      u.onend = () => {
-        if (msg) {
-          msg.isAudioPlaying = false;
-          this.renderMessages();
-        }
-      };
-      u.onerror = () => {
-        if (msg) {
-          msg.isAudioPlaying = false;
-          this.renderMessages();
-        }
-      };
-      window.speechSynthesis.speak(u);
     }
-  }
-
-  // --- Platform Context Extraction (Reads live page) ---
-
-  private extractPlatformContext(): { page_url: string; page_title: string; page_content: string; section: string } {
-    const page_url = typeof window !== "undefined" ? window.location.href : "";
-    const page_title = typeof document !== "undefined" ? document.title || "Savanna Platform" : "Savanna Platform";
-
-    let section = "Current Lesson";
-    if (typeof document !== "undefined") {
-      const heading = document.querySelector("h1, h2, [aria-current='page'], .active-lesson, .module-title");
-      if (heading && heading.textContent) {
-        section = heading.textContent.trim();
-      }
+    if (this.activeAudio) {
+      this.activeAudio.pause();
+      this.activeAudio = null;
     }
-
-    let page_content = "";
-    if (typeof document !== "undefined") {
-      const mainEl = document.querySelector("main") || document.querySelector("article") || document.querySelector(".content") || document.body;
-      if (mainEl) {
-        try {
-          const clone = mainEl.cloneNode(true) as HTMLElement;
-          clone.querySelectorAll("script, style, db-assistant, bridge-assistant, noscript, nav, footer, header").forEach((el) => el.remove());
-          page_content = (clone.textContent || "").replace(/\s+/g, " ").trim().slice(0, 15000);
-        } catch {
-          page_content = "";
-        }
-      }
-    }
-
-    return { page_url, page_title, page_content, section };
+    this.isSpeaking = false;
+    this.messages.forEach((m) => (m.isAudioPlaying = false));
+    this.renderMessages();
+    this.updateVoiceStatusUI();
   }
 
   // --- Q&A / Ask ---
@@ -2733,6 +2896,14 @@ export class BridgeAssistant extends HTMLElement {
   public async askQuestion(questionText: string, forceSimple = false): Promise<void> {
     const q = questionText.trim();
     if (!q || this.isThinking) return;
+
+    this.stopSpeaking();
+
+    // Auto-detect language of question if different from current selection
+    const detectedLang = this.detectLanguage(q);
+    if (detectedLang !== this.currentLang) {
+      this.setLanguage(detectedLang, false);
+    }
 
     this.dispatchEvent(
       new CustomEvent("db-assistant:question", {
@@ -2752,8 +2923,6 @@ export class BridgeAssistant extends HTMLElement {
     this.announce(this.t("lookingInCourse"));
     this.renderMessages();
 
-    const platform = this.extractPlatformContext();
-
     try {
       let res = await fetch(`${this.apiBase}/api/v1/ask`, {
         method: "POST",
@@ -2764,10 +2933,6 @@ export class BridgeAssistant extends HTMLElement {
           course_id: this.courseId,
           simple_mode: forceSimple || this.simpleMode,
           channel: "web",
-          page_url: platform.page_url,
-          page_title: platform.page_title,
-          page_content: platform.page_content,
-          section: platform.section,
         }),
       });
 
@@ -2781,10 +2946,6 @@ export class BridgeAssistant extends HTMLElement {
             course_id: this.courseId,
             simple_mode: forceSimple || this.simpleMode,
             channel: "web",
-            page_url: platform.page_url,
-            page_title: platform.page_title,
-            page_content: platform.page_content,
-            section: platform.section,
           }),
         });
       }
@@ -2802,20 +2963,24 @@ export class BridgeAssistant extends HTMLElement {
           citations: data.citations || [],
           offerHuman: data.offer_human,
           isRefusal: isRefusal,
-          originalQuestion: q,
         };
         this.messages.push(assistantMsg);
         this.saveChatState();
-        if (this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_tts && assistantMsg.text) {
-          this.speakText(assistantMsg.text);
+        this.renderMessages();
+
+        // Automatically read response aloud in appropriate language
+        if (this.autoReadSpeech || (this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_tts)) {
+          this.speakResponse(assistantMsg);
         }
       } else {
-        this.messages.push({
+        const errMsg: ChatMessage = {
           id: `msg_${Date.now()}_err`,
           sender: "assistant",
           text: this.t("serverErrorNotice"),
           offerHuman: true,
-        });
+        };
+        this.messages.push(errMsg);
+        this.renderMessages();
       }
     } catch {
       this.isThinking = false;
@@ -2826,15 +2991,15 @@ export class BridgeAssistant extends HTMLElement {
       } catch {
         // Ignore
       }
-      this.messages.push({
+      const offlineMsg: ChatMessage = {
         id: `msg_${Date.now()}_offline`,
         sender: "assistant",
         text: this.t("savedOnPhoneNotice"),
         offerHuman: true,
-      });
+      };
+      this.messages.push(offlineMsg);
+      this.renderMessages();
     }
-
-    this.renderMessages();
   }
 
   // --- Human Handoff ---
@@ -2885,7 +3050,7 @@ export class BridgeAssistant extends HTMLElement {
         this.messages.push({
           id: `msg_${Date.now()}_handoff`,
           sender: "assistant",
-          text: this.t("handoffReadyTitle"),
+          text: `${this.t("handoffReadyTitle")}: ${this.activeHandoff.room_url}`,
           heading: this.t("handoffReadyTitle"),
           isHandoff: true,
           roomUrl,
@@ -2911,7 +3076,6 @@ export class BridgeAssistant extends HTMLElement {
             </div>
           `;
         }
-
         this.renderMessages();
       } else {
         alert(this.t("serverErrorNotice"));
@@ -2923,27 +3087,12 @@ export class BridgeAssistant extends HTMLElement {
 
   // --- Rendering ---
 
-  private updateSizeButtons(): void {
-    if (!this.shadowRoot) return;
-    this.shadowRoot.querySelectorAll<HTMLButtonElement>(".size-btn-group button").forEach((b) => {
-      b.setAttribute("aria-pressed", "false");
-    });
-    if (this.textSize === "smaller") {
-      this.shadowRoot.querySelector("#btn-size-smaller")?.setAttribute("aria-pressed", "true");
-    } else if (this.textSize === "larger") {
-      this.shadowRoot.querySelector("#btn-size-larger")?.setAttribute("aria-pressed", "true");
-    } else {
-      this.shadowRoot.querySelector("#btn-size-normal")?.setAttribute("aria-pressed", "true");
-    }
-  }
-
   private render(): void {
     if (!this.shadowRoot) return;
 
     this.setAttribute("data-contrast", this.highContrast ? "high" : "normal");
     this.setAttribute("data-size", this.textSize);
     this.setAttribute("dir", this.currentLang === "ar" ? "rtl" : "ltr");
-    this.setAttribute("lang", this.currentLang);
 
     if (this.accessibilityPrefs?.keyboard_navigation) {
       this.classList.add("keyboard-focus-enhanced");
@@ -2954,15 +3103,17 @@ export class BridgeAssistant extends HTMLElement {
     this.shadowRoot.innerHTML = `
       <style>${STYLES}</style>
 
-      <!-- Live Announcer for Screen Readers (TalkBack / NVDA) -->
+      <!-- Live Announcer -->
       <div id="live-announcer" class="sr-only" aria-live="polite" aria-atomic="true" style="position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); border:0;"></div>
 
-      <!-- Floating Launcher Button -->
+      <!-- Floating Launcher Button with Wake Word Hint -->
       <button class="launcher" type="button" id="launcher-btn"
-              aria-expanded="${this.isOpen}" aria-controls="assistant-dialog" aria-haspopup="dialog"
-              aria-label="${this.t("launcherLabel")}">
+              aria-expanded="${this.isOpen}" aria-controls="assistant-dialog" aria-haspopup="dialog">
         ${ICONS.launcher}
-        <span>${this.t("launcherLabel")}</span>
+        <div style="display:flex; flex-direction:column; align-items:flex-start; text-align:left; line-height:1.15;">
+          <span>${this.t("launcherLabel")}</span>
+          <span style="font-size:0.6875rem; font-weight:normal; opacity:0.9;">${this.t("wakeHint")}</span>
+        </div>
       </button>
 
       <!-- Floating Autoplay Audio Permission Banner if closed -->
@@ -2991,11 +3142,7 @@ export class BridgeAssistant extends HTMLElement {
         <!-- Header -->
         <header class="header">
           <div class="header-titles">
-            <h2 id="dialog-title" class="title"><span id="bridge-title">${this.t("appTitle")}</span></h2>
-            <span class="status-badge" aria-label="Online status">
-              <span class="status-dot"></span>
-              <span>Active</span>
-            </span>
+            <h2 id="dialog-title" class="title">${this.t("appTitle")}</h2>
           </div>
           <div class="header-actions">
             <!-- Quick EN/AM Toggle for backward compatibility with integration tests -->
@@ -3022,12 +3169,13 @@ export class BridgeAssistant extends HTMLElement {
                       aria-pressed="${this.currentLang === "ar"}"
                       aria-label="عربي - العربية (Arabic)">عربي</button>
             </div>
+
             <!-- Settings Button -->
-            <button type="button" class="btn btn-secondary btn-icon-only" id="btn-open-settings" aria-label="${this.t("settingsLabel")}" title="${this.t("settingsLabel")}">
+            <button type="button" class="btn btn-secondary" id="btn-open-settings" aria-label="${this.t("settingsLabel")}" title="${this.t("settingsLabel")}" style="padding:0.4rem 0.6rem;">
               ${ICONS.settings}
             </button>
             <!-- Close Button -->
-            <button type="button" class="btn btn-secondary btn-icon-only" id="btn-close-dialog" aria-label="${this.t("closeLabel")}" title="${this.t("closeLabel")}">
+            <button type="button" class="btn btn-secondary" id="btn-close-dialog" aria-label="${this.t("closeLabel")}" style="padding:0.4rem 0.6rem;">
               ${ICONS.close}
             </button>
           </div>
@@ -3043,10 +3191,6 @@ export class BridgeAssistant extends HTMLElement {
             ${ICONS.heart}
             <span>${this.t("supportTab")}</span>
           </button>
-          <button type="button" class="tab-btn" id="tab-link" role="tab" aria-selected="${this.activeTab === "link"}" aria-controls="pane-link">
-            ${ICONS.link}
-            <span>${this.t("linkTab")}</span>
-          </button>
           <button type="button" class="tab-btn" id="tab-handoff" role="tab" aria-selected="${this.activeTab === "handoff"}" aria-controls="pane-handoff">
             ${ICONS.headphones}
             <span>${this.t("handoffTab")}</span>
@@ -3055,6 +3199,9 @@ export class BridgeAssistant extends HTMLElement {
 
         <!-- Pane 1: Chat Message Stream & Footer -->
         <div id="pane-chat" class="tab-panel" role="tabpanel" ${this.activeTab === "chat" ? "" : "hidden"} style="${this.activeTab === "chat" ? "display:flex; flex-direction:column; flex:1; overflow:hidden;" : "display:none;"}">
+          <!-- Voice Status Bar (Listening / Processing / Speaking) -->
+          <div id="voice-status-container" aria-live="polite"></div>
+
           ${this.showAutoplayBanner ? `
             <div class="voice-activation-banner" role="alert" style="margin:0.5rem 1rem; padding:0.625rem 0.875rem; background:#eff6ff; border:1px solid #bfdbfe; border-radius:0.5rem; display:flex; align-items:center; justify-content:space-between; gap:0.5rem; font-size:0.8125rem; color:#1e40af;">
               <div style="display:flex; align-items:center; gap:0.5rem;">
@@ -3104,6 +3251,7 @@ export class BridgeAssistant extends HTMLElement {
               <input type="text" class="text-input" id="chat-text-input" data-id="chat-input"
                      placeholder="${this.t("inputPlaceholder")}"
                      aria-label="${this.t("inputPlaceholder")}"
+                     dir="${this.currentLang === "ar" ? "rtl" : "ltr"}"
                      required autocomplete="off">
               <button type="button" class="btn btn-secondary mic-btn btn-icon-only" id="mic-btn"
                       aria-label="${this.t("micLabel")}" title="${this.t("micLabel")}">
@@ -3193,22 +3341,7 @@ export class BridgeAssistant extends HTMLElement {
           </div>
         </div>
 
-        <!-- Pane 3: Barrier-Free Account Linking -->
-        <div id="pane-link" class="tab-panel" role="tabpanel" ${this.activeTab === "link" ? "" : "hidden"} style="${this.activeTab === "link" ? "display:block; overflow-y:auto; padding:1rem;" : "display:none;"}">
-          <div class="settings-card">
-            <div class="settings-card-title">${ICONS.link} <span>${this.t("linkTab")}</span></div>
-            <div class="settings-card-desc">
-              ${this.t("supportZeroProof")}
-            </div>
-            <button type="button" class="btn btn-primary" id="btn-generate-code" style="width:100%; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-              ${ICONS.key} <span>${this.t("generateCodeBtn")}</span>
-            </button>
-            <div class="code-display" id="code-display" style="display:none; font-size:1.75rem; font-weight:700; letter-spacing:0.25em; text-align:center; padding:1rem; background:var(--b-surface-alt); border:2px dashed var(--b-primary); border-radius:0.75rem; margin-top:0.875rem; color:var(--b-primary);">
-            </div>
-          </div>
-        </div>
-
-        <!-- Pane 4: Consented Live Help Handoff -->
+        <!-- Pane 3: Consented Live Help Handoff -->
         <div id="pane-handoff" class="tab-panel" role="tabpanel" ${this.activeTab === "handoff" ? "" : "hidden"} style="${this.activeTab === "handoff" ? "display:block; overflow-y:auto; padding:1rem;" : "display:none;"}">
           <div class="settings-card">
             <div class="settings-card-title">${ICONS.headphones} <span>${this.t("handoffTab")}</span></div>
@@ -3238,12 +3371,9 @@ export class BridgeAssistant extends HTMLElement {
         <!-- Settings Modal Overlay (Region) -->
         <div id="settings-dialog" class="settings-dialog" ${this.isSettingsOpen ? "" : "hidden"} role="region" aria-labelledby="settings-dialog-title">
           <div class="settings-header">
-            <div class="settings-title-group">
-              ${ICONS.settings}
-              <h3 id="settings-dialog-title" class="settings-heading">${this.t("settingsTitle")}</h3>
-            </div>
-            <button type="button" class="btn btn-secondary btn-icon-only" id="btn-close-settings" aria-label="${this.t("closeSettings")}" title="${this.t("closeSettings")}">
-              ${ICONS.close}
+            <h3 id="settings-dialog-title" style="margin:0; font-size:1.125rem;">${this.t("settingsTitle")}</h3>
+            <button type="button" class="btn btn-secondary" id="btn-close-settings">
+              ${this.t("closeSettings")}
             </button>
           </div>
 
@@ -3408,6 +3538,7 @@ export class BridgeAssistant extends HTMLElement {
 
     this.renderMessages();
     this.updateTelegramLinkUI();
+    this.updateVoiceStatusUI();
     this.bindEvents();
   }
 
@@ -3511,14 +3642,14 @@ export class BridgeAssistant extends HTMLElement {
           <p style="margin:0; font-size:1rem; font-weight:600;">${this.t("emptyWelcome")}</p>
           <div class="suggested-questions">
             <span style="font-size:0.8125rem; font-weight:700; color:var(--b-text-muted);">${this.t("suggestedTitle")}</span>
-            <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ1"))}" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
-              ${ICONS.arrowRight} <span>${this.escapeHtml(this.t("suggestedQ1"))}</span>
+            <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ1"))}">
+              ${ICONS.arrowRight} ${this.escapeHtml(this.t("suggestedQ1"))}
             </button>
-            <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ2"))}" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
-              ${ICONS.arrowRight} <span>${this.escapeHtml(this.t("suggestedQ2"))}</span>
+            <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ2"))}">
+              ${ICONS.arrowRight} ${this.escapeHtml(this.t("suggestedQ2"))}
             </button>
-            <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ3"))}" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
-              ${ICONS.arrowRight} <span>${this.escapeHtml(this.t("suggestedQ3"))}</span>
+            <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ3"))}">
+              ${ICONS.arrowRight} ${this.escapeHtml(this.t("suggestedQ3"))}
             </button>
           </div>
         </div>
@@ -3546,11 +3677,10 @@ export class BridgeAssistant extends HTMLElement {
         // Assistant Message Card
         const hasCitations = msg.citations && msg.citations.length > 0;
         const isRefusal = !!msg.isRefusal;
-        const headingText = msg.isHandoff ? this.t("handoffReadyTitle") : this.t("answerHeading");
 
         return `
           <div class="msg-row msg-assistant" id="${msg.id}">
-            <h4 class="answer-heading">${this.escapeHtml(headingText)}</h4>
+            <h4 class="answer-heading">${this.escapeHtml(msg.heading || this.t("answerHeading"))}</h4>
             <p class="answer-text">${this.escapeHtml(msg.text)}</p>
 
             ${
@@ -3579,9 +3709,9 @@ export class BridgeAssistant extends HTMLElement {
                 ? `
                 <div class="not-verified-box refusal-box" role="alert">
                   <div>${this.t("notVerifiedNotice")}</div>
-                  <div style="display:flex; gap:0.375rem; flex-wrap:wrap; margin-top:0.5rem;">
-                    <button type="button" class="btn btn-primary btn-talk-person" data-msg-id="${msg.id}" style="font-size:0.8125rem; min-height:2.25rem; display:inline-flex; align-items:center; gap:0.375rem;">
-                      ${ICONS.user} <span>${this.t("talkToPersonButton")}</span>
+                  <div style="display:flex; gap:0.375rem; flex-wrap:wrap;">
+                    <button type="button" class="btn btn-primary btn-talk-person" data-msg-id="${msg.id}" style="font-size:0.8125rem; min-height:2.25rem;">
+                      ${ICONS.user} ${this.t("talkToPersonButton")}
                     </button>
                     <button type="button" class="btn btn-secondary btn-try-another" style="font-size:0.8125rem; min-height:2.25rem;">
                       ${this.t("tryAnotherQuestion")}
@@ -3589,40 +3719,37 @@ export class BridgeAssistant extends HTMLElement {
                   </div>
                 </div>
               `
-                : ""
-            }
+            : ""
+          }
 
             <!-- Listen & Make Simpler action buttons -->
             <div class="answer-actions">
-              <button type="button" class="btn btn-secondary btn-listen" data-msg-id="${msg.id}" style="display:inline-flex; align-items:center; gap:0.375rem;">
-                ${msg.isAudioPlaying ? ICONS.pause : ICONS.listen}
-                <span>${msg.isAudioPlaying ? this.t("pauseButton") : this.t("listenButton")}</span>
+              <button type="button" class="btn btn-secondary btn-listen" data-msg-id="${msg.id}">
+                ${msg.isAudioPlaying ? `${ICONS.pause} ${this.t("pauseButton")}` : `${ICONS.sound} ${this.t("listenButton")}`}
               </button>
-              <button type="button" class="btn btn-secondary btn-simpler" data-msg-id="${msg.id}" style="display:inline-flex; align-items:center; gap:0.375rem;">
-                ${ICONS.lightbulb}
-                <span>${this.t("makeSimplerButton")}</span>
+              <button type="button" class="btn btn-secondary btn-simpler" data-msg-id="${msg.id}">
+                ${ICONS.lightbulb} ${this.t("makeSimplerButton")}
               </button>
             </div>
 
             <!-- Citations / Sources with readable names -->
-            ${
-              hasCitations
-                ? `
+            ${hasCitations
+            ? `
                 <div class="sources-box">
                   <div class="sources-title">${this.t("sourcesTitle")}</div>
                   ${msg.citations!
-                    .map(
-                      (c) => `
-                    <a href="${this.escapeHtml(c.url)}" target="_blank" rel="noopener noreferrer" class="source-link citation-link" style="display:inline-flex; align-items:center; gap:0.375rem;">
-                      ${ICONS.book} <span>${this.escapeHtml(c.title || c.heading)}</span>
+              .map(
+                (c) => `
+                    <a href="${this.escapeHtml(c.url)}" target="_blank" rel="noopener noreferrer" class="source-link">
+                      📖 ${this.escapeHtml(c.title || c.heading)}
                     </a>
                   `
-                    )
-                    .join("")}
+              )
+              .join("")}
                 </div>
               `
-                : ""
-            }
+            : ""
+          }
           </div>
         `;
       })
@@ -3630,8 +3757,8 @@ export class BridgeAssistant extends HTMLElement {
 
     if (this.isThinking) {
       chatLog.innerHTML += `
-        <div class="live-status-indicator" style="display:inline-flex; align-items:center; gap:0.375rem;">
-          ${ICONS.spinner} <span>${this.t("lookingInCourse")}</span>
+        <div class="live-status-indicator">
+          ⏳ ${this.t("lookingInCourse")}
         </div>
       `;
     }
@@ -3641,7 +3768,13 @@ export class BridgeAssistant extends HTMLElement {
       btn.addEventListener("click", () => {
         const msgId = btn.getAttribute("data-msg-id");
         const msg = this.messages.find((m) => m.id === msgId);
-        if (msg) this.handleListen(msg);
+        if (msg) {
+          if (msg.isAudioPlaying) {
+            this.stopSpeaking();
+          } else {
+            this.speakResponse(msg);
+          }
+        }
       });
     });
 
@@ -3649,10 +3782,7 @@ export class BridgeAssistant extends HTMLElement {
       btn.addEventListener("click", () => {
         const msgId = btn.getAttribute("data-msg-id");
         const msg = this.messages.find((m) => m.id === msgId);
-        if (msg) {
-          const targetQuestion = msg.originalQuestion || msg.text;
-          this.askQuestion(targetQuestion, true);
-        }
+        if (msg) this.askQuestion(`Explain simpler: ${msg.text}`, true);
       });
     });
 
@@ -3666,20 +3796,10 @@ export class BridgeAssistant extends HTMLElement {
 
     chatLog.querySelectorAll<HTMLButtonElement>(".btn-try-another").forEach((btn) => {
       btn.addEventListener("click", () => {
-        const input = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-text-input, #chat-input");
+        const input = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-text-input");
         if (input) {
           input.value = "";
           input.focus();
-        }
-      });
-    });
-
-    chatLog.querySelectorAll<HTMLButtonElement>(".btn-copy-room").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        const url = btn.getAttribute("data-url");
-        if (url && navigator.clipboard) {
-          await navigator.clipboard.writeText(url);
-          this.announce(this.t("linkCodeCopied"));
         }
       });
     });
@@ -3697,107 +3817,60 @@ export class BridgeAssistant extends HTMLElement {
     const closeSettingsBtn = this.shadowRoot.querySelector<HTMLButtonElement>("#btn-close-settings")!;
 
     // Open/Close Dialog
-    const closeDialog = (): void => {
-      this.isOpen = false;
-      this.isSettingsOpen = false;
-      dialog.hidden = true;
-      dialog.setAttribute("hidden", "true");
-      dialog.style.display = "none";
-      const settingsDialog = this.shadowRoot?.querySelector<HTMLElement>("#settings-dialog");
-      if (settingsDialog) {
-        settingsDialog.hidden = true;
-        settingsDialog.setAttribute("hidden", "true");
-        settingsDialog.style.display = "none";
-      }
-      launcher.setAttribute("aria-expanded", "false");
-      this.announce("Savanna Bridge Assistant closed.");
-      (this.previousFocus ?? launcher).focus();
-    };
-
     launcher.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
       this.previousFocus = launcher;
-      this.isOpen = true;
-      dialog.hidden = false;
-      dialog.removeAttribute("hidden");
-      dialog.style.display = "flex";
-      launcher.setAttribute("aria-expanded", "true");
-      this.announce("Savanna Bridge Assistant opened. Use Tab to navigate or Escape to close.");
-      const chatInput = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-text-input");
-      if (chatInput) {
-        setTimeout(() => chatInput.focus(), 60);
+      if (this.isOpen) {
+        this.closeAssistant();
       } else {
-        dialog.focus();
+        this.openAssistant();
       }
     });
 
-    closeBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      closeDialog();
-    });
+    closeBtn.addEventListener("click", () => this.closeAssistant());
 
-    const closeSettings = (): void => {
-      this.isSettingsOpen = false;
-      const settingsDialog = this.shadowRoot?.querySelector<HTMLElement>("#settings-dialog");
-      if (settingsDialog) {
-        settingsDialog.hidden = true;
-        settingsDialog.setAttribute("hidden", "true");
-        settingsDialog.style.display = "none";
-      }
-      this.announce("Settings closed.");
-      openSettingsBtn.focus();
-    };
-
-    // Keyboard Trap and Shortcuts for Screen Reader Accessibility (NVDA / TalkBack)
     dialog.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
         if (this.isSettingsOpen) {
-          closeSettings();
+          this.isSettingsOpen = false;
+          const settingsDialog = this.shadowRoot?.querySelector("#settings-dialog");
+          if (settingsDialog) settingsDialog.setAttribute("hidden", "true");
         } else {
-          closeDialog();
+          this.closeAssistant();
         }
         return;
       }
 
-      // Focus trap
       if (e.key === "Tab") {
         const activeContainer = this.isSettingsOpen
-          ? (this.shadowRoot?.querySelector("#settings-dialog") as HTMLElement)
+          ? this.shadowRoot?.querySelector<HTMLElement>("#settings-dialog")
           : dialog;
         if (!activeContainer) return;
-
         const focusables = Array.from(
           activeContainer.querySelectorAll<HTMLElement>(
             'button:not([disabled]):not([hidden]), [href]:not([disabled]), input:not([disabled]):not([hidden]), select:not([disabled]):not([hidden]), textarea:not([disabled]):not([hidden]), [tabindex]:not([tabindex="-1"])'
           )
-        ).filter((el) => el.offsetParent !== null);
-
+        ).filter((element) => element.offsetParent !== null);
         if (focusables.length === 0) return;
         const first = focusables[0];
         const last = focusables[focusables.length - 1];
-
-        const activeEl = this.shadowRoot?.activeElement || document.activeElement;
-        if (e.shiftKey && activeEl === first) {
+        const activeElement = this.shadowRoot?.activeElement ?? document.activeElement;
+        if (e.shiftKey && activeElement === first) {
           e.preventDefault();
           last.focus();
-        } else if (!e.shiftKey && activeEl === last) {
+        } else if (!e.shiftKey && activeElement === last) {
           e.preventDefault();
           first.focus();
         }
       }
     });
 
-    // Language Buttons: Direct setLanguage call
-    this.shadowRoot.querySelectorAll<HTMLButtonElement>(".lang-toggle-btn").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const langCode = btn.id.replace("btn-lang-", "") as SupportedLanguage;
-        if (langCode) {
-          this.setLanguage(langCode);
-        }
-      });
-    });
+    // 4-Language Switcher
+    this.shadowRoot.querySelector("#btn-lang-en")?.addEventListener("click", () => this.setLanguage("en"));
+    this.shadowRoot.querySelector("#btn-lang-am")?.addEventListener("click", () => this.setLanguage("am"));
+    this.shadowRoot.querySelector("#btn-lang-om")?.addEventListener("click", () => this.setLanguage("om"));
+    this.shadowRoot.querySelector("#btn-lang-ar")?.addEventListener("click", () => this.setLanguage("ar"));
 
     // Quick Language Toggle Button (.lang-btn)
     this.shadowRoot.querySelector(".lang-btn")?.addEventListener("click", () => {
@@ -3805,37 +3878,32 @@ export class BridgeAssistant extends HTMLElement {
     });
 
     // Settings Modal
-    openSettingsBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
+    openSettingsBtn.addEventListener("click", () => {
       this.isSettingsOpen = true;
-      const settingsDialog = this.shadowRoot?.querySelector<HTMLElement>("#settings-dialog");
+      const settingsDialog = this.shadowRoot?.querySelector("#settings-dialog");
       if (settingsDialog) {
-        settingsDialog.hidden = false;
         settingsDialog.removeAttribute("hidden");
-        settingsDialog.style.display = "flex";
-        this.announce("Settings opened.");
         const focusable = settingsDialog.querySelector<HTMLElement>("button, input");
         if (focusable) focusable.focus();
       }
     });
 
-    closeSettingsBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      closeSettings();
+    closeSettingsBtn.addEventListener("click", () => {
+      this.isSettingsOpen = false;
+      const settingsDialog = this.shadowRoot?.querySelector("#settings-dialog");
+      if (settingsDialog) settingsDialog.setAttribute("hidden", "true");
+      openSettingsBtn.focus();
     });
 
-    // Main Navigation Tabs Switching (Chat, Support, Link, Handoff)
+    // Main Navigation Tabs Switching (Chat, Support, Handoff)
     const mainTabs = [
       { id: "chat", btn: this.shadowRoot.querySelector<HTMLButtonElement>("#tab-chat"), pane: this.shadowRoot.querySelector<HTMLElement>("#pane-chat") },
       { id: "support", btn: this.shadowRoot.querySelector<HTMLButtonElement>("#tab-support"), pane: this.shadowRoot.querySelector<HTMLElement>("#pane-support") },
-      { id: "link", btn: this.shadowRoot.querySelector<HTMLButtonElement>("#tab-link"), pane: this.shadowRoot.querySelector<HTMLElement>("#pane-link") },
       { id: "handoff", btn: this.shadowRoot.querySelector<HTMLButtonElement>("#tab-handoff"), pane: this.shadowRoot.querySelector<HTMLElement>("#pane-handoff") },
     ];
 
     const switchMainTab = (index: number) => {
-      this.activeTab = mainTabs[index].id as "chat" | "support" | "link" | "handoff";
+      this.activeTab = mainTabs[index].id as "chat" | "support" | "handoff";
       mainTabs.forEach((t, i) => {
         const selected = i === index;
         t.btn?.setAttribute("aria-selected", selected ? "true" : "false");
@@ -3874,33 +3942,30 @@ export class BridgeAssistant extends HTMLElement {
       });
     });
 
-    // Text Size Settings (Instant without destroying modal)
+    // Text Size Settings
     this.shadowRoot.querySelector("#btn-size-smaller")?.addEventListener("click", () => {
       this.textSize = "smaller";
-      this.setAttribute("data-size", "smaller");
       localStorage.setItem("savanna_bridge_text_size", "smaller");
-      this.updateSizeButtons();
+      this.render();
     });
     this.shadowRoot.querySelector("#btn-size-normal")?.addEventListener("click", () => {
       this.textSize = "normal";
-      this.setAttribute("data-size", "normal");
       localStorage.setItem("savanna_bridge_text_size", "normal");
-      this.updateSizeButtons();
+      this.render();
     });
     this.shadowRoot.querySelector("#btn-size-larger")?.addEventListener("click", () => {
       this.textSize = "larger";
-      this.setAttribute("data-size", "larger");
       localStorage.setItem("savanna_bridge_text_size", "larger");
-      this.updateSizeButtons();
+      this.render();
     });
 
-    // Contrast Toggle (Instant)
+    // Contrast Toggle
     const chkContrast = this.shadowRoot.querySelector<HTMLInputElement>("#chk-contrast");
     if (chkContrast) {
       chkContrast.addEventListener("change", () => {
         this.highContrast = chkContrast.checked;
-        this.setAttribute("data-contrast", this.highContrast ? "high" : "normal");
         localStorage.setItem("savanna_bridge_contrast", this.highContrast ? "high" : "normal");
+        this.render();
       });
     }
 
@@ -3909,31 +3974,22 @@ export class BridgeAssistant extends HTMLElement {
     if (chkSimple) {
       chkSimple.addEventListener("change", () => {
         this.simpleMode = chkSimple.checked;
-        localStorage.setItem("savanna_bridge_simple_mode", this.simpleMode ? "true" : "false");
       });
     }
 
-    // Clear Chat Button
-    this.shadowRoot.querySelector("#btn-clear-chat")?.addEventListener("click", () => {
-      this.clearChat();
-    });
-
-    // Generate Link Code Button
-    this.shadowRoot.querySelector("#btn-generate-code")?.addEventListener("click", () => {
-      this.generateLinkCode();
-    });
-
-    // Handoff Request Form in Settings
-    const handoffForm = this.shadowRoot.querySelector<HTMLFormElement>("#handoff-request-form");
-    if (handoffForm) {
-      handoffForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const reasonInput = this.shadowRoot?.querySelector<HTMLInputElement>("#handoff-reason");
-        this.requestHandoff(reasonInput?.value || undefined);
+    // Auto-read Speech Toggle
+    const chkAutoRead = this.shadowRoot.querySelector<HTMLInputElement>("#chk-auto-read");
+    if (chkAutoRead) {
+      chkAutoRead.addEventListener("change", () => {
+        this.autoReadSpeech = chkAutoRead.checked;
+        localStorage.setItem("savanna_bridge_auto_read", this.autoReadSpeech ? "true" : "false");
+        if (!this.autoReadSpeech && this.isSpeaking) {
+          this.stopSpeaking();
+        }
       });
     }
 
-    // Support Form Submit
+    // Support Form
     const supportForm = this.shadowRoot.querySelector<HTMLFormElement>("#support-form");
     if (supportForm) {
       supportForm.addEventListener("submit", (e) => {
@@ -3948,7 +4004,7 @@ export class BridgeAssistant extends HTMLElement {
 
     // Chat Form Submit
     const chatForm = this.shadowRoot.querySelector<HTMLFormElement>("#chat-form");
-    const chatInput = this.shadowRoot.querySelector<HTMLInputElement>("#chat-text-input, #chat-input");
+    const chatInput = this.shadowRoot.querySelector<HTMLInputElement>("#chat-text-input");
     const micBtn = this.shadowRoot.querySelector<HTMLButtonElement>("#mic-btn");
 
     if (chatForm && chatInput) {
@@ -4133,10 +4189,10 @@ export class BridgeAssistant extends HTMLElement {
   }
 }
 
-// Register both custom elements for full compatibility
+// Register both custom elements for full compatibility across systems
 if (!customElements.get("bridge-assistant")) {
   customElements.define("bridge-assistant", BridgeAssistant);
 }
 if (!customElements.get("db-assistant")) {
-  customElements.define("db-assistant", class extends BridgeAssistant {});
+  customElements.define("db-assistant", BridgeAssistant);
 }
