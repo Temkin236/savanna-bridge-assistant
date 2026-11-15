@@ -50,6 +50,8 @@ def init_db(db_path: str = DB_PATH) -> None:
             ("linked", "INTEGER NOT NULL DEFAULT 0"),
             ("attempts", "INTEGER NOT NULL DEFAULT 0"),
             ("revoked", "INTEGER NOT NULL DEFAULT 0"),
+            ("platform_id", "TEXT NOT NULL DEFAULT 'generic'"),
+            ("platform_name", "TEXT NOT NULL DEFAULT 'this platform'"),
         ]:
             with contextlib.suppress(sqlite3.OperationalError):
                 cursor.execute(f"ALTER TABLE links ADD COLUMN {col_name} {col_type}")
@@ -104,6 +106,20 @@ def init_db(db_path: str = DB_PATH) -> None:
                 updated_at TEXT NOT NULL
             )
         """)
+        for col_name, col_type in [
+            ("telegram_enabled", "INTEGER NOT NULL DEFAULT 0"),
+            ("consent_granted", "INTEGER NOT NULL DEFAULT 0"),
+            ("frequency", "TEXT NOT NULL DEFAULT 'immediate'"),
+            ("quiet_hours_start", "TEXT"),
+            ("quiet_hours_end", "TEXT"),
+            ("timezone", "TEXT NOT NULL DEFAULT 'Africa/Addis_Ababa'"),
+            ("language", "TEXT NOT NULL DEFAULT 'en'"),
+            ("platform_id", "TEXT NOT NULL DEFAULT 'generic'"),
+        ]:
+            with contextlib.suppress(sqlite3.OperationalError):
+                cursor.execute(
+                    f"ALTER TABLE notification_settings ADD COLUMN {col_name} {col_type}"
+                )
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS teacher_stats (
                 question TEXT PRIMARY KEY,
@@ -137,6 +153,8 @@ class Database:
         channel: str,
         learner_ref: str | None = None,
         token: str | None = None,
+        platform_id: str = "generic",
+        platform_name: str = "this platform",
     ) -> dict[str, Any]:
         token = token or secrets.token_urlsafe(32)[:32]
         expires_in = 600
@@ -146,8 +164,11 @@ class Database:
         with get_connection(self.db_path) as conn:
             conn.execute(
                 """
-                INSERT INTO links (link_id, token, code, session_id, channel, learner_ref, expires_at, used, created_at, linked)
-                VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, 0)
+                INSERT INTO links (
+                    link_id, token, code, session_id, channel, learner_ref,
+                    expires_at, used, created_at, linked, platform_id, platform_name
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, 0, ?, ?)
                 """,
                 (
                     link_id,
@@ -158,6 +179,8 @@ class Database:
                     learner_ref or f"learner_{session_id}",
                     expires_at,
                     created_at,
+                    platform_id,
+                    platform_name,
                 ),
             )
             conn.commit()
@@ -171,6 +194,8 @@ class Database:
             "single_use": True,
             "channel": channel,
             "mocked": False,
+            "platform_id": platform_id,
+            "platform_name": platform_name,
         }
 
     def get_link_status(self, token: str) -> dict[str, Any]:
@@ -187,6 +212,19 @@ class Database:
             if row["linked"]:
                 return {"linked": True, "channel": "telegram"}
             return {"linked": False, "channel": None}
+
+    def get_link_context(self, token: str) -> dict[str, str]:
+        with get_connection(self.db_path) as conn:
+            row = conn.execute(
+                "SELECT platform_id, platform_name FROM links WHERE token = ? OR link_id = ? ORDER BY created_at DESC LIMIT 1",
+                (token, token),
+            ).fetchone()
+            if not row:
+                return {"platform_id": "generic", "platform_name": "this platform"}
+            return {
+                "platform_id": row["platform_id"] or "generic",
+                "platform_name": row["platform_name"] or "this platform",
+            }
 
     def verify_and_consume_token_link(
         self, token: str, telegram_chat_id: str | int | None = None
@@ -493,6 +531,14 @@ class Database:
                 job_alerts=bool(row["job_alerts"]),
                 muted=bool(row["muted"]),
                 low_bandwidth=bool(row["low_bandwidth"]),
+                telegram_enabled=bool(row["telegram_enabled"]),
+                consent_granted=bool(row["consent_granted"]),
+                frequency=row["frequency"] or "immediate",
+                quiet_hours_start=row["quiet_hours_start"],
+                quiet_hours_end=row["quiet_hours_end"],
+                timezone=row["timezone"] or "Africa/Addis_Ababa",
+                language=row["language"] or "en",
+                platform_id=row["platform_id"] or "generic",
             )
 
     def set_notification_settings(
@@ -502,14 +548,27 @@ class Database:
         with get_connection(self.db_path) as conn:
             conn.execute(
                 """
-                INSERT INTO notification_settings (learner_ref, deadlines, new_lessons, job_alerts, muted, low_bandwidth, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO notification_settings (
+                    learner_ref, deadlines, new_lessons, job_alerts, muted,
+                    low_bandwidth, telegram_enabled, consent_granted, frequency,
+                    quiet_hours_start, quiet_hours_end, timezone, language,
+                    platform_id, updated_at
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(learner_ref) DO UPDATE SET
                     deadlines=excluded.deadlines,
                     new_lessons=excluded.new_lessons,
                     job_alerts=excluded.job_alerts,
                     muted=excluded.muted,
                     low_bandwidth=excluded.low_bandwidth,
+                    telegram_enabled=excluded.telegram_enabled,
+                    consent_granted=excluded.consent_granted,
+                    frequency=excluded.frequency,
+                    quiet_hours_start=excluded.quiet_hours_start,
+                    quiet_hours_end=excluded.quiet_hours_end,
+                    timezone=excluded.timezone,
+                    language=excluded.language,
+                    platform_id=excluded.platform_id,
                     updated_at=excluded.updated_at
                 """,
                 (
@@ -519,6 +578,14 @@ class Database:
                     1 if settings.job_alerts else 0,
                     1 if settings.muted else 0,
                     1 if settings.low_bandwidth else 0,
+                    1 if settings.telegram_enabled else 0,
+                    1 if settings.consent_granted else 0,
+                    settings.frequency,
+                    settings.quiet_hours_start,
+                    settings.quiet_hours_end,
+                    settings.timezone,
+                    settings.language.value,
+                    settings.platform_id,
                     now_iso,
                 ),
             )

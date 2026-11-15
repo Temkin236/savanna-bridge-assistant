@@ -75,8 +75,17 @@ def test_handle_start_valid_token() -> None:
             headers = kwargs.get("headers", {})
             assert "X-Bot-Secret" in headers
 
-            assert message.answer.called
-            answer_text = message.answer.call_args[0][0]
+            assert message.answer.call_count == 2
+            answer_text = message.answer.call_args_list[0].args[0]
+            consent_text = message.answer.call_args_list[1].args[0]
+            assert "this platform" in consent_text.lower()
+            consent_markup = message.answer.call_args_list[1].kwargs["reply_markup"]
+            callbacks = [
+                button.callback_data
+                for row in consent_markup.inline_keyboard
+                for button in row
+            ]
+            assert callbacks == ["notify_consent_yes", "notify_consent_no"]
             assert "ተገናኝቷል" in answer_text or "Connected" in answer_text
 
     asyncio.run(_test())

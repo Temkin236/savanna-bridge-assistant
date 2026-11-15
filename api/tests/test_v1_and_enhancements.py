@@ -155,7 +155,7 @@ def test_translation_routes_and_endpoint() -> None:
     )
     assert am_res.status_code == 200
     am_data = am_res.json()
-    assert am_data["provider"] == "addis"
+    assert am_data["provider"] == "auto/addis"
     assert am_data["target_language"] == "am"
     assert "translated_text" in am_data
 
@@ -166,7 +166,7 @@ def test_translation_routes_and_endpoint() -> None:
     )
     assert ar_res.status_code == 200
     ar_data = ar_res.json()
-    assert ar_data["provider"] == "gemini"
+    assert ar_data["provider"] == "auto/google"
     assert ar_data["target_language"] == "ar"
     assert "translated_text" in ar_data
 

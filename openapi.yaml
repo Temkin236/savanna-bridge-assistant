@@ -606,6 +606,69 @@ paths:
               schema:
                 $ref: "#/components/schemas/NotificationSettings"
 
+  /api/v1/notification-settings:
+    get:
+      tags: [Alerts]
+      operationId: getNotificationSettingsV1
+      summary: Read learner-specific notification choices
+      parameters:
+        - name: learner_ref
+          in: query
+          schema:
+            type: string
+            default: default
+      responses:
+        "200":
+          description: Current settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationSettings"
+    put:
+      tags: [Alerts]
+      operationId: updateNotificationSettingsV1
+      summary: Partially update learner notification choices
+      parameters:
+        - name: learner_ref
+          in: query
+          schema:
+            type: string
+            default: default
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NotificationSettings"
+      responses:
+        "200":
+          description: Saved settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationSettings"
+
+  /api/v1/agent/plan:
+    post:
+      tags: [Tutor]
+      operationId: planAccessiblePageAction
+      summary: Plan one allow-listed, voice-driven page action
+      description: >-
+        Returns a deterministic action plan. Form submission, field filling,
+        and sensitive activation require an explicit user confirmation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PageActionRequest"
+      responses:
+        "200":
+          description: Safe page action plan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PageActionPlan"
   /learner/deadlines:
     get:
       tags: [Learner]
@@ -1015,7 +1078,7 @@ components:
 
     AskRequest:
       type: object
-      required: [question, language]
+      required: [question]
       properties:
         question:
           type: string
@@ -1034,6 +1097,21 @@ components:
         channel:
           type: string
           enum: [web, telegram, sms_sandbox]
+        page_url:
+          type: string
+          format: uri
+        page_title:
+          type: string
+        page_content:
+          type: string
+        section:
+          type: string
+        learner_ref:
+          type: string
+          default: default
+        platform_id:
+          type: string
+          default: generic
       example:
         question: What is in Module 2?
         language: en
@@ -1087,6 +1165,15 @@ components:
           type: string
         mocked:
           type: boolean
+        detected_language:
+          $ref: "#/components/schemas/Language"
+        language_confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        language_changed:
+          type: boolean
+          default: false
       example:
         answer: Module 2 explains how to listen, clarify a customer's need, and respond clearly.
         citations:
@@ -1153,6 +1240,12 @@ components:
         learner_reference:
           type: string
           description: Non-sensitive account reference such as username or enrolment code.
+        platform_id:
+          type: string
+          default: generic
+        platform_name:
+          type: string
+          default: this platform
       example:
         session_id: web_demo_01
         channel: web
@@ -1192,6 +1285,10 @@ components:
         mocked:
           type: boolean
           example: false
+        platform_id:
+          type: string
+        platform_name:
+          type: string
       example:
         token: "a8B9cD_eF1gH2iJ3kL4mN5oP6qR7sT8u"
         deep_link: "https://t.me/savannah_assistant3_bot?start=a8B9cD_eF1gH2iJ3kL4mN5oP6qR7sT8u"
@@ -1524,6 +1621,32 @@ components:
           type: boolean
         low_bandwidth:
           type: boolean
+        telegram_enabled:
+          type: boolean
+          default: false
+        consent_granted:
+          type: boolean
+          default: false
+        frequency:
+          type: string
+          enum: [immediate, daily]
+          default: immediate
+        quiet_hours_start:
+          type: string
+          nullable: true
+          example: "22:00"
+        quiet_hours_end:
+          type: string
+          nullable: true
+          example: "07:00"
+        timezone:
+          type: string
+          default: Africa/Addis_Ababa
+        language:
+          $ref: "#/components/schemas/Language"
+        platform_id:
+          type: string
+          default: generic
       example:
         deadlines: true
         new_lessons: true
@@ -1627,7 +1750,10 @@ components:
           type: string
           enum: [audio/webm, audio/ogg, audio/wav, audio/mpeg]
         language:
-          $ref: "#/components/schemas/Language"
+          oneOf:
+            - $ref: "#/components/schemas/Language"
+            - type: string
+              const: auto
         retain:
           type: boolean
           default: false
@@ -1654,6 +1780,12 @@ components:
           type: string
         mocked:
           type: boolean
+        detected_language:
+          $ref: "#/components/schemas/Language"
+        language_confidence:
+          type: number
+          minimum: 0
+          maximum: 1
       example:
         transcript: Please explain Module 2.
         language: en
@@ -1662,6 +1794,48 @@ components:
         provider: offline
         mocked: true
 
+    PageActionRequest:
+      type: object
+      required: [utterance]
+      properties:
+        utterance:
+          type: string
+          minLength: 1
+          maxLength: 500
+        language:
+          $ref: "#/components/schemas/Language"
+        page_title:
+          type: string
+        available_controls:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              type: string
+
+    PageActionPlan:
+      type: object
+      required: [action, spoken_confirmation, requires_confirmation, confidence, language]
+      properties:
+        action:
+          type: string
+          enum: [read_page, read_section, list_controls, focus_control, activate_control, fill_control, submit, stop_reading, repeat, none]
+        target:
+          type: string
+          nullable: true
+        value:
+          type: string
+          nullable: true
+        spoken_confirmation:
+          type: string
+        requires_confirmation:
+          type: boolean
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        language:
+          $ref: "#/components/schemas/Language"
     SynthesisRequest:
       type: object
       required: [text, language]

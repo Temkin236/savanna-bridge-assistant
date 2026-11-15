@@ -83,6 +83,9 @@ def get_user_state(user_id: int) -> dict[str, Any]:
             "learner_ref": f"tg_{user_id}",
             "last_job_id": None,
             "last_context": "Exploring courses on Telegram",
+            "platform_id": "generic",
+            "platform_name": "this platform",
+            "notification_setup": {},
         }
     return USER_SESSIONS[user_id]
 
@@ -219,6 +222,8 @@ async def handle_start(message: types.Message) -> None:
             state["linked"] = True
             if res.get("learner_ref"):
                 state["learner_ref"] = res["learner_ref"]
+            state["platform_id"] = res.get("platform_id", "generic")
+            state["platform_name"] = res.get("platform_name", "this platform")
             success_msgs = {
                 "am": "የኮርስ ክፍለ-ጊዜዎ ተገናኝቷል። ማንኛውንም ጥያቄ በጽሑፍ ይጠይቁ ወይም 'ከሰው ጋር ተገናኝ' የሚለውን ይጫኑ።",
                 "om": "Kutaan barnootaa keessan walqabateera. Gaaffii keessan barreeffamaan gaafadhaa ykn 'Nama Waliin Dubbadhu' kan jedhu tuqaa.",
@@ -230,6 +235,26 @@ async def handle_start(message: types.Message) -> None:
                 message,
                 success_msgs.get(lang, success_msgs["en"]),
                 reply_markup=make_main_keyboard(lang, state["lite_mode"]),
+            )
+            notification_prompt = {
+                "am": f"{state['platform_name']} ላይ ስለ ማጠናቀቂያ ቀኖች፣ አዲስ ትምህርቶች እና የሥራ እድሎች በቴሌግራም ማሳወቂያ ይፈልጋሉ?",
+                "om": f"Waa'ee yeroo xumuraa, barnoota haaraa fi carraa hojii {state['platform_name']} irraa beeksisa Telegram barbaadduu?",
+                "ti": f"ካብ {state['platform_name']} ናይ ዕለት፣ ሓድሽ ትምህርቲን ስራሕን መተሓሳሰቢ ብቴሌግራም ትደልዩ ዶ?",
+                "ar": f"هل تريد إشعارات تيليجرام بالمواعيد والدروس الجديدة وفرص العمل من {state['platform_name']}؟",
+                "en": f"Would you like Telegram notifications about deadlines, new lessons, and job alerts from {state['platform_name']}?",
+            }
+            yes_no = InlineKeyboardMarkup(
+                inline_keyboard=[
+                    [
+                        InlineKeyboardButton(text="Yes / አዎ", callback_data="notify_consent_yes"),
+                        InlineKeyboardButton(text="No / አይ", callback_data="notify_consent_no"),
+                    ]
+                ]
+            )
+            await send_safe_message(
+                message,
+                notification_prompt.get(lang, notification_prompt["en"]),
+                reply_markup=yes_no,
             )
             return
         else:
@@ -260,6 +285,126 @@ async def handle_start(message: types.Message) -> None:
         parse_mode="Markdown",
         reply_markup=make_language_inline(),
     )
+
+
+@router.callback_query(F.data == "notify_consent_no")
+async def decline_notifications(callback: types.CallbackQuery) -> None:
+    state = get_user_state(callback.from_user.id)
+    await call_api(
+        "PUT",
+        f"/api/v1/notification-settings?learner_ref={state['learner_ref']}",
+        {
+            "telegram_enabled": False,
+            "consent_granted": False,
+            "platform_id": state["platform_id"],
+            "language": state["language"],
+        },
+    )
+    await callback.answer("Notifications remain off")
+    await send_safe_message(
+        callback.message,
+        "Notifications are off. You can enable them later with /settings.",
+    )
+
+
+@router.callback_query(F.data == "notify_consent_yes")
+async def choose_notification_categories(callback: types.CallbackQuery) -> None:
+    state = get_user_state(callback.from_user.id)
+    state["notification_setup"] = {"consent_granted": True, "telegram_enabled": True}
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="All updates", callback_data="notify_categories_all")],
+            [
+                InlineKeyboardButton(text="Jobs only", callback_data="notify_categories_jobs"),
+                InlineKeyboardButton(text="Deadlines only", callback_data="notify_categories_deadlines"),
+            ],
+        ]
+    )
+    await callback.answer()
+    await send_safe_message(
+        callback.message,
+        "Which updates should I send? You can change this later in /settings.",
+        reply_markup=keyboard,
+    )
+
+
+@router.callback_query(F.data.startswith("notify_categories_"))
+async def choose_notification_frequency(callback: types.CallbackQuery) -> None:
+    state = get_user_state(callback.from_user.id)
+    choice = callback.data.removeprefix("notify_categories_")
+    setup = state.setdefault("notification_setup", {})
+    setup.update(
+        {
+            "deadlines": choice in {"all", "deadlines"},
+            "new_lessons": choice == "all",
+            "job_alerts": choice in {"all", "jobs"},
+        }
+    )
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text="Immediately", callback_data="notify_frequency_immediate"),
+                InlineKeyboardButton(text="Daily summary", callback_data="notify_frequency_daily"),
+            ]
+        ]
+    )
+    await callback.answer()
+    await send_safe_message(callback.message, "When should I send them?", reply_markup=keyboard)
+
+
+@router.callback_query(F.data.startswith("notify_frequency_"))
+async def choose_notification_quiet_hours(callback: types.CallbackQuery) -> None:
+    state = get_user_state(callback.from_user.id)
+    frequency = callback.data.removeprefix("notify_frequency_")
+    state.setdefault("notification_setup", {})["frequency"] = frequency
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text="Quiet 22:00–07:00", callback_data="notify_quiet_yes"),
+                InlineKeyboardButton(text="No quiet hours", callback_data="notify_quiet_no"),
+            ]
+        ]
+    )
+    await callback.answer()
+    await send_safe_message(
+        callback.message,
+        "Should I avoid notifications overnight in the platform time zone?",
+        reply_markup=keyboard,
+    )
+
+
+@router.callback_query(F.data.startswith("notify_quiet_"))
+async def finish_notification_setup(callback: types.CallbackQuery) -> None:
+    state = get_user_state(callback.from_user.id)
+    use_quiet_hours = callback.data.endswith("yes")
+    setup = state.setdefault("notification_setup", {})
+    setup.update(
+        {
+            "quiet_hours_start": "22:00" if use_quiet_hours else None,
+            "quiet_hours_end": "07:00" if use_quiet_hours else None,
+            "timezone": "Africa/Addis_Ababa",
+            "language": state["language"],
+            "platform_id": state["platform_id"],
+            "muted": False,
+            "low_bandwidth": state["lite_mode"],
+        }
+    )
+    saved = await call_api(
+        "PUT",
+        f"/api/v1/notification-settings?learner_ref={state['learner_ref']}",
+        setup,
+    )
+    await callback.answer()
+    if saved:
+        await send_safe_message(
+            callback.message,
+            "Notification preferences saved. Use /settings to review or /mute at any time.",
+        )
+    else:
+        await send_safe_message(
+            callback.message,
+            "I could not save notification preferences. Notifications remain off; try /settings later.",
+        )
 
 
 @router.callback_query(F.data.startswith("lang_"))
@@ -849,7 +994,10 @@ async def handle_settings(message: types.Message) -> None:
     state = get_user_state(user_id)
     lang = state.get("language", "en")
 
-    res = await call_api("GET", "/notification-settings")
+    res = await call_api(
+        "GET",
+        f"/api/v1/notification-settings?learner_ref={state['learner_ref']}",
+    )
     if not res:
         res = {
             "deadlines": True,
@@ -915,7 +1063,11 @@ async def handle_mute(message: types.Message) -> None:
     state = get_user_state(user_id)
     lang = state.get("language", "en")
 
-    await call_api("PUT", "/notification-settings", {"muted": True})
+    await call_api(
+        "PUT",
+        f"/api/v1/notification-settings?learner_ref={state['learner_ref']}",
+        {"muted": True},
+    )
     mute_msgs = {
         "am": "🔕 ማሳወቂያዎች ድምጽ አልባ ሆነዋል።",
         "om": "🔕 Beeksisawwan sagalee dhabaniiru.",
@@ -932,7 +1084,11 @@ async def handle_unmute(message: types.Message) -> None:
     state = get_user_state(user_id)
     lang = state.get("language", "en")
 
-    await call_api("PUT", "/notification-settings", {"muted": False})
+    await call_api(
+        "PUT",
+        f"/api/v1/notification-settings?learner_ref={state['learner_ref']}",
+        {"muted": False},
+    )
     unmute_msgs = {
         "am": "🔔 ማሳወቂያዎች ተከፍተዋል።",
         "om": "🔔 Beeksisawwan banamaniiru.",
@@ -1053,6 +1209,9 @@ async def handle_voice_message(message: types.Message, bot: Bot) -> None:
         if transcribe_res
         else "Please explain Module 2."
     )
+    if transcribe_res and transcribe_res.get("language_confidence", 0) >= 0.82:
+        lang = transcribe_res.get("detected_language", lang)
+        state["language"] = lang
 
     trans_labels = {
         "am": f"📝 **የድምጽ ግልባጭ:**\n_{transcript}_",
@@ -1083,6 +1242,10 @@ async def handle_voice_message(message: types.Message, bot: Bot) -> None:
         }
         await send_safe_message(message, no_ans.get(lang, no_ans["en"]))
         return
+
+    if ask_res.get("language_changed") and ask_res.get("language"):
+        lang = ask_res["language"]
+        state["language"] = lang
 
     answer_text = ask_res.get("answer", "")
     citations = ask_res.get("citations", [])
@@ -1166,6 +1329,10 @@ async def handle_text_question(message: types.Message) -> None:
         }
         await send_safe_message(message, err_msg.get(lang, err_msg["en"]))
         return
+
+    if res.get("language_changed") and res.get("language"):
+        lang = res["language"]
+        state["language"] = lang
 
     answer_text = res.get("answer", "")
     citations = res.get("citations", [])

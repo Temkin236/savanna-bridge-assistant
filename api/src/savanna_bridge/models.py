@@ -33,7 +33,7 @@ class Citation(BaseModel):
 
 class AskRequest(BaseModel):
     question: str = Field(..., min_length=1, max_length=2000)
-    language: Language
+    language: Language | None = None
     course_id: str | None = None
     simple_mode: bool = False
     anonymous: bool = False
@@ -42,6 +42,8 @@ class AskRequest(BaseModel):
     page_title: str | None = None
     page_content: str | None = None
     section: str | None = None
+    learner_ref: str = "default"
+    platform_id: str = "generic"
 
 
 class Answer(BaseModel):
@@ -53,6 +55,9 @@ class Answer(BaseModel):
     confidence: float | None = None
     provider: str | None = None
     mocked: bool | None = None
+    detected_language: Language | None = None
+    language_confidence: float | None = None
+    language_changed: bool = False
 
 
 class TranslateRequest(BaseModel):
@@ -73,6 +78,8 @@ class LinkStartRequest(BaseModel):
     session_id: str = "web_session"
     channel: Literal["web", "telegram"] = "telegram"
     learner_reference: str | None = None
+    platform_id: str = "generic"
+    platform_name: str = "this platform"
 
 
 class LinkStartResponse(BaseModel):
@@ -85,6 +92,8 @@ class LinkStartResponse(BaseModel):
     single_use: bool = True
     channel: str = "telegram"
     mocked: bool | None = None
+    platform_id: str = "generic"
+    platform_name: str = "this platform"
 
 
 class LinkStatusResponse(BaseModel):
@@ -104,6 +113,8 @@ class LinkConfirmResponse(BaseModel):
     channel: str | None = "telegram"
     learner_ref: str
     mocked: bool | None = None
+    platform_id: str = "generic"
+    platform_name: str = "this platform"
 
 
 class LinkDisconnectRequest(BaseModel):
@@ -227,6 +238,14 @@ class NotificationSettings(BaseModel):
     job_alerts: bool = True
     muted: bool = False
     low_bandwidth: bool = True
+    telegram_enabled: bool = False
+    consent_granted: bool = False
+    frequency: Literal["immediate", "daily"] = "immediate"
+    quiet_hours_start: str | None = None
+    quiet_hours_end: str | None = None
+    timezone: str = "Africa/Addis_Ababa"
+    language: Language = Language.EN
+    platform_id: str = "generic"
 
 
 class Deadline(BaseModel):
@@ -270,7 +289,7 @@ class AccommodationDraft(BaseModel):
 class TranscriptionRequest(BaseModel):
     audio_base64: str
     media_type: Literal["audio/webm", "audio/ogg", "audio/wav", "audio/mpeg"]
-    language: Language
+    language: Language | Literal["auto"] = "auto"
     retain: bool = False
 
 
@@ -281,6 +300,36 @@ class Transcription(BaseModel):
     editable: bool
     provider: str
     mocked: bool | None = None
+    detected_language: Language | None = None
+    language_confidence: float | None = None
+
+
+class PageActionRequest(BaseModel):
+    utterance: str = Field(..., min_length=1, max_length=500)
+    language: Language | None = None
+    page_title: str | None = None
+    available_controls: list[dict[str, str]] = Field(default_factory=list)
+
+
+class PageActionPlan(BaseModel):
+    action: Literal[
+        "read_page",
+        "read_section",
+        "list_controls",
+        "focus_control",
+        "activate_control",
+        "fill_control",
+        "submit",
+        "stop_reading",
+        "repeat",
+        "none",
+    ]
+    target: str | None = None
+    value: str | None = None
+    spoken_confirmation: str
+    requires_confirmation: bool = False
+    confidence: float = 0.0
+    language: Language = Language.EN
 
 
 class SynthesisRequest(BaseModel):

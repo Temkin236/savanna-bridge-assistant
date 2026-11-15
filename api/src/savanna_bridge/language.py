@@ -154,6 +154,42 @@ class LanguageGuard:
         return default
 
     @classmethod
+    def detect_language_with_confidence(
+        cls, text: str, default: str = "en"
+    ) -> tuple[str, float]:
+        """Detect a supported language and expose confidence for safe turn switching.
+
+        Short commands such as "send" and "yes" intentionally keep the current
+        language with low confidence. Script-specific sentences can switch with
+        high confidence without making the learner repeat a preference.
+        """
+        clean = (text or "").strip()
+        if not clean:
+            return default, 0.0
+        if cls._ARABIC_RE.search(clean):
+            return "ar", 0.99
+        if cls._ETHIOPIC_RE.search(clean):
+            words = set(clean.split())
+            tigrinya_markers = {
+                "ናይ", "እንታይ", "እቲ", "እዚ", "ከመይ", "ኣሎ", "ትምህርቲ"
+            }
+            if words.intersection(tigrinya_markers):
+                return "ti", 0.94
+            return "am", 0.92
+
+        words = re.findall(r"[A-Za-z']+", clean.lower())
+        word_set = set(words)
+        oromo_hits = len(word_set.intersection(cls._OROMO_TOKENS))
+        if oromo_hits:
+            confidence = min(0.98, 0.78 + (0.07 * oromo_hits))
+            return "om", confidence
+        if len(words) >= 3:
+            return "en", 0.9
+        if len(words) == 2:
+            return default, 0.68
+        return default, 0.45
+
+    @classmethod
     def is_read_aloud_query(cls, text: str) -> bool:
         """Check if learner is requesting to read the page, lesson, or paragraph aloud."""
         q = (text or "").lower().strip()

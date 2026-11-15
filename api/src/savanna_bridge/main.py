@@ -38,6 +38,7 @@ from savanna_bridge.auth import create_widget_token, verify_widget_token
 from savanna_bridge.config import (
     BOT_API_SECRET,
     CONFIDENCE_THRESHOLD,
+    CORS_ORIGINS,
     DB_PATH,
 )
 from savanna_bridge.database import Database
@@ -75,6 +76,8 @@ from savanna_bridge.models import (
     LinkStatusResponse,
     ModuleListResponse,
     NotificationSettings,
+    PageActionPlan,
+    PageActionRequest,
     SmsInboundRequest,
     SupportNeeds,
     SynthesisRequest,
@@ -114,10 +117,11 @@ app = FastAPI(
     description="Multilingual assistant and live help API for learning and career platforms.",
 )
 
-# CORS allowlist - Allow all origins
+# Only embedding platforms explicitly configured by the operator may call the API
+# from a browser. Server-to-server clients are not affected by CORS.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=CORS_ORIGINS,
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -273,12 +277,151 @@ def generate_token(session_id: str = "web_demo", course_id: str = "course_demo")
     return {"token": token}
 
 
+def _action_target(utterance: str, controls: list[dict[str, str]]) -> str | None:
+    normalized = utterance.casefold()
+    candidates: list[tuple[int, str]] = []
+    for control in controls[:100]:
+        label = str(control.get("label", "")).strip()
+        control_id = str(control.get("id", "")).strip()
+        if label and control_id and label.casefold() in normalized:
+            candidates.append((len(label), control_id))
+    return max(candidates, default=(0, ""))[1] or None
+
+
+def _spoken_action(action: str, language: Language, target: str | None) -> str:
+    target_name = target or "the selected control"
+    messages = {
+        Language.EN: {
+            "read_page": "Reading the main page content.",
+            "read_section": "Reading the current section.",
+            "list_controls": "Listing the available controls.",
+            "focus_control": f"Moving focus to {target_name}.",
+            "activate_control": f"Ready to activate {target_name}.",
+            "fill_control": f"Ready to enter text in {target_name}.",
+            "submit": "This will submit the current form. Say yes to confirm or no to cancel.",
+            "stop_reading": "Stopping page reading.",
+            "repeat": "Repeating the last spoken message.",
+            "none": "I did not recognize a page command.",
+        },
+        Language.AM: {
+            "read_page": "የገጹን ዋና ይዘት እያነበብኩ ነው።",
+            "read_section": "ይህን ክፍል እያነበብኩ ነው።",
+            "list_controls": "በገጹ ላይ ያሉትን መቆጣጠሪያዎች እዘረዝራለሁ።",
+            "submit": "ይህ ቅጹን ይልካል። ለማረጋገጥ አዎ፣ ለመሰረዝ አይ ይበሉ።",
+            "stop_reading": "ማንበብ አቁሜያለሁ።",
+            "repeat": "የመጨረሻውን መልዕክት እደግማለሁ።",
+        },
+        Language.OM: {
+            "read_page": "Qabiyyee fuulaa dubbisaa jira.",
+            "read_section": "Kutaa kana dubbisaa jira.",
+            "list_controls": "To'annoo fuula kanaa tarreessaa jira.",
+            "submit": "Kun unka ni erga. Mirkaneessuuf eeyyee, haquuf lakki jedhaa.",
+            "stop_reading": "Dubbisuu dhaabeera.",
+            "repeat": "Ergaa dhumaa irra deebi'a.",
+        },
+        Language.TI: {
+            "read_page": "ቀንዲ ትሕዝቶ እዚ ገጽ አንብብ ኣለኹ።",
+            "read_section": "እዚ ክፍሊ አንብብ ኣለኹ።",
+            "submit": "እዚ ቅጥዒ ክልእኽ እዩ። ንምርግጋጽ እወ፣ ንምቁራጽ ኣይፋል በሉ።",
+            "stop_reading": "ምንባብ ኣቋሪጸ።",
+            "repeat": "ናይ መወዳእታ መልእኽቲ ክደግም እየ።",
+        },
+        Language.AR: {
+            "read_page": "سأقرأ المحتوى الرئيسي للصفحة.",
+            "read_section": "سأقرأ القسم الحالي.",
+            "list_controls": "سأذكر عناصر التحكم المتاحة.",
+            "submit": "سيؤدي هذا إلى إرسال النموذج. قل نعم للتأكيد أو لا للإلغاء.",
+            "stop_reading": "تم إيقاف القراءة.",
+            "repeat": "سأكرر آخر رسالة منطوقة.",
+        },
+    }
+    localized = messages.get(language, messages[Language.EN])
+    return localized.get(action, messages[Language.EN][action])
+
+
+@app.post("/agent/plan", response_model=PageActionPlan, tags=["Agent"])
+@app.post("/api/v1/agent/plan", response_model=PageActionPlan, tags=["Agent"])
+def plan_page_action(payload: PageActionRequest) -> PageActionPlan:
+    """Plan only allow-listed page operations; the widget executes them locally."""
+    utterance = payload.utterance.strip()
+    lowered = utterance.casefold()
+    detected_code, detected_confidence = LanguageGuard.detect_language_with_confidence(
+        utterance, (payload.language or Language.EN).value
+    )
+    language = (
+        Language(detected_code)
+        if detected_code in {item.value for item in Language}
+        else (payload.language or Language.EN)
+    )
+    target = _action_target(utterance, payload.available_controls)
+    action = "none"
+    value: str | None = None
+    confidence = 0.25
+
+    if any(term in lowered for term in ("stop reading", "stop talking", "አቁም", "dhaabi", "ኣቋርጽ", "توقف عن القراءة")):
+        action, confidence = "stop_reading", 0.99
+    elif any(term in lowered for term in ("repeat", "say again", "ደግመህ", "irra deebi", "ደግም", "كرر")):
+        action, confidence = "repeat", 0.96
+    elif any(term in lowered for term in ("read this page", "read the page", "read page", "ገጹን አንብብ", "fuula kana dubbisi", "ገጽ ኣንብብ", "اقرأ الصفحة")):
+        action, confidence = "read_page", 0.98
+    elif any(term in lowered for term in ("read this section", "read section", "ክፍሉን አንብብ", "kutaa kana dubbisi", "اقرأ القسم")):
+        action, confidence = "read_section", 0.96
+    elif any(term in lowered for term in ("list buttons", "list controls", "what can i do", "አዝራሮችን ዘርዝር", "tarreessi", "اذكر الأزرار")):
+        action, confidence = "list_controls", 0.94
+    elif lowered in {"send", "submit", "apply", "ላክ", "ergo", "ስደድ", "إرسال", "أرسل"} or any(
+        term in lowered for term in ("submit form", "send form", "send message", "apply now")
+    ):
+        action, confidence = "submit", 0.96
+    else:
+        fill_match = re.search(
+            r"(?:type|enter|write|fill)\s+(.+?)\s+(?:in|into)\s+(.+)$", lowered
+        )
+        if fill_match:
+            action, value, confidence = "fill_control", fill_match.group(1).strip(), 0.9
+            target = target or fill_match.group(2).strip()
+        elif any(term in lowered for term in ("focus", "move to", "go to")):
+            action, confidence = "focus_control", 0.86
+        elif any(term in lowered for term in ("click", "press", "open", "select", "choose", "ክፈት", "اضغط", "افتح")):
+            action, confidence = "activate_control", 0.84
+
+    requires_confirmation = action in {"submit", "fill_control"}
+    if action == "activate_control" and target:
+        sensitive = {"send", "submit", "apply", "delete", "remove", "confirm", "pay"}
+        control = next(
+            (item for item in payload.available_controls if str(item.get("id")) == target),
+            {},
+        )
+        requires_confirmation = any(
+            term in str(control.get("label", "")).casefold() for term in sensitive
+        )
+
+    return PageActionPlan(
+        action=action,
+        target=target,
+        value=value,
+        spoken_confirmation=_spoken_action(action, language, target),
+        requires_confirmation=requires_confirmation,
+        confidence=max(confidence, detected_confidence if action != "none" else confidence),
+        language=language,
+    )
+
+
 @app.post("/ask", response_model=Answer, tags=["Tutor"])
 @app.post("/api/v1/ask", response_model=Answer, tags=["Tutor"])
 def ask(payload: AskRequest, _token: Any = Depends(verify_optional_token)) -> Answer:
     ai = get_ai_provider()
-    user_lang = payload.language
     question = payload.question.strip()
+    requested_lang = payload.language or Language.EN
+    detected_code, language_confidence = LanguageGuard.detect_language_with_confidence(
+        question, requested_lang.value
+    )
+    detected_lang = (
+        Language(detected_code)
+        if detected_code in {item.value for item in Language}
+        else requested_lang
+    )
+    user_lang = detected_lang if language_confidence >= 0.82 else requested_lang
+    language_changed = payload.language is not None and user_lang != payload.language
 
     # Record question anonymously for teacher stats (FR-39 / NFR-5)
     db.record_question(question)
@@ -310,6 +453,9 @@ def ask(payload: AskRequest, _token: Any = Depends(verify_optional_token)) -> An
             confidence=1.0,
             provider=ai.name,
             mocked=ai.is_mocked,
+            detected_language=detected_lang,
+            language_confidence=round(language_confidence, 2),
+            language_changed=language_changed,
         )
 
     # Ingest live platform content if provided directly by web widget
@@ -399,6 +545,9 @@ def ask(payload: AskRequest, _token: Any = Depends(verify_optional_token)) -> An
             confidence=round(confidence, 2),
             provider=ai.name,
             mocked=ai.is_mocked,
+            detected_language=detected_lang,
+            language_confidence=round(language_confidence, 2),
+            language_changed=language_changed,
         )
 
     # Generate answer from context
@@ -447,6 +596,9 @@ def ask(payload: AskRequest, _token: Any = Depends(verify_optional_token)) -> An
         confidence=round(confidence, 2),
         provider=ai.name,
         mocked=ai.is_mocked,
+        detected_language=detected_lang,
+        language_confidence=round(language_confidence, 2),
+        language_changed=language_changed,
     )
 
 
@@ -514,6 +666,8 @@ def link_start(payload: LinkStartRequest | None = None) -> LinkStartResponse:
         channel=channel,
         learner_ref=learner_ref,
         token=token,
+        platform_id=payload.platform_id if payload else "generic",
+        platform_name=payload.platform_name if payload else "this platform",
     )
     return LinkStartResponse(**link_data)
 
@@ -548,6 +702,7 @@ def link_confirm(
                 detail="Forbidden: Invalid or missing X-Bot-Secret header.",
             )
         token_to_verify = payload.token or payload.link_id or ""
+        link_context = db.get_link_context(token_to_verify)
         success, learner_ref, reason = db.verify_and_consume_token_link(
             token=token_to_verify,
             telegram_chat_id=payload.telegram_chat_id,
@@ -577,6 +732,7 @@ def link_confirm(
             channel="telegram",
             learner_ref=learner_ref,
             mocked=False,
+            **link_context,
         )
 
     # Legacy 6-digit code flow
@@ -596,6 +752,8 @@ def link_confirm(
         channel="telegram",
         learner_ref=learner_ref,
         mocked=False,
+        platform_id="generic",
+        platform_name="this platform",
     )
 
 
@@ -798,15 +956,24 @@ def match_alerts(payload: AlertMatchRequest) -> AlertMatchResponse:
 
 
 @app.get("/notification-settings", response_model=NotificationSettings, tags=["Alerts"])
-def get_notification_settings(_token: Any = Depends(verify_optional_token)) -> NotificationSettings:
-    return db.get_notification_settings("default")
+@app.get("/api/v1/notification-settings", response_model=NotificationSettings, tags=["Alerts"])
+def get_notification_settings(
+    learner_ref: str = "default", _token: Any = Depends(verify_optional_token)
+) -> NotificationSettings:
+    return db.get_notification_settings(learner_ref)
 
 
 @app.put("/notification-settings", response_model=NotificationSettings, tags=["Alerts"])
+@app.put("/api/v1/notification-settings", response_model=NotificationSettings, tags=["Alerts"])
 def put_notification_settings(
-    payload: NotificationSettings, _token: Any = Depends(verify_optional_token)
+    payload: NotificationSettings,
+    learner_ref: str = "default",
+    _token: Any = Depends(verify_optional_token),
 ) -> NotificationSettings:
-    return db.set_notification_settings("default", payload)
+    current = db.get_notification_settings(learner_ref)
+    updates = payload.model_dump(include=payload.model_fields_set)
+    merged = current.model_copy(update=updates)
+    return db.set_notification_settings(learner_ref, merged)
 
 
 @app.get("/learner/deadlines", response_model=DeadlineListResponse, tags=["Learner"])
@@ -884,9 +1051,17 @@ def draft_accommodation(payload: AccommodationDraftRequest) -> AccommodationDraf
 def transcribe_speech(payload: TranscriptionRequest) -> Transcription:
     from savanna_bridge.config import ADDIS_API_KEY
 
-    # Use Addis AI as preferred speech service for Amharic and Afaan Oromo
+    requested_language = payload.language
+    language_hint = Language.EN if requested_language == "auto" else requested_language
+
+    # Auto mode starts with multilingual Groq STT, then the normal resilient chain.
     ai = get_ai_provider()
-    if payload.language in (Language.AM, Language.OM) and ADDIS_API_KEY:
+    if requested_language == "auto":
+        from savanna_bridge.ai.groq import GroqProvider
+
+        groq = GroqProvider()
+        ai = groq if groq.keys.count else ai
+    elif language_hint in (Language.AM, Language.OM, Language.TI) and ADDIS_API_KEY:
         from savanna_bridge.ai.addis import AddisAiProvider
         addis = AddisAiProvider(api_key=ADDIS_API_KEY)
         if not addis.is_mocked:
@@ -899,16 +1074,37 @@ def transcribe_speech(payload: TranscriptionRequest) -> Transcription:
     text = ai.transcribe(
         audio_bytes=audio_bytes,
         media_type=payload.media_type,
-        language=payload.language,
+        language=language_hint,
         retain=payload.retain,
+    )
+    # Auto mode prefers Groq's multilingual Whisper endpoint. If both Groq
+    # credentials are unavailable, continue through the normal provider chain
+    # instead of returning Groq's deterministic offline transcript.
+    if requested_language == "auto" and ai.name == "groq" and ai.is_mocked:
+        ai = get_ai_provider()
+        text = ai.transcribe(
+            audio_bytes=audio_bytes,
+            media_type=payload.media_type,
+            language=language_hint,
+            retain=payload.retain,
+        )
+    detected_code, language_confidence = LanguageGuard.detect_language_with_confidence(
+        text, language_hint.value
+    )
+    detected_language = (
+        Language(detected_code)
+        if detected_code in {item.value for item in Language}
+        else language_hint
     )
     return Transcription(
         transcript=text,
-        language=payload.language,
+        language=detected_language,
         retained=payload.retain,  # Must be false by default
         editable=True,
         provider=ai.name,
         mocked=ai.is_mocked,
+        detected_language=detected_language,
+        language_confidence=round(language_confidence, 2),
     )
 
 
@@ -943,18 +1139,9 @@ def translate_text(payload: TranslationRequest) -> TranslationResponse:
     src = (payload.source_language or "en").lower().split("-")[0].strip()
     tgt = (payload.target_language or "am").lower().split("-")[0].strip()
 
-    local_langs = {"am", "om", "ti", "so"}
-    if src in local_langs or tgt in local_langs:
-        from savanna_bridge.ai.addis import AddisAiProvider
-
-        provider_name = "addis"
-        provider = AddisAiProvider()
-    else:
-        from savanna_bridge.ai.cloud import CloudProvider
-
-        provider_name = "gemini"
-        provider = CloudProvider()
-
+    # The multilingual router applies language-specific order and continues
+    # through Addis AI, Google, both rotating Groq keys, and offline fallback.
+    provider = get_ai_provider("multilingual")
     translated = provider.translate(payload.text, src, tgt)
 
     return TranslationResponse(
@@ -962,7 +1149,7 @@ def translate_text(payload: TranslationRequest) -> TranslationResponse:
         translation=translated,
         source_language=src,
         target_language=tgt,
-        provider=provider_name,
+        provider=provider.name,
         mocked=provider.is_mocked,
     )
 

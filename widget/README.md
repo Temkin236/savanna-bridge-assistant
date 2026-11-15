@@ -1,6 +1,6 @@
 # Savanna Bridge Assistant Widget (`<bridge-assistant>`)
 
-The **Savanna Bridge Assistant** is an embeddable, accessible Web Component built with vanilla TypeScript and Shadow DOM. It provides grounded learning Q&A, multilingual support in Amharic and English, voice input with editable preview, read-aloud playback, zero-proof support preferences, barrier-free account linking, and human mentor handoffs.
+The **Savanna Bridge Assistant** is an embeddable, accessible Web Component built with vanilla TypeScript and Shadow DOM. It provides grounded learning Q&A in English, Amharic, Afaan Oromo, Tigrinya, and Arabic; editable voice input; opt-in read-aloud playback; zero-proof support preferences; platform-aware Telegram linking; safe voice-driven page actions; and human mentor handoffs.
 
 Owned by **Person B** under the one-owner-per-folder agreement.
 
@@ -32,6 +32,8 @@ Add the following anywhere in your LMS, learning platform, or job portal:
 | `data-course` | No | `course_demo` | Course or content identifier used for context-bounded retrieval. |
 | `data-lang` | No | `en` | Initial UI language: `en` (English), `am` (Amharic), `om` (Afaan Oromo), or `ti` (Tigrinya). |
 | `data-token` | No | `null` | Optional HMAC-signed widget token issued by the host platform, forwarded as the `X-Widget-Token` HTTP header. |
+| `data-platform` | No | `generic` | Stable id for the LMS, job portal, or other embedding platform. |
+| `data-platform-name` | No | `this platform` | Human-readable name used in spoken prompts and Telegram notification consent. |
 
 ---
 
@@ -46,7 +48,8 @@ Add the following anywhere in your LMS, learning platform, or job portal:
 - **Low-Confidence Refusal:** Explains when content cannot be verified and provides a "Talk to a person" action button.
 
 ### Milestone B-M2: Voice, Support & Consent
-- **Voice Input with Editable Preview:** Captures speech via `MediaRecorder`, transcribes via `POST /speech/transcribe` with `retain: false`, and places the transcription directly into the text input for learner review/editing before sending.
+- **Voice Input with Editable Preview:** Starts only after explicit voice opt-in, transcribes with `retain: false`, detects confident per-turn language changes, and places ordinary questions in the input for review before sending.
+- **Spoken Setup and Safe Page Actions:** Reads onboarding choices on request, accepts spoken yes/no answers, and supports an allow-list such as read page, list controls, focus, activate, fill, and submit. Filling, submitting, and sensitive activation require spoken confirmation.
 - **Read-Aloud TTS on Every Answer:** Audio playback via `POST /speech/synthesize` (with Web Speech API fallback) featuring Play, Pause, and Speed controls (0.75x, 1x, 1.25x, 1.5x).
 - **Sound-Off Equivalence:** Full text answers remain visible at all times for Deaf/Hard-of-Hearing learners.
 - **Simple-Mode Switch:** Optional checkbox passes `simple_mode: true` to request shorter, plain-language explanations.
@@ -65,7 +68,7 @@ Add the following anywhere in your LMS, learning platform, or job portal:
 
 ### Milestone B-M4: Co-designer Polish & Verification
 - Self-contained build: No external runtime CDNs or polyfills.
-- Production bundle size: **~15.4 KB gzipped** (well under the 100 KB limit).
+- Production bundle size: **38.73 KB gzipped** for IIFE and **40.60 KB gzipped** for ES (under the 100 KB limit).
 - Interactive development host at `widget/dev/index.html`.
 
 ---
