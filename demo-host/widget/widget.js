@@ -1,7 +1,7 @@
-var S = Object.defineProperty;
-var L = (u, c, e) => c in u ? S(u, c, { enumerable: !0, configurable: !0, writable: !0, value: e }) : u[c] = e;
-var r = (u, c, e) => L(u, typeof c != "symbol" ? c + "" : c, e);
-const g = {
+var $ = Object.defineProperty;
+var C = (m, c, e) => c in m ? $(m, c, { enumerable: !0, configurable: !0, writable: !0, value: e }) : m[c] = e;
+var n = (m, c, e) => C(m, typeof c != "symbol" ? c + "" : c, e);
+const u = {
   en: {
     appTitle: "Savanna Bridge Assistant",
     appSubtitle: "Ask questions, adjust support, or connect with a mentor",
@@ -64,7 +64,20 @@ const g = {
     handoffReadyTitle: "Your Live Help Room is Ready",
     joinRoomButton: "Join Live Help Room ↗",
     leaveRoomButton: "Close Help Session",
-    androidFallbackNote: "Android note: Browser screen sharing (getDisplayMedia) is not supported in Chrome on Android. Your mentor automatically sees your active lesson URL, section, and focused element."
+    androidFallbackNote: "Android note: Browser screen sharing (getDisplayMedia) is not supported in Chrome on Android. Your mentor automatically sees your active lesson URL, section, and focused element.",
+    generalTab: "Display & Audio",
+    supportTab: "Support Needs",
+    linkTab: "Link Account",
+    handoffTab: "Live Help",
+    clearChatBtn: "Clear conversation",
+    generateCodeBtn: "Generate 6-digit code",
+    yourCodeIs: "Your 6-digit code:",
+    handoffConsentCheck: "I consent to connect with a human mentor",
+    handoffReasonLabel: "What do you need help with? (optional)",
+    handoffReasonPlaceholder: "e.g., I need help with Module 2 exercise...",
+    requestMentorBtn: "Request Human Mentor",
+    copyRoomBtn: "Copy Link",
+    linkCodeCopied: "Link copied to clipboard!"
   },
   am: {
     appTitle: "የሳቫና ብሪጅ ረዳት",
@@ -128,7 +141,20 @@ const g = {
     handoffReadyTitle: "የቀጥታ ድጋፍ ክፍልዎ ዝግጁ ነው",
     joinRoomButton: "ወደ ስብሰባው ክፍል ግባ ↗",
     leaveRoomButton: "ክፍለ-ጊዜውን ዝጋ",
-    androidFallbackNote: "የአንድሮይድ ማሳሰቢያ፡ በአንድሮይድ ክሮም ላይ የስክሪን ማጋራት አይደገፍም። አማካሪዎ እርስዎ ያሉበትን የትምህርት ገጽ እና ርዕስ በቀጥታ ይመለከታል።"
+    androidFallbackNote: "የአንድሮይድ ማሳሰቢያ፡ በአንድሮይድ ክሮም ላይ የስክሪን ማጋራት አይደገፍም። አማካሪዎ እርስዎ ያሉበትን የትምህርት ገጽ እና ርዕስ በቀጥታ ይመለከታል።",
+    generalTab: "እይታ እና ድምጽ",
+    supportTab: "የድጋፍ ፍላጎቶች",
+    linkTab: "መለያ አገናኝ",
+    handoffTab: "የቀጥታ ድጋፍ",
+    clearChatBtn: "ውይይቱን አጽዳ",
+    generateCodeBtn: "ባለ 6 አሃዝ ኮድ ፍጠር",
+    yourCodeIs: "የእርስዎ ባለ 6 አሃዝ ኮድ፡",
+    handoffConsentCheck: "ከሰው አማካሪ ጋር ለመገናኘት እስማማለሁ",
+    handoffReasonLabel: "በምን ላይ እርዳታ ይፈልጋሉ? (አማራጭ)",
+    handoffReasonPlaceholder: "ምሳሌ፡ በሞጁል 2 መልመጃ ላይ እገዛ እፈልጋለሁ...",
+    requestMentorBtn: "የሰው አማካሪ ጠይቅ",
+    copyRoomBtn: "ሊንኩን ቅዳ",
+    linkCodeCopied: "ሊንኩ ተቀድቷል!"
   },
   om: {
     appTitle: "Gargaaraa Savanna Bridge",
@@ -192,7 +218,20 @@ const g = {
     handoffReadyTitle: "Kutaan gargaarsaa qophiidha",
     joinRoomButton: "Kutaa Seenaa ↗",
     leaveRoomButton: "Kutaa Dhiisaa",
-    androidFallbackNote: "Iskiriinii qooduun Android irratti hin danda'amu."
+    androidFallbackNote: "Iskiriinii qooduun Android irratti hin danda'amu.",
+    generalTab: "Mul'ina",
+    supportTab: "Deeggarsa",
+    linkTab: "Herrega Walqabsiisi",
+    handoffTab: "Gargaarsa Kallattii",
+    clearChatBtn: "Haquu",
+    generateCodeBtn: "Koodii uumi",
+    yourCodeIs: "Koodii keessan:",
+    handoffConsentCheck: "Gorsaa waliin walqunnamuuf walii galeera",
+    handoffReasonLabel: "Waan gargaarsa barbaaddan:",
+    handoffReasonPlaceholder: "fkn: Kutaa 2ffaa...",
+    requestMentorBtn: "Gorsaa Gaafadhaa",
+    copyRoomBtn: "Waraabi",
+    linkCodeCopied: "Waraabameera!"
   },
   ti: {
     appTitle: "ናይ ሳቫና ብሪጅ ሓጋዚ",
@@ -256,7 +295,20 @@ const g = {
     handoffReadyTitle: "ናይ ሓገዝ ክፍሊ ድሉው እዩ",
     joinRoomButton: "ናብ ክፍሊ እቶ ↗",
     leaveRoomButton: "ክፍሊ ዕጾ",
-    androidFallbackNote: "ኣብ አንድሮይድ ስክሪን ምክፋል ኣይድገፍን።"
+    androidFallbackNote: "ኣብ አንድሮይድ ስክሪን ምክፋል ኣይድገፍን።",
+    generalTab: "ምርኣይ",
+    supportTab: "ሓገዝ",
+    linkTab: "ሕሳብ ኣላግብ",
+    handoffTab: "ቀጥታዊ ሓገዝ",
+    clearChatBtn: "ኣጽርዮ",
+    generateCodeBtn: "ኮድ ፍጠር",
+    yourCodeIs: "ናይ ስድሽተ ኣሃዝ ኮድኩም፡",
+    handoffConsentCheck: "ምስ መካሪ ንምርኻብ ተሰማሚዐ ኣለኹ",
+    handoffReasonLabel: "እንታይ ሓገዝ የድልየኩም?",
+    handoffReasonPlaceholder: "ንኣብነት፡ ኣብ ሞጁል 2...",
+    requestMentorBtn: "ናይ ሰብ ሓገዝ ሕተት",
+    copyRoomBtn: "ቅዳሕ",
+    linkCodeCopied: "ተቐዲሑ ኣሎ!"
   },
   ar: {
     appTitle: "مساعد سافانا بريدج",
@@ -320,9 +372,22 @@ const g = {
     handoffReadyTitle: "غرفة المساعدة المباشرة جاهزة",
     joinRoomButton: "الانضمام للغرفة ↗",
     leaveRoomButton: "إغلاق الجلسة",
-    androidFallbackNote: "ملاحظة أندرويد: مشاركة الشاشة عبر المتصفح غير مدعومة على متصفح Chrome لنظام أندرويد."
+    androidFallbackNote: "ملاحظة أندرويد: مشاركة الشاشة عبر المتصفح غير مدعومة على متصفح Chrome لنظام أندرويد.",
+    generalTab: "العرض والصوت",
+    supportTab: "احتياجات الدعم",
+    linkTab: "ربط الحساب",
+    handoffTab: "المساعدة المباشرة",
+    clearChatBtn: "مسح المحادثة",
+    generateCodeBtn: "توليد رمز مكون من 6 أرقام",
+    yourCodeIs: "رمزك المكون من 6 أرقام:",
+    handoffConsentCheck: "أوافق على التواصل مع مرشد بشري",
+    handoffReasonLabel: "ما الذي تحتاج إلى مساعدة فيه؟ (اختياري)",
+    handoffReasonPlaceholder: "مثال: أحتاج مساعدة في تمرين الوحدة 2...",
+    requestMentorBtn: "طلب مساعدة بشرية",
+    copyRoomBtn: "نسخ الرابط",
+    linkCodeCopied: "تم نسخ الرابط بنجاح!"
   }
-}, $ = `
+}, _ = `
   :host {
     --b-font: var(--bs-body-font-family, system-ui, -apple-system, "Noto Sans Ethiopic", "Nyala", sans-serif);
     --b-bg: var(--bs-body-bg, #ffffff);
@@ -788,62 +853,62 @@ const g = {
     accent-color: var(--b-primary);
   }
 `;
-class x extends HTMLElement {
+class T extends HTMLElement {
   constructor() {
     super(...arguments);
-    r(this, "isOpen", !1);
-    r(this, "currentLang", "en");
-    r(this, "textSize", "normal");
-    r(this, "highContrast", !1);
-    r(this, "simpleMode", !1);
-    r(this, "isOffline", !navigator.onLine);
-    r(this, "isThinking", !1);
-    r(this, "isRecording", !1);
-    r(this, "mediaRecorder", null);
-    r(this, "audioChunks", []);
-    r(this, "activeAudio", null);
-    r(this, "messages", []);
-    r(this, "sessionId", `sess_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`);
+    n(this, "isOpen", !1);
+    n(this, "currentLang", "en");
+    n(this, "textSize", "normal");
+    n(this, "highContrast", !1);
+    n(this, "simpleMode", !1);
+    n(this, "isOffline", !navigator.onLine);
+    n(this, "isThinking", !1);
+    n(this, "isRecording", !1);
+    n(this, "mediaRecorder", null);
+    n(this, "audioChunks", []);
+    n(this, "activeAudio", null);
+    n(this, "messages", []);
+    n(this, "sessionId", `sess_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`);
     // Telegram link state
-    r(this, "telegramToken", null);
-    r(this, "telegramDeepLink", "https://t.me/savannah_assistant3_bot");
-    r(this, "isTelegramLinked", !1);
-    r(this, "telegramPollTimer", null);
+    n(this, "telegramToken", null);
+    n(this, "telegramDeepLink", "https://t.me/savannah_assistant3_bot");
+    n(this, "isTelegramLinked", !1);
+    n(this, "telegramPollTimer", null);
     // Settings dialog visibility
-    r(this, "isSettingsOpen", !1);
+    n(this, "isSettingsOpen", !1);
     // Active Handoff state
-    r(this, "activeHandoff", null);
+    n(this, "activeHandoff", null);
     // Support needs
-    r(this, "supportNeeds", {
+    n(this, "supportNeeds", {
       needs: ["written_instructions"],
       other_text: "",
       preferred_contact_mode: "text"
     });
-    r(this, "previousFocus", null);
+    n(this, "previousFocus", null);
   }
   // Attributes: supports both guide plain attributes (lang, api, content) and data-*
   get apiBase() {
-    return this.getAttribute("api") || this.getAttribute("data-api") || "http://localhost:8000";
+    return (this.getAttribute("api") || this.getAttribute("data-api") || this.getAttribute("api-base") || "http://localhost:8000").replace(/\/$/, "");
   }
   get courseId() {
-    return this.getAttribute("content") || this.getAttribute("data-course") || "course_demo";
+    return this.getAttribute("content") || this.getAttribute("data-course") || this.getAttribute("course-id") || "course_demo";
   }
   static get observedAttributes() {
-    return ["lang", "data-lang", "api", "data-api", "content", "data-course"];
+    return ["lang", "data-lang", "api", "data-api", "api-base", "content", "data-course", "course-id"];
   }
   attributeChangedCallback(e, t, a) {
-    t !== a && (e === "lang" || e === "data-lang") && a in g && (this.currentLang = a, this.shadowRoot && this.render());
+    t !== a && (e === "lang" || e === "data-lang") && a in u && this.setLanguage(a);
   }
   connectedCallback() {
     if (this.shadowRoot) return;
-    const e = this.getAttribute("lang") || this.getAttribute("data-lang"), t = sessionStorage.getItem("savanna_bridge_lang");
-    e && e in g ? this.currentLang = e : t && t in g && (this.currentLang = t), this.restoreState(), this.attachShadow({ mode: "open" }), this.render(), this.setupNetworkMonitor(), this.fetchTelegramStartLink(), this.fetchSupportNeeds();
+    const e = this.getAttribute("lang") || this.getAttribute("data-lang"), t = sessionStorage.getItem("savanna_bridge_lang"), a = document.documentElement.lang?.slice(0, 2);
+    e && e in u ? this.currentLang = e : t && t in u ? this.currentLang = t : a && a in u ? this.currentLang = a : this.currentLang = "en", this.restoreState(), this.attachShadow({ mode: "open" }), this.render(), this.setupNetworkMonitor(), this.fetchTelegramStartLink(), this.fetchSupportNeeds();
   }
   disconnectedCallback() {
     this.telegramPollTimer && (window.clearInterval(this.telegramPollTimer), this.telegramPollTimer = null);
   }
   t(e) {
-    return (g[this.currentLang] || g.en)[e] || g.en[e] || e;
+    return (u[this.currentLang] || u.en)[e] || u.en[e] || e;
   }
   announce(e) {
     const t = this.shadowRoot?.querySelector("#live-announcer");
@@ -852,7 +917,29 @@ class x extends HTMLElement {
     }, 50));
   }
   setLanguage(e) {
-    this.currentLang = e, sessionStorage.setItem("savanna_bridge_lang", e), this.render();
+    this.currentLang !== e && (this.currentLang = e, sessionStorage.setItem("savanna_bridge_lang", e), this.setAttribute("lang", e), this.setAttribute("dir", e === "ar" ? "rtl" : "ltr"), this.messages = [], sessionStorage.removeItem("savanna_bridge_chat_history"), this.render(), this.announce(this.t("appTitle")));
+  }
+  clearChat() {
+    this.messages = [], sessionStorage.removeItem("savanna_bridge_chat_history"), this.renderMessages(), this.announce(this.t("emptyWelcome"));
+  }
+  async generateLinkCode() {
+    try {
+      const e = await fetch(`${this.apiBase}/api/v1/link/start`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          session_id: this.sessionId,
+          channel: "web",
+          learner_reference: `learner_${this.sessionId}`
+        })
+      });
+      if (e.ok) {
+        const t = await e.json(), a = this.shadowRoot?.querySelector("#code-display");
+        a && (a.textContent = t.token, a.style.display = "block", this.announce(`${this.t("yourCodeIs")} ${t.token}`));
+      }
+    } catch (e) {
+      console.warn("Failed to generate link code", e);
+    }
   }
   setupNetworkMonitor() {
     window.addEventListener("online", () => {
@@ -881,6 +968,8 @@ class x extends HTMLElement {
       t && (this.highContrast = t === "high");
       const a = localStorage.getItem("savanna_bridge_text_size");
       a && (this.textSize = a);
+      const i = localStorage.getItem("savanna_bridge_simple_mode");
+      i && (this.simpleMode = i === "true");
     } catch {
     }
   }
@@ -1029,25 +1118,25 @@ class x extends HTMLElement {
   async sendAudioForTranscription(e, t, a) {
     this.announce(this.t("transcribingState"));
     try {
-      const i = new FileReader(), s = new Promise((d, m) => {
+      const i = new FileReader(), s = new Promise((d, f) => {
         i.onloadend = () => {
           const p = i.result;
           d(p.split(",")[1] || "");
-        }, i.onerror = m;
+        }, i.onerror = f;
       });
       i.readAsDataURL(e);
-      const l = await s, h = await fetch(`${this.apiBase}/api/v1/speech/transcribe`, {
+      const r = await s, g = await fetch(`${this.apiBase}/api/v1/speech/transcribe`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          audio_base64: l,
+          audio_base64: r,
           media_type: t,
           language: this.currentLang,
           retain: !1
         })
       });
-      if (h.ok) {
-        const d = await h.json();
+      if (g.ok) {
+        const d = await g.json();
         d.transcript && (a.value = (a.value ? a.value + " " : "") + d.transcript, a.focus(), this.announce(this.t("voicePreviewNotice")));
       }
     } catch {
@@ -1129,14 +1218,15 @@ class x extends HTMLElement {
           channel: "web"
         })
       })), this.isThinking = !1, s.ok) {
-        const l = await s.json(), h = !!l.offer_human || l.reason === "low_confidence", d = {
+        const r = await s.json(), g = !!r.offer_human || r.reason === "low_confidence", d = {
           id: `msg_${Date.now()}_assistant`,
           sender: "assistant",
-          text: l.answer,
+          text: r.answer,
           heading: this.t("answerHeading"),
-          citations: l.citations || [],
-          offerHuman: l.offer_human,
-          isRefusal: h
+          citations: r.citations || [],
+          offerHuman: r.offer_human,
+          isRefusal: g,
+          originalQuestion: a
         };
         this.messages.push(d), this.saveChatState();
       } else
@@ -1186,23 +1276,39 @@ class x extends HTMLElement {
         })
       });
       if (t.ok) {
-        const a = await t.json(), i = a.ticketId || a.id || "ticket_01";
+        const a = await t.json(), i = a.ticketId || a.id || "ticket_01", s = a.room_url || a.roomUrl || "https://meet.jit.si/savanna-bridge-demo";
         this.activeHandoff = {
           id: i,
-          room_url: a.room_url || "https://meet.jit.si/savanna-bridge-demo"
+          room_url: s
         }, this.dispatchEvent(
           new CustomEvent("db-assistant:escalated", {
             bubbles: !0,
             composed: !0,
-            detail: { ticketId: i }
+            detail: { ticketId: i, roomUrl: s }
           })
         ), this.messages.push({
           id: `msg_${Date.now()}_handoff`,
           sender: "assistant",
-          text: `${this.t("handoffReadyTitle")}: ${this.activeHandoff.room_url}`,
+          text: this.t("handoffReadyTitle"),
           heading: this.t("handoffReadyTitle"),
+          isHandoff: !0,
+          roomUrl: s,
           offerHuman: !1
-        }), this.renderMessages();
+        });
+        const r = this.shadowRoot?.querySelector("#handoff-room-box");
+        r && (r.innerHTML = `
+            <div style="padding:0.75rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:0.5rem; margin-top:0.75rem;">
+              <p style="margin:0 0 0.5rem 0; font-size:0.875rem; font-weight:600; color:#166534;">🎉 ${this.t("handoffReadyTitle")}</p>
+              <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                <a href="${s}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="text-decoration:none; display:inline-flex; align-items:center; gap:0.375rem;">
+                  🎥 ${this.t("joinRoomButton")}
+                </a>
+                <button type="button" class="btn btn-secondary btn-copy-room" data-url="${this.escapeHtml(s)}" style="font-size:0.8125rem; min-height:2.25rem;">
+                  📋 ${this.t("copyRoomBtn")}
+                </button>
+              </div>
+            </div>
+          `), this.renderMessages();
       } else
         alert(this.t("serverErrorNotice"));
     } catch {
@@ -1210,9 +1316,14 @@ class x extends HTMLElement {
     }
   }
   // --- Rendering ---
+  updateSizeButtons() {
+    this.shadowRoot && (this.shadowRoot.querySelectorAll(".size-btn-group button").forEach((e) => {
+      e.setAttribute("aria-pressed", "false");
+    }), this.textSize === "smaller" ? this.shadowRoot.querySelector("#btn-size-smaller")?.setAttribute("aria-pressed", "true") : this.textSize === "larger" ? this.shadowRoot.querySelector("#btn-size-larger")?.setAttribute("aria-pressed", "true") : this.shadowRoot.querySelector("#btn-size-normal")?.setAttribute("aria-pressed", "true"));
+  }
   render() {
-    this.shadowRoot && (this.setAttribute("data-contrast", this.highContrast ? "high" : "normal"), this.setAttribute("data-size", this.textSize), this.setAttribute("dir", this.currentLang === "ar" ? "rtl" : "ltr"), this.shadowRoot.innerHTML = `
-      <style>${$}</style>
+    this.shadowRoot && (this.setAttribute("data-contrast", this.highContrast ? "high" : "normal"), this.setAttribute("data-size", this.textSize), this.setAttribute("dir", this.currentLang === "ar" ? "rtl" : "ltr"), this.setAttribute("lang", this.currentLang), this.shadowRoot.innerHTML = `
+      <style>${_}</style>
 
       <!-- Live Announcer -->
       <div id="live-announcer" class="sr-only" aria-live="polite" aria-atomic="true" style="position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); border:0;"></div>
@@ -1234,16 +1345,18 @@ class x extends HTMLElement {
         <!-- Header -->
         <header class="header">
           <div class="header-titles">
-            <h2 id="dialog-title" class="title">${this.t("appTitle")}</h2>
+            <h2 id="dialog-title" class="title"><span id="bridge-title">${this.t("appTitle")}</span></h2>
           </div>
           <div class="header-actions">
-            <!-- Language Switcher in native script -->
-            <button type="button" class="lang-toggle-btn" id="btn-lang-am" 
-                    aria-pressed="${this.currentLang === "am"}" aria-label="ቋንቋ ወደ አማርኛ ቀይር">
-              አማርኛ
+            <!-- Language Switcher in native script with English adaptation -->
+            <button type="button" class="lang-toggle-btn lang-btn" id="btn-lang-am" 
+                    aria-pressed="${this.currentLang === "am"}" 
+                    aria-label="${this.currentLang === "en" ? "Switch to Amharic" : "ቋንቋ ወደ አማርኛ ቀይር"}">
+              ${this.currentLang === "en" ? "Amharic" : "አማርኛ"}
             </button>
-            <button type="button" class="lang-toggle-btn" id="btn-lang-en" 
-                    aria-pressed="${this.currentLang === "en"}" aria-label="Switch to English">
+            <button type="button" class="lang-toggle-btn lang-btn" id="btn-lang-en" 
+                    aria-pressed="${this.currentLang === "en"}" 
+                    aria-label="${this.currentLang === "en" ? "English (active)" : "ወደ እንግሊዝኛ ቀይር"}">
               English
             </button>
             <!-- Settings Button -->
@@ -1266,7 +1379,7 @@ class x extends HTMLElement {
         <footer class="footer">
           <!-- Top Row: Input, Mic, Send -->
           <form class="input-row" id="chat-form">
-            <input type="text" class="text-input" id="chat-input" 
+            <input type="text" class="text-input" id="chat-text-input" data-id="chat-input"
                    placeholder="${this.t("inputPlaceholder")}" 
                    aria-label="${this.t("inputPlaceholder")}" 
                    required autocomplete="off">
@@ -1274,14 +1387,14 @@ class x extends HTMLElement {
                     aria-label="${this.t("micLabel")}" title="${this.t("micLabel")}">
               🎤
             </button>
-            <button type="submit" class="btn btn-primary" id="btn-send">
+            <button type="submit" class="btn btn-primary" id="send-btn" data-id="btn-send">
               ${this.t("sendButton")}
             </button>
           </form>
 
           <!-- Bottom Row: Talk to a person & Continue on Telegram -->
           <div class="footer-actions-row">
-            <button type="button" class="btn btn-secondary btn-footer" id="btn-footer-handoff">
+            <button type="button" class="btn btn-secondary btn-footer btn-talk-person" id="btn-footer-handoff">
               👤 ${this.t("talkToPersonButton")}
             </button>
             <div id="telegram-container" class="telegram-section">
@@ -1290,7 +1403,7 @@ class x extends HTMLElement {
           </div>
         </footer>
 
-        <!-- Settings Dialog Modal Overlay -->
+        <!-- Settings Dialog Modal Overlay with Full Tabbed Support -->
         <div id="settings-dialog" class="settings-dialog" ${this.isSettingsOpen ? "" : "hidden"} role="region" aria-labelledby="settings-dialog-title">
           <div class="settings-header">
             <h3 id="settings-dialog-title" style="margin:0; font-size:1.125rem;">${this.t("settingsTitle")}</h3>
@@ -1299,94 +1412,162 @@ class x extends HTMLElement {
             </button>
           </div>
 
-          <!-- Text Size -->
-          <div class="settings-section">
-            <span class="settings-label">${this.t("textSizeLabel")}</span>
-            <div class="size-btn-group">
-              <button type="button" class="btn btn-secondary" id="btn-size-smaller" aria-pressed="${this.textSize === "smaller"}">
-                ${this.t("textSmaller")}
-              </button>
-              <button type="button" class="btn btn-secondary" id="btn-size-normal" aria-pressed="${this.textSize === "normal"}">
-                ${this.t("textNormal")}
-              </button>
-              <button type="button" class="btn btn-secondary" id="btn-size-larger" aria-pressed="${this.textSize === "larger"}">
-                ${this.t("textLarger")}
+          <!-- Settings Tab Buttons -->
+          <div class="settings-tabs" role="tablist" style="display:flex; gap:0.25rem; margin-bottom:1rem; border-bottom:1px solid var(--b-border); padding-bottom:0.5rem; overflow-x:auto;">
+            <button type="button" class="btn btn-primary settings-tab-btn" id="tab-general" role="tab" aria-selected="true" style="font-size:0.8125rem; min-height:2.25rem; padding:0.25rem 0.5rem;">
+              ${this.t("generalTab")}
+            </button>
+            <button type="button" class="btn btn-secondary settings-tab-btn" id="tab-support" role="tab" aria-selected="false" style="font-size:0.8125rem; min-height:2.25rem; padding:0.25rem 0.5rem;">
+              ${this.t("supportTab")}
+            </button>
+            <button type="button" class="btn btn-secondary settings-tab-btn" id="tab-link" role="tab" aria-selected="false" style="font-size:0.8125rem; min-height:2.25rem; padding:0.25rem 0.5rem;">
+              ${this.t("linkTab")}
+            </button>
+            <button type="button" class="btn btn-secondary settings-tab-btn" id="tab-handoff" role="tab" aria-selected="false" style="font-size:0.8125rem; min-height:2.25rem; padding:0.25rem 0.5rem;">
+              ${this.t("handoffTab")}
+            </button>
+          </div>
+
+          <!-- Tab Content 1: General (Display, Font, Contrast, Mode, Clear) -->
+          <div id="pane-general" class="settings-pane">
+            <!-- Text Size -->
+            <div class="settings-section">
+              <span class="settings-label">${this.t("textSizeLabel")}</span>
+              <div class="size-btn-group">
+                <button type="button" class="btn btn-secondary" id="btn-size-smaller" aria-pressed="${this.textSize === "smaller"}">
+                  ${this.t("textSmaller")}
+                </button>
+                <button type="button" class="btn btn-secondary" id="btn-size-normal" aria-pressed="${this.textSize === "normal"}">
+                  ${this.t("textNormal")}
+                </button>
+                <button type="button" class="btn btn-secondary" id="btn-size-larger" aria-pressed="${this.textSize === "larger"}">
+                  ${this.t("textLarger")}
+                </button>
+              </div>
+            </div>
+
+            <!-- High Contrast -->
+            <div class="settings-section">
+              <label class="checkbox-row">
+                <input type="checkbox" id="chk-contrast" ${this.highContrast ? "checked" : ""}>
+                <span class="settings-label">${this.t("highContrastLabel")}</span>
+              </label>
+            </div>
+
+            <!-- Simple Mode -->
+            <div class="settings-section">
+              <label class="checkbox-row">
+                <input type="checkbox" id="chk-simple-mode" ${this.simpleMode ? "checked" : ""}>
+                <div>
+                  <span class="settings-label">${this.t("simpleModeLabel")}</span>
+                  <div style="font-size:0.75rem; color:var(--b-text-muted);">${this.t("simpleModeDesc")}</div>
+                </div>
+              </label>
+            </div>
+
+            <!-- Clear Chat -->
+            <div class="settings-section" style="border-top:1px solid var(--b-border); padding-top:0.75rem;">
+              <button type="button" class="btn btn-secondary" id="btn-clear-chat" style="font-size:0.875rem; width:100%;">
+                🗑️ ${this.t("clearChatBtn")}
               </button>
             </div>
           </div>
 
-          <!-- High Contrast -->
-          <div class="settings-section">
-            <label class="checkbox-row">
-              <input type="checkbox" id="chk-contrast" ${this.highContrast ? "checked" : ""}>
-              <span class="settings-label">${this.t("highContrastLabel")}</span>
-            </label>
-          </div>
-
-          <!-- Simple Mode -->
-          <div class="settings-section">
-            <label class="checkbox-row">
-              <input type="checkbox" id="chk-simple-mode" ${this.simpleMode ? "checked" : ""}>
-              <div>
-                <span class="settings-label">${this.t("simpleModeLabel")}</span>
-                <div style="font-size:0.75rem; color:var(--b-text-muted);">${this.t("simpleModeDesc")}</div>
+          <!-- Tab Content 2: Support Preferences -->
+          <div id="pane-support" class="settings-pane" style="display:none;">
+            <div class="settings-section">
+              <span class="settings-label">${this.t("supportNeedsTitle")}</span>
+              <div style="font-size:0.75rem; color:var(--b-text-muted); margin-bottom:0.5rem;">
+                ${this.t("supportZeroProof")}
               </div>
-            </label>
-          </div>
 
-          <!-- Support Needs -->
-          <div class="settings-section" style="border-top:1px solid var(--b-border); padding-top:0.75rem;">
-            <span class="settings-label">${this.t("supportNeedsTitle")}</span>
-            <div style="font-size:0.75rem; color:var(--b-text-muted); margin-bottom:0.5rem;">
-              ${this.t("supportZeroProof")}
+              <form id="support-form" style="display:flex; flex-direction:column; gap:0.5rem;">
+                <label class="checkbox-row">
+                  <input type="checkbox" name="need" value="extra_time" 
+                         ${this.supportNeeds.needs.includes("extra_time") ? "checked" : ""}>
+                  <span style="font-size:0.875rem;">${this.t("needExtraTime")}</span>
+                </label>
+
+                <label class="checkbox-row">
+                  <input type="checkbox" name="need" value="screen_reader_help" 
+                         ${this.supportNeeds.needs.includes("screen_reader_help") ? "checked" : ""}>
+                  <span style="font-size:0.875rem;">${this.t("needScreenReader")}</span>
+                </label>
+
+                <label class="checkbox-row">
+                  <input type="checkbox" name="need" value="written_instructions" 
+                         ${this.supportNeeds.needs.includes("written_instructions") ? "checked" : ""}>
+                  <span style="font-size:0.875rem;">${this.t("needWritten")}</span>
+                </label>
+
+                <label class="checkbox-row">
+                  <input type="checkbox" name="need" value="other" 
+                         ${this.supportNeeds.needs.includes("other") || this.supportNeeds.other_text ? "checked" : ""}>
+                  <span style="font-size:0.875rem;">${this.t("needOther")}</span>
+                </label>
+
+                <textarea name="other_text" class="text-input" style="min-height:3.5rem;" 
+                          placeholder="${this.t("otherPlaceholder")}">${this.supportNeeds.other_text || ""}</textarea>
+
+                <label style="font-size:0.875rem; font-weight:600; margin-top:0.25rem;">
+                  ${this.t("contactModeLabel")}
+                  <select name="contact_mode" class="text-input" style="margin-top:0.25rem; min-height:2.5rem;">
+                    <option value="text" ${this.supportNeeds.preferred_contact_mode === "text" ? "selected" : ""}>${this.t("modeText")}</option>
+                    <option value="voice" ${this.supportNeeds.preferred_contact_mode === "voice" ? "selected" : ""}>${this.t("modeVoice")}</option>
+                    <option value="video" ${this.supportNeeds.preferred_contact_mode === "video" ? "selected" : ""}>${this.t("modeVideo")}</option>
+                    <option value="telegram" ${this.supportNeeds.preferred_contact_mode === "telegram" ? "selected" : ""}>${this.t("modeTelegram")}</option>
+                  </select>
+                </label>
+
+                <div id="support-saved-notice" class="support-saved-notice" hidden style="color:#166534; font-size:0.8125rem; font-weight:600;">
+                  ✓ ${this.t("supportSavedNotice")}
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="margin-top:0.25rem;">
+                  ${this.t("saveSupportBtn")}
+                </button>
+              </form>
             </div>
+          </div>
 
-            <form id="support-form" style="display:flex; flex-direction:column; gap:0.5rem;">
-              <label class="checkbox-row">
-                <input type="checkbox" name="need" value="extra_time" 
-                       ${this.supportNeeds.needs.includes("extra_time") ? "checked" : ""}>
-                <span style="font-size:0.875rem;">${this.t("needExtraTime")}</span>
-              </label>
-
-              <label class="checkbox-row">
-                <input type="checkbox" name="need" value="screen_reader_help" 
-                       ${this.supportNeeds.needs.includes("screen_reader_help") ? "checked" : ""}>
-                <span style="font-size:0.875rem;">${this.t("needScreenReader")}</span>
-              </label>
-
-              <label class="checkbox-row">
-                <input type="checkbox" name="need" value="written_instructions" 
-                       ${this.supportNeeds.needs.includes("written_instructions") ? "checked" : ""}>
-                <span style="font-size:0.875rem;">${this.t("needWritten")}</span>
-              </label>
-
-              <label class="checkbox-row">
-                <input type="checkbox" name="need" value="other" 
-                       ${this.supportNeeds.needs.includes("other") || this.supportNeeds.other_text ? "checked" : ""}>
-                <span style="font-size:0.875rem;">${this.t("needOther")}</span>
-              </label>
-
-              <textarea name="other_text" class="text-input" style="min-height:3.5rem;" 
-                        placeholder="${this.t("otherPlaceholder")}">${this.supportNeeds.other_text || ""}</textarea>
-
-              <label style="font-size:0.875rem; font-weight:600; margin-top:0.25rem;">
-                ${this.t("contactModeLabel")}
-                <select name="contact_mode" class="text-input" style="margin-top:0.25rem; min-height:2.5rem;">
-                  <option value="text" ${this.supportNeeds.preferred_contact_mode === "text" ? "selected" : ""}>${this.t("modeText")}</option>
-                  <option value="voice" ${this.supportNeeds.preferred_contact_mode === "voice" ? "selected" : ""}>${this.t("modeVoice")}</option>
-                  <option value="video" ${this.supportNeeds.preferred_contact_mode === "video" ? "selected" : ""}>${this.t("modeVideo")}</option>
-                  <option value="telegram" ${this.supportNeeds.preferred_contact_mode === "telegram" ? "selected" : ""}>${this.t("modeTelegram")}</option>
-                </select>
-              </label>
-
-              <div id="support-saved-notice" hidden style="color:#166534; font-size:0.8125rem; font-weight:600;">
-                ✓ ${this.t("supportSavedNotice")}
-              </div>
-
-              <button type="submit" class="btn btn-primary" style="margin-top:0.25rem;">
-                ${this.t("saveSupportBtn")}
+          <!-- Tab Content 3: Account Linking -->
+          <div id="pane-link" class="settings-pane" style="display:none;">
+            <div class="settings-section">
+              <span class="settings-label">${this.t("linkTab")}</span>
+              <p style="font-size:0.8125rem; color:var(--b-text-muted); margin:0.25rem 0 0.75rem 0;">
+                ${this.t("supportZeroProof")}
+              </p>
+              <button type="button" class="btn btn-primary" id="btn-generate-code" style="width:100%;">
+                🔑 ${this.t("generateCodeBtn")}
               </button>
-            </form>
+              <div class="code-display" id="code-display" style="display:none; font-size:1.5rem; font-weight:700; letter-spacing:0.25em; text-align:center; padding:0.75rem; background:#f8fafc; border:1px solid #cbd5e1; border-radius:0.5rem; margin-top:0.75rem;">
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab Content 4: Live Help Handoff -->
+          <div id="pane-handoff" class="settings-pane" style="display:none;">
+            <div class="settings-section">
+              <span class="settings-label">${this.t("handoffTab")}</span>
+              <p style="font-size:0.8125rem; color:var(--b-text-muted); margin:0.25rem 0 0.75rem 0;">
+                ${this.t("appSubtitle")}
+              </p>
+              <form id="handoff-request-form" style="display:flex; flex-direction:column; gap:0.5rem;">
+                <label class="checkbox-row">
+                  <input type="checkbox" id="handoff-consent" required checked>
+                  <span style="font-size:0.8125rem;">${this.t("handoffConsentCheck")}</span>
+                </label>
+                <label style="font-size:0.8125rem; font-weight:600;">
+                  ${this.t("handoffReasonLabel")}
+                  <input type="text" id="handoff-reason" class="text-input" style="margin-top:0.25rem;" 
+                         placeholder="${this.t("handoffReasonPlaceholder")}">
+                </label>
+                <button type="submit" class="btn btn-primary" id="btn-submit-handoff">
+                  👥 ${this.t("requestMentorBtn")}
+                </button>
+              </form>
+              <div id="handoff-room-box" style="margin-top:0.5rem;"></div>
+            </div>
           </div>
 
         </div>
@@ -1429,16 +1610,31 @@ class x extends HTMLElement {
               <p class="answer-text" style="margin:0;">${this.escapeHtml(t.text)}</p>
             </div>
           `;
-        const a = t.citations && t.citations.length > 0, i = !!t.isRefusal;
+        const a = t.citations && t.citations.length > 0, i = !!t.isRefusal, s = t.isHandoff ? this.t("handoffReadyTitle") : this.t("answerHeading");
         return `
           <div class="msg-row msg-assistant" id="${t.id}">
-            <h4 class="answer-heading">${this.escapeHtml(t.heading || this.t("answerHeading"))}</h4>
+            <h4 class="answer-heading">${this.escapeHtml(s)}</h4>
             <p class="answer-text">${this.escapeHtml(t.text)}</p>
 
+            ${t.isHandoff ? `
+                <div class="handoff-card" style="margin-top:0.75rem; padding:0.75rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:0.5rem;">
+                  <p style="margin:0 0 0.5rem 0; font-size:0.875rem; font-weight:600; color:#166534;">🎉 ${this.t("handoffReadyTitle")}</p>
+                  <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                    <a href="${this.escapeHtml(t.roomUrl || this.activeHandoff?.room_url || "https://meet.jit.si/savanna-bridge-demo")}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" id="btn-join-room-card" style="text-decoration:none; display:inline-flex; align-items:center; gap:0.375rem;">
+                      🎥 ${this.t("joinRoomButton")}
+                    </a>
+                    <button type="button" class="btn btn-secondary btn-copy-room" data-url="${this.escapeHtml(t.roomUrl || this.activeHandoff?.room_url || "https://meet.jit.si/savanna-bridge-demo")}" style="font-size:0.8125rem; min-height:2.25rem;">
+                      📋 ${this.t("copyRoomBtn")}
+                    </button>
+                  </div>
+                  <div style="font-size:0.75rem; color:#15803d; margin-top:0.5rem;">${this.t("androidFallbackNote")}</div>
+                </div>
+              ` : ""}
+
             ${i ? `
-                <div class="not-verified-box" role="alert">
+                <div class="not-verified-box refusal-box" role="alert">
                   <div>${this.t("notVerifiedNotice")}</div>
-                  <div style="display:flex; gap:0.375rem; flex-wrap:wrap;">
+                  <div style="display:flex; gap:0.375rem; flex-wrap:wrap; margin-top:0.5rem;">
                     <button type="button" class="btn btn-primary btn-talk-person" data-msg-id="${t.id}" style="font-size:0.8125rem; min-height:2.25rem;">
                       👤 ${this.t("talkToPersonButton")}
                     </button>
@@ -1464,9 +1660,9 @@ class x extends HTMLElement {
                 <div class="sources-box">
                   <div class="sources-title">${this.t("sourcesTitle")}</div>
                   ${t.citations.map(
-          (s) => `
-                    <a href="${this.escapeHtml(s.url)}" target="_blank" rel="noopener noreferrer" class="source-link">
-                      📖 ${this.escapeHtml(s.title || s.heading)}
+          (r) => `
+                    <a href="${this.escapeHtml(r.url)}" target="_blank" rel="noopener noreferrer" class="source-link citation-link">
+                      📖 ${this.escapeHtml(r.title || r.heading)}
                     </a>
                   `
         ).join("")}
@@ -1486,7 +1682,10 @@ class x extends HTMLElement {
       }), e.querySelectorAll(".btn-simpler").forEach((t) => {
         t.addEventListener("click", () => {
           const a = t.getAttribute("data-msg-id"), i = this.messages.find((s) => s.id === a);
-          i && this.askQuestion(`Explain simpler: ${i.text}`, !0);
+          if (i) {
+            const s = i.originalQuestion || i.text;
+            this.askQuestion(s, !0);
+          }
         });
       }), e.querySelectorAll(".btn-talk-person").forEach((t) => {
         t.addEventListener("click", () => {
@@ -1495,66 +1694,98 @@ class x extends HTMLElement {
         });
       }), e.querySelectorAll(".btn-try-another").forEach((t) => {
         t.addEventListener("click", () => {
-          const a = this.shadowRoot?.querySelector("#chat-input");
+          const a = this.shadowRoot?.querySelector("#chat-text-input, #chat-input");
           a && (a.value = "", a.focus());
+        });
+      }), e.querySelectorAll(".btn-copy-room").forEach((t) => {
+        t.addEventListener("click", async () => {
+          const a = t.getAttribute("data-url");
+          a && navigator.clipboard && (await navigator.clipboard.writeText(a), this.announce(this.t("linkCodeCopied")));
         });
       }), e.scrollTop = e.scrollHeight;
     }
   }
   bindEvents() {
     if (!this.shadowRoot) return;
-    const e = this.shadowRoot.querySelector("#launcher-btn"), t = this.shadowRoot.querySelector("#assistant-dialog"), a = this.shadowRoot.querySelector("#btn-close-dialog"), i = this.shadowRoot.querySelector("#btn-lang-am"), s = this.shadowRoot.querySelector("#btn-lang-en"), l = this.shadowRoot.querySelector("#btn-open-settings"), h = this.shadowRoot.querySelector("#btn-close-settings"), d = () => {
+    const e = this.shadowRoot.querySelector("#launcher-btn"), t = this.shadowRoot.querySelector("#assistant-dialog"), a = this.shadowRoot.querySelector("#btn-close-dialog"), i = this.shadowRoot.querySelector("#btn-lang-am"), s = this.shadowRoot.querySelector("#btn-lang-en"), r = this.shadowRoot.querySelector("#btn-open-settings"), g = this.shadowRoot.querySelector("#btn-close-settings"), d = () => {
       this.isOpen = !1, t.hidden = !0, e.setAttribute("aria-expanded", "false"), (this.previousFocus ?? e).focus();
     };
     e.addEventListener("click", () => {
       this.previousFocus = document.activeElement, this.isOpen = !0, t.hidden = !1, e.setAttribute("aria-expanded", "true"), t.focus();
-    }), a.addEventListener("click", d), t.addEventListener("keydown", (n) => {
-      if (n.key === "Escape")
+    }), a.addEventListener("click", d), t.addEventListener("keydown", (o) => {
+      if (o.key === "Escape")
         if (this.isSettingsOpen) {
           this.isSettingsOpen = !1;
-          const o = this.shadowRoot?.querySelector("#settings-dialog");
-          o && o.setAttribute("hidden", "true");
+          const l = this.shadowRoot?.querySelector("#settings-dialog");
+          l && l.setAttribute("hidden", "true");
         } else
           d();
-    }), i.addEventListener("click", () => this.setLanguage("am")), s.addEventListener("click", () => this.setLanguage("en")), l.addEventListener("click", () => {
+    }), i.addEventListener("click", () => {
+      this.currentLang === "am" ? this.setLanguage("en") : this.setLanguage("am");
+    }), s.addEventListener("click", () => {
+      this.currentLang === "en" ? this.setLanguage("am") : this.setLanguage("en");
+    }), r.addEventListener("click", () => {
       this.isSettingsOpen = !0;
-      const n = this.shadowRoot?.querySelector("#settings-dialog");
-      if (n) {
-        n.removeAttribute("hidden");
-        const o = n.querySelector("button, input");
-        o && o.focus();
+      const o = this.shadowRoot?.querySelector("#settings-dialog");
+      if (o) {
+        o.removeAttribute("hidden");
+        const l = o.querySelector("button, input");
+        l && l.focus();
       }
-    }), h.addEventListener("click", () => {
+    }), g.addEventListener("click", () => {
       this.isSettingsOpen = !1;
-      const n = this.shadowRoot?.querySelector("#settings-dialog");
-      n && n.setAttribute("hidden", "true"), l.focus();
+      const o = this.shadowRoot?.querySelector("#settings-dialog");
+      o && o.setAttribute("hidden", "true"), r.focus();
+    });
+    const f = [
+      { btn: this.shadowRoot.querySelector("#tab-general"), pane: this.shadowRoot.querySelector("#pane-general") },
+      { btn: this.shadowRoot.querySelector("#tab-support"), pane: this.shadowRoot.querySelector("#pane-support") },
+      { btn: this.shadowRoot.querySelector("#tab-link"), pane: this.shadowRoot.querySelector("#pane-link") },
+      { btn: this.shadowRoot.querySelector("#tab-handoff"), pane: this.shadowRoot.querySelector("#pane-handoff") }
+    ];
+    f.forEach(({ btn: o, pane: l }) => {
+      o?.addEventListener("click", () => {
+        f.forEach((h) => {
+          h.btn?.setAttribute("aria-selected", "false"), h.btn?.classList.remove("btn-primary"), h.btn?.classList.add("btn-secondary"), h.pane && (h.pane.style.display = "none");
+        }), o.setAttribute("aria-selected", "true"), o.classList.remove("btn-secondary"), o.classList.add("btn-primary"), l && (l.style.display = "block");
+      });
     }), this.shadowRoot.querySelector("#btn-size-smaller")?.addEventListener("click", () => {
-      this.textSize = "smaller", localStorage.setItem("savanna_bridge_text_size", "smaller"), this.render();
+      this.textSize = "smaller", this.setAttribute("data-size", "smaller"), localStorage.setItem("savanna_bridge_text_size", "smaller"), this.updateSizeButtons();
     }), this.shadowRoot.querySelector("#btn-size-normal")?.addEventListener("click", () => {
-      this.textSize = "normal", localStorage.setItem("savanna_bridge_text_size", "normal"), this.render();
+      this.textSize = "normal", this.setAttribute("data-size", "normal"), localStorage.setItem("savanna_bridge_text_size", "normal"), this.updateSizeButtons();
     }), this.shadowRoot.querySelector("#btn-size-larger")?.addEventListener("click", () => {
-      this.textSize = "larger", localStorage.setItem("savanna_bridge_text_size", "larger"), this.render();
+      this.textSize = "larger", this.setAttribute("data-size", "larger"), localStorage.setItem("savanna_bridge_text_size", "larger"), this.updateSizeButtons();
     });
-    const m = this.shadowRoot.querySelector("#chk-contrast");
-    m && m.addEventListener("change", () => {
-      this.highContrast = m.checked, localStorage.setItem("savanna_bridge_contrast", this.highContrast ? "high" : "normal"), this.render();
-    });
-    const p = this.shadowRoot.querySelector("#chk-simple-mode");
+    const p = this.shadowRoot.querySelector("#chk-contrast");
     p && p.addEventListener("change", () => {
-      this.simpleMode = p.checked;
+      this.highContrast = p.checked, this.setAttribute("data-contrast", this.highContrast ? "high" : "normal"), localStorage.setItem("savanna_bridge_contrast", this.highContrast ? "high" : "normal");
     });
-    const f = this.shadowRoot.querySelector("#support-form");
-    f && f.addEventListener("submit", (n) => {
-      n.preventDefault();
-      const o = new FormData(f), w = o.getAll("need"), k = o.get("other_text") || "", T = o.get("contact_mode") || "text";
-      this.saveSupportNeeds(w, k, T);
+    const y = this.shadowRoot.querySelector("#chk-simple-mode");
+    y && y.addEventListener("change", () => {
+      this.simpleMode = y.checked, localStorage.setItem("savanna_bridge_simple_mode", this.simpleMode ? "true" : "false");
+    }), this.shadowRoot.querySelector("#btn-clear-chat")?.addEventListener("click", () => {
+      this.clearChat();
+    }), this.shadowRoot.querySelector("#btn-generate-code")?.addEventListener("click", () => {
+      this.generateLinkCode();
     });
-    const v = this.shadowRoot.querySelector("#chat-form"), b = this.shadowRoot.querySelector("#chat-input"), y = this.shadowRoot.querySelector("#mic-btn");
-    v && b && v.addEventListener("submit", (n) => {
-      n.preventDefault();
-      const o = b.value;
-      b.value = "", this.askQuestion(o);
-    }), y && b && y.addEventListener("click", () => {
+    const x = this.shadowRoot.querySelector("#handoff-request-form");
+    x && x.addEventListener("submit", (o) => {
+      o.preventDefault();
+      const l = this.shadowRoot?.querySelector("#handoff-reason");
+      this.requestHandoff(l?.value || void 0);
+    });
+    const v = this.shadowRoot.querySelector("#support-form");
+    v && v.addEventListener("submit", (o) => {
+      o.preventDefault();
+      const l = new FormData(v), h = l.getAll("need"), S = l.get("other_text") || "", L = l.get("contact_mode") || "text";
+      this.saveSupportNeeds(h, S, L);
+    });
+    const k = this.shadowRoot.querySelector("#chat-form"), b = this.shadowRoot.querySelector("#chat-text-input, #chat-input"), w = this.shadowRoot.querySelector("#mic-btn");
+    k && b && k.addEventListener("submit", (o) => {
+      o.preventDefault();
+      const l = b.value;
+      b.value = "", this.askQuestion(l);
+    }), w && b && w.addEventListener("click", () => {
       this.toggleVoiceInput(b);
     }), this.shadowRoot.querySelector("#btn-footer-handoff")?.addEventListener("click", () => {
       this.requestHandoff();
@@ -1565,10 +1796,10 @@ class x extends HTMLElement {
     return t.textContent = e, t.innerHTML;
   }
 }
-customElements.get("bridge-assistant") || customElements.define("bridge-assistant", x);
-customElements.get("db-assistant") || customElements.define("db-assistant", class extends x {
+customElements.get("bridge-assistant") || customElements.define("bridge-assistant", T);
+customElements.get("db-assistant") || customElements.define("db-assistant", class extends T {
 });
 export {
-  x as BridgeAssistant
+  T as BridgeAssistant
 };
 //# sourceMappingURL=widget.js.map
