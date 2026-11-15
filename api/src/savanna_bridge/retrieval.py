@@ -62,7 +62,7 @@ def tokenize(text: str) -> list[str]:
     normalized = re.sub(r"[\u1361-\u1368]", " ", text)
     # Extract alphanumeric words and Ethiopic character sequences
     tokens = re.findall(r"[\w\u1200-\u137F]+", normalized.lower())
-    return [t for t in tokens if len(t) >= 1]
+    return [t for t in tokens if len(t) >= 1 and t not in STOP_WORDS]
 
 
 class SimpleBM25Plus:
@@ -174,8 +174,11 @@ class RetrievalEngine:
         for idx, score in enumerate(raw_scores):
             if score <= 0.0:
                 continue
-            # Normalization into [0.0, 1.0] confidence
-            confidence = float(min(1.0, score / (score + 2.0)))
+            # Normalization into [0.0, 1.0] confidence with term coverage validation
+            coverage = len(matched_terms) / max(len(content_tokens), 1)
+            confidence = float(min(1.0, (score / (score + 2.0)) * (0.5 + 0.5 * coverage)))
+            if len(content_tokens) >= 3 and len(matched_terms) < 2:
+                confidence *= 0.5
             chunk = self.chunks[idx]
             scored.append((chunk, score, confidence))
 

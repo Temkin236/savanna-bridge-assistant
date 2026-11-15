@@ -164,3 +164,34 @@ class LanguageGuard:
         if clean.startswith("+251"):
             return clean
         return clean
+
+    @classmethod
+    def translate(cls, text: str, source_lang: str, target_lang: str) -> str:
+        """Real neural translation between English, Amharic, Oromo, Tigrinya, Arabic, Somali."""
+        if not text or not text.strip():
+            return text
+        src = (source_lang or "auto").lower().split("-")[0].strip()
+        tgt = (target_lang or "en").lower().split("-")[0].strip()
+        if src == tgt:
+            return text
+
+        import json
+        import urllib.parse
+        import urllib.request
+
+        try:
+            url = (
+                f"https://translate.googleapis.com/translate_a/single?client=gtx&sl={src}&tl={tgt}&dt=t&q="
+                + urllib.parse.quote(text)
+            )
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req, timeout=8) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                if data and isinstance(data, list) and data[0]:
+                    translated = "".join([x[0] for x in data[0] if x and x[0]])
+                    if translated.strip():
+                        return translated.strip()
+        except Exception:
+            pass
+        return text
+
