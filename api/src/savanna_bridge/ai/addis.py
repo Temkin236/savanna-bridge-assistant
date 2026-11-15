@@ -102,6 +102,19 @@ class AddisAiProvider(AIProvider):
         if direct:
             return direct
 
+        # Fallback to Google Gemini if Addis AI is unavailable or fails
+        try:
+            from savanna_bridge.ai.cloud import CloudProvider
+
+            cloud = CloudProvider()
+            if cloud.api_key:
+                gemini_trans = cloud.translate_direct(text, src, tgt)
+                if gemini_trans:
+                    self._last_call_mocked = cloud.is_mocked
+                    return gemini_trans
+        except Exception as exc:
+            logger.warning("Gemini fallback translation error: %s", exc)
+
         self._last_call_mocked = True
         return self._offline_fallback.translate(text, src, tgt)
 
@@ -146,7 +159,24 @@ class AddisAiProvider(AIProvider):
                     self._last_call_mocked = False
                     return answer_content.strip()
             except Exception as e:
-                logger.warning("AddisAI chat call failed: %s. Falling back to offline FAQ.", e)
+                logger.warning(
+                    "AddisAI chat call failed: %s. Falling back to Gemini / offline FAQ.", e
+                )
+
+        # Fallback to Google Gemini if Addis AI is unavailable or fails
+        try:
+            from savanna_bridge.ai.cloud import CloudProvider
+
+            cloud = CloudProvider()
+            if cloud.api_key:
+                gemini_ans = cloud.generate_answer(
+                    question, context_chunks, language, simple_mode
+                )
+                if gemini_ans and not cloud.is_mocked:
+                    self._last_call_mocked = False
+                    return gemini_ans
+        except Exception as exc:
+            logger.warning("Gemini fallback answer error: %s", exc)
 
         self._last_call_mocked = True
         return self._offline_fallback.generate_answer(
@@ -169,6 +199,20 @@ class AddisAiProvider(AIProvider):
                     return transcript
             except Exception as e:
                 logger.warning("AddisAI transcription failed: %s", e)
+
+        # Fallback to Google Gemini / Cloud STT
+        try:
+            from savanna_bridge.ai.cloud import CloudProvider
+
+            cloud = CloudProvider()
+            if cloud.api_key or cloud.speech_key:
+                gemini_stt = cloud.transcribe(audio_bytes, media_type, language, retain)
+                if gemini_stt and not cloud.is_mocked:
+                    self._last_call_mocked = False
+                    return gemini_stt
+        except Exception as exc:
+            logger.warning("Gemini fallback transcription error: %s", exc)
+
         self._last_call_mocked = True
         return self._offline_fallback.transcribe(audio_bytes, media_type, language, retain)
 
@@ -186,5 +230,19 @@ class AddisAiProvider(AIProvider):
                     return audio_url
             except Exception as e:
                 logger.warning("AddisAI synthesis failed: %s", e)
+
+        # Fallback to Google Gemini / Cloud TTS
+        try:
+            from savanna_bridge.ai.cloud import CloudProvider
+
+            cloud = CloudProvider()
+            if cloud.api_key or cloud.speech_key:
+                gemini_tts = cloud.synthesize(text, language, speed)
+                if gemini_tts and not cloud.is_mocked:
+                    self._last_call_mocked = False
+                    return gemini_tts
+        except Exception as exc:
+            logger.warning("Gemini fallback synthesis error: %s", exc)
+
         self._last_call_mocked = True
         return self._offline_fallback.synthesize(text, language, speed)

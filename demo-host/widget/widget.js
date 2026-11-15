@@ -874,24 +874,28 @@ const o = {
 
   /* Header */
   .header {
-    padding: 0.5rem 0.75rem;
+    padding: 0.625rem 0.75rem;
     border-bottom: 1px solid var(--b-border);
     background: var(--b-surface);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.375rem;
+    gap: 0.5rem;
     flex-shrink: 0;
   }
 
   .header-titles {
-    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     min-width: 0;
+    flex: 1 1 auto;
+    overflow: hidden;
   }
 
   .title {
     margin: 0;
-    font-size: 1rem;
+    font-size: 0.9375rem;
     font-weight: 700;
     white-space: nowrap;
     overflow: hidden;
@@ -902,20 +906,35 @@ const o = {
     display: flex;
     align-items: center;
     gap: 0.25rem;
-    flex-wrap: wrap;
+    flex-shrink: 0;
+    flex-wrap: nowrap;
   }
 
-  .lang-bar {
-    display: flex;
+  .lang-group {
+    display: inline-flex;
     align-items: center;
-    gap: 0.2rem;
+    background: var(--b-surface-alt);
+    border: 1px solid var(--b-border);
+    border-radius: 0.375rem;
+    padding: 1px;
+    gap: 1px;
   }
 
   .lang-toggle-btn {
-    font-size: 0.8125rem;
-    padding: 0.375rem 0.5rem;
-    min-height: 2.5rem;
-    min-width: 2.5rem;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.35rem;
+    min-height: 1.875rem;
+    min-width: 1.875rem;
+    border: none;
+    border-radius: 0.25rem;
+    background: transparent;
+    color: var(--b-text);
+    cursor: pointer;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.15s ease, color 0.15s ease;
   }
 
   .lang-toggle-btn[aria-pressed="true"] {
@@ -1762,8 +1781,8 @@ class N extends HTMLElement {
       ti: "ti-ET",
       ar: "ar-SA"
     }[e].toLowerCase(), n = e.toLowerCase();
-    let s = t.find((u) => u.lang.toLowerCase() === i);
-    if (s || (s = t.find((u) => u.lang.toLowerCase().startsWith(n)), s)) return s;
+    let s = t.find((g) => g.lang.toLowerCase() === i);
+    if (s || (s = t.find((g) => g.lang.toLowerCase().startsWith(n)), s)) return s;
     const h = {
       en: "english",
       am: "amharic",
@@ -1771,7 +1790,7 @@ class N extends HTMLElement {
       ti: "tigrinya",
       ar: "arabic"
     }[e];
-    return s = t.find((u) => u.name.toLowerCase().includes(h)), s || null;
+    return s = t.find((g) => g.name.toLowerCase().includes(h)), s || null;
   }
   speakText(e, t) {
     if (!("speechSynthesis" in window))
@@ -2136,11 +2155,11 @@ class N extends HTMLElement {
   async sendAudioForTranscription(e, t, a) {
     this.isProcessingSpeech = !0, this.updateVoiceStatusUI(), this.announce(this.t("voiceProcessing"));
     try {
-      const i = new FileReader(), n = new Promise((h, u) => {
+      const i = new FileReader(), n = new Promise((h, g) => {
         i.onloadend = () => {
           const y = i.result;
           h(y.split(",")[1] || "");
-        }, i.onerror = u;
+        }, i.onerror = g;
       });
       i.readAsDataURL(e);
       const s = await n, l = await fetch(`${this.apiBase}/api/v1/speech/transcribe`, {
@@ -2156,8 +2175,8 @@ class N extends HTMLElement {
       if (l.ok) {
         const h = await l.json();
         if (h.transcript) {
-          const u = this.detectLanguage(h.transcript);
-          u !== this.currentLang && this.setLanguage(u, !1), a.value = (a.value ? a.value + " " : "") + h.transcript, a.focus(), this.playEarcon("transcribed"), this.announce(this.t("voicePreviewNotice"));
+          const g = this.detectLanguage(h.transcript);
+          g !== this.currentLang && this.setLanguage(g, !1), a.value = (a.value ? a.value + " " : "") + h.transcript, a.focus(), this.playEarcon("transcribed"), this.announce(this.t("voicePreviewNotice"));
         }
       }
     } catch (i) {
@@ -2294,14 +2313,14 @@ class N extends HTMLElement {
           ...s
         })
       })), this.isThinking = !1, l.ok) {
-        const h = await l.json(), u = !!h.offer_human || h.reason === "low_confidence", y = {
+        const h = await l.json(), g = !!h.offer_human || h.reason === "low_confidence", y = {
           id: `msg_${Date.now()}_assistant`,
           sender: "assistant",
           text: h.answer,
           heading: this.t("answerHeading"),
           citations: h.citations || [],
           offerHuman: h.offer_human,
-          isRefusal: u
+          isRefusal: g
         };
         this.messages.push(y), this.saveChatState(), this.renderMessages(), (this.autoReadSpeech || this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_tts) && this.speakResponse(y);
       } else {
@@ -2442,21 +2461,13 @@ class N extends HTMLElement {
 
         <!-- Header -->
         <header class="header">
-          <div class="header-titles" style="display:flex; align-items:center; gap:0.5rem;">
+          <div class="header-titles">
             <span class="header-accessibility-icon" aria-hidden="true" style="display:inline-flex; align-items:center; justify-content:center; width:1.875rem; height:1.875rem; border-radius:50%; background:#fef2f2; color:#b91c1c; flex-shrink:0;">
               ${o.accessibility}
             </span>
-            <div>
-              <h2 id="dialog-title" class="title">${this.t("appTitle")}</h2>
-            </div>
+            <h2 id="dialog-title" class="title">${this.t("appTitle")}</h2>
           </div>
           <div class="header-actions">
-            <!-- Quick EN/AM Toggle for backward compatibility with integration tests -->
-            <button class="lang-btn" type="button" id="btn-lang-toggle"
-                    aria-label="${this.currentLang === "am" ? "English - Switch Language" : "አማርኛ - ቋንቋ ቀይር"}"
-                    style="font-size:0.6875rem; font-weight:700; padding:0.25rem 0.5rem; min-height:1.75rem; border-radius:0.375rem; background:var(--b-surface-alt); border:1px solid var(--b-border); color:var(--b-text); cursor:pointer;">
-              ${this.currentLang === "am" ? "English" : "አማርኛ"}
-            </button>
             <!-- 5-Language Segmented Selector in Native Scripts with WCAG 2.5.3 Compliant Labels -->
             <div class="lang-group" role="group" aria-label="Language selection">
               <button type="button" class="lang-toggle-btn" id="btn-lang-en"
@@ -2477,11 +2488,11 @@ class N extends HTMLElement {
             </div>
 
             <!-- Settings Button -->
-            <button type="button" class="btn btn-secondary" id="btn-open-settings" aria-label="${this.t("settingsLabel")}" title="${this.t("settingsLabel")}" style="padding:0.4rem 0.6rem;">
+            <button type="button" class="btn btn-secondary" id="btn-open-settings" aria-label="${this.t("settingsLabel")}" title="${this.t("settingsLabel")}" style="min-height:1.875rem; min-width:1.875rem; width:1.875rem; padding:0;">
               ${o.settings}
             </button>
             <!-- Close Button -->
-            <button type="button" class="btn btn-secondary" id="btn-close-dialog" aria-label="${this.t("closeLabel")}" style="padding:0.4rem 0.6rem;">
+            <button type="button" class="btn btn-secondary" id="btn-close-dialog" aria-label="${this.t("closeLabel")}" style="min-height:1.875rem; min-width:1.875rem; width:1.875rem; padding:0;">
               ${o.close}
             </button>
           </div>
@@ -3068,13 +3079,13 @@ class N extends HTMLElement {
       if (r.key === "Tab") {
         const d = this.isSettingsOpen ? this.shadowRoot?.querySelector("#settings-dialog") : t;
         if (!d) return;
-        const g = Array.from(
+        const u = Array.from(
           d.querySelectorAll(
             'button:not([disabled]):not([hidden]), [href]:not([disabled]), input:not([disabled]):not([hidden]), select:not([disabled]):not([hidden]), textarea:not([disabled]):not([hidden]), [tabindex]:not([tabindex="-1"])'
           )
         ).filter((j) => j.offsetParent !== null);
-        if (g.length === 0) return;
-        const p = g[0], b = g[g.length - 1], x = this.shadowRoot?.activeElement ?? document.activeElement;
+        if (u.length === 0) return;
+        const p = u[0], b = u[u.length - 1], x = this.shadowRoot?.activeElement ?? document.activeElement;
         r.shiftKey && x === p ? (r.preventDefault(), b.focus()) : !r.shiftKey && x === b && (r.preventDefault(), p.focus());
       }
     }), this.shadowRoot.querySelector("#btn-lang-en")?.addEventListener("click", () => this.setLanguage("en")), this.shadowRoot.querySelector("#btn-lang-am")?.addEventListener("click", () => this.setLanguage("am")), this.shadowRoot.querySelector("#btn-lang-om")?.addEventListener("click", () => this.setLanguage("om")), this.shadowRoot.querySelector("#btn-lang-ar")?.addEventListener("click", () => this.setLanguage("ar")), this.shadowRoot.querySelector(".lang-btn")?.addEventListener("click", () => {
@@ -3097,23 +3108,23 @@ class N extends HTMLElement {
       { id: "support", btn: this.shadowRoot.querySelector("#tab-support"), pane: this.shadowRoot.querySelector("#pane-support") },
       { id: "handoff", btn: this.shadowRoot.querySelector("#tab-handoff"), pane: this.shadowRoot.querySelector("#pane-handoff") }
     ], l = (r) => {
-      this.activeTab = s[r].id, s.forEach((g, p) => {
+      this.activeTab = s[r].id, s.forEach((u, p) => {
         const b = p === r;
-        g.btn?.setAttribute("aria-selected", b ? "true" : "false"), g.pane && (g.pane.hidden = !b, g.pane.style.display = b ? g.id === "chat" ? "flex" : "block" : "none");
+        u.btn?.setAttribute("aria-selected", b ? "true" : "false"), u.pane && (u.pane.hidden = !b, u.pane.style.display = b ? u.id === "chat" ? "flex" : "block" : "none");
       });
       const d = s[r].btn;
       d && (d.focus(), this.announce(d.textContent?.trim() + " tab selected"));
     };
     s.forEach(({ btn: r }, d) => {
-      r?.addEventListener("click", () => l(d)), r?.addEventListener("keydown", (g) => {
-        const p = g;
+      r?.addEventListener("click", () => l(d)), r?.addEventListener("keydown", (u) => {
+        const p = u;
         p.key === "ArrowRight" ? (p.preventDefault(), l((d + 1) % s.length)) : p.key === "ArrowLeft" && (p.preventDefault(), l((d - 1 + s.length) % s.length));
       });
     }), this.shadowRoot.querySelectorAll(".btn-talk-person, #btn-footer-handoff").forEach((r) => {
       r.addEventListener("click", (d) => {
         d.preventDefault();
-        const g = s.findIndex((p) => p.id === "handoff");
-        g >= 0 && l(g);
+        const u = s.findIndex((p) => p.id === "handoff");
+        u >= 0 && l(u);
       });
     }), this.shadowRoot.querySelector("#btn-size-smaller")?.addEventListener("click", () => {
       this.textSize = "smaller", localStorage.setItem("savanna_bridge_text_size", "smaller"), this.render();
@@ -3126,9 +3137,9 @@ class N extends HTMLElement {
     h && h.addEventListener("change", () => {
       this.highContrast = h.checked, localStorage.setItem("savanna_bridge_contrast", this.highContrast ? "high" : "normal"), this.render();
     });
-    const u = this.shadowRoot.querySelector("#chk-simple-mode");
-    u && u.addEventListener("change", () => {
-      this.simpleMode = u.checked;
+    const g = this.shadowRoot.querySelector("#chk-simple-mode");
+    g && g.addEventListener("change", () => {
+      this.simpleMode = g.checked;
     });
     const y = this.shadowRoot.querySelector("#chk-auto-read");
     y && y.addEventListener("change", () => {
@@ -3137,20 +3148,20 @@ class N extends HTMLElement {
     const R = this.shadowRoot.querySelector("#support-form");
     R && R.addEventListener("submit", (r) => {
       r.preventDefault();
-      const d = new FormData(R), g = d.getAll("need"), p = d.get("other_text") || "", b = d.get("contact_mode") || "text";
-      this.saveSupportNeeds(g, p, b);
+      const d = new FormData(R), u = d.getAll("need"), p = d.get("other_text") || "", b = d.get("contact_mode") || "text";
+      this.saveSupportNeeds(u, p, b);
     });
     const A = this.shadowRoot.querySelector("#handoff-request-form, #handoff-form");
     A && A.addEventListener("submit", (r) => {
       r.preventDefault();
-      const g = this.shadowRoot?.querySelector("#handoff-reason")?.value?.trim() || void 0;
-      this.requestHandoff(g);
+      const u = this.shadowRoot?.querySelector("#handoff-reason")?.value?.trim() || void 0;
+      this.requestHandoff(u);
     });
     const B = this.shadowRoot.querySelector("#btn-submit-handoff");
     B && B.addEventListener("click", (r) => {
       r.preventDefault();
-      const g = this.shadowRoot?.querySelector("#handoff-reason")?.value?.trim() || void 0;
-      this.requestHandoff(g);
+      const u = this.shadowRoot?.querySelector("#handoff-reason")?.value?.trim() || void 0;
+      this.requestHandoff(u);
     });
     const C = this.shadowRoot.querySelector("#chat-form"), k = this.shadowRoot.querySelector("#chat-text-input"), M = this.shadowRoot.querySelector("#mic-btn");
     C && k && C.addEventListener("submit", (r) => {
@@ -3174,8 +3185,8 @@ class N extends HTMLElement {
     });
     const $ = (r) => {
       if (r) {
-        const d = this.shadowRoot?.querySelector("#onboard-chk-voice")?.checked ?? !0, g = this.shadowRoot?.querySelector("#onboard-chk-screen-reader")?.checked ?? !1, p = this.shadowRoot?.querySelector("#onboard-chk-keyboard-nav")?.checked ?? !1, b = this.shadowRoot?.querySelector("#onboard-chk-contrast")?.checked ?? !1, x = this.shadowRoot?.querySelector("#onboard-chk-large-text")?.checked ?? !1;
-        this.accessibilityPrefs.voice_enabled = d, this.accessibilityPrefs.screen_reader_mode = g, this.accessibilityPrefs.keyboard_navigation = p, this.accessibilityPrefs.high_contrast = b, this.accessibilityPrefs.large_text = x ? "larger" : "normal", this.highContrast = b, x && (this.textSize = "larger", localStorage.setItem("savanna_bridge_text_size", "larger"));
+        const d = this.shadowRoot?.querySelector("#onboard-chk-voice")?.checked ?? !0, u = this.shadowRoot?.querySelector("#onboard-chk-screen-reader")?.checked ?? !1, p = this.shadowRoot?.querySelector("#onboard-chk-keyboard-nav")?.checked ?? !1, b = this.shadowRoot?.querySelector("#onboard-chk-contrast")?.checked ?? !1, x = this.shadowRoot?.querySelector("#onboard-chk-large-text")?.checked ?? !1;
+        this.accessibilityPrefs.voice_enabled = d, this.accessibilityPrefs.screen_reader_mode = u, this.accessibilityPrefs.keyboard_navigation = p, this.accessibilityPrefs.high_contrast = b, this.accessibilityPrefs.large_text = x ? "larger" : "normal", this.highContrast = b, x && (this.textSize = "larger", localStorage.setItem("savanna_bridge_text_size", "larger"));
       }
       this.accessibilityPrefs.onboarded = !0, this.onboardingDismissed = !0, this.savePreferences(), this.render(), this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_welcome && this.triggerSpokenWelcome();
     };
@@ -3200,24 +3211,24 @@ class N extends HTMLElement {
     ];
     z.forEach(({ id: r, rate: d }) => {
       this.shadowRoot?.querySelector(r)?.addEventListener("click", () => {
-        this.accessibilityPrefs.speech_rate = d, this.savePreferences(), z.forEach((g) => {
-          this.shadowRoot?.querySelector(g.id)?.setAttribute("aria-pressed", g.rate === d ? "true" : "false");
+        this.accessibilityPrefs.speech_rate = d, this.savePreferences(), z.forEach((u) => {
+          this.shadowRoot?.querySelector(u.id)?.setAttribute("aria-pressed", u.rate === d ? "true" : "false");
         }), this.announce(`Speech rate set to ${d}x`);
       });
     }), this.shadowRoot.querySelector("#btn-read-page")?.addEventListener("click", () => this.readPageAloud()), this.shadowRoot.querySelector("#btn-read-section")?.addEventListener("click", () => this.readSectionAloud()), this.shadowRoot.querySelector("#btn-test-voice")?.addEventListener("click", () => {
       this.speakText(this.t("welcomeSpoken"));
     });
-    const L = this.shadowRoot.querySelector("#chk-screen-reader");
-    L && L.addEventListener("change", () => {
-      this.accessibilityPrefs.screen_reader_mode = L.checked, this.savePreferences(), this.announce(L.checked ? "Screen reader mode enabled" : "Screen reader mode disabled");
+    const T = this.shadowRoot.querySelector("#chk-screen-reader");
+    T && T.addEventListener("change", () => {
+      this.accessibilityPrefs.screen_reader_mode = T.checked, this.savePreferences(), this.announce(T.checked ? "Screen reader mode enabled" : "Screen reader mode disabled");
     });
     const w = this.shadowRoot.querySelector("#chk-keyboard-nav");
     w && w.addEventListener("change", () => {
       this.accessibilityPrefs.keyboard_navigation = w.checked, this.savePreferences(), w.checked ? this.classList.add("keyboard-focus-enhanced") : this.classList.remove("keyboard-focus-enhanced"), this.announce(w.checked ? "Enhanced keyboard navigation enabled" : "Enhanced keyboard navigation disabled");
     });
-    const T = this.shadowRoot.querySelector("#chk-sync-prefs");
-    T && T.addEventListener("change", () => {
-      this.accessibilityPrefs.sync_enabled = T.checked, this.savePreferences(), T.checked ? (this.syncPreferencesToBackend(), this.announce("Cross-website synchronization enabled")) : this.announce("Cross-website synchronization disabled");
+    const L = this.shadowRoot.querySelector("#chk-sync-prefs");
+    L && L.addEventListener("change", () => {
+      this.accessibilityPrefs.sync_enabled = L.checked, this.savePreferences(), L.checked ? (this.syncPreferencesToBackend(), this.announce("Cross-website synchronization enabled")) : this.announce("Cross-website synchronization disabled");
     }), this.shadowRoot.querySelector("#btn-replay-onboarding")?.addEventListener("click", () => {
       this.accessibilityPrefs.onboarded = !1, this.onboardingDismissed = !1, this.isSettingsOpen = !1, this.render();
     });

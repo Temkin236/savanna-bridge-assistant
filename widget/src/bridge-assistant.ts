@@ -949,24 +949,28 @@ const STYLES = `
 
   /* Header */
   .header {
-    padding: 0.5rem 0.75rem;
+    padding: 0.625rem 0.75rem;
     border-bottom: 1px solid var(--b-border);
     background: var(--b-surface);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.375rem;
+    gap: 0.5rem;
     flex-shrink: 0;
   }
 
   .header-titles {
-    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     min-width: 0;
+    flex: 1 1 auto;
+    overflow: hidden;
   }
 
   .title {
     margin: 0;
-    font-size: 1rem;
+    font-size: 0.9375rem;
     font-weight: 700;
     white-space: nowrap;
     overflow: hidden;
@@ -977,20 +981,35 @@ const STYLES = `
     display: flex;
     align-items: center;
     gap: 0.25rem;
-    flex-wrap: wrap;
+    flex-shrink: 0;
+    flex-wrap: nowrap;
   }
 
-  .lang-bar {
-    display: flex;
+  .lang-group {
+    display: inline-flex;
     align-items: center;
-    gap: 0.2rem;
+    background: var(--b-surface-alt);
+    border: 1px solid var(--b-border);
+    border-radius: 0.375rem;
+    padding: 1px;
+    gap: 1px;
   }
 
   .lang-toggle-btn {
-    font-size: 0.8125rem;
-    padding: 0.375rem 0.5rem;
-    min-height: 2.5rem;
-    min-width: 2.5rem;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.35rem;
+    min-height: 1.875rem;
+    min-width: 1.875rem;
+    border: none;
+    border-radius: 0.25rem;
+    background: transparent;
+    color: var(--b-text);
+    cursor: pointer;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.15s ease, color 0.15s ease;
   }
 
   .lang-toggle-btn[aria-pressed="true"] {
@@ -3167,21 +3186,13 @@ export class BridgeAssistant extends HTMLElement {
 
         <!-- Header -->
         <header class="header">
-          <div class="header-titles" style="display:flex; align-items:center; gap:0.5rem;">
+          <div class="header-titles">
             <span class="header-accessibility-icon" aria-hidden="true" style="display:inline-flex; align-items:center; justify-content:center; width:1.875rem; height:1.875rem; border-radius:50%; background:#fef2f2; color:#b91c1c; flex-shrink:0;">
               ${ICONS.accessibility}
             </span>
-            <div>
-              <h2 id="dialog-title" class="title">${this.t("appTitle")}</h2>
-            </div>
+            <h2 id="dialog-title" class="title">${this.t("appTitle")}</h2>
           </div>
           <div class="header-actions">
-            <!-- Quick EN/AM Toggle for backward compatibility with integration tests -->
-            <button class="lang-btn" type="button" id="btn-lang-toggle"
-                    aria-label="${this.currentLang === "am" ? "English - Switch Language" : "አማርኛ - ቋንቋ ቀይር"}"
-                    style="font-size:0.6875rem; font-weight:700; padding:0.25rem 0.5rem; min-height:1.75rem; border-radius:0.375rem; background:var(--b-surface-alt); border:1px solid var(--b-border); color:var(--b-text); cursor:pointer;">
-              ${this.currentLang === "am" ? "English" : "አማርኛ"}
-            </button>
             <!-- 5-Language Segmented Selector in Native Scripts with WCAG 2.5.3 Compliant Labels -->
             <div class="lang-group" role="group" aria-label="Language selection">
               <button type="button" class="lang-toggle-btn" id="btn-lang-en"
@@ -3202,11 +3213,11 @@ export class BridgeAssistant extends HTMLElement {
             </div>
 
             <!-- Settings Button -->
-            <button type="button" class="btn btn-secondary" id="btn-open-settings" aria-label="${this.t("settingsLabel")}" title="${this.t("settingsLabel")}" style="padding:0.4rem 0.6rem;">
+            <button type="button" class="btn btn-secondary" id="btn-open-settings" aria-label="${this.t("settingsLabel")}" title="${this.t("settingsLabel")}" style="min-height:1.875rem; min-width:1.875rem; width:1.875rem; padding:0;">
               ${ICONS.settings}
             </button>
             <!-- Close Button -->
-            <button type="button" class="btn btn-secondary" id="btn-close-dialog" aria-label="${this.t("closeLabel")}" style="padding:0.4rem 0.6rem;">
+            <button type="button" class="btn btn-secondary" id="btn-close-dialog" aria-label="${this.t("closeLabel")}" style="min-height:1.875rem; min-width:1.875rem; width:1.875rem; padding:0;">
               ${ICONS.close}
             </button>
           </div>
