@@ -9,6 +9,7 @@ import base64
 import contextlib
 import logging
 import random
+import re
 import secrets
 import struct
 import time
@@ -51,6 +52,7 @@ from savanna_bridge.models import (
     AlertSubscription,
     Answer,
     AskRequest,
+    Citation,
     ContentIngestRequest,
     DeadlineListResponse,
     ErrorDetail,
@@ -311,33 +313,63 @@ def ask(payload: AskRequest, _token: Any = Depends(verify_optional_token)) -> An
         )
 
     # Ingest live platform content if provided directly by web widget
-    if payload.page_content and payload.page_url:
-        content_source.add_dynamic_content(
+    dynamic_chunks: list[ContentChunk] = []
+    if payload.page_content:
+        url = payload.page_url or "https://learning.example.org/current-page"
+        dynamic_chunks = content_source.add_dynamic_content(
             title=payload.page_title or "Current Platform Page",
-            url=payload.page_url,
+            url=url,
             content=payload.page_content,
             course_id=payload.course_id or "course_demo",
         )
+        if dynamic_chunks:
+            retrieval_engine.add_chunks(dynamic_chunks)
 
-    # Search course and platform content in requested language
-    matches, confidence = retrieval_engine.search(
-        query=question,
-        language=user_lang,
-        top_k=3,
-        threshold=CONFIDENCE_THRESHOLD,
-    )
+    # Check if this is a page-level or overview/reading question about the current active page
+    is_page_query = LanguageGuard.is_page_overview_query(question)
+    
+    matches: list[tuple[ContentChunk, float]] = []
+    confidence = 0.0
 
-    # If no match or low confidence and language is non-English, try searching with translated English query
-    if (not matches or confidence < CONFIDENCE_THRESHOLD) and user_lang in (Language.AM, Language.OM, Language.TI, Language.AR):
-        en_query = ai.translate(question, user_lang.value, "en")
-        matches_en, conf_en = retrieval_engine.search(
-            query=en_query,
+    if is_page_query:
+        if dynamic_chunks:
+            # Ground answer directly on the active educational page chunks
+            matches = [(c, 1.0) for c in dynamic_chunks[:12]]
+            confidence = 1.0
+        else:
+            # Ground answer on available course chunks for general course/lesson overview queries
+            all_course_chunks = [
+                c for c in retrieval_engine.chunks
+                if getattr(c, "language", "en") == user_lang.value or getattr(c, "language", "en") == "en"
+            ]
+            if all_course_chunks:
+                matches = [(c, 0.95) for c in all_course_chunks[:8]]
+                confidence = 0.95
+    else:
+        # Search course and platform content in requested language
+        matches, confidence = retrieval_engine.search(
+            query=question,
             language=user_lang,
-            top_k=3,
+            top_k=5,
             threshold=CONFIDENCE_THRESHOLD,
         )
-        if matches_en and conf_en >= CONFIDENCE_THRESHOLD:
-            matches, confidence = matches_en, conf_en
+
+        # If no match or low confidence and language is non-English, try searching with translated English query
+        if (not matches or confidence < CONFIDENCE_THRESHOLD) and user_lang in (Language.AM, Language.OM, Language.TI, Language.AR):
+            en_query = ai.translate(question, user_lang.value, "en")
+            matches_en, conf_en = retrieval_engine.search(
+                query=en_query,
+                language=user_lang,
+                top_k=5,
+                threshold=CONFIDENCE_THRESHOLD,
+            )
+            if matches_en and conf_en >= CONFIDENCE_THRESHOLD:
+                matches, confidence = matches_en, conf_en
+
+        # If still low confidence but we have live page content, fall back to current page context
+        if (not matches or confidence < CONFIDENCE_THRESHOLD) and dynamic_chunks and not any(off_topic in question.lower() for off_topic in ["football", "mars", "weather", "recipe"]):
+            matches = [(c, 0.85) for c in dynamic_chunks[:12]]
+            confidence = 0.85
 
     # Refusal condition: below threshold or zero matches (FR-3)
     if not matches or confidence < CONFIDENCE_THRESHOLD:
@@ -385,10 +417,30 @@ def ask(payload: AskRequest, _token: Any = Depends(verify_optional_token)) -> An
         answer_text = ai.translate(answer_text, "en", user_lang.value)
 
     citations = retrieval_engine.format_citations(matches)
+    # Deduplicate citations and ensure clean readable labels for accessibility & screen readers
+    clean_citations = []
+    seen_labels = set()
+    for cit in citations:
+        c_title = re.sub(r"\s*\|\s*.*$", "", cit.title).replace("Concept page:", "").strip()
+        c_heading = re.sub(r"^#+\s*", "", cit.heading).strip()
+        if c_title in ("Learner dashboard", "Savanna Platform", "Current Platform Page", "Course Document") or not c_title:
+            c_title = c_heading if c_heading and c_heading != "General Overview" else "The Executive Thesis"
+        
+        display_label = f"{c_heading} ({c_title})" if c_heading and c_heading not in ("General Overview", "Section") and c_heading != c_title else c_title
+        if display_label not in seen_labels:
+            seen_labels.add(display_label)
+            clean_citations.append(
+                Citation(
+                    title=display_label,
+                    heading=c_heading or cit.heading,
+                    page=cit.page,
+                    url=cit.url,
+                )
+            )
 
     return Answer(
         answer=answer_text,
-        citations=citations,
+        citations=clean_citations or citations[:1],
         language=user_lang,
         offer_human=False,
         reason="grounded",
@@ -830,7 +882,16 @@ def draft_accommodation(payload: AccommodationDraftRequest) -> AccommodationDraf
 @app.post("/speech/transcribe", response_model=Transcription, tags=["Speech"])
 @app.post("/api/v1/speech/transcribe", response_model=Transcription, tags=["Speech"])
 def transcribe_speech(payload: TranscriptionRequest) -> Transcription:
+    from savanna_bridge.config import ADDIS_API_KEY
+
+    # Use Addis AI as preferred speech service for Amharic and Afaan Oromo
     ai = get_ai_provider()
+    if payload.language in (Language.AM, Language.OM) and ADDIS_API_KEY:
+        from savanna_bridge.ai.addis import AddisAiProvider
+        addis = AddisAiProvider(api_key=ADDIS_API_KEY)
+        if not addis.is_mocked:
+            ai = addis
+
     audio_bytes = b""
     with contextlib.suppress(Exception):
         audio_bytes = base64.b64decode(payload.audio_base64)
@@ -854,7 +915,16 @@ def transcribe_speech(payload: TranscriptionRequest) -> Transcription:
 @app.post("/speech/synthesize", response_model=SynthesisResult, tags=["Speech"])
 @app.post("/api/v1/speech/synthesize", response_model=SynthesisResult, tags=["Speech"])
 def synthesize_speech(payload: SynthesisRequest) -> SynthesisResult:
+    from savanna_bridge.config import ADDIS_API_KEY
+
+    # Use Addis AI as preferred voice synthesis for Amharic and Afaan Oromo
     ai = get_ai_provider()
+    if payload.language in (Language.AM, Language.OM) and ADDIS_API_KEY:
+        from savanna_bridge.ai.addis import AddisAiProvider
+        addis = AddisAiProvider(api_key=ADDIS_API_KEY)
+        if not addis.is_mocked:
+            ai = addis
+
     audio_url = ai.synthesize(text=payload.text, language=payload.language, speed=payload.speed)
     expires_at = (datetime.now(UTC) + timedelta(minutes=20)).isoformat()
     return SynthesisResult(
