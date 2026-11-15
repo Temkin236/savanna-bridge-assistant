@@ -22,6 +22,8 @@ class OfflineFaqProvider(AIProvider):
 
     def detect_language(self, text: str) -> Language:
         clean = text.strip()
+        if re.search(r"[\u0600-\u06ff]", clean):
+            return Language.AR
         # Ethiopic script check
         if re.search(r"[\u1200-\u137F]", clean):
             # Check for Tigrinya specific letters / vocabulary

@@ -40,6 +40,7 @@ from savanna_bridge.config import (
     DB_PATH,
 )
 from savanna_bridge.database import Database
+from savanna_bridge.language import LanguageRegistry
 from savanna_bridge.models import (
     AccommodationDraft,
     AccommodationDraftRequest,
@@ -78,8 +79,9 @@ from savanna_bridge.models import (
     TeacherStats,
     Transcription,
     TranscriptionRequest,
+    TranslateRequest,
+    TranslateResponse,
 )
-from savanna_bridge.language import LanguageGuard, LanguageRegistry
 from savanna_bridge.rate_limiter import RateLimiter
 from savanna_bridge.retrieval import RetrievalEngine
 from savanna_bridge.tenant import TenantRegistry
@@ -359,8 +361,8 @@ def ask(payload: AskRequest, _token: Any = Depends(verify_optional_token)) -> An
         simple_mode=payload.simple_mode,
     )
 
-    # If language was om or ti and was answered in English, translate back
-    if user_lang in (Language.OM, Language.TI) and not any(
+    # Translate an English-source answer back to the learner's selected language.
+    if user_lang in (Language.OM, Language.TI, Language.AR) and not any(
         c.language == user_lang.value for c in chunks
     ):
         answer_text = ai.translate(answer_text, "en", user_lang.value)
@@ -374,6 +376,23 @@ def ask(payload: AskRequest, _token: Any = Depends(verify_optional_token)) -> An
         offer_human=False,
         reason="grounded",
         confidence=round(confidence, 2),
+        provider=ai.name,
+        mocked=ai.is_mocked,
+    )
+
+
+@app.post("/translate", response_model=TranslateResponse, tags=["Tutor"])
+@app.post("/api/v1/translate", response_model=TranslateResponse, tags=["Tutor"])
+def translate_text(payload: TranslateRequest) -> TranslateResponse:
+    """Translate through the language-routed provider with an explicit fallback label."""
+    ai = get_ai_provider()
+    translation = ai.translate(
+        payload.text, payload.source_language.value, payload.target_language.value
+    )
+    return TranslateResponse(
+        translation=translation,
+        source_language=payload.source_language,
+        target_language=payload.target_language,
         provider=ai.name,
         mocked=ai.is_mocked,
     )

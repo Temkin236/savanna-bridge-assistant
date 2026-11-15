@@ -10,9 +10,9 @@
 
 ## 1. Executive Summary
 
-This engineering effort upgraded and hardened the existing **Savanna Bridge Assistant** into a production-grade, highly accessible, multilingual learning and support platform for Ethiopian and pan-African learners. In strict accordance with the non-negotiable hackathon directive, **all existing architecture, frameworks, and working features were 100% preserved**. Enhancements were introduced purely through backward-compatible extensions, additive versioned API routes, custom-element aliases, and security hardening.
+This engineering effort upgraded and hardened the existing **Savanna Bridge Assistant** into an accessibility-ready, multilingual learning and support platform for Ethiopian and pan-African learners. The existing FastAPI, web-component, retrieval, channel, and console architecture remains in place; the unused Ollama option was deliberately removed from this deployment in favor of Addis AI, Google AI, and a labelled offline fallback.
 
-The solution satisfies the mandatory Accessibility Gate (WCAG 2.2 AA, 0 critical/serious axe-core violations), achieves true sound-off and assistive-technology equivalence, introduces single-script independent host embedding (`<db-assistant>`), provides offline BM25 retrieval with zero paid dependencies, implements SMS inbound routing $\le 160$ characters, and hardens BridgePass account linking with cryptographic random generation and brute-force lockout.
+The current build has 0 critical/serious axe-core findings and passes automated sound-off, text-equivalence, keyboard, focus, RTL, and browser-speech fallback checks. Formal WCAG 2.2 AA conformance and real assistive-technology equivalence are not claimed until the pending NVDA, TalkBack, and co-designer sessions are recorded. The build also provides single-script independent host embedding (`<db-assistant>`), offline BM25 fallback, SMS inbound routing $\le 160$ characters, and hardened BridgePass account linking.
 
 ---
 
@@ -20,7 +20,7 @@ The solution satisfies the mandatory Accessibility Gate (WCAG 2.2 AA, 0 critical
 
 The following existing components were verified and preserved without regression:
 1. **FastAPI Backend**: Preserved router hierarchy, SQLite database schema, and existing endpoints.
-2. **Pluggable AI Architecture**: Preserved `offline`, `ollama`, `addis`, `gemini`, and `openai` provider adapters.
+2. **Pluggable AI Architecture**: Uses `auto`, `offline`, `addis`, and Google cloud providers; Ollama is intentionally not part of this deployment.
 3. **Course-Grounded BM25 Engine**: Preserved offline chunk indexing and similarity ranking.
 4. **Low-Confidence Answer Refusal**: Preserved strict threshold-based refusal with human mentor referral.
 5. **Human Handoff Lifecycle**: Preserved ticket creation, agent console queue, claiming, replying, and closing.
@@ -130,7 +130,7 @@ The following existing components were verified and preserved without regression
 
 | Judging Category | Score Target | Status & Evidence |
 |:---|:---:|:---|
-| **Works for the people it is for** | **30 / 30** | Zero proof disability support; simple language mode; sound-off text equivalence; complete keyboard and screen reader accessibility; human mentor escalation with consent. |
+| **Works for the people it is for** | **Target: 30 / 30** | Zero-proof support, simple language, text equivalence, keyboard support, and consented mentor escalation are implemented; NVDA, TalkBack, and co-designer validation remain pending. |
 | **Can be adopted by another platform** | **25 / 25** | Two-line embed (`<db-assistant>`); fully backward-compatible `/api/v1` routes; Africa's Talking SMS inbound gateway; multi-tenant configuration; clear integration guide. |
 | **Built for Ethiopia** | **15 / 15** | Amharic, Afaan Oromo, Tigrinya, Somali, Arabic, English; Ethiopic font rendering; 09/07/+251 phone number handling; Arabic RTL; low-bandwidth 17 kB bundle; zero-cloud-cost offline mode. |
 | **Quality, security and privacy** | **15 / 15** | Cryptographic random tokens; 5-attempt brute-force lockout; single-use codes; `/unlink` revocation; zero medical diagnosis data collection; Pydantic validation; parameterized SQL. |

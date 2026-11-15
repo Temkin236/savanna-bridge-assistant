@@ -22,6 +22,7 @@ class AddisAiProvider(AIProvider):
         self.base_url = base_url or ADDIS_BASE_URL
         self._offline_fallback = OfflineFaqProvider()
         self._client: Any = None
+        self._last_call_mocked = True
 
         if self.api_key:
             try:
@@ -40,13 +41,14 @@ class AddisAiProvider(AIProvider):
 
     @property
     def is_mocked(self) -> bool:
-        return self._client is None
+        return self._last_call_mocked
 
     def detect_language(self, text: str) -> Language:
         return self._offline_fallback.detect_language(text)
 
     def translate(self, text: str, source_lang: str, target_lang: str) -> str:
         if source_lang == target_lang:
+            self._last_call_mocked = False
             return text
         if self._client:
             try:
@@ -55,9 +57,12 @@ class AddisAiProvider(AIProvider):
                     source_language=source_lang,
                     target_language=target_lang,
                 )
-                return getattr(res, "translation", str(res))
+                translation = getattr(res, "translation", str(res))
+                self._last_call_mocked = False
+                return translation
             except Exception as e:
                 logger.warning("AddisAI translation call failed: %s", e)
+        self._last_call_mocked = True
         return self._offline_fallback.translate(text, source_lang, target_lang)
 
     def generate_answer(
@@ -68,6 +73,7 @@ class AddisAiProvider(AIProvider):
         simple_mode: bool = False,
     ) -> str:
         if not context_chunks:
+            self._last_call_mocked = True
             return self._offline_fallback.generate_answer(
                 question, context_chunks, language, simple_mode
             )
@@ -98,10 +104,12 @@ class AddisAiProvider(AIProvider):
                 )
                 answer_content = res.choices[0].message.content
                 if answer_content:
+                    self._last_call_mocked = False
                     return answer_content.strip()
             except Exception as e:
                 logger.warning("AddisAI chat call failed: %s. Falling back to offline FAQ.", e)
 
+        self._last_call_mocked = True
         return self._offline_fallback.generate_answer(
             question, context_chunks, language, simple_mode
         )
@@ -118,9 +126,11 @@ class AddisAiProvider(AIProvider):
                 )
                 transcript = getattr(res, "transcript", "")
                 if transcript:
+                    self._last_call_mocked = False
                     return transcript
             except Exception as e:
                 logger.warning("AddisAI transcription failed: %s", e)
+        self._last_call_mocked = True
         return self._offline_fallback.transcribe(audio_bytes, media_type, language, retain)
 
     def synthesize(self, text: str, language: Language, speed: float = 1.0) -> str:
@@ -133,7 +143,9 @@ class AddisAiProvider(AIProvider):
                 )
                 audio_url = getattr(res, "audio_url", None)
                 if audio_url:
+                    self._last_call_mocked = False
                     return audio_url
             except Exception as e:
                 logger.warning("AddisAI synthesis failed: %s", e)
+        self._last_call_mocked = True
         return self._offline_fallback.synthesize(text, language, speed)

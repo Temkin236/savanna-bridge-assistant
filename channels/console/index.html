@@ -397,6 +397,14 @@
 
     <!-- Application JavaScript Logic -->
     <script>
+      const uiIcon = (name) => {
+        const paths = {
+          voice: '<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3"/>',
+          video: '<path d="M15 10l4.5-2.5v9L15 14v2H4V8h11v2Z"/>',
+          text: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10Z"/>',
+        };
+        return `<svg class="w-3.5 h-3.5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${paths[name] || paths.text}</svg>`;
+      };
       let currentHandoffs = [];
       let activeTab = "all"; // 'all' | 'waiting' | 'claimed'
       let activeDrawerHandoff = null;
@@ -594,7 +602,7 @@
                       ${escapeHtml(card.language || "en").toUpperCase()}
                     </span>
                     <span class="text-[11px] font-semibold text-gray-700 capitalize bg-gray-100 px-1.5 py-0.5 rounded flex items-center gap-1">
-                      ${card.contact_mode === "voice" ? "🎙️ Voice" : card.contact_mode === "video" ? "📹 Video" : "💬 Text"}
+                      ${card.contact_mode === "voice" ? `${uiIcon("voice")} Voice` : card.contact_mode === "video" ? `${uiIcon("video")} Video` : `${uiIcon("text")} Text`}
                     </span>
                   </div>
                 </div>
@@ -650,7 +658,7 @@
                     rel="noopener noreferrer"
                     class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 text-xs font-semibold rounded-md transition-colors"
                   >
-                    📹 Join Call
+                    ${uiIcon("video")} Join Call
                   </a>
                   <button
                     type="button"
@@ -775,7 +783,7 @@
               rel="noopener noreferrer"
               class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-md shadow-xs transition-colors"
             >
-              📹 Open Jitsi Room
+              ${uiIcon("video")} Open Jitsi Room
             </a>
           `;
         }

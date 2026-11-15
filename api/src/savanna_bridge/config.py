@@ -10,16 +10,12 @@ API_DIR = Path(__file__).resolve().parents[2]
 ROOT_DIR = API_DIR.parent
 DEFAULT_DB_PATH = str(API_DIR / "savanna_bridge.db")
 
-# Provider settings: "offline", "addis", "ollama", "cloud"
-AI_PROVIDER: str = os.getenv("AI_PROVIDER", "offline").lower()
+# Provider settings: "auto", "offline", "addis", "cloud"
+AI_PROVIDER: str = os.getenv("AI_PROVIDER", "auto").lower()
 
 # Addis AI configuration
 ADDIS_API_KEY: str = os.getenv("ADDIS_API_KEY", "")
-ADDIS_BASE_URL: str = os.getenv("ADDIS_BASE_URL", "https://api.addisassistant.com/v1")
-
-# Ollama configuration
-OLLAMA_HOST: str = os.getenv("OLLAMA_HOST", "http://localhost:11434")
-OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "llama3.2")
+ADDIS_BASE_URL: str = os.getenv("ADDIS_BASE_URL", "https://api.addisassistant.com")
 
 # Database
 DB_PATH: str = os.getenv("DB_PATH", DEFAULT_DB_PATH)

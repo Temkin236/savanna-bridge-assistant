@@ -1,13 +1,13 @@
 # Savanna Bridge Assistant
 
-[![Accessibility: Tested with axe-core & NVDA](https://img.shields.io/badge/Accessibility-Axe--core%20%26%20NVDA%20Tested-success)](CONFORMANCE.md)
+[![Accessibility: AT validation pending](https://img.shields.io/badge/Accessibility-AT%20validation%20pending-orange)](CONFORMANCE.md)
 [![OpenAPI 3.1.0](https://img.shields.io/badge/OpenAPI-3.1.0-blue)](openapi.yaml)
 [![License: MIT / ALX Open](https://img.shields.io/badge/License-MIT%20%2F%20ALX%20Open-green.svg)](LICENSE)
 [![Docker](https://img.shields.io/badge/Docker-Compose%20v2-2496ED?logo=docker&logoColor=white)](docker-compose.yml)
 
 **Track 3:** Multilingual Assistant and Live Help  
 **Team Members:** Person A (Backend & Retrieval), Person B (Accessible Widget), Person C (Channels & Console), Person D (Quality & Integration)  
-**Co-Designer Collaboration:** Stand-in rehearsal protocol conducted on low-cost Android and Windows NVDA (appointment pending with mentor desk).
+**Co-Designer Collaboration:** Automated and developer keyboard checks are prepared; the real NVDA, TalkBack, and co-designer sessions remain pending and must be recorded before claiming a pass.
 
 ---
 
@@ -41,11 +41,13 @@ docker compose up --build -d
 | Variable | Default / Example | Purpose |
 |---|---|---|
 | `API_PORT` | `8000` | Port for the core FastAPI backend. |
-| `AI_PROVIDER` | `offline` | Active AI provider: `offline` (extractive BM25), `cloud` (Gemini), or `addis`. |
+| `AI_PROVIDER` | `auto` | Routes Amharic, Afaan Oromo, and Tigrinya to Addis AI; Arabic to Google; uses the labelled offline fallback when a key or service is unavailable. |
 | `TELEGRAM_BOT_TOKEN` | `""` | Telegram Bot token issued by BotFather. |
 | `TELEGRAM_BOT_USERNAME` | `savannah_assistant3_bot` | Bot username used to construct seamless one-button deep links. |
 | `BOT_API_SECRET` | `change-me-bot-secret` | Shared secret header (`X-Bot-Secret`) required to confirm link tokens. |
-| `GOOGLE_AI_API_KEY` | `""` | Optional Google Gemini key used when `AI_PROVIDER=cloud`. |
+| `GOOGLE_AI_API_KEY` | `""` | Gemini key for Arabic translation and Gemini text-to-speech; written text and browser speech remain the labelled fallback. |
+| `GOOGLE_TRANSLATE_API_KEY` | `""` | Optional Google Cloud Translation key for Arabic translation. `GOOGLE_API_KEY` can be used as a shared fallback. |
+| `GOOGLE_SPEECH_API_KEY` | `""` | Optional Google Speech-to-Text/Text-to-Speech key for Arabic speech. Browser speech remains the accessible fallback. |
 
 *(On Windows PowerShell, use `./scripts/dev.ps1 up`)*
 
@@ -120,9 +122,9 @@ The assistant panel is structured for immediate cognitive ease, screen-reader cl
 
 1. **Header**:
    - Course assistant title with auto-truncation.
-   - Script-native language toggle buttons (`አማርኛ` / `English`).
-   - Settings button (`⚙️`) opening the modal settings dialog.
-   - Accessible Close button (`✕`) restoring focus to the floating launcher.
+   - Script-native selector for English, Amharic, Afaan Oromo, Tigrinya, and Arabic.
+   - Professional SVG Settings button opening the modal settings dialog.
+   - Professional SVG Close button restoring focus to the floating launcher.
 2. **Body (Message Log)**:
    - **Empty State**: Welcoming message with **3 course-grounded suggested questions** ("What does Module 2 teach?", "Explain customer service foundations", "How do I communicate with customers?") for one-tap answers.
    - **Answer Cards**: Each answer presents a clear heading, explanatory text, action toolbar (**Listen** TTS with pause/resume, **Make simpler** simplification toggle), and clickable course source citations with human-readable titles.
@@ -367,10 +369,10 @@ Jobs are marked up with structured JSON-LD directly within the host page at [dem
 ## Languages and How to Add One
 
 The system currently supports:
-- **English (`en`)**: Complete offline BM25 and cloud generation.
-- **Amharic (`am`, አማርኛ)**: Complete offline BM25 extraction with Ge'ez punctuation normalizer and Addis AI/Gemini generation.
+- **English (`en`)**: Complete offline BM25 retrieval and grounded generation.
+- **Amharic (`am`, አማርኛ)**: Offline BM25 extraction with Ge'ez punctuation normalization and Addis AI generation.
 - **Afaan Oromo (`om`) & Tigrinya (`ti`)**: *Experimental* via Addis AI SDK cloud translations; UI strings translated.
-- **Arabic (`ar`)**: Right-to-left (`dir="rtl"`) CSS logical property layout support.
+- **Arabic (`ar`)**: Google translation and text-to-speech routing, right-to-left layout, persistent written answers, and browser-speech fallback.
 
 ### Adding a New Language (e.g., Somali `so`)
 
@@ -414,7 +416,7 @@ The system currently supports:
   - The system **never** asks for kebele ID, national identification, medical history, or diagnosis proof.
 - **Third-Party AI Consent Disclosure**:
   - In default `offline` mode, **zero** data leaves the host container.
-  - When `AI_PROVIDER=cloud` (Google Gemini) or `addis` is enabled, question text is sent to the respective third-party API without learner identifiers.
+  - With `AI_PROVIDER=auto`, Ethiopian-language text is sent to Addis AI and Arabic text is sent to the configured Google service without learner identifiers. Responses set `mocked: true` whenever an offline fallback is used.
 - **Data Export & Deletion**:
   - Learners can view and export all data held about them via `GET /api/v1/me/export`.
   - Learners can permanently erase all their data with `DELETE /api/v1/me`.
@@ -428,7 +430,7 @@ Assuming 3,000 active learners asking an average of 20 questions per month:
 | Architecture Component | Setup | Estimated Monthly Cost |
 |---|---|---|
 | **Default Offline Setup** | Extractive BM25 running on existing host server | **$0.00 / month** (zero paid APIs) |
-| **Cloud AI (Google Gemini 1.5 Flash)** | 60,000 queries/mo @ ~600 tokens/query | **~$3.00 / month** |
+| **Cloud AI (configured Gemini model)** | Usage depends on the selected model and current Google pricing | **Verify in the Google project before production** |
 | **Self-Hosted VPS** | 2 vCPU / 4 GB RAM container host | **~$10.00 - $20.00 / month** |
 | **Total Deployment Cost** | Fully functional accessibility suite | **Under $25 / month** |
 
@@ -449,7 +451,7 @@ Assuming 3,000 active learners asking an average of 20 questions per month:
 - [x] Automated accessibility test pass (0 critical, 0 serious violations via `axe-core`).
 
 ### What is Not Finished / Experimental
-- [ ] **Co-Designer Live Session**: Stand-in rehearsal protocols completed on Windows NVDA and Android Chrome; live co-designer session with an assigned participant is pending mentor desk scheduling.
+- [ ] **Co-Designer Live Session**: Run and record the Windows NVDA, Android TalkBack, and assigned-participant sessions; no human-device pass is claimed yet.
 - [ ] **Afaan Oromo & Tigrinya Offline Retrieval**: Currently experimental via Addis AI cloud translation; offline BM25 dictionary index is populated for English and Amharic only.
 - [ ] **Production LMS Integration**: Demonstrated with bundled mock learner directory (deadlines and modules are test fixtures).
 - [ ] **Android Screen Sharing Fallback**: Mobile Chrome does not support `getDisplayMedia`; helper receives current URL, heading anchor, and active element details instead of live video stream.

@@ -6,7 +6,7 @@
   "scripts": {
     "axe": "playwright test axe.spec.ts",
     "e2e": "playwright test integration.spec.ts",
-    "verify": "playwright test axe.spec.ts integration.spec.ts",
+    "verify": "playwright test axe.spec.ts integration.spec.ts screen-reader.spec.ts",
     "axe:baseline": "node capture-axe-baseline.mjs",
     "test": "playwright test"
   },

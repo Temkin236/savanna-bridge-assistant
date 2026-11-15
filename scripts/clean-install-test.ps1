@@ -29,7 +29,6 @@ try {
         $env:MOCK_API_PORT = '14010'
         $env:CONSOLE_PORT = '18080'
         $env:DEMO_PORT = '14173'
-        $env:OLLAMA_PORT = '11435'
 
         docker compose -p $project config --quiet
         docker compose -p $project up --build -d api mock-api bot console demo-host

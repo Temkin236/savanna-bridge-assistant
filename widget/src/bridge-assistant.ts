@@ -38,12 +38,31 @@ export interface ChatMessage {
   isRefusal?: boolean;
   audioUrl?: string;
   isAudioPlaying?: boolean;
+  roomUrl?: string;
 }
 
 export interface SupportNeedsData {
   needs: string[];
   other_text: string;
   preferred_contact_mode: "text" | "voice" | "video" | "telegram";
+}
+
+const ICONS = {
+  settings: '<path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.12 2.12-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V20.3h-3v-.08a1.7 1.7 0 0 0-1.04-1.56A1.7 1.7 0 0 0 8.78 19l-.06.06-2.12-2.12.06-.06A1.7 1.7 0 0 0 7 15a1.7 1.7 0 0 0-1.56-1.04H5.3v-3h.14A1.7 1.7 0 0 0 7 9.92a1.7 1.7 0 0 0-.34-1.88L6.6 7.98l2.12-2.12.06.06a1.7 1.7 0 0 0 1.88.34A1.7 1.7 0 0 0 11.7 4.7v-.1h3v.1a1.7 1.7 0 0 0 1.04 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.12 2.12-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.56 1.04h.04v3h-.04A1.7 1.7 0 0 0 19.4 15Z"/>',
+  close: '<path d="M18 6 6 18M6 6l12 12"/>',
+  microphone: '<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3M8 22h8"/>',
+  person: '<path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/>',
+  arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+  volume: '<path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12"/>',
+  pause: '<path d="M9 5H6v14h3V5ZM18 5h-3v14h3V5Z"/>',
+  simplify: '<path d="M9 18h6M10 22h4M8.5 14.5A6 6 0 1 1 15.5 14.5c-.9.7-1.5 1.5-1.5 2.5h-4c0-1-.6-1.8-1.5-2.5Z"/>',
+  book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4H6.5A2.5 2.5 0 0 0 4 6.5v13Z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  check: '<path d="m5 12 4 4L19 6"/>',
+} as const;
+
+function icon(name: keyof typeof ICONS): string {
+  return `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${ICONS[name]}</svg>`;
 }
 
 const I18N: Record<SupportedLanguage, Record<string, string>> = {
@@ -53,6 +72,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     closeLabel: "Close dialog",
     launcherLabel: "Help & Assistant",
     settingsLabel: "Settings",
+    languageLabel: "Assistant language",
     settingsTitle: "Assistant Settings",
     closeSettings: "Done",
     textSizeLabel: "Text Size",
@@ -106,8 +126,9 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     offlineBanner: "You are offline.",
     savedOnPhoneNotice: "Saved on this phone. It will send when you are online.",
     serverErrorNotice: "Could not connect to the assistant. Please check your connection and try again.",
+    handoffConsentPrompt: "Share a short summary of your question and support preferences with a human mentor?",
     handoffReadyTitle: "Your Live Help Room is Ready",
-    joinRoomButton: "Join Live Help Room ↗",
+    joinRoomButton: "Join Live Help Room",
     leaveRoomButton: "Close Help Session",
     androidFallbackNote: "Android note: Browser screen sharing (getDisplayMedia) is not supported in Chrome on Android. Your mentor automatically sees your active lesson URL, section, and focused element.",
   },
@@ -170,8 +191,9 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     offlineBanner: "ከመስመር ውጭ ነዎት።",
     savedOnPhoneNotice: "በዚህ ስልክ ላይ ተቀምጧል። መስመር ላይ ሲሆኑ ይላካል።",
     serverErrorNotice: "ከአገልጋዩ ጋር መገናኘት አልተቻለም። እባክዎ ግንኙነትዎን ያረጋግጡና እንደገና ይሞክሩ።",
+    handoffConsentPrompt: "የጥያቄዎን አጭር መግለጫ እና የድጋፍ ምርጫዎችዎን ለአማካሪ ለማጋራት ይስማማሉ?",
     handoffReadyTitle: "የቀጥታ ድጋፍ ክፍልዎ ዝግጁ ነው",
-    joinRoomButton: "ወደ ስብሰባው ክፍል ግባ ↗",
+    joinRoomButton: "ወደ ስብሰባው ክፍል ግባ",
     leaveRoomButton: "ክፍለ-ጊዜውን ዝጋ",
     androidFallbackNote: "የአንድሮይድ ማሳሰቢያ፡ በአንድሮይድ ክሮም ላይ የስክሪን ማጋራት አይደገፍም። አማካሪዎ እርስዎ ያሉበትን የትምህርት ገጽ እና ርዕስ በቀጥታ ይመለከታል።",
   },
@@ -234,8 +256,9 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     offlineBanner: "Toora irraa ala jirtu.",
     savedOnPhoneNotice: "Bilbila kana irratti kuufameera. Toora irratti yemmuu dhuftan ergama.",
     serverErrorNotice: "Gargaaraa waliin walqunnamuu hin dandeenye.",
+    handoffConsentPrompt: "Gaaffii keessanii fi filannoo deeggarsaa gorsaa waliin qooduun ni eeyyamtu?",
     handoffReadyTitle: "Kutaan gargaarsaa qophiidha",
-    joinRoomButton: "Kutaa Seenaa ↗",
+    joinRoomButton: "Kutaa Seenaa",
     leaveRoomButton: "Kutaa Dhiisaa",
     androidFallbackNote: "Iskiriinii qooduun Android irratti hin danda'amu.",
   },
@@ -298,8 +321,9 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     offlineBanner: "መስመር ተቛሪጹ ኣሎ።",
     savedOnPhoneNotice: "ኣብዚ ስልኪ ተቐሚጡ ኣሎ። ኦንላይን ምስ ኮንኩም ክስደድ እዩ።",
     serverErrorNotice: "ምስ ሓጋዚ ክራኸብ ኣይተኻእለን።",
+    handoffConsentPrompt: "ሕቶኹምን ምርጫታት ደገፍኩምን ምስ ኣማኻሪ ክካፈል ትሰማምዑ ዶ?",
     handoffReadyTitle: "ናይ ሓገዝ ክፍሊ ድሉው እዩ",
-    joinRoomButton: "ናብ ክፍሊ እቶ ↗",
+    joinRoomButton: "ናብ ክፍሊ እቶ",
     leaveRoomButton: "ክፍሊ ዕጾ",
     androidFallbackNote: "ኣብ አንድሮይድ ስክሪን ምክፋል ኣይድገፍን።",
   },
@@ -362,8 +386,9 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     offlineBanner: "أنت غير متصل بالإنترنت.",
     savedOnPhoneNotice: "تم الحفظ على الهاتف. سيتم الإرسال فور اتصالك بالإنترنت.",
     serverErrorNotice: "تعذر الاتصال بالمساعد. يرجى التحقق من اتصالك والمحاولة لاحقاً.",
+    handoffConsentPrompt: "هل توافق على مشاركة ملخص سؤالك وتفضيلات الدعم مع المرشد؟",
     handoffReadyTitle: "غرفة المساعدة المباشرة جاهزة",
-    joinRoomButton: "الانضمام للغرفة ↗",
+    joinRoomButton: "الانضمام للغرفة",
     leaveRoomButton: "إغلاق الجلسة",
     androidFallbackNote: "ملاحظة أندرويد: مشاركة الشاشة عبر المتصفح غير مدعومة على متصفح Chrome لنظام أندرويد.",
   },
@@ -376,8 +401,10 @@ const STYLES = `
     --b-text: var(--bs-body-color, #0f172a);
     --b-text-muted: #475569;
     --b-border: #cbd5e1;
-    --b-primary: var(--bs-primary, #1d4ed8);
-    --b-primary-hover: #1e40af;
+    /* Host pages may opt in with an accessible brand colour. Do not inherit
+       Bootstrap's primary value because its contrast is not guaranteed. */
+    --b-primary: var(--bridge-assistant-primary, #b42318);
+    --b-primary-hover: var(--bridge-assistant-primary-hover, #8f1d14);
     --b-primary-contrast: #ffffff;
     --b-surface: #f8fafc;
     --b-surface-alt: #f1f5f9;
@@ -461,6 +488,13 @@ const STYLES = `
     background: var(--b-surface-alt);
   }
 
+  .icon {
+    width: 1.125rem;
+    height: 1.125rem;
+    flex: 0 0 auto;
+    pointer-events: none;
+  }
+
   button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, a:focus-visible {
     outline: 3px solid var(--b-focus);
     outline-offset: 2px;
@@ -520,6 +554,10 @@ const STYLES = `
     box-shadow: var(--b-shadow);
     z-index: 2147483640;
     overflow: hidden;
+  }
+
+  .panel[hidden] {
+    display: none !important;
   }
 
   /* Header */
@@ -1084,7 +1122,7 @@ export class BridgeAssistant extends HTMLElement {
       container.innerHTML = `
         <div style="display:flex; align-items:center; gap:0.375rem; width:100%;">
           <span style="font-size:0.8125rem; font-weight:600; color:#166534; flex:1;">
-            ✓ ${this.t("connectedToTelegram")}
+            ${icon("check")} ${this.t("connectedToTelegram")}
           </span>
           <button type="button" class="btn btn-secondary" id="btn-disconnect-tg" style="font-size:0.75rem; min-height:2.25rem; padding:0.25rem 0.5rem;">
             ${this.t("disconnectTelegram")}
@@ -1274,8 +1312,15 @@ export class BridgeAssistant extends HTMLElement {
 
       if (res.ok) {
         const data = await res.json();
+        if (data.mocked || !data.audio_url) {
+          this.fallbackTTS(msg.text);
+          return;
+        }
         if (this.activeAudio) this.activeAudio.pause();
-        const audioUrl = data.audio_url?.startsWith("http") ? data.audio_url : `${this.apiBase}${data.audio_url || ""}`;
+        const rawAudioUrl = String(data.audio_url);
+        const audioUrl = /^(https?:|data:|blob:)/.test(rawAudioUrl)
+          ? rawAudioUrl
+          : `${this.apiBase}${rawAudioUrl}`;
         this.activeAudio = new Audio(audioUrl);
         this.activeAudio.onended = () => {
           msg.isAudioPlaying = false;
@@ -1296,7 +1341,13 @@ export class BridgeAssistant extends HTMLElement {
     if ("speechSynthesis" in window) {
       window.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);
-      u.lang = this.currentLang === "am" ? "am-ET" : "en-US";
+      u.lang = {
+        am: "am-ET",
+        en: "en-US",
+        om: "om-ET",
+        ti: "ti-ET",
+        ar: "ar-XA",
+      }[this.currentLang];
       window.speechSynthesis.speak(u);
     }
   }
@@ -1403,6 +1454,7 @@ export class BridgeAssistant extends HTMLElement {
       alert(this.t("offlineBanner"));
       return;
     }
+    if (!window.confirm(this.t("handoffConsentPrompt"))) return;
 
     this.announce(this.t("lookingInCourse"));
 
@@ -1442,10 +1494,12 @@ export class BridgeAssistant extends HTMLElement {
         this.messages.push({
           id: `msg_${Date.now()}_handoff`,
           sender: "assistant",
-          text: `${this.t("handoffReadyTitle")}: ${this.activeHandoff.room_url}`,
+          text: this.t("handoffReadyTitle"),
           heading: this.t("handoffReadyTitle"),
           offerHuman: false,
+          roomUrl: this.activeHandoff.room_url,
         });
+        this.saveChatState();
         this.renderMessages();
       } else {
         alert(this.t("serverErrorNotice"));
@@ -1480,7 +1534,7 @@ export class BridgeAssistant extends HTMLElement {
       </button>
 
       <!-- Main Open Panel -->
-      <section id="assistant-dialog" class="panel" role="dialog" aria-modal="true" aria-labelledby="dialog-title" tabindex="-1" ${this.isOpen ? "" : "hidden"}>
+      <section id="assistant-dialog" class="panel" role="dialog" aria-modal="true" aria-labelledby="dialog-title" lang="${this.currentLang}" dir="${this.currentLang === "ar" ? "rtl" : "ltr"}" tabindex="-1" ${this.isOpen ? "" : "hidden"}>
         
         ${this.isOffline ? `<div class="offline-bar" role="alert">${this.t("offlineBanner")}</div>` : ""}
 
@@ -1490,22 +1544,21 @@ export class BridgeAssistant extends HTMLElement {
             <h2 id="dialog-title" class="title">${this.t("appTitle")}</h2>
           </div>
           <div class="header-actions">
-            <!-- Language Switcher in native script -->
-            <button type="button" class="lang-toggle-btn" id="btn-lang-am" 
-                    aria-pressed="${this.currentLang === "am"}" aria-label="ቋንቋ ወደ አማርኛ ቀይር">
-              አማርኛ
-            </button>
-            <button type="button" class="lang-toggle-btn" id="btn-lang-en" 
-                    aria-pressed="${this.currentLang === "en"}" aria-label="Switch to English">
-              English
-            </button>
+            <label class="sr-only" for="language-select">${this.t("languageLabel")}</label>
+            <select class="text-input" id="language-select" aria-label="${this.t("languageLabel")}" style="width:auto; min-height:2.75rem;">
+              <option value="en" ${this.currentLang === "en" ? "selected" : ""}>English</option>
+              <option value="am" ${this.currentLang === "am" ? "selected" : ""}>አማርኛ</option>
+              <option value="om" ${this.currentLang === "om" ? "selected" : ""}>Afaan Oromoo</option>
+              <option value="ti" ${this.currentLang === "ti" ? "selected" : ""}>ትግርኛ</option>
+              <option value="ar" ${this.currentLang === "ar" ? "selected" : ""}>العربية</option>
+            </select>
             <!-- Settings Button -->
             <button type="button" class="btn btn-secondary" id="btn-open-settings" aria-label="${this.t("settingsLabel")}" title="${this.t("settingsLabel")}" style="padding:0.4rem 0.6rem;">
-              ⚙️
+              ${icon("settings")}
             </button>
             <!-- Close Button -->
             <button type="button" class="btn btn-secondary" id="btn-close-dialog" aria-label="${this.t("closeLabel")}" style="padding:0.4rem 0.6rem;">
-              ✕
+              ${icon("close")}
             </button>
           </div>
         </header>
@@ -1525,7 +1578,7 @@ export class BridgeAssistant extends HTMLElement {
                    required autocomplete="off">
             <button type="button" class="btn btn-secondary mic-btn" id="mic-btn" 
                     aria-label="${this.t("micLabel")}" title="${this.t("micLabel")}">
-              🎤
+              ${icon("microphone")}
             </button>
             <button type="submit" class="btn btn-primary" id="btn-send">
               ${this.t("sendButton")}
@@ -1535,7 +1588,7 @@ export class BridgeAssistant extends HTMLElement {
           <!-- Bottom Row: Talk to a person & Continue on Telegram -->
           <div class="footer-actions-row">
             <button type="button" class="btn btn-secondary btn-footer" id="btn-footer-handoff">
-              👤 ${this.t("talkToPersonButton")}
+              ${icon("person")} ${this.t("talkToPersonButton")}
             </button>
             <div id="telegram-container" class="telegram-section">
               <!-- Rendered by updateTelegramLinkUI() -->
@@ -1633,7 +1686,7 @@ export class BridgeAssistant extends HTMLElement {
               </label>
 
               <div id="support-saved-notice" hidden style="color:#166534; font-size:0.8125rem; font-weight:600;">
-                ✓ ${this.t("supportSavedNotice")}
+                ${icon("check")} ${this.t("supportSavedNotice")}
               </div>
 
               <button type="submit" class="btn btn-primary" style="margin-top:0.25rem;">
@@ -1663,13 +1716,13 @@ export class BridgeAssistant extends HTMLElement {
           <div class="suggested-questions">
             <span style="font-size:0.8125rem; font-weight:700; color:var(--b-text-muted);">${this.t("suggestedTitle")}</span>
             <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ1"))}">
-              👉 ${this.escapeHtml(this.t("suggestedQ1"))}
+              ${icon("arrow")} ${this.escapeHtml(this.t("suggestedQ1"))}
             </button>
             <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ2"))}">
-              👉 ${this.escapeHtml(this.t("suggestedQ2"))}
+              ${icon("arrow")} ${this.escapeHtml(this.t("suggestedQ2"))}
             </button>
             <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ3"))}">
-              👉 ${this.escapeHtml(this.t("suggestedQ3"))}
+              ${icon("arrow")} ${this.escapeHtml(this.t("suggestedQ3"))}
             </button>
           </div>
         </div>
@@ -1702,6 +1755,11 @@ export class BridgeAssistant extends HTMLElement {
           <div class="msg-row msg-assistant" id="${msg.id}">
             <h4 class="answer-heading">${this.escapeHtml(msg.heading || this.t("answerHeading"))}</h4>
             <p class="answer-text">${this.escapeHtml(msg.text)}</p>
+            ${
+              msg.roomUrl
+                ? `<a class="btn btn-primary room-link" href="${this.escapeHtml(msg.roomUrl)}" target="_blank" rel="noopener noreferrer">${icon("arrow")} ${this.t("joinRoomButton")}</a>`
+                : ""
+            }
 
             ${
               isRefusal
@@ -1710,7 +1768,7 @@ export class BridgeAssistant extends HTMLElement {
                   <div>${this.t("notVerifiedNotice")}</div>
                   <div style="display:flex; gap:0.375rem; flex-wrap:wrap;">
                     <button type="button" class="btn btn-primary btn-talk-person" data-msg-id="${msg.id}" style="font-size:0.8125rem; min-height:2.25rem;">
-                      👤 ${this.t("talkToPersonButton")}
+                      ${icon("person")} ${this.t("talkToPersonButton")}
                     </button>
                     <button type="button" class="btn btn-secondary btn-try-another" style="font-size:0.8125rem; min-height:2.25rem;">
                       ${this.t("tryAnotherQuestion")}
@@ -1724,10 +1782,10 @@ export class BridgeAssistant extends HTMLElement {
             <!-- Listen & Make Simpler action buttons -->
             <div class="answer-actions">
               <button type="button" class="btn btn-secondary btn-listen" data-msg-id="${msg.id}">
-                ${msg.isAudioPlaying ? `⏸️ ${this.t("pauseButton")}` : `🔊 ${this.t("listenButton")}`}
+                ${msg.isAudioPlaying ? `${icon("pause")} ${this.t("pauseButton")}` : `${icon("volume")} ${this.t("listenButton")}`}
               </button>
               <button type="button" class="btn btn-secondary btn-simpler" data-msg-id="${msg.id}">
-                💡 ${this.t("makeSimplerButton")}
+                ${icon("simplify")} ${this.t("makeSimplerButton")}
               </button>
             </div>
 
@@ -1741,7 +1799,7 @@ export class BridgeAssistant extends HTMLElement {
                     .map(
                       (c) => `
                     <a href="${this.escapeHtml(c.url)}" target="_blank" rel="noopener noreferrer" class="source-link">
-                      📖 ${this.escapeHtml(c.title || c.heading)}
+                      ${icon("book")} ${this.escapeHtml(c.title || c.heading)}
                     </a>
                   `
                     )
@@ -1758,7 +1816,7 @@ export class BridgeAssistant extends HTMLElement {
     if (this.isThinking) {
       chatLog.innerHTML += `
         <div class="live-status-indicator">
-          ⏳ ${this.t("lookingInCourse")}
+          ${icon("clock")} ${this.t("lookingInCourse")}
         </div>
       `;
     }
@@ -1807,8 +1865,7 @@ export class BridgeAssistant extends HTMLElement {
     const launcher = this.shadowRoot.querySelector<HTMLButtonElement>("#launcher-btn")!;
     const dialog = this.shadowRoot.querySelector<HTMLElement>("#assistant-dialog")!;
     const closeBtn = this.shadowRoot.querySelector<HTMLButtonElement>("#btn-close-dialog")!;
-    const langAm = this.shadowRoot.querySelector<HTMLButtonElement>("#btn-lang-am")!;
-    const langEn = this.shadowRoot.querySelector<HTMLButtonElement>("#btn-lang-en")!;
+    const languageSelect = this.shadowRoot.querySelector<HTMLSelectElement>("#language-select")!;
     const openSettingsBtn = this.shadowRoot.querySelector<HTMLButtonElement>("#btn-open-settings")!;
     const closeSettingsBtn = this.shadowRoot.querySelector<HTMLButtonElement>("#btn-close-settings")!;
 
@@ -1821,11 +1878,11 @@ export class BridgeAssistant extends HTMLElement {
     };
 
     launcher.addEventListener("click", () => {
-      this.previousFocus = document.activeElement as HTMLElement | null;
+      this.previousFocus = launcher;
       this.isOpen = true;
       dialog.hidden = false;
       launcher.setAttribute("aria-expanded", "true");
-      dialog.focus();
+      this.shadowRoot?.querySelector<HTMLInputElement>("#chat-input")?.focus();
     });
 
     closeBtn.addEventListener("click", closeDialog);
@@ -1839,12 +1896,35 @@ export class BridgeAssistant extends HTMLElement {
         } else {
           closeDialog();
         }
+        e.preventDefault();
+        return;
+      }
+
+      if (e.key === "Tab") {
+        const settingsDialog = this.shadowRoot?.querySelector<HTMLElement>("#settings-dialog");
+        const scope = this.isSettingsOpen && settingsDialog ? settingsDialog : dialog;
+        const focusable = Array.from(
+          scope.querySelectorAll<HTMLElement>(
+            'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+          )
+        ).filter((element) => !element.closest("[hidden]"));
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        const active = this.shadowRoot?.activeElement;
+        if (e.shiftKey && active === first) {
+          last.focus();
+          e.preventDefault();
+        } else if (!e.shiftKey && active === last) {
+          first.focus();
+          e.preventDefault();
+        }
       }
     });
 
-    // Native Script Language Buttons
-    langAm.addEventListener("click", () => this.setLanguage("am"));
-    langEn.addEventListener("click", () => this.setLanguage("en"));
+    languageSelect.addEventListener("change", () => {
+      this.setLanguage(languageSelect.value as SupportedLanguage);
+    });
 
     // Settings Modal
     openSettingsBtn.addEventListener("click", () => {
