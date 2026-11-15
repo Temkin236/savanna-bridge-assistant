@@ -1,9 +1,8 @@
 """Tests for v1 versioned endpoints and enhancements (Track 3 compliance)."""
 
-import pytest
 from fastapi.testclient import TestClient
 
-from savanna_bridge.language import LanguageGuard, LanguageRegistry
+from savanna_bridge.language import LanguageGuard
 from savanna_bridge.main import app
 
 client = TestClient(app)
@@ -20,7 +19,7 @@ def test_api_v1_health() -> None:
 def test_api_v1_ask_grounded() -> None:
     res = client.post(
         "/api/v1/ask",
-        json={"question": "What is shaping the future of virtual assistance?", "language": "en"},
+        json={"question": "What does Module 2 teach?", "language": "en"},
     )
     assert res.status_code == 200
     data = res.json()
@@ -57,7 +56,7 @@ def test_link_revoke_and_attempt_limit() -> None:
     start_res = client.post("/link/start", json={"session_id": "sess_test", "channel": "web"})
     assert start_res.status_code == 200
     link_id = start_res.json()["link_id"]
-    code = start_res.json()["code"]
+    _ = start_res.json()["code"]
 
     # 2. Test failed attempts increment
     for _ in range(4):
@@ -124,7 +123,7 @@ def test_tenants_and_languages_metadata() -> None:
     lang_res = client.get("/api/v1/languages")
     assert lang_res.status_code == 200
     languages = lang_res.json()
-    lang_codes = [l["code"] for l in languages]
+    lang_codes = [item["code"] for item in languages]
     assert "am" in lang_codes
     assert "ar" in lang_codes
     assert "om" in lang_codes

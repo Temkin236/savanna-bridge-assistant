@@ -1213,10 +1213,14 @@ async def handle_inline_handoff(callback: types.CallbackQuery) -> None:
     await callback.answer()
 
 
+_dp: Dispatcher | None = None
+
 def get_dispatcher() -> Dispatcher:
-    dp = Dispatcher()
-    dp.include_router(router)
-    return dp
+    global _dp
+    if _dp is None:
+        _dp = Dispatcher()
+        _dp.include_router(router)
+    return _dp
 
 
 async def setup_bot_commands(bot: Bot) -> None:

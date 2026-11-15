@@ -116,6 +116,8 @@ class OfflineFaqProvider(AIProvider):
             return "Mee waa'ee moojulii 2 naaf ibsaa."
         elif language == Language.TI:
             return "ብዛዕባ ሞጁል 2 ግለጹለይ።"
+        elif language == Language.AR:
+            return "يرجى شرح الوحدة الثانية."
         return "Please explain Module 2."
 
     def synthesize(self, text: str, language: Language, speed: float = 1.0) -> str:

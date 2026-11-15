@@ -40,6 +40,7 @@ from savanna_bridge.config import (
     DB_PATH,
 )
 from savanna_bridge.database import Database
+from savanna_bridge.language import LanguageRegistry
 from savanna_bridge.models import (
     AccommodationDraft,
     AccommodationDraftRequest,
@@ -79,7 +80,6 @@ from savanna_bridge.models import (
     Transcription,
     TranscriptionRequest,
 )
-from savanna_bridge.language import LanguageGuard, LanguageRegistry
 from savanna_bridge.rate_limiter import RateLimiter
 from savanna_bridge.retrieval import RetrievalEngine
 from savanna_bridge.tenant import TenantRegistry
