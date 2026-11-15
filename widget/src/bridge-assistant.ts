@@ -73,7 +73,9 @@ export interface AccessibilityPreferences {
 }
 
 export const ICONS = {
-  launcher: `<svg class="icon-inline" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M8 10h.01M12 10h.01M16 10h.01"></path></svg>`,
+  launcher: `<svg class="icon-inline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="7.2" r="1.5" fill="currentColor"></circle><path d="M5.5 10.5h13"></path><path d="M12 10.5v4"></path><path d="M12 14.5l-2.8 5"></path><path d="M12 14.5l2.8 5"></path></svg>`,
+  accessibility: `<svg class="icon-inline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="7.2" r="1.5" fill="currentColor"></circle><path d="M5.5 10.5h13"></path><path d="M12 10.5v4"></path><path d="M12 14.5l-2.8 5"></path><path d="M12 14.5l2.8 5"></path></svg>`,
+  chat: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`,
   settings: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>`,
   close: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
   mic: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>`,
@@ -113,8 +115,8 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     appTitle: "Savanna Bridge Assistant",
     appSubtitle: "Ask questions, adjust support, or connect with a mentor",
     closeLabel: "Close dialog",
-    launcherLabel: "Help & Assistant",
-    wakeHint: "Say \"Help\" or tap to open",
+    launcherLabel: "Accessibility & Assistant",
+    wakeHint: "Tap or press Alt+A to open",
     settingsLabel: "Settings",
     settingsTitle: "Assistant Settings",
     closeSettings: "Done",
@@ -236,8 +238,8 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     appTitle: "የሳቫና ብሪጅ ረዳት",
     appSubtitle: "ጥያቄዎችን ይጠይቁ፣ ድጋፍዎን ያስተካክሉ፣ ወይም ከአማካሪ ጋር ይገናኙ",
     closeLabel: "መስኮቱን ዝጋ",
-    launcherLabel: "እርዳታ እና ረዳት",
-    wakeHint: "\"እርዳታ\" ይበሉ ወይም ይንኩ",
+    launcherLabel: "ተደራሽነት እና ረዳት",
+    wakeHint: "ይንኩ ወይም Alt+A ን ይጫኑ",
     settingsLabel: "ቅንብሮች",
     settingsTitle: "የረዳት ቅንብሮች",
     closeSettings: "ጨርስ",
@@ -359,8 +361,8 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     appTitle: "Gargaaraa Savanna Bridge",
     appSubtitle: "Gaaffii gaafadhaa, deeggarsa madaalsisaa, ykn gorsaa waliin walqunnamaa",
     closeLabel: "Cufi",
-    launcherLabel: "Gargaarsa & Deeggarsa",
-    wakeHint: "\"Gargaarsa\" jedhaa ykn tuqaa",
+    launcherLabel: "Qaqqabummaa & Deeggarsa",
+    wakeHint: "Tuqaa ykn Alt+A dhiibaa",
     settingsLabel: "Qindaa'ina",
     settingsTitle: "Qindaa'ina Gargaaraa",
     closeSettings: "Xumuri",
@@ -482,8 +484,8 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     appTitle: "ናይ ሳቫና ብሪጅ ሓጋዚ",
     appSubtitle: "ሕቶታት ሕተቱ፡ ድሌትኩም ኣመዓራርዩ፡ ወይ ምስ መካሪ ተራኸቡ",
     closeLabel: "ዕጾ",
-    launcherLabel: "ሓገዝ & ሓጋዚ",
-    wakeHint: "\"ሓገዝ\" በሉ ወይ ንከፉ",
+    launcherLabel: "ተበጻሕነት & ሓጋዚ",
+    wakeHint: "ንከፉ ወይ Alt+A ጸቕጡ",
     settingsLabel: "ቅጥዕታት",
     settingsTitle: "ናይ ሓጋዚ ቅጥዕታት",
     closeSettings: "ወዲአ",
@@ -605,8 +607,8 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     appTitle: "مساعد سافانا بريدج",
     appSubtitle: "اطرح أسئلة، خصص دعمك، أو تواصل مع مرشد",
     closeLabel: "إغلاق النافذة",
-    launcherLabel: "المساعدة والمساعد",
-    wakeHint: "قل \"مساعدة\" أو اضغط للفتح",
+    launcherLabel: "إمكانية الوصول والمساعد",
+    wakeHint: "انقر أو اضغط Alt+A للفتح",
     settingsLabel: "الإعدادات",
     settingsTitle: "إعدادات المساعد",
     closeSettings: "تم",
@@ -738,7 +740,7 @@ const STYLES = `
     --b-primary-contrast: #ffffff;
     --b-surface: #f8fafc;
     --b-surface-alt: #f1f5f9;
-    --b-focus: #2563eb;
+    --b-focus: #b91c1c;
     --b-radius: 0.75rem;
     --b-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
     font-family: var(--b-font);
@@ -753,16 +755,16 @@ const STYLES = `
   :host([data-size="larger"]) { font-size: 1.15rem; }
 
   :host([data-contrast="high"]) {
-    --b-bg: #ffffff;
-    --b-text: #000000;
-    --b-text-muted: #111111;
-    --b-border: #000000;
-    --b-primary: #000080;
-    --b-primary-hover: #000050;
-    --b-primary-contrast: #ffffff;
-    --b-surface: #ffffff;
-    --b-surface-alt: #f0f0f0;
-    --b-focus: #000000;
+    --b-bg: #000000;
+    --b-text: #ffffff;
+    --b-text-muted: #e2e8f0;
+    --b-border: #ffffff;
+    --b-primary: #facc15;
+    --b-primary-hover: #eab308;
+    --b-primary-contrast: #000000;
+    --b-surface: #0a0a0a;
+    --b-surface-alt: #1a1a1a;
+    --b-focus: #facc15;
   }
 
   *, *::before, *::after {
@@ -838,7 +840,7 @@ const STYLES = `
     border-color: var(--b-border);
   }
 
-  /* Floating Launcher Button */
+  /* Floating Accessibility Launcher Button */
   .launcher {
     position: fixed;
     inset: auto 1.25rem 1.25rem auto;
@@ -847,15 +849,33 @@ const STYLES = `
     color: #ffffff;
     border: 2px solid #ffffff;
     border-radius: 2rem;
-    padding: 0.5rem 1.25rem;
-    box-shadow: var(--b-shadow);
+    padding: 0.625rem 1.25rem;
+    box-shadow: 0 4px 14px rgba(185, 28, 28, 0.4), 0 2px 6px rgba(0, 0, 0, 0.15);
     font-weight: 700;
     display: inline-flex;
     align-items: center;
     gap: 0.625rem;
+    cursor: pointer;
+    transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
   }
   .launcher:hover {
     background: #991b1b;
+    box-shadow: 0 6px 20px rgba(185, 28, 28, 0.5), 0 3px 8px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+  }
+
+  :host([data-contrast="high"]) .launcher {
+    background: #000000;
+    color: #facc15;
+    border: 3px solid #facc15;
+    box-shadow: 0 0 0 2px #000000, 0 0 16px rgba(250, 204, 21, 0.6);
+  }
+  :host([data-contrast="high"]) .launcher .launcher-icon-badge {
+    background: #facc15;
+    color: #000000;
+  }
+  :host([data-contrast="high"]) .launcher span {
+    color: #facc15 !important;
   }
 
   /* Nav Tabs */
@@ -3110,12 +3130,15 @@ export class BridgeAssistant extends HTMLElement {
       <div id="live-announcer" class="sr-only" aria-live="polite" aria-atomic="true" style="position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); border:0;"></div>
 
       <!-- Floating Launcher Button with Wake Word Hint -->
-      <button class="launcher" type="button" id="launcher-btn"
-              aria-expanded="${this.isOpen}" aria-controls="assistant-dialog" aria-haspopup="dialog">
-        ${ICONS.launcher}
-        <div style="display:flex; flex-direction:column; align-items:flex-start; text-align:left; line-height:1.15;">
-          <span>${this.t("launcherLabel")}</span>
-          <span style="font-size:0.6875rem; font-weight:normal; opacity:0.9;">${this.t("wakeHint")}</span>
+      <button class="launcher" type="button" id="launcher-btn" accesskey="a"
+              aria-expanded="${this.isOpen}" aria-controls="assistant-dialog" aria-haspopup="dialog"
+              aria-label="${this.t("launcherLabel")}. ${this.t("wakeHint")}">
+        <span class="launcher-icon-badge" aria-hidden="true" style="display:inline-flex; align-items:center; justify-content:center; width:2rem; height:2rem; border-radius:50%; background:rgba(255,255,255,0.22); color:#ffffff; flex-shrink:0;">
+          ${ICONS.launcher}
+        </span>
+        <div style="display:flex; flex-direction:column; align-items:flex-start; text-align:left; line-height:1.2;">
+          <span style="color:#ffffff; font-weight:700;">${this.t("launcherLabel")}</span>
+          <span style="font-size:0.75rem; font-weight:500; color:#ffffff;">${this.t("wakeHint")}</span>
         </div>
       </button>
 
@@ -3144,8 +3167,13 @@ export class BridgeAssistant extends HTMLElement {
 
         <!-- Header -->
         <header class="header">
-          <div class="header-titles">
-            <h2 id="dialog-title" class="title">${this.t("appTitle")}</h2>
+          <div class="header-titles" style="display:flex; align-items:center; gap:0.5rem;">
+            <span class="header-accessibility-icon" aria-hidden="true" style="display:inline-flex; align-items:center; justify-content:center; width:1.875rem; height:1.875rem; border-radius:50%; background:#fef2f2; color:#b91c1c; flex-shrink:0;">
+              ${ICONS.accessibility}
+            </span>
+            <div>
+              <h2 id="dialog-title" class="title">${this.t("appTitle")}</h2>
+            </div>
           </div>
           <div class="header-actions">
             <!-- Quick EN/AM Toggle for backward compatibility with integration tests -->
@@ -3187,7 +3215,7 @@ export class BridgeAssistant extends HTMLElement {
         <!-- Navigation Tabs on Main Assistant Dialog -->
         <nav class="nav-tabs" role="tablist" aria-label="Assistant sections">
           <button type="button" class="tab-btn" id="tab-chat" role="tab" aria-selected="${this.activeTab === "chat"}" aria-controls="pane-chat">
-            ${ICONS.launcher}
+            ${ICONS.chat}
             <span>${this.t("chatTab")}</span>
           </button>
           <button type="button" class="tab-btn" id="tab-support" role="tab" aria-selected="${this.activeTab === "support"}" aria-controls="pane-support">
@@ -4002,6 +4030,26 @@ export class BridgeAssistant extends HTMLElement {
         const otherText = (data.get("other_text") as string) || "";
         const contactMode = (data.get("contact_mode") as "text" | "voice" | "video" | "telegram") || "text";
         this.saveSupportNeeds(selectedNeeds, otherText, contactMode);
+      });
+    }
+
+    // Human Handoff Form
+    const handoffForm = this.shadowRoot.querySelector<HTMLFormElement>("#handoff-request-form, #handoff-form");
+    if (handoffForm) {
+      handoffForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const reasonInput = this.shadowRoot?.querySelector<HTMLInputElement>("#handoff-reason");
+        const reason = reasonInput?.value?.trim() || undefined;
+        this.requestHandoff(reason);
+      });
+    }
+    const btnSubmitHandoff = this.shadowRoot.querySelector<HTMLButtonElement>("#btn-submit-handoff");
+    if (btnSubmitHandoff) {
+      btnSubmitHandoff.addEventListener("click", (e) => {
+        e.preventDefault();
+        const reasonInput = this.shadowRoot?.querySelector<HTMLInputElement>("#handoff-reason");
+        const reason = reasonInput?.value?.trim() || undefined;
+        this.requestHandoff(reason);
       });
     }
 

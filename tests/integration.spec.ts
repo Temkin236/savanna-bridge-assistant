@@ -2,7 +2,11 @@ import { expect, test } from "@playwright/test";
 
 const demoBase = process.env.DEMO_BASE_URL ?? "http://localhost:4173";
 const apiBase = process.env.PUBLIC_API_BASE_URL ?? "http://localhost:8000";
-const consoleBase = process.env.CONSOLE_BASE_URL ?? "http://localhost:8080";
+const consoleBase =
+  process.env.CONSOLE_BASE_URL ??
+  (process.env.CONSOLE_PORT
+    ? `http://localhost:${process.env.CONSOLE_PORT}`
+    : "http://localhost:8090");
 
 async function configureWidget(page: import("@playwright/test").Page, path = "/savanna/") {
   await page.goto(`${demoBase}${path}?api=${encodeURIComponent(apiBase)}`);
@@ -69,9 +73,16 @@ test.describe("Savanna Bridge integration", () => {
     const response = await request.get(`${apiBase}/handoff/queue`);
     expect(response.ok()).toBeTruthy();
     const queue = await response.json();
-    const handoff = queue.items.find((item: { room_url: string }) =>
-      item.room_url.includes("savanna-bridge-demo")
-    );
+    const handoff =
+      queue.items
+        .filter(
+          (item: { status: string; room_url: string }) =>
+            item.status === "waiting" && item.room_url.includes("savanna-bridge-demo"),
+        )
+        .slice(-1)[0] ??
+      queue.items.find((item: { room_url: string }) =>
+        item.room_url.includes("savanna-bridge-demo"),
+      );
     expect(handoff).toBeTruthy();
 
     await page.goto(consoleBase);

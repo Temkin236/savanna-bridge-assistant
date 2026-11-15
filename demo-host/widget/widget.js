@@ -1,8 +1,10 @@
-var N = Object.defineProperty;
-var j = (v, m, e) => m in v ? N(v, m, { enumerable: !0, configurable: !0, writable: !0, value: e }) : v[m] = e;
-var c = (v, m, e) => j(v, typeof m != "symbol" ? m + "" : m, e);
+var I = Object.defineProperty;
+var D = (v, m, e) => m in v ? I(v, m, { enumerable: !0, configurable: !0, writable: !0, value: e }) : v[m] = e;
+var c = (v, m, e) => D(v, typeof m != "symbol" ? m + "" : m, e);
 const o = {
-  launcher: '<svg class="icon-inline" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M8 10h.01M12 10h.01M16 10h.01"></path></svg>',
+  launcher: '<svg class="icon-inline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="7.2" r="1.5" fill="currentColor"></circle><path d="M5.5 10.5h13"></path><path d="M12 10.5v4"></path><path d="M12 14.5l-2.8 5"></path><path d="M12 14.5l2.8 5"></path></svg>',
+  accessibility: '<svg class="icon-inline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="7.2" r="1.5" fill="currentColor"></circle><path d="M5.5 10.5h13"></path><path d="M12 10.5v4"></path><path d="M12 14.5l-2.8 5"></path><path d="M12 14.5l2.8 5"></path></svg>',
+  chat: '<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>',
   settings: '<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>',
   close: '<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
   mic: '<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>',
@@ -40,8 +42,8 @@ const o = {
     appTitle: "Savanna Bridge Assistant",
     appSubtitle: "Ask questions, adjust support, or connect with a mentor",
     closeLabel: "Close dialog",
-    launcherLabel: "Help & Assistant",
-    wakeHint: 'Say "Help" or tap to open',
+    launcherLabel: "Accessibility & Assistant",
+    wakeHint: "Tap or press Alt+A to open",
     settingsLabel: "Settings",
     settingsTitle: "Assistant Settings",
     closeSettings: "Done",
@@ -163,8 +165,8 @@ const o = {
     appTitle: "የሳቫና ብሪጅ ረዳት",
     appSubtitle: "ጥያቄዎችን ይጠይቁ፣ ድጋፍዎን ያስተካክሉ፣ ወይም ከአማካሪ ጋር ይገናኙ",
     closeLabel: "መስኮቱን ዝጋ",
-    launcherLabel: "እርዳታ እና ረዳት",
-    wakeHint: '"እርዳታ" ይበሉ ወይም ይንኩ',
+    launcherLabel: "ተደራሽነት እና ረዳት",
+    wakeHint: "ይንኩ ወይም Alt+A ን ይጫኑ",
     settingsLabel: "ቅንብሮች",
     settingsTitle: "የረዳት ቅንብሮች",
     closeSettings: "ጨርስ",
@@ -286,8 +288,8 @@ const o = {
     appTitle: "Gargaaraa Savanna Bridge",
     appSubtitle: "Gaaffii gaafadhaa, deeggarsa madaalsisaa, ykn gorsaa waliin walqunnamaa",
     closeLabel: "Cufi",
-    launcherLabel: "Gargaarsa & Deeggarsa",
-    wakeHint: '"Gargaarsa" jedhaa ykn tuqaa',
+    launcherLabel: "Qaqqabummaa & Deeggarsa",
+    wakeHint: "Tuqaa ykn Alt+A dhiibaa",
     settingsLabel: "Qindaa'ina",
     settingsTitle: "Qindaa'ina Gargaaraa",
     closeSettings: "Xumuri",
@@ -409,8 +411,8 @@ const o = {
     appTitle: "ናይ ሳቫና ብሪጅ ሓጋዚ",
     appSubtitle: "ሕቶታት ሕተቱ፡ ድሌትኩም ኣመዓራርዩ፡ ወይ ምስ መካሪ ተራኸቡ",
     closeLabel: "ዕጾ",
-    launcherLabel: "ሓገዝ & ሓጋዚ",
-    wakeHint: '"ሓገዝ" በሉ ወይ ንከፉ',
+    launcherLabel: "ተበጻሕነት & ሓጋዚ",
+    wakeHint: "ንከፉ ወይ Alt+A ጸቕጡ",
     settingsLabel: "ቅጥዕታት",
     settingsTitle: "ናይ ሓጋዚ ቅጥዕታት",
     closeSettings: "ወዲአ",
@@ -532,8 +534,8 @@ const o = {
     appTitle: "مساعد سافانا بريدج",
     appSubtitle: "اطرح أسئلة، خصص دعمك، أو تواصل مع مرشد",
     closeLabel: "إغلاق النافذة",
-    launcherLabel: "المساعدة والمساعد",
-    wakeHint: 'قل "مساعدة" أو اضغط للفتح',
+    launcherLabel: "إمكانية الوصول والمساعد",
+    wakeHint: "انقر أو اضغط Alt+A للفتح",
     settingsLabel: "الإعدادات",
     settingsTitle: "إعدادات المساعد",
     closeSettings: "تم",
@@ -651,7 +653,7 @@ const o = {
     onboardingReplay: "دليل الإعداد الأولي",
     voiceTab: "الصوت والقراءة"
   }
-}, D = `
+}, V = `
   :host {
     --b-font: var(--bs-body-font-family, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Ethiopic", "Noto Sans Arabic", "Nyala", sans-serif);
     --b-bg: var(--bs-body-bg, #ffffff);
@@ -663,7 +665,7 @@ const o = {
     --b-primary-contrast: #ffffff;
     --b-surface: #f8fafc;
     --b-surface-alt: #f1f5f9;
-    --b-focus: #2563eb;
+    --b-focus: #b91c1c;
     --b-radius: 0.75rem;
     --b-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
     font-family: var(--b-font);
@@ -678,16 +680,16 @@ const o = {
   :host([data-size="larger"]) { font-size: 1.15rem; }
 
   :host([data-contrast="high"]) {
-    --b-bg: #ffffff;
-    --b-text: #000000;
-    --b-text-muted: #111111;
-    --b-border: #000000;
-    --b-primary: #000080;
-    --b-primary-hover: #000050;
-    --b-primary-contrast: #ffffff;
-    --b-surface: #ffffff;
-    --b-surface-alt: #f0f0f0;
-    --b-focus: #000000;
+    --b-bg: #000000;
+    --b-text: #ffffff;
+    --b-text-muted: #e2e8f0;
+    --b-border: #ffffff;
+    --b-primary: #facc15;
+    --b-primary-hover: #eab308;
+    --b-primary-contrast: #000000;
+    --b-surface: #0a0a0a;
+    --b-surface-alt: #1a1a1a;
+    --b-focus: #facc15;
   }
 
   *, *::before, *::after {
@@ -763,7 +765,7 @@ const o = {
     border-color: var(--b-border);
   }
 
-  /* Floating Launcher Button */
+  /* Floating Accessibility Launcher Button */
   .launcher {
     position: fixed;
     inset: auto 1.25rem 1.25rem auto;
@@ -772,15 +774,33 @@ const o = {
     color: #ffffff;
     border: 2px solid #ffffff;
     border-radius: 2rem;
-    padding: 0.5rem 1.25rem;
-    box-shadow: var(--b-shadow);
+    padding: 0.625rem 1.25rem;
+    box-shadow: 0 4px 14px rgba(185, 28, 28, 0.4), 0 2px 6px rgba(0, 0, 0, 0.15);
     font-weight: 700;
     display: inline-flex;
     align-items: center;
     gap: 0.625rem;
+    cursor: pointer;
+    transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
   }
   .launcher:hover {
     background: #991b1b;
+    box-shadow: 0 6px 20px rgba(185, 28, 28, 0.5), 0 3px 8px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+  }
+
+  :host([data-contrast="high"]) .launcher {
+    background: #000000;
+    color: #facc15;
+    border: 3px solid #facc15;
+    box-shadow: 0 0 0 2px #000000, 0 0 16px rgba(250, 204, 21, 0.6);
+  }
+  :host([data-contrast="high"]) .launcher .launcher-icon-badge {
+    background: #facc15;
+    color: #000000;
+  }
+  :host([data-contrast="high"]) .launcher span {
+    color: #facc15 !important;
   }
 
   /* Nav Tabs */
@@ -1491,7 +1511,7 @@ const o = {
     outline-offset: 3px !important;
   }
 `;
-class q extends HTMLElement {
+class N extends HTMLElement {
   constructor() {
     super(...arguments);
     c(this, "isOpen", !1);
@@ -1666,8 +1686,8 @@ class q extends HTMLElement {
       const t = localStorage.getItem("savanna_voice_prefs");
       if (t)
         try {
-          const d = JSON.parse(t);
-          this.accessibilityPrefs = { ...this.accessibilityPrefs, ...d };
+          const h = JSON.parse(t);
+          this.accessibilityPrefs = { ...this.accessibilityPrefs, ...h };
         } catch {
         }
       const a = localStorage.getItem("savanna_bridge_preferred_lang");
@@ -1744,14 +1764,14 @@ class q extends HTMLElement {
     }[e].toLowerCase(), n = e.toLowerCase();
     let s = t.find((u) => u.lang.toLowerCase() === i);
     if (s || (s = t.find((u) => u.lang.toLowerCase().startsWith(n)), s)) return s;
-    const d = {
+    const h = {
       en: "english",
       am: "amharic",
       om: "oromo",
       ti: "tigrinya",
       ar: "arabic"
     }[e];
-    return s = t.find((u) => u.name.toLowerCase().includes(d)), s || null;
+    return s = t.find((u) => u.name.toLowerCase().includes(h)), s || null;
   }
   speakText(e, t) {
     if (!("speechSynthesis" in window))
@@ -2059,13 +2079,13 @@ class q extends HTMLElement {
         };
         this.activeRecognition.lang = i[this.currentLang] || "en-US", this.activeRecognition.onresult = (n) => {
           let s = "";
-          for (let d = 0; d < n.results.length; d++)
-            s += n.results[d][0]?.transcript || "";
+          for (let h = 0; h < n.results.length; h++)
+            s += n.results[h][0]?.transcript || "";
           const l = s.trim();
           if (l) {
             t = !0;
-            const d = this.detectLanguage(l);
-            d !== this.currentLang && this.setLanguage(d, !1), e.value = l;
+            const h = this.detectLanguage(l);
+            h !== this.currentLang && this.setLanguage(h, !1), e.value = l;
           }
         }, this.activeRecognition.onend = () => {
           this.isRecording && this.stopVoiceRecording(t);
@@ -2116,10 +2136,10 @@ class q extends HTMLElement {
   async sendAudioForTranscription(e, t, a) {
     this.isProcessingSpeech = !0, this.updateVoiceStatusUI(), this.announce(this.t("voiceProcessing"));
     try {
-      const i = new FileReader(), n = new Promise((d, u) => {
+      const i = new FileReader(), n = new Promise((h, u) => {
         i.onloadend = () => {
           const y = i.result;
-          d(y.split(",")[1] || "");
+          h(y.split(",")[1] || "");
         }, i.onerror = u;
       });
       i.readAsDataURL(e);
@@ -2134,10 +2154,10 @@ class q extends HTMLElement {
         })
       });
       if (l.ok) {
-        const d = await l.json();
-        if (d.transcript) {
-          const u = this.detectLanguage(d.transcript);
-          u !== this.currentLang && this.setLanguage(u, !1), a.value = (a.value ? a.value + " " : "") + d.transcript, a.focus(), this.playEarcon("transcribed"), this.announce(this.t("voicePreviewNotice"));
+        const h = await l.json();
+        if (h.transcript) {
+          const u = this.detectLanguage(h.transcript);
+          u !== this.currentLang && this.setLanguage(u, !1), a.value = (a.value ? a.value + " " : "") + h.transcript, a.focus(), this.playEarcon("transcribed"), this.announce(this.t("voicePreviewNotice"));
         }
       }
     } catch (i) {
@@ -2274,30 +2294,30 @@ class q extends HTMLElement {
           ...s
         })
       })), this.isThinking = !1, l.ok) {
-        const d = await l.json(), u = !!d.offer_human || d.reason === "low_confidence", y = {
+        const h = await l.json(), u = !!h.offer_human || h.reason === "low_confidence", y = {
           id: `msg_${Date.now()}_assistant`,
           sender: "assistant",
-          text: d.answer,
+          text: h.answer,
           heading: this.t("answerHeading"),
-          citations: d.citations || [],
-          offerHuman: d.offer_human,
+          citations: h.citations || [],
+          offerHuman: h.offer_human,
           isRefusal: u
         };
         this.messages.push(y), this.saveChatState(), this.renderMessages(), (this.autoReadSpeech || this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_tts) && this.speakResponse(y);
       } else {
-        const d = {
+        const h = {
           id: `msg_${Date.now()}_err`,
           sender: "assistant",
           text: this.t("serverErrorNotice"),
           offerHuman: !0
         };
-        this.messages.push(d), this.renderMessages();
+        this.messages.push(h), this.renderMessages();
       }
     } catch {
       this.isThinking = !1;
       try {
-        const d = JSON.parse(localStorage.getItem("db_assistant_offline_queue") || "[]");
-        d.push({ question: a, language: this.currentLang, timestamp: Date.now() }), localStorage.setItem("db_assistant_offline_queue", JSON.stringify(d));
+        const h = JSON.parse(localStorage.getItem("db_assistant_offline_queue") || "[]");
+        h.push({ question: a, language: this.currentLang, timestamp: Date.now() }), localStorage.setItem("db_assistant_offline_queue", JSON.stringify(h));
       } catch {
       }
       const l = {
@@ -2379,18 +2399,21 @@ class q extends HTMLElement {
   // --- Rendering ---
   render() {
     this.shadowRoot && (this.setAttribute("data-contrast", this.highContrast ? "high" : "normal"), this.setAttribute("data-size", this.textSize), this.setAttribute("dir", this.currentLang === "ar" ? "rtl" : "ltr"), this.accessibilityPrefs?.keyboard_navigation ? this.classList.add("keyboard-focus-enhanced") : this.classList.remove("keyboard-focus-enhanced"), this.shadowRoot.innerHTML = `
-      <style>${D}</style>
+      <style>${V}</style>
 
       <!-- Live Announcer -->
       <div id="live-announcer" class="sr-only" aria-live="polite" aria-atomic="true" style="position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); border:0;"></div>
 
       <!-- Floating Launcher Button with Wake Word Hint -->
-      <button class="launcher" type="button" id="launcher-btn"
-              aria-expanded="${this.isOpen}" aria-controls="assistant-dialog" aria-haspopup="dialog">
-        ${o.launcher}
-        <div style="display:flex; flex-direction:column; align-items:flex-start; text-align:left; line-height:1.15;">
-          <span>${this.t("launcherLabel")}</span>
-          <span style="font-size:0.6875rem; font-weight:normal; opacity:0.9;">${this.t("wakeHint")}</span>
+      <button class="launcher" type="button" id="launcher-btn" accesskey="a"
+              aria-expanded="${this.isOpen}" aria-controls="assistant-dialog" aria-haspopup="dialog"
+              aria-label="${this.t("launcherLabel")}. ${this.t("wakeHint")}">
+        <span class="launcher-icon-badge" aria-hidden="true" style="display:inline-flex; align-items:center; justify-content:center; width:2rem; height:2rem; border-radius:50%; background:rgba(255,255,255,0.22); color:#ffffff; flex-shrink:0;">
+          ${o.launcher}
+        </span>
+        <div style="display:flex; flex-direction:column; align-items:flex-start; text-align:left; line-height:1.2;">
+          <span style="color:#ffffff; font-weight:700;">${this.t("launcherLabel")}</span>
+          <span style="font-size:0.75rem; font-weight:500; color:#ffffff;">${this.t("wakeHint")}</span>
         </div>
       </button>
 
@@ -2419,8 +2442,13 @@ class q extends HTMLElement {
 
         <!-- Header -->
         <header class="header">
-          <div class="header-titles">
-            <h2 id="dialog-title" class="title">${this.t("appTitle")}</h2>
+          <div class="header-titles" style="display:flex; align-items:center; gap:0.5rem;">
+            <span class="header-accessibility-icon" aria-hidden="true" style="display:inline-flex; align-items:center; justify-content:center; width:1.875rem; height:1.875rem; border-radius:50%; background:#fef2f2; color:#b91c1c; flex-shrink:0;">
+              ${o.accessibility}
+            </span>
+            <div>
+              <h2 id="dialog-title" class="title">${this.t("appTitle")}</h2>
+            </div>
           </div>
           <div class="header-actions">
             <!-- Quick EN/AM Toggle for backward compatibility with integration tests -->
@@ -2462,7 +2490,7 @@ class q extends HTMLElement {
         <!-- Navigation Tabs on Main Assistant Dialog -->
         <nav class="nav-tabs" role="tablist" aria-label="Assistant sections">
           <button type="button" class="tab-btn" id="tab-chat" role="tab" aria-selected="${this.activeTab === "chat"}" aria-controls="pane-chat">
-            ${o.launcher}
+            ${o.chat}
             <span>${this.t("chatTab")}</span>
           </button>
           <button type="button" class="tab-btn" id="tab-support" role="tab" aria-selected="${this.activeTab === "support"}" aria-controls="pane-support">
@@ -3031,23 +3059,23 @@ class q extends HTMLElement {
       if (r.key === "Escape") {
         if (this.isSettingsOpen) {
           this.isSettingsOpen = !1;
-          const h = this.shadowRoot?.querySelector("#settings-dialog");
-          h && h.setAttribute("hidden", "true");
+          const d = this.shadowRoot?.querySelector("#settings-dialog");
+          d && d.setAttribute("hidden", "true");
         } else
           this.closeAssistant();
         return;
       }
       if (r.key === "Tab") {
-        const h = this.isSettingsOpen ? this.shadowRoot?.querySelector("#settings-dialog") : t;
-        if (!h) return;
+        const d = this.isSettingsOpen ? this.shadowRoot?.querySelector("#settings-dialog") : t;
+        if (!d) return;
         const g = Array.from(
-          h.querySelectorAll(
+          d.querySelectorAll(
             'button:not([disabled]):not([hidden]), [href]:not([disabled]), input:not([disabled]):not([hidden]), select:not([disabled]):not([hidden]), textarea:not([disabled]):not([hidden]), [tabindex]:not([tabindex="-1"])'
           )
-        ).filter((z) => z.offsetParent !== null);
+        ).filter((j) => j.offsetParent !== null);
         if (g.length === 0) return;
-        const b = g[0], p = g[g.length - 1], x = this.shadowRoot?.activeElement ?? document.activeElement;
-        r.shiftKey && x === b ? (r.preventDefault(), p.focus()) : !r.shiftKey && x === p && (r.preventDefault(), b.focus());
+        const p = g[0], b = g[g.length - 1], x = this.shadowRoot?.activeElement ?? document.activeElement;
+        r.shiftKey && x === p ? (r.preventDefault(), b.focus()) : !r.shiftKey && x === b && (r.preventDefault(), p.focus());
       }
     }), this.shadowRoot.querySelector("#btn-lang-en")?.addEventListener("click", () => this.setLanguage("en")), this.shadowRoot.querySelector("#btn-lang-am")?.addEventListener("click", () => this.setLanguage("am")), this.shadowRoot.querySelector("#btn-lang-om")?.addEventListener("click", () => this.setLanguage("om")), this.shadowRoot.querySelector("#btn-lang-ar")?.addEventListener("click", () => this.setLanguage("ar")), this.shadowRoot.querySelector(".lang-btn")?.addEventListener("click", () => {
       this.setLanguage(this.currentLang === "en" ? "am" : "en");
@@ -3056,8 +3084,8 @@ class q extends HTMLElement {
       const r = this.shadowRoot?.querySelector("#settings-dialog");
       if (r) {
         r.removeAttribute("hidden");
-        const h = r.querySelector("button, input");
-        h && h.focus();
+        const d = r.querySelector("button, input");
+        d && d.focus();
       }
     }), n.addEventListener("click", () => {
       this.isSettingsOpen = !1;
@@ -3069,22 +3097,22 @@ class q extends HTMLElement {
       { id: "support", btn: this.shadowRoot.querySelector("#tab-support"), pane: this.shadowRoot.querySelector("#pane-support") },
       { id: "handoff", btn: this.shadowRoot.querySelector("#tab-handoff"), pane: this.shadowRoot.querySelector("#pane-handoff") }
     ], l = (r) => {
-      this.activeTab = s[r].id, s.forEach((g, b) => {
-        const p = b === r;
-        g.btn?.setAttribute("aria-selected", p ? "true" : "false"), g.pane && (g.pane.hidden = !p, g.pane.style.display = p ? g.id === "chat" ? "flex" : "block" : "none");
+      this.activeTab = s[r].id, s.forEach((g, p) => {
+        const b = p === r;
+        g.btn?.setAttribute("aria-selected", b ? "true" : "false"), g.pane && (g.pane.hidden = !b, g.pane.style.display = b ? g.id === "chat" ? "flex" : "block" : "none");
       });
-      const h = s[r].btn;
-      h && (h.focus(), this.announce(h.textContent?.trim() + " tab selected"));
+      const d = s[r].btn;
+      d && (d.focus(), this.announce(d.textContent?.trim() + " tab selected"));
     };
-    s.forEach(({ btn: r }, h) => {
-      r?.addEventListener("click", () => l(h)), r?.addEventListener("keydown", (g) => {
-        const b = g;
-        b.key === "ArrowRight" ? (b.preventDefault(), l((h + 1) % s.length)) : b.key === "ArrowLeft" && (b.preventDefault(), l((h - 1 + s.length) % s.length));
+    s.forEach(({ btn: r }, d) => {
+      r?.addEventListener("click", () => l(d)), r?.addEventListener("keydown", (g) => {
+        const p = g;
+        p.key === "ArrowRight" ? (p.preventDefault(), l((d + 1) % s.length)) : p.key === "ArrowLeft" && (p.preventDefault(), l((d - 1 + s.length) % s.length));
       });
     }), this.shadowRoot.querySelectorAll(".btn-talk-person, #btn-footer-handoff").forEach((r) => {
-      r.addEventListener("click", (h) => {
-        h.preventDefault();
-        const g = s.findIndex((b) => b.id === "handoff");
+      r.addEventListener("click", (d) => {
+        d.preventDefault();
+        const g = s.findIndex((p) => p.id === "handoff");
         g >= 0 && l(g);
       });
     }), this.shadowRoot.querySelector("#btn-size-smaller")?.addEventListener("click", () => {
@@ -3094,9 +3122,9 @@ class q extends HTMLElement {
     }), this.shadowRoot.querySelector("#btn-size-larger")?.addEventListener("click", () => {
       this.textSize = "larger", localStorage.setItem("savanna_bridge_text_size", "larger"), this.render();
     });
-    const d = this.shadowRoot.querySelector("#chk-contrast");
-    d && d.addEventListener("change", () => {
-      this.highContrast = d.checked, localStorage.setItem("savanna_bridge_contrast", this.highContrast ? "high" : "normal"), this.render();
+    const h = this.shadowRoot.querySelector("#chk-contrast");
+    h && h.addEventListener("change", () => {
+      this.highContrast = h.checked, localStorage.setItem("savanna_bridge_contrast", this.highContrast ? "high" : "normal"), this.render();
     });
     const u = this.shadowRoot.querySelector("#chk-simple-mode");
     u && u.addEventListener("change", () => {
@@ -3109,33 +3137,45 @@ class q extends HTMLElement {
     const R = this.shadowRoot.querySelector("#support-form");
     R && R.addEventListener("submit", (r) => {
       r.preventDefault();
-      const h = new FormData(R), g = h.getAll("need"), b = h.get("other_text") || "", p = h.get("contact_mode") || "text";
-      this.saveSupportNeeds(g, b, p);
+      const d = new FormData(R), g = d.getAll("need"), p = d.get("other_text") || "", b = d.get("contact_mode") || "text";
+      this.saveSupportNeeds(g, p, b);
     });
-    const A = this.shadowRoot.querySelector("#chat-form"), k = this.shadowRoot.querySelector("#chat-text-input"), B = this.shadowRoot.querySelector("#mic-btn");
-    A && k && A.addEventListener("submit", (r) => {
+    const A = this.shadowRoot.querySelector("#handoff-request-form, #handoff-form");
+    A && A.addEventListener("submit", (r) => {
       r.preventDefault();
-      const h = k.value;
-      k.value = "", this.askQuestion(h);
-    }), B && k && B.addEventListener("click", () => {
+      const g = this.shadowRoot?.querySelector("#handoff-reason")?.value?.trim() || void 0;
+      this.requestHandoff(g);
+    });
+    const B = this.shadowRoot.querySelector("#btn-submit-handoff");
+    B && B.addEventListener("click", (r) => {
+      r.preventDefault();
+      const g = this.shadowRoot?.querySelector("#handoff-reason")?.value?.trim() || void 0;
+      this.requestHandoff(g);
+    });
+    const C = this.shadowRoot.querySelector("#chat-form"), k = this.shadowRoot.querySelector("#chat-text-input"), M = this.shadowRoot.querySelector("#mic-btn");
+    C && k && C.addEventListener("submit", (r) => {
+      r.preventDefault();
+      const d = k.value;
+      k.value = "", this.askQuestion(d);
+    }), M && k && M.addEventListener("click", () => {
       this.toggleVoiceInput(k);
     });
-    const C = () => {
+    const q = () => {
       this.showAutoplayBanner = !1, this.accessibilityPrefs.voice_enabled = !0, this.savePreferences(), this.announce(this.t("welcomeSpoken")), this.triggerSpokenWelcome(), this.render();
     };
-    this.shadowRoot.querySelector("#btn-activate-voice-welcome")?.addEventListener("click", C), this.shadowRoot.querySelector("#btn-activate-voice-welcome-floating")?.addEventListener("click", C);
-    const M = () => {
+    this.shadowRoot.querySelector("#btn-activate-voice-welcome")?.addEventListener("click", q), this.shadowRoot.querySelector("#btn-activate-voice-welcome-floating")?.addEventListener("click", q);
+    const E = () => {
       this.showAutoplayBanner = !1, this.render();
     };
-    this.shadowRoot.querySelector("#btn-dismiss-voice-banner")?.addEventListener("click", M), this.shadowRoot.querySelector("#btn-dismiss-voice-banner-floating")?.addEventListener("click", M), this.shadowRoot.querySelector("#btn-reading-pause")?.addEventListener("click", () => this.pausePageReading()), this.shadowRoot.querySelector("#btn-reading-resume")?.addEventListener("click", () => this.resumePageReading()), this.shadowRoot.querySelector("#btn-reading-stop")?.addEventListener("click", () => this.stopPageReading()), ["en", "am", "om", "ti", "ar"].forEach((r) => {
+    this.shadowRoot.querySelector("#btn-dismiss-voice-banner")?.addEventListener("click", E), this.shadowRoot.querySelector("#btn-dismiss-voice-banner-floating")?.addEventListener("click", E), this.shadowRoot.querySelector("#btn-reading-pause")?.addEventListener("click", () => this.pausePageReading()), this.shadowRoot.querySelector("#btn-reading-resume")?.addEventListener("click", () => this.resumePageReading()), this.shadowRoot.querySelector("#btn-reading-stop")?.addEventListener("click", () => this.stopPageReading()), ["en", "am", "om", "ti", "ar"].forEach((r) => {
       this.shadowRoot?.querySelector(`#onboard-lang-${r}`)?.addEventListener("click", () => {
         this.setLanguage(r);
       });
     });
     const $ = (r) => {
       if (r) {
-        const h = this.shadowRoot?.querySelector("#onboard-chk-voice")?.checked ?? !0, g = this.shadowRoot?.querySelector("#onboard-chk-screen-reader")?.checked ?? !1, b = this.shadowRoot?.querySelector("#onboard-chk-keyboard-nav")?.checked ?? !1, p = this.shadowRoot?.querySelector("#onboard-chk-contrast")?.checked ?? !1, x = this.shadowRoot?.querySelector("#onboard-chk-large-text")?.checked ?? !1;
-        this.accessibilityPrefs.voice_enabled = h, this.accessibilityPrefs.screen_reader_mode = g, this.accessibilityPrefs.keyboard_navigation = b, this.accessibilityPrefs.high_contrast = p, this.accessibilityPrefs.large_text = x ? "larger" : "normal", this.highContrast = p, x && (this.textSize = "larger", localStorage.setItem("savanna_bridge_text_size", "larger"));
+        const d = this.shadowRoot?.querySelector("#onboard-chk-voice")?.checked ?? !0, g = this.shadowRoot?.querySelector("#onboard-chk-screen-reader")?.checked ?? !1, p = this.shadowRoot?.querySelector("#onboard-chk-keyboard-nav")?.checked ?? !1, b = this.shadowRoot?.querySelector("#onboard-chk-contrast")?.checked ?? !1, x = this.shadowRoot?.querySelector("#onboard-chk-large-text")?.checked ?? !1;
+        this.accessibilityPrefs.voice_enabled = d, this.accessibilityPrefs.screen_reader_mode = g, this.accessibilityPrefs.keyboard_navigation = p, this.accessibilityPrefs.high_contrast = b, this.accessibilityPrefs.large_text = x ? "larger" : "normal", this.highContrast = b, x && (this.textSize = "larger", localStorage.setItem("savanna_bridge_text_size", "larger"));
       }
       this.accessibilityPrefs.onboarded = !0, this.onboardingDismissed = !0, this.savePreferences(), this.render(), this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_welcome && this.triggerSpokenWelcome();
     };
@@ -3152,32 +3192,32 @@ class q extends HTMLElement {
     _ && _.addEventListener("change", () => {
       this.accessibilityPrefs.auto_tts = _.checked, this.savePreferences();
     });
-    const E = [
+    const z = [
       { id: "#btn-rate-075", rate: 0.75 },
       { id: "#btn-rate-100", rate: 1 },
       { id: "#btn-rate-125", rate: 1.25 },
       { id: "#btn-rate-150", rate: 1.5 }
     ];
-    E.forEach(({ id: r, rate: h }) => {
+    z.forEach(({ id: r, rate: d }) => {
       this.shadowRoot?.querySelector(r)?.addEventListener("click", () => {
-        this.accessibilityPrefs.speech_rate = h, this.savePreferences(), E.forEach((g) => {
-          this.shadowRoot?.querySelector(g.id)?.setAttribute("aria-pressed", g.rate === h ? "true" : "false");
-        }), this.announce(`Speech rate set to ${h}x`);
+        this.accessibilityPrefs.speech_rate = d, this.savePreferences(), z.forEach((g) => {
+          this.shadowRoot?.querySelector(g.id)?.setAttribute("aria-pressed", g.rate === d ? "true" : "false");
+        }), this.announce(`Speech rate set to ${d}x`);
       });
     }), this.shadowRoot.querySelector("#btn-read-page")?.addEventListener("click", () => this.readPageAloud()), this.shadowRoot.querySelector("#btn-read-section")?.addEventListener("click", () => this.readSectionAloud()), this.shadowRoot.querySelector("#btn-test-voice")?.addEventListener("click", () => {
       this.speakText(this.t("welcomeSpoken"));
     });
-    const T = this.shadowRoot.querySelector("#chk-screen-reader");
-    T && T.addEventListener("change", () => {
-      this.accessibilityPrefs.screen_reader_mode = T.checked, this.savePreferences(), this.announce(T.checked ? "Screen reader mode enabled" : "Screen reader mode disabled");
+    const L = this.shadowRoot.querySelector("#chk-screen-reader");
+    L && L.addEventListener("change", () => {
+      this.accessibilityPrefs.screen_reader_mode = L.checked, this.savePreferences(), this.announce(L.checked ? "Screen reader mode enabled" : "Screen reader mode disabled");
     });
     const w = this.shadowRoot.querySelector("#chk-keyboard-nav");
     w && w.addEventListener("change", () => {
       this.accessibilityPrefs.keyboard_navigation = w.checked, this.savePreferences(), w.checked ? this.classList.add("keyboard-focus-enhanced") : this.classList.remove("keyboard-focus-enhanced"), this.announce(w.checked ? "Enhanced keyboard navigation enabled" : "Enhanced keyboard navigation disabled");
     });
-    const L = this.shadowRoot.querySelector("#chk-sync-prefs");
-    L && L.addEventListener("change", () => {
-      this.accessibilityPrefs.sync_enabled = L.checked, this.savePreferences(), L.checked ? (this.syncPreferencesToBackend(), this.announce("Cross-website synchronization enabled")) : this.announce("Cross-website synchronization disabled");
+    const T = this.shadowRoot.querySelector("#chk-sync-prefs");
+    T && T.addEventListener("change", () => {
+      this.accessibilityPrefs.sync_enabled = T.checked, this.savePreferences(), T.checked ? (this.syncPreferencesToBackend(), this.announce("Cross-website synchronization enabled")) : this.announce("Cross-website synchronization disabled");
     }), this.shadowRoot.querySelector("#btn-replay-onboarding")?.addEventListener("click", () => {
       this.accessibilityPrefs.onboarded = !1, this.onboardingDismissed = !1, this.isSettingsOpen = !1, this.render();
     });
@@ -3187,10 +3227,10 @@ class q extends HTMLElement {
     return t.textContent = e, t.innerHTML;
   }
 }
-customElements.get("bridge-assistant") || customElements.define("bridge-assistant", q);
-customElements.get("db-assistant") || customElements.define("db-assistant", q);
+customElements.get("bridge-assistant") || customElements.define("bridge-assistant", N);
+customElements.get("db-assistant") || customElements.define("db-assistant", N);
 export {
-  q as BridgeAssistant,
+  N as BridgeAssistant,
   o as ICONS
 };
 //# sourceMappingURL=widget.js.map
