@@ -41,6 +41,7 @@ from savanna_bridge.config import (
 )
 from savanna_bridge.database import Database
 from savanna_bridge.language import LanguageGuard, LanguageRegistry
+from savanna_bridge.language import LanguageGuard, LanguageRegistry
 from savanna_bridge.models import (
     AccommodationDraft,
     AccommodationDraftRequest,
