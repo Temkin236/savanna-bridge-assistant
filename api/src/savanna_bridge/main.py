@@ -42,6 +42,7 @@ from savanna_bridge.config import (
 from savanna_bridge.database import Database
 from savanna_bridge.language import LanguageRegistry
 from savanna_bridge.models import (
+    AccessibilityProfile,
     AccommodationDraft,
     AccommodationDraftRequest,
     AlertMatchItem,
@@ -309,18 +310,34 @@ def ask(payload: AskRequest, _token: Any = Depends(verify_optional_token)) -> An
             mocked=ai.is_mocked,
         )
 
-    # If language is Afaan Oromoo (om), Tigrinya (ti), or Arabic (ar), translate question to English for retrieval
-    query_for_retrieval = question
-    if user_lang in (Language.OM, Language.TI, Language.AR):
-        query_for_retrieval = ai.translate(question, user_lang.value, "en")
+    # Ingest live platform content if provided directly by web widget
+    if payload.page_content and payload.page_url:
+        content_source.add_dynamic_content(
+            title=payload.page_title or "Current Platform Page",
+            url=payload.page_url,
+            content=payload.page_content,
+            course_id=payload.course_id or "course_demo",
+        )
 
-    # Search course content with BM25
+    # Search course and platform content in requested language
     matches, confidence = retrieval_engine.search(
-        query=query_for_retrieval,
+        query=question,
         language=user_lang,
-        top_k=2,
+        top_k=3,
         threshold=CONFIDENCE_THRESHOLD,
     )
+
+    # If no match or low confidence and language is non-English, try searching with translated English query
+    if (not matches or confidence < CONFIDENCE_THRESHOLD) and user_lang in (Language.AM, Language.OM, Language.TI, Language.AR):
+        en_query = ai.translate(question, user_lang.value, "en")
+        matches_en, conf_en = retrieval_engine.search(
+            query=en_query,
+            language=user_lang,
+            top_k=3,
+            threshold=CONFIDENCE_THRESHOLD,
+        )
+        if matches_en and conf_en >= CONFIDENCE_THRESHOLD:
+            matches, confidence = matches_en, conf_en
 
     # Refusal condition: below threshold or zero matches (FR-3)
     if not matches or confidence < CONFIDENCE_THRESHOLD:
@@ -440,7 +457,7 @@ def sms_inbound(payload: SmsInboundRequest) -> Response:
             language=Language.EN,
             simple_mode=True,
         )
-        reply = answer_text.strip().replace("\n", " ")
+        reply = f"Savanna: {answer_text.strip().replace(chr(10), ' ')}"
         if len(reply) > 160:
             reply = reply[:157] + "..."
     return Response(content=reply, media_type="text/plain")
@@ -576,6 +593,25 @@ def put_support_needs(
     payload: SupportNeeds, _token: Any = Depends(verify_optional_token)
 ) -> SupportNeeds:
     return db.set_support_needs("default", payload)
+
+
+@app.get("/accessibility-profile", response_model=AccessibilityProfile, tags=["Support"])
+@app.get("/api/v1/accessibility-profile", response_model=AccessibilityProfile, tags=["Support"])
+def get_accessibility_profile(
+    learner_ref: str = "default",
+    _token: Any = Depends(verify_optional_token),
+) -> AccessibilityProfile:
+    return db.get_accessibility_profile(learner_ref)
+
+
+@app.put("/accessibility-profile", response_model=AccessibilityProfile, tags=["Support"])
+@app.post("/accessibility-profile", response_model=AccessibilityProfile, tags=["Support"])
+@app.put("/api/v1/accessibility-profile", response_model=AccessibilityProfile, tags=["Support"])
+@app.post("/api/v1/accessibility-profile", response_model=AccessibilityProfile, tags=["Support"])
+def set_accessibility_profile(
+    payload: AccessibilityProfile, _token: Any = Depends(verify_optional_token)
+) -> AccessibilityProfile:
+    return db.set_accessibility_profile(payload)
 
 
 @app.post("/handoff", response_model=Handoff, status_code=status.HTTP_201_CREATED, tags=["Handoff"])

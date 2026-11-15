@@ -5,6 +5,7 @@ const demoBase = process.env.DEMO_BASE_URL ?? "http://localhost:4173";
 test.describe("screen-reader and non-visual interaction contract", () => {
   test("dialog has semantic navigation, trapped focus, and restored focus", async ({ page }) => {
     await page.goto(`${demoBase}/savanna/`);
+    await page.evaluate(() => customElements.whenDefined("bridge-assistant"));
     const launcher = page.locator("bridge-assistant #launcher-btn");
     await expect(launcher).toHaveAccessibleName(/help|assistant/i);
     await launcher.click();
@@ -12,7 +13,7 @@ test.describe("screen-reader and non-visual interaction contract", () => {
     const dialog = page.locator("bridge-assistant #assistant-dialog");
     await expect(dialog).toHaveAttribute("role", "dialog");
     await expect(dialog).toHaveAttribute("aria-modal", "true");
-    await expect(page.locator("bridge-assistant #chat-input")).toBeFocused();
+    await expect(page.locator("bridge-assistant #chat-text-input")).toBeFocused();
     await expect(page.locator("bridge-assistant #chat-log")).toHaveAttribute("role", "log");
 
     const focusables = dialog.locator(
@@ -30,16 +31,19 @@ test.describe("screen-reader and non-visual interaction contract", () => {
 
   test("all languages are selectable and Arabic uses RTL", async ({ page }) => {
     await page.goto(`${demoBase}/savanna/`);
+    await page.evaluate(() => customElements.whenDefined("bridge-assistant"));
     await page.locator("bridge-assistant #launcher-btn").click();
-    const language = page.locator("bridge-assistant #language-select");
-    await expect(language.locator("option")).toHaveCount(5);
+    const languageButtons = page.locator(
+      "bridge-assistant .header-actions .lang-group .lang-toggle-btn"
+    );
+    await expect(languageButtons).toHaveCount(5);
 
-    await language.selectOption("ar");
+    await page.locator("bridge-assistant #btn-lang-ar").click();
     const dialog = page.locator("bridge-assistant #assistant-dialog");
     await expect(dialog).toHaveAttribute("lang", "ar");
     await expect(dialog).toHaveAttribute("dir", "rtl");
 
-    await page.locator("bridge-assistant #language-select").selectOption("om");
+    await page.locator("bridge-assistant #btn-lang-om").click();
     await expect(page.locator("bridge-assistant #assistant-dialog")).toHaveAttribute("lang", "om");
   });
 
@@ -84,9 +88,10 @@ test.describe("screen-reader and non-visual interaction contract", () => {
     });
 
     await page.goto(`${demoBase}/savanna/`);
+    await page.evaluate(() => customElements.whenDefined("bridge-assistant"));
     await page.locator("bridge-assistant #launcher-btn").click();
-    await page.locator("bridge-assistant #chat-input").fill("Explain the lesson");
-    await page.locator("bridge-assistant #btn-send").click();
+    await page.locator("bridge-assistant #chat-text-input").fill("Explain the lesson");
+    await page.locator("bridge-assistant #send-btn").click();
     const answer = page.getByText("The written answer stays available.");
     await expect(answer).toBeVisible();
     await page.locator("bridge-assistant .btn-listen").click();
@@ -100,12 +105,13 @@ test.describe("screen-reader and non-visual interaction contract", () => {
 
   test("UI controls do not use emoji as icons", async ({ page }) => {
     await page.goto(`${demoBase}/savanna/`);
+    await page.evaluate(() => customElements.whenDefined("bridge-assistant"));
     await page.locator("bridge-assistant #launcher-btn").click();
     const controlText = await page
       .locator("bridge-assistant button, bridge-assistant a")
       .allInnerTexts();
     expect(controlText.join(" ")).not.toMatch(/[\u{1F300}-\u{1FAFF}]/u);
-    const decorativeIcons = page.locator("bridge-assistant svg.icon");
+    const decorativeIcons = page.locator("bridge-assistant svg.icon-inline");
     await expect(decorativeIcons.first()).toHaveAttribute("aria-hidden", "true");
   });
 });

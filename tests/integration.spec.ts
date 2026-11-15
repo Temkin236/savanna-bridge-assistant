@@ -6,6 +6,7 @@ const consoleBase = process.env.CONSOLE_BASE_URL ?? "http://localhost:8080";
 
 async function configureWidget(page: import("@playwright/test").Page, path = "/savanna/") {
   await page.goto(`${demoBase}${path}?api=${encodeURIComponent(apiBase)}`);
+  await page.evaluate(() => customElements.whenDefined("bridge-assistant"));
   await page.locator("bridge-assistant").evaluate((element, api) => {
     element.setAttribute("data-api", api);
   }, apiBase);
@@ -21,25 +22,25 @@ test.describe("Savanna Bridge integration", () => {
     await expect(dialog).toBeVisible();
     await expect(dialog.locator("#dialog-title")).toContainText("Savanna Bridge Assistant");
 
-    const input = page.locator("bridge-assistant #chat-input");
-    await input.fill("What is shaping the future of virtual assistance?");
-    await page.locator("bridge-assistant #btn-send").click();
+    const input = page.locator("bridge-assistant #chat-text-input");
+    await input.fill("Explain Module 2");
+    await page.locator("bridge-assistant #send-btn").click();
     await expect(page.locator("bridge-assistant .source-link").first()).toBeVisible({
       timeout: 10_000,
     });
 
     await input.fill("Who won the football match on Mars?");
-    await page.locator("bridge-assistant #btn-send").click();
+    await page.locator("bridge-assistant #send-btn").click();
     await expect(page.locator("bridge-assistant .not-verified-box").first()).toBeVisible({
       timeout: 10_000,
     });
     await expect(page.locator("bridge-assistant .btn-talk-person").first()).toBeVisible();
 
-    await page.locator("bridge-assistant #language-select").selectOption("ar");
+    await page.locator("bridge-assistant #btn-lang-ar").click();
     await expect(page.locator("bridge-assistant #assistant-dialog")).toHaveAttribute("dir", "rtl");
-    await page.locator("bridge-assistant #language-select").selectOption("en");
+    await page.locator("bridge-assistant #btn-lang-en").click();
 
-    await page.locator("bridge-assistant #btn-open-settings").click();
+    await page.locator("bridge-assistant #tab-support").click();
     const supportForm = page.locator("bridge-assistant #support-form");
     const written = supportForm.locator('input[name="need"][value="written_instructions"]');
     await written.check();
@@ -54,7 +55,8 @@ test.describe("Savanna Bridge integration", () => {
     await configureWidget(page);
     page.once("dialog", (dialog) => dialog.accept());
     await page.locator("bridge-assistant #btn-footer-handoff").click();
-    const roomLink = page.locator("bridge-assistant .room-link");
+    await page.locator("bridge-assistant #btn-submit-handoff").click();
+    const roomLink = page.locator("bridge-assistant #handoff-room-box .room-link");
     await expect(roomLink).toBeVisible({ timeout: 10_000 });
     await expect(roomLink).toHaveAttribute("href", /meet\.jit\.si/);
 

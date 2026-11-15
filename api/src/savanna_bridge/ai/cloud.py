@@ -144,6 +144,14 @@ Learner Question:
                     return transcript
             except Exception as exc:
                 logger.warning("Google Speech-to-Text error: %s", exc)
+        if self.api_key and len(audio_bytes) > 64:
+            try:
+                transcript = self._call_gemini_transcribe(audio_bytes, media_type, language)
+                if transcript:
+                    self._last_call_mocked = False
+                    return transcript
+            except Exception as exc:
+                logger.warning("Gemini transcription error: %s", exc)
         self._last_call_mocked = True
         return self._offline_fallback.transcribe(audio_bytes, media_type, language, retain)
 
@@ -222,6 +230,43 @@ Learner Question:
         )
         audio = response.get("audioContent", "")
         return audio if isinstance(audio, str) else ""
+
+    def _call_gemini_transcribe(
+        self, audio_bytes: bytes, media_type: str, language: Language
+    ) -> str:
+        url = (
+            f"https://generativelanguage.googleapis.com/v1beta/models/"
+            f"{self.model}:generateContent?key={urllib.parse.quote(self.api_key)}"
+        )
+        response = self._post_json(
+            url,
+            {
+                "contents": [
+                    {
+                        "parts": [
+                            {
+                                "inlineData": {
+                                    "mimeType": media_type or "audio/webm",
+                                    "data": base64.b64encode(audio_bytes).decode("ascii"),
+                                }
+                            },
+                            {
+                                "text": (
+                                    "Transcribe this audio accurately in "
+                                    f"{language.value}. Return only the transcript."
+                                )
+                            },
+                        ]
+                    }
+                ],
+                "generationConfig": {"temperature": 0.0, "maxOutputTokens": 500},
+            },
+        )
+        candidates = response.get("candidates", [])
+        if not isinstance(candidates, list) or not candidates:
+            return ""
+        parts = candidates[0].get("content", {}).get("parts", [])
+        return parts[0].get("text", "").strip() if parts else ""
 
     def _call_gemini_tts(
         self, text: str, language: Language, speed: float

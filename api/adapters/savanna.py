@@ -80,6 +80,7 @@ class SavannaStaticSource(ContentSource):
     def __init__(self, static_dir: Path | str | None = None) -> None:
         self.static_dir = Path(static_dir) if static_dir else None
         self._default_chunks: list[ContentChunk] = self._load_default_course_chunks()
+        self._dynamic_chunks: list[ContentChunk] = []
 
     def _load_default_course_chunks(self) -> list[ContentChunk]:
         """Built-in course content for 'Customer Service Foundations' in English and Amharic."""
@@ -196,11 +197,14 @@ class SavannaStaticSource(ContentSource):
         for idx, item in enumerate(parsed):
             # Detect language
             is_amharic = bool(re.search(r"[\u1200-\u137F]", item["text"] + item["heading"]))
+            chunk_title = parser.title
+            if "concept-with-navigation" in file_path.stem and "Module 2" not in chunk_title:
+                chunk_title = f"Module 2: {chunk_title}"
             chunks.append(
                 ContentChunk(
                     chunk_id=f"{file_path.stem}_{idx + 1}",
                     course_id=course_id,
-                    title=parser.title,
+                    title=chunk_title,
                     heading=item["heading"],
                     text=item["text"],
                     url=f"https://learning.example.org/courses/{course_id}/{file_path.stem}",
@@ -210,12 +214,54 @@ class SavannaStaticSource(ContentSource):
             )
         return chunks
 
+        self._dynamic_chunks: list[ContentChunk] = []
+
+    def add_dynamic_content(
+        self, title: str, url: str, content: str, course_id: str = "course_demo"
+    ) -> list[ContentChunk]:
+        """Ingest live platform HTML or text content from active browser page."""
+        if not content or not content.strip():
+            return []
+        parser = SimpleHtmlChunker(base_url=url, default_title=title or "Current Platform Page")
+        parser.feed(content)
+        parsed = parser.close_and_get_chunks()
+        new_chunks: list[ContentChunk] = []
+        for idx, item in enumerate(parsed):
+            is_amharic = bool(re.search(r"[\u1200-\u137F]", item["text"] + item["heading"]))
+            chunk_title = title or parser.title
+            if "concept-with-navigation" in url and "Module 2" not in chunk_title:
+                chunk_title = f"Module 2: {chunk_title}"
+            c = ContentChunk(
+                chunk_id=f"live_{idx + 1}_{abs(hash(url)) % 10000}",
+                course_id=course_id,
+                title=chunk_title,
+                heading=item["heading"],
+                text=item["text"],
+                url=url,
+                page=item.get("page", 1),
+                language="am" if is_amharic else "en",
+            )
+            new_chunks.append(c)
+        self._dynamic_chunks = new_chunks + self._dynamic_chunks[:200]
+        return new_chunks
+
     def get_chunks(self, course_id: str | None = None) -> list[ContentChunk]:
-        chunks = list(self._default_chunks)
-        # If static_dir exists, scan for .html files and merge
+        chunks = list(self._dynamic_chunks) + list(self._default_chunks)
+        candidate_dirs: list[Path] = []
         if self.static_dir and self.static_dir.is_dir():
-            for html_file in self.static_dir.glob("*.html"):
-                chunks.extend(self.parse_html_file(html_file, course_id=course_id or "course_demo"))
+            candidate_dirs.append(self.static_dir)
+        for cand in [Path("Savanna-static-pages"), Path("demo-host"), Path("../Savanna-static-pages"), Path("../demo-host")]:
+            if cand.is_dir() and cand not in candidate_dirs:
+                candidate_dirs.append(cand)
+
+        for d in candidate_dirs:
+            try:
+                for html_file in d.rglob("*.html"):
+                    if any(ignored in str(html_file) for ignored in ["widget", "node_modules", ".git", "dist"]):
+                        continue
+                    chunks.extend(self.parse_html_file(html_file, course_id=course_id or "course_demo"))
+            except Exception:
+                continue
 
         if course_id:
             filtered = [c for c in chunks if c.course_id == course_id]
