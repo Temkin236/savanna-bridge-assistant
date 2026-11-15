@@ -311,3 +311,17 @@ class EscalationRequest(BaseModel):
     conversation: list[dict[str, Any]] | None = None
     card: HandoffCard | None = None
     learner_ref: str | None = None
+
+
+class TranslationRequest(BaseModel):
+    text: str
+    source_language: str = "en"
+    target_language: str = "am"
+
+
+class TranslationResponse(BaseModel):
+    translated_text: str
+    source_language: str
+    target_language: str
+    provider: str
+

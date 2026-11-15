@@ -143,3 +143,28 @@ def test_language_guard_detection_and_normalization() -> None:
     assert LanguageGuard.normalize_ethiopian_phone("0911223344") == "+251911223344"
     assert LanguageGuard.normalize_ethiopian_phone("0711223344") == "+251711223344"
     assert LanguageGuard.normalize_ethiopian_phone("+251911223344") == "+251911223344"
+
+
+def test_translation_routes_and_endpoint() -> None:
+    # 1. Local language routes to Addis AI
+    am_res = client.post(
+        "/api/v1/translate",
+        json={"text": "Hello world", "source_language": "en", "target_language": "am"},
+    )
+    assert am_res.status_code == 200
+    am_data = am_res.json()
+    assert am_data["provider"] == "addis"
+    assert am_data["target_language"] == "am"
+    assert "translated_text" in am_data
+
+    # 2. English & Arabic routes to Gemini
+    ar_res = client.post(
+        "/api/v1/translate",
+        json={"text": "Hello world", "source_language": "en", "target_language": "ar"},
+    )
+    assert ar_res.status_code == 200
+    ar_data = ar_res.json()
+    assert ar_data["provider"] == "gemini"
+    assert ar_data["target_language"] == "ar"
+    assert "translated_text" in ar_data
+

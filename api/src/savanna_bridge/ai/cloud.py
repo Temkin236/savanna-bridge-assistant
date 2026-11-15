@@ -28,7 +28,7 @@ class CloudProvider(AIProvider):
             or os.getenv("GOOGLE_API_KEY")
             or ""
         )
-        self.model = os.getenv("CLOUD_MODEL", "gemini-1.5-flash")
+        self.model = os.getenv("CLOUD_MODEL", "gemini-2.5-flash")
 
     @property
     def name(self) -> str:
@@ -41,9 +41,63 @@ class CloudProvider(AIProvider):
     def detect_language(self, text: str) -> Language:
         return self._offline_fallback.detect_language(text)
 
+    def translate_direct(self, text: str, source_lang: str, target_lang: str) -> str:
+        """Call Gemini to translate English and Arabic."""
+        if not text or not text.strip():
+            return text
+        src = (source_lang or "en").lower().split("-")[0].strip()
+        tgt = (target_lang or "en").lower().split("-")[0].strip()
+        if src == tgt:
+            return text
+
+        if self.api_key:
+            lang_names = {
+                "en": "English",
+                "ar": "Arabic",
+                "am": "Amharic",
+                "om": "Afaan Oromo",
+                "ti": "Tigrinya",
+            }
+            src_name = lang_names.get(src, src)
+            tgt_name = lang_names.get(tgt, tgt)
+
+            prompt = (
+                f"You are a professional educational translator. "
+                f"Translate the following text accurately from {src_name} to {tgt_name}. "
+                f"Preserve terminology and tone. Output ONLY the raw translated text without quotes or notes:\n\n{text}"
+            )
+            try:
+                res = self._call_gemini(prompt)
+                if res and res.strip():
+                    return res.strip()
+            except Exception as e:
+                logger.warning("Gemini translate call error: %s", e)
+        return ""
+
     def translate(self, text: str, source_lang: str, target_lang: str) -> str:
+        """Translate text using Gemini for English and Arabic, delegating local languages to Addis AI."""
+        if not text or not text.strip():
+            return text
+        src = (source_lang or "en").lower().split("-")[0].strip()
+        tgt = (target_lang or "en").lower().split("-")[0].strip()
+        if src == tgt:
+            return text
+
+        # If local language, route to Addis AI
+        local_langs = {"am", "om", "ti", "so"}
+        if src in local_langs or tgt in local_langs:
+            from savanna_bridge.ai.addis import AddisAiProvider
+
+            return AddisAiProvider().translate(text, src, tgt)
+
+        # For English and Arabic, call Gemini directly
+        direct = self.translate_direct(text, src, tgt)
+        if direct:
+            return direct
+
         from savanna_bridge.language import LanguageGuard
-        return LanguageGuard.translate(text, source_lang, target_lang)
+
+        return LanguageGuard._neural_translate(text, src, tgt)
 
     def generate_answer(
         self,
@@ -103,7 +157,7 @@ Learner Question:
         if self.api_key and audio_bytes and len(audio_bytes) > 64:
             import base64
             b64_audio = base64.b64encode(audio_bytes).decode("utf-8")
-            models = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-flash-latest"]
+            models = ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-pro"]
             for m in models:
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={self.api_key}"
                 payload = {
@@ -140,7 +194,7 @@ Learner Question:
         return self._offline_fallback.synthesize(text, language, speed)
 
     def _call_gemini(self, prompt: str) -> str:
-        models = [self.model, "gemini-2.0-flash", "gemini-1.5-flash", "gemini-flash-latest"]
+        models = [self.model, "gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-pro"]
         models = list(dict.fromkeys([m for m in models if m]))
 
         last_err: Exception | None = None

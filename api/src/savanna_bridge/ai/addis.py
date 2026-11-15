@@ -45,20 +45,55 @@ class AddisAiProvider(AIProvider):
     def detect_language(self, text: str) -> Language:
         return self._offline_fallback.detect_language(text)
 
-    def translate(self, text: str, source_lang: str, target_lang: str) -> str:
-        if source_lang == target_lang:
+    def translate_direct(self, text: str, source_lang: str, target_lang: str) -> str:
+        """Call Addis AI translation directly for local Ethiopian languages."""
+        if not text or not text.strip():
             return text
-        if self._client:
+        src = (source_lang or "en").lower().split("-")[0].strip()
+        tgt = (target_lang or "en").lower().split("-")[0].strip()
+        if src == tgt:
+            return text
+
+        if self._client and src in ("am", "om", "ti", "en") and tgt in ("am", "om", "ti", "en"):
             try:
                 res = self._client.translate.create(
                     text=text,
-                    source_language=source_lang,
-                    target_language=target_lang,
+                    source=src,
+                    target=tgt,
                 )
-                return getattr(res, "translation", str(res))
+                if isinstance(res, dict):
+                    translated = res.get("text") or res.get("translation")
+                    if translated and str(translated).strip():
+                        return str(translated).strip()
+                elif hasattr(res, "text") and res.text:
+                    return str(res.text).strip()
             except Exception as e:
-                logger.warning("AddisAI translation call failed: %s", e)
-        return self._offline_fallback.translate(text, source_lang, target_lang)
+                logger.warning("AddisAI translate call failed: %s", e)
+        return ""
+
+    def translate(self, text: str, source_lang: str, target_lang: str) -> str:
+        """Translate text using Addis AI for local languages, delegating English/Arabic to Gemini."""
+        if not text or not text.strip():
+            return text
+        src = (source_lang or "en").lower().split("-")[0].strip()
+        tgt = (target_lang or "en").lower().split("-")[0].strip()
+        if src == tgt:
+            return text
+
+        # If English <-> Arabic, route to Gemini
+        if src in ("en", "ar") and tgt in ("en", "ar"):
+            from savanna_bridge.ai.cloud import CloudProvider
+
+            return CloudProvider().translate(text, src, tgt)
+
+        # For local languages, call Addis AI
+        direct = self.translate_direct(text, src, tgt)
+        if direct:
+            return direct
+
+        from savanna_bridge.language import LanguageGuard
+
+        return LanguageGuard._neural_translate(text, src, tgt)
 
     def generate_answer(
         self,

@@ -688,6 +688,49 @@ paths:
               schema:
                 $ref: "#/components/schemas/SynthesisResult"
 
+  /api/v1/translate:
+    post:
+      tags: [Translation]
+      operationId: translateTextV1
+      summary: Translate text using Addis AI for local languages and Gemini for English and Arabic
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              properties:
+                text:
+                  type: string
+                  example: "Hello world"
+                source_language:
+                  type: string
+                  example: "en"
+                target_language:
+                  type: string
+                  example: "am"
+      responses:
+        "200":
+          description: Translated text result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  translated_text:
+                    type: string
+                    example: "ሰላም ዓለም"
+                  source_language:
+                    type: string
+                    example: "en"
+                  target_language:
+                    type: string
+                    example: "am"
+                  provider:
+                    type: string
+                    example: "addis"
+
   /teacher/stats:
     get:
       tags: [Teacher]

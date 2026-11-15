@@ -40,7 +40,7 @@ from savanna_bridge.config import (
     DB_PATH,
 )
 from savanna_bridge.database import Database
-from savanna_bridge.language import LanguageRegistry
+from savanna_bridge.language import LanguageGuard, LanguageRegistry
 from savanna_bridge.models import (
     AccommodationDraft,
     AccommodationDraftRequest,
@@ -79,6 +79,8 @@ from savanna_bridge.models import (
     TeacherStats,
     Transcription,
     TranscriptionRequest,
+    TranslationRequest,
+    TranslationResponse,
 )
 from savanna_bridge.rate_limiter import RateLimiter
 from savanna_bridge.retrieval import RetrievalEngine
@@ -842,6 +844,30 @@ def synthesize_speech(payload: SynthesisRequest) -> SynthesisResult:
         expires_at=expires_at,
         provider=ai.name,
         mocked=ai.is_mocked,
+    )
+
+
+@app.post("/translate", response_model=TranslationResponse, tags=["Translation"])
+@app.post("/api/v1/translate", response_model=TranslationResponse, tags=["Translation"])
+def translate_text(payload: TranslationRequest) -> TranslationResponse:
+    src = (payload.source_language or "en").lower().split("-")[0].strip()
+    tgt = (payload.target_language or "am").lower().split("-")[0].strip()
+
+    local_langs = {"am", "om", "ti", "so"}
+    if src in local_langs or tgt in local_langs:
+        provider_name = "addis"
+    elif src in ("en", "ar") and tgt in ("en", "ar"):
+        provider_name = "gemini"
+    else:
+        provider_name = "gemini"
+
+    translated = LanguageGuard.translate(payload.text, src, tgt)
+
+    return TranslationResponse(
+        translated_text=translated,
+        source_language=src,
+        target_language=tgt,
+        provider=provider_name,
     )
 
 
