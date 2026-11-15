@@ -49,6 +49,22 @@ export interface SupportNeedsData {
   preferred_contact_mode: "text" | "voice" | "video" | "telegram";
 }
 
+export interface AccessibilityPreferences {
+  language: SupportedLanguage;
+  voice_enabled: boolean;
+  auto_welcome: boolean;
+  auto_tts: boolean;
+  speech_rate: number;
+  voice_input_enabled: boolean;
+  screen_reader_mode: boolean;
+  keyboard_navigation: boolean;
+  high_contrast: boolean;
+  large_text: "smaller" | "normal" | "larger";
+  simple_mode: boolean;
+  sync_enabled: boolean;
+  onboarded: boolean;
+}
+
 export const ICONS = {
   launcher: `<svg class="icon-inline" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M8 10h.01M12 10h.01M16 10h.01"></path></svg>`,
   settings: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>`,
@@ -76,6 +92,13 @@ export const ICONS = {
   headphones: `<svg class="icon-inline" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg>`,
   type: `<svg class="icon-inline" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>`,
   contrast: `<svg class="icon-inline" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"></circle><path d="M12 18a6 6 0 0 0 0-12v12z"></path></svg>`,
+  sound: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`,
+  volumeMute: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>`,
+  play: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`,
+  stop: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect></svg>`,
+  speed: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`,
+  sync: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>`,
+  sparkles: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>`,
 };
 
 const I18N: Record<SupportedLanguage, Record<string, string>> = {
@@ -142,6 +165,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     joinRoomButton: "Join Live Help Room ↗",
     leaveRoomButton: "Close Help Session",
     androidFallbackNote: "Android note: Browser screen sharing (getDisplayMedia) is not supported in Chrome on Android. Your mentor automatically sees your active lesson URL, section, and focused element.",
+    chatTab: "Chat",
     generalTab: "Display & Audio",
     supportTab: "Support Needs",
     linkTab: "Link Account",
@@ -155,6 +179,43 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     requestMentorBtn: "Request Human Mentor",
     copyRoomBtn: "Copy Link",
     linkCodeCopied: "Link copied to clipboard!",
+    voiceAccessibilityLabel: "Voice Accessibility",
+    voiceAccessibilityDesc: "Spoken welcome, read-aloud responses, and voice navigation",
+    autoWelcomeLabel: "Spoken Welcome Announcement",
+    autoWelcomeDesc: "Announce assistant status when the page opens",
+    autoTtsLabel: "Read AI Responses Aloud",
+    autoTtsDesc: "Automatically speak responses as they arrive",
+    speechRateLabel: "Speech Rate",
+    voiceInputLabel: "Voice Input (Microphone)",
+    screenReaderModeLabel: "Screen-Reader Optimized",
+    screenReaderModeDesc: "Enhanced ARIA labels and live region announcements",
+    keyboardNavLabel: "Enhanced Keyboard Focus",
+    keyboardNavDesc: "High-visibility focus outlines and navigation hints",
+    syncPrefsLabel: "Sync Across Integrated Sites",
+    syncPrefsDesc: "Securely restore these preferences when you visit other learning portals",
+    readPageBtn: "Read Page Aloud",
+    readSectionBtn: "Read Active Section",
+    pauseReading: "Pause Reading",
+    resumeReading: "Resume Reading",
+    stopReading: "Stop Reading",
+    readingPageAnnouncement: "Reading page content aloud...",
+    readingSectionAnnouncement: "Reading active section aloud...",
+    testVoiceBtn: "Test Voice",
+    testingVoiceMsg: "Hello! Voice accessibility is active and configured in English.",
+    voiceNotAvailable: "Voice speech synthesis for this language is not installed in your browser. Text and screen-reader assistance remain fully active.",
+    oneTapVoiceActivation: "Voice assistance is available. Tap to listen to spoken welcome.",
+    voiceWelcomeAnnouncement: "Welcome to Savanna Bridge Assistant. Voice accessibility is enabled. You can ask questions or ask to read the page.",
+    onboardingTitle: "Welcome to Savanna Bridge",
+    onboardingSubtitle: "Configure your accessibility and voice preferences once, use everywhere.",
+    onboardingLangPrompt: "Choose your preferred language:",
+    onboardingVoiceQuestion: "Would you like spoken audio and voice assistance?",
+    onboardingVoiceEnable: "Enable Voice Accessibility",
+    onboardingVoiceDesc: "Spoken welcome, read-aloud responses, and voice navigation",
+    onboardingMicExplain: "Privacy notice: The microphone is only active when you tap the mic button. We never capture background audio.",
+    onboardingSave: "Save & Start",
+    onboardingSkip: "Skip for now",
+    onboardingReplay: "Setup Tour / Onboarding",
+    voiceTab: "Voice & Audio",
   },
   am: {
     appTitle: "የሳቫና ብሪጅ ረዳት",
@@ -219,6 +280,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     joinRoomButton: "ወደ ስብሰባው ክፍል ግባ ↗",
     leaveRoomButton: "ክፍለ-ጊዜውን ዝጋ",
     androidFallbackNote: "የአንድሮይድ ማሳሰቢያ፡ በአንድሮይድ ክሮም ላይ የስክሪን ማጋራት አይደገፍም። አማካሪዎ እርስዎ ያሉበትን የትምህርት ገጽ እና ርዕስ በቀጥታ ይመለከታል።",
+    chatTab: "ውይይት",
     generalTab: "እይታ እና ድምጽ",
     supportTab: "የድጋፍ ፍላጎቶች",
     linkTab: "መለያ አገናኝ",
@@ -232,6 +294,43 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     requestMentorBtn: "የሰው አማካሪ ጠይቅ",
     copyRoomBtn: "ሊንኩን ቅዳ",
     linkCodeCopied: "ሊንኩ ተቀድቷል!",
+    voiceAccessibilityLabel: "የድምጽ አገልግሎት",
+    voiceAccessibilityDesc: "የድምጽ ሰላምታ፣ መልሶችን ጮክ ብሎ ማንበብ፣ እና የድምጽ ዳሰሳ",
+    autoWelcomeLabel: "ገጹ ሲከፈት የድምጽ ሰላምታ ይስጡ",
+    autoWelcomeDesc: "ገጹ እንደተከፈተ ረዳቱ ዝግጁ መሆኑን በድምጽ ያስታውቃል",
+    autoTtsLabel: "የአይአይ መልሶችን በድምጽ አንብብ",
+    autoTtsDesc: "መልሶች ሲደርሱ ወዲያውኑ በድምጽ ያነባል",
+    speechRateLabel: "የንግግር ፍጥነት",
+    voiceInputLabel: "የድምጽ ግብዓት (ማይክሮፎን)",
+    screenReaderModeLabel: "ለስክሪን አንባቢ ምቹ ሁነታ",
+    screenReaderModeDesc: "የተሻሻለ የአሪያ ማብራሪያዎች እና ማስታወቂያዎች",
+    keyboardNavLabel: "የተሻሻለ የኪቦርድ ትኩረት",
+    keyboardNavDesc: "ግልጽ የትኩረት መስመሮች እና የዳሰሳ ጠቋሚዎች",
+    syncPrefsLabel: "በሁሉም ድረ-ገጾች ላይ ምርጫዎችን አመሳስል",
+    syncPrefsDesc: "ወደ ሌሎች የትምህርት ገጾች ሲሄዱ እነዚህን ምርጫዎች በራስ-ሰር ያግኙ",
+    readPageBtn: "ገጹን በድምጽ አንብብ",
+    readSectionBtn: "ወቅታዊውን ክፍል አንብብ",
+    pauseReading: "ማንበብ አቁም",
+    resumeReading: "ማንበብ ቀጥል",
+    stopReading: "ማንበብ ጨርስ",
+    readingPageAnnouncement: "የገጹን ይዘት በድምጽ እያነበበ ነው...",
+    readingSectionAnnouncement: "ወቅታዊውን ክፍል በድምጽ እያነበበ ነው...",
+    testVoiceBtn: "ድምጽን ፈትሽ",
+    testingVoiceMsg: "ሰላም! የድምጽ አገልግሎት በአማርኛ ቋንቋ በትክክል እየሰራ ነው።",
+    voiceNotAvailable: "ለዚህ ቋንቋ የድምጽ ንባብ በብራውዘርዎ ውስጥ አልተገኘም። የጽሑፍ እና የስክሪን አንባቢ አገልግሎት ሙሉ በሙሉ ይሰራል።",
+    oneTapVoiceActivation: "የድምጽ አገልግሎት ዝግጁ ነው። የድምጽ ሰላምታውን ለማዳመጥ እዚህ ይጫኑ።",
+    voiceWelcomeAnnouncement: "እንኳን ወደ ሳቫና ብሪጅ ረዳት በደህና መጡ። የድምጽ አገልግሎት በርቷል። ጥያቄዎችን መጠየቅ ወይም ገጹን እንዲያነብልዎ ማድረግ ይችላሉ።",
+    onboardingTitle: "እንኳን ወደ ሳቫና ብሪጅ በደህና መጡ",
+    onboardingSubtitle: "የእርስዎን የድምጽ እና የአጠቃቀም ምርጫዎች አንድ ጊዜ ያስተካክሉ፣ በሁሉም ቦታ ይጠቀሙ።",
+    onboardingLangPrompt: "የሚመርጡትን ቋንቋ ይምረጡ፡",
+    onboardingVoiceQuestion: "የድምጽ ድጋፍ እና ንባብ ይፈልጋሉ?",
+    onboardingVoiceEnable: "የድምጽ አገልግሎትን አብራ",
+    onboardingVoiceDesc: "የድምጽ ሰላምታ፣ መልሶችን ጮክ ብሎ ማንበብ፣ እና የድምጽ ዳሰሳ",
+    onboardingMicExplain: "የግላዊነት ማሳሰቢያ፡ ማይክሮፎኑ የሚሰራው እርስዎ የማይክ ቁልፉን ሲጫኑ ብቻ ነው። ከበስተጀርባ ድምጽ አንቀዳም።",
+    onboardingSave: "መዝግብና ጀምር",
+    onboardingSkip: "ለጊዜው እለፈው",
+    onboardingReplay: "የመጀመሪያ ቅንብር መመሪያ",
+    voiceTab: "ድምጽ እና ማዳመጥ",
   },
   om: {
     appTitle: "Gargaaraa Savanna Bridge",
@@ -296,6 +395,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     joinRoomButton: "Kutaa Seenaa ↗",
     leaveRoomButton: "Kutaa Dhiisaa",
     androidFallbackNote: "Iskiriinii qooduun Android irratti hin danda'amu.",
+    chatTab: "Haasaa",
     generalTab: "Mul'ina",
     supportTab: "Deeggarsa",
     linkTab: "Herrega Walqabsiisi",
@@ -309,6 +409,43 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     requestMentorBtn: "Gorsaa Gaafadhaa",
     copyRoomBtn: "Waraabi",
     linkCodeCopied: "Waraabameera!",
+    voiceAccessibilityLabel: "Tajaajila Sagalee",
+    voiceAccessibilityDesc: "Nagaa gaafachuu sagalee, deebii dubbisuu, fi sagaleen deemsisa",
+    autoWelcomeLabel: "Banaamuu irratti nagaa sagaleen",
+    autoWelcomeDesc: "Fuulli yemmuu banamu gargaaraan qophaa'uu isaa sagaleen beeksisa",
+    autoTtsLabel: "Deebii AI sagaleen dubbisi",
+    autoTtsDesc: "Deebiin yemmuu dhufu battalumatti sagaleen dubbisa",
+    speechRateLabel: "Saffisa Dubbisuu",
+    voiceInputLabel: "Galtee Sagalee (Maaykirofoonii)",
+    screenReaderModeLabel: "Dubbisaa Iskiriiniif kan Mijate",
+    screenReaderModeDesc: "Ibsa fi beeksisa ARIA fooyya'aa",
+    keyboardNavLabel: "Xiyyeeffannoo Kiibordii Fooyya'aa",
+    keyboardNavDesc: "Sarara xiyyeeffannoo ifa ta'e",
+    syncPrefsLabel: "Marsariitiiwwan hundatti Qindaa'ina Walsimsiisi",
+    syncPrefsDesc: "Marsariitiiwwan barnootaa biroo yemmuu daawwattan qindaa'ina kana argadhaa",
+    readPageBtn: "Fuula Sagaleen Dubbisi",
+    readSectionBtn: "Kutaa Ammaa Dubbisi",
+    pauseReading: "Dhaabi",
+    resumeReading: "Itti Fufi",
+    stopReading: "Xumuri",
+    readingPageAnnouncement: "Qabiyyee fuulaa sagaleen dubbisaa jira...",
+    readingSectionAnnouncement: "Kutaa jiru sagaleen dubbisaa jira...",
+    testVoiceBtn: "Sagalee Qori",
+    testingVoiceMsg: "Akkam! Tajaajilli sagalee Afaan Oromootiin hojjetaa jira.",
+    voiceNotAvailable: "Sagaleen dubbisuu Afaan Oromoo biraawzarii keessan keessatti hin argamne. Tajaajilli barruu fi dubbisaa iskiriinii guutuu dha.",
+    oneTapVoiceActivation: "Tajaajilli sagalee qophiidha. Nagaa dhaggeeffachuuf as tuqaa.",
+    voiceWelcomeAnnouncement: "Baga nagaan gara Gargaaraa Savanna Bridge dhuftan. Tajaajilli sagalee hojjetaa jira. Gaaffii gaafachuu ykn fuula akka dubbisu gochuu dandeessu.",
+    onboardingTitle: "Baga Nagaan Gara Savanna Bridge Dhuftan",
+    onboardingSubtitle: "Filannoo keessan al tokko qindeessaa, iddoo hundatti itti fayyadamaa.",
+    onboardingLangPrompt: "Afaan filattan filadhaa:",
+    onboardingVoiceQuestion: "Deeggarsa sagalee fi dubbisuu barbaadduu?",
+    onboardingVoiceEnable: "Tajaajila Sagalee Bani",
+    onboardingVoiceDesc: "Nagaa sagalee, deebii dubbisuu, fi sagaleen deemsisa",
+    onboardingMicExplain: "Eegumsa dhuunfaa: Maaykirofooniin kan hojjetu yemmuu isin cuqaastan qofa. Sagalee duubaa hin waraabnu.",
+    onboardingSave: "Galmeessi & Jalqabi",
+    onboardingSkip: "Ammaaf darbi",
+    onboardingReplay: "Daawwannaa Qindaa'inaa",
+    voiceTab: "Sagalee & Dhaggeeffannaa",
   },
   ti: {
     appTitle: "ናይ ሳቫና ብሪጅ ሓጋዚ",
@@ -373,6 +510,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     joinRoomButton: "ናብ ክፍሊ እቶ ↗",
     leaveRoomButton: "ክፍሊ ዕጾ",
     androidFallbackNote: "ኣብ አንድሮይድ ስክሪን ምክፋል ኣይድገፍን።",
+    chatTab: "ዕላል",
     generalTab: "ምርኣይ",
     supportTab: "ሓገዝ",
     linkTab: "ሕሳብ ኣላግብ",
@@ -386,6 +524,43 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     requestMentorBtn: "ናይ ሰብ ሓገዝ ሕተት",
     copyRoomBtn: "ቅዳሕ",
     linkCodeCopied: "ተቐዲሑ ኣሎ!",
+    voiceAccessibilityLabel: "ናይ ድምጺ ኣገልግሎት",
+    voiceAccessibilityDesc: "ናይ ድምጺ ሰላምታ፡ መልስታት ዓው ኢልካ ምንባብ፡ ናይ ድምጺ ምንቅስቓስ",
+    autoWelcomeLabel: "ገጽ ክኽፈት ከሎ ብድምጺ ሰላምታ ሃብ",
+    autoWelcomeDesc: "ገጽ ምስ ተኸፍተ ሓጋዚ ድሉው ምዃኑ ብድምጺ ይሕብር",
+    autoTtsLabel: "መልስታት ብድምጺ ኣንብብ",
+    autoTtsDesc: "መልስታት ምስ መጹ ብኡንብኡ ብድምጺ የንብብ",
+    speechRateLabel: "ናይ ድምጺ ፍጥነት",
+    voiceInputLabel: "ናይ ድምጺ ምእታዊ (ማይክሮፎን)",
+    screenReaderModeLabel: "ንስክሪን ኣንባቢ ዝተመዓራረየ",
+    screenReaderModeDesc: "ዝተመሓየሸ ናይ ARIA መብርሂታትን መተሓሳሰብታትን",
+    keyboardNavLabel: "ዝተመሓየሸ ናይ ኪቦርድ ትኹረት",
+    keyboardNavDesc: "ግሉጽ ናይ ትኹረት መስመራት",
+    syncPrefsLabel: "ኣብ ኩሎም መርበባት ሓበሬታ ኣመሳስል",
+    syncPrefsDesc: "ናብ ካልኦት ናይ ትምህርቲ መርበባት ክትከዱ ከለኹም ነዚ ምርጫታት ርኸቡ",
+    readPageBtn: "ገጽ ብድምጺ ኣንብብ",
+    readSectionBtn: "ዘለኹሞ ክፍሊ ኣንብብ",
+    pauseReading: "ኣዕርፍ",
+    resumeReading: "ቀጽል",
+    stopReading: "ወድእ",
+    readingPageAnnouncement: "ትሕዝቶ ገጽ ብድምጺ የንብብ ኣሎ...",
+    readingSectionAnnouncement: "ክፍሊ ብድምጺ የንብብ ኣሎ...",
+    testVoiceBtn: "ድምጺ ፈትን",
+    testingVoiceMsg: "ሰላም! ናይ ድምጺ ኣገልግሎት ብትግርኛ ይሰርሕ ኣሎ።",
+    voiceNotAvailable: "ናይዚ ቋንቋ ናይ ድምጺ ምንባብ ኣብዚ ብራውዘር ኣይተረኽበን። ናይ ጽሑፍን ስክሪን ኣንባብን ኣገልግሎት ሙሉእ ብሙሉእ ይሰርሕ።",
+    oneTapVoiceActivation: "ናይ ድምጺ ኣገልግሎት ድሉው እዩ። ንምስማዕ ኣብዚ ጠውቑ።",
+    voiceWelcomeAnnouncement: "እንቋዕ ናብ ሳቫና ብሪጅ ረዳኢ ብደሓን መጻእኩም። ናይ ድምጺ ኣገልግሎት ነቒሑ ኣሎ። ሕቶታት ክትሓቱ ወይ ገጽ ከነብበልኩም ክትሓቱ ትኽእሉ።",
+    onboardingTitle: "እንቋዕ ናብ ሳቫና ብሪጅ ብደሓን መጻእኩም",
+    onboardingSubtitle: "ምርጫታትኩም ሓንሳብ ኣመዓራርዩ፡ ኣብ ኩሉ ተጠቐሙ።",
+    onboardingLangPrompt: "ዝመረጽኩምዎ ቋንቋ ምረጹ፡",
+    onboardingVoiceQuestion: "ናይ ድምጺ ሓገዝን ምንባብን ትደልዩ ዶ?",
+    onboardingVoiceEnable: "ናይ ድምጺ ኣገልግሎት ኣብርህ",
+    onboardingVoiceDesc: "ናይ ድምጺ ሰላምታ፡ መልስታት ዓው ኢልካ ምንባብ፡ ናይ ድምጺ ምንቅስቓስ",
+    onboardingMicExplain: "ናይ ብሕትውና መተሓሳሰቢ፡ ማይክሮፎን ዝሰርሕ እቲ ምልክት ክትጠውቑ ከለኹም ጥራይ እዩ። ናይ ድሕሪት ድምጺ ኣይንቐድሕን ኢና።",
+    onboardingSave: "መዝግብ & ጀምር",
+    onboardingSkip: "ንሕጂ ሕለፎ",
+    onboardingReplay: "ናይ መጀመርታ መምርሒ",
+    voiceTab: "ድምጽን ምስማዕን",
   },
   ar: {
     appTitle: "مساعد سافانا بريدج",
@@ -450,6 +625,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     joinRoomButton: "الانضمام للغرفة ↗",
     leaveRoomButton: "إغلاق الجلسة",
     androidFallbackNote: "ملاحظة أندرويد: مشاركة الشاشة عبر المتصفح غير مدعومة على متصفح Chrome لنظام أندرويد.",
+    chatTab: "محادثة",
     generalTab: "العرض والصوت",
     supportTab: "احتياجات الدعم",
     linkTab: "ربط الحساب",
@@ -463,6 +639,43 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     requestMentorBtn: "طلب مساعدة بشرية",
     copyRoomBtn: "نسخ الرابط",
     linkCodeCopied: "تم نسخ الرابط بنجاح!",
+    voiceAccessibilityLabel: "المساعدة الصوتية",
+    voiceAccessibilityDesc: "ترحيب صوتي، قراءة الإجابات بصوت عالٍ، وملاحة صوتية",
+    autoWelcomeLabel: "ترحيب صوتي تلقائي",
+    autoWelcomeDesc: "الإعلان عن جاهزية المساعد عند فتح الصفحة",
+    autoTtsLabel: "قراءة إجابات الذكاء الاصطناعي بصوت عالٍ",
+    autoTtsDesc: "نطق الإجابات تلقائياً فور وصولها",
+    speechRateLabel: "سرعة النطق",
+    voiceInputLabel: "الإدخال الصوتي (الميكروفون)",
+    screenReaderModeLabel: "محسّن لقارئات الشاشة",
+    screenReaderModeDesc: "تسميات وإعلانات ARIA محسّنة ودقيقة",
+    keyboardNavLabel: "تنقل محسّن بلوحة المفاتيح",
+    keyboardNavDesc: "مؤشرات تركيز واضحة للمفاتيح",
+    syncPrefsLabel: "مزامنة التفضيلات عبر جميع المواقع",
+    syncPrefsDesc: "استعادة تفضيلاتك تلقائياً عند زيارة منصات تعليمية أخرى",
+    readPageBtn: "قراءة الصفحة بصوت عالٍ",
+    readSectionBtn: "قراءة القسم الحالي",
+    pauseReading: "إيقاف مؤقت",
+    resumeReading: "استئناف",
+    stopReading: "إيقاف القراءة",
+    readingPageAnnouncement: "جاري قراءة محتوى الصفحة بصوت عالٍ...",
+    readingSectionAnnouncement: "جاري قراءة القسم الحالي بصوت عالٍ...",
+    testVoiceBtn: "اختبار الصوت",
+    testingVoiceMsg: "مرحباً! المساعدة الصوتية مفعلة وتعمل باللغة العربية.",
+    voiceNotAvailable: "الصوت العربي غير مثبت في متصفحك. المساعدة النصية وتوافق قارئ الشاشة يعملان بشكل كامل.",
+    oneTapVoiceActivation: "المساعدة الصوتية متاحة. اضغط هنا للاستماع للترحيب الصوتي.",
+    voiceWelcomeAnnouncement: "مرحباً بكم في مساعد سافانا بريدج. تم تفعيل المساعدة الصوتية. يمكنك طرح الأسئلة أو طلب قراءة الصفحة.",
+    onboardingTitle: "مرحباً بكم في سافانا بريدج",
+    onboardingSubtitle: "اضبط تفضيلات إمكانية الوصول والصوت مرة واحدة، واستخدمها في كل مكان.",
+    onboardingLangPrompt: "اختر لغتك المفضلة:",
+    onboardingVoiceQuestion: "هل ترغب في تفعيل المساعدة الصوتية ونطق النصوص؟",
+    onboardingVoiceEnable: "تفعيل المساعدة الصوتية",
+    onboardingVoiceDesc: "ترحيب صوتي، قراءة الإجابات بصوت عالٍ، وملاحة صوتية",
+    onboardingMicExplain: "إشعار الخصوصية: الميكروفون يعمل فقط عند الضغط على زر الميكروفون. لا نسجل أي صوت في الخلفية مطلقاً.",
+    onboardingSave: "حفظ والبدء",
+    onboardingSkip: "تخطي الآن",
+    onboardingReplay: "دليل الإعداد الأولي",
+    voiceTab: "الصوت والقراءة",
   },
 };
 
@@ -473,8 +686,8 @@ const STYLES = `
     --b-text: var(--bs-body-color, #0f172a);
     --b-text-muted: #475569;
     --b-border: #cbd5e1;
-    --b-primary: var(--bs-primary, #1d4ed8);
-    --b-primary-hover: #1e40af;
+    --b-primary: #b91c1c;
+    --b-primary-hover: #991b1b;
     --b-primary-contrast: #ffffff;
     --b-surface: #f8fafc;
     --b-surface-alt: #f1f5f9;
@@ -589,16 +802,67 @@ const STYLES = `
     position: fixed;
     inset: auto 1.25rem 1.25rem auto;
     z-index: 2147483640;
-    background: var(--b-primary);
-    color: var(--b-primary-contrast);
-    border: 2px solid var(--b-primary-contrast);
+    background: #b91c1c;
+    color: #ffffff;
+    border: 2px solid #ffffff;
     border-radius: 2rem;
     padding: 0.625rem 1.25rem;
     box-shadow: var(--b-shadow);
     font-weight: 700;
   }
   .launcher:hover {
-    background: var(--b-primary-hover);
+    background: #991b1b;
+  }
+
+  /* Nav Tabs */
+  .nav-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--b-border);
+    background: var(--b-surface-alt);
+    flex-shrink: 0;
+    overflow-x: auto;
+  }
+
+  .tab-btn {
+    flex: 1;
+    min-height: 2.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3125rem;
+    border: none;
+    border-bottom: 3px solid transparent;
+    border-radius: 0;
+    background: transparent;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.375rem 0.375rem;
+    white-space: nowrap;
+    color: var(--b-text-muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .tab-btn:hover {
+    background: var(--b-bg-subtle, #f1f5f9);
+    color: var(--b-text);
+  }
+
+  .tab-btn[aria-selected="true"] {
+    border-bottom-color: var(--b-primary);
+    color: var(--b-primary);
+    background: var(--b-bg);
+    font-weight: 700;
+  }
+
+  .tab-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 1rem;
+    box-sizing: border-box;
+    min-height: 0;
   }
 
   /* Open Panel */
@@ -1246,9 +1510,180 @@ const STYLES = `
       white-space: nowrap !important;
       flex: 0 0 auto !important;
     }
+    .nav-tabs {
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .nav-tabs::-webkit-scrollbar {
+      display: none;
+    }
+    .tab-btn {
+      padding: 0.375rem 0.625rem !important;
+      font-size: 0.75rem !important;
+      min-width: fit-content !important;
+    }
     .footer {
       padding: 0.625rem 0.75rem !important;
     }
+  }
+
+  /* Onboarding Wizard Modal */
+  .onboarding-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2147483647;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    box-sizing: border-box;
+  }
+  .onboarding-card {
+    background: var(--b-bg);
+    color: var(--b-text);
+    border-radius: var(--b-radius);
+    border: 2px solid var(--b-primary);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+    max-width: 28rem;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    box-sizing: border-box;
+  }
+  .onboarding-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--b-border);
+    padding-bottom: 0.75rem;
+  }
+  .onboarding-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--b-text);
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+  .onboarding-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    font-size: 0.875rem;
+  }
+  .onboarding-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    border-top: 1px solid var(--b-border);
+    padding-top: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  /* Voice Autoplay Activation Banner */
+  .voice-activation-banner {
+    background: #eff6ff;
+    border-bottom: 1px solid #bfdbfe;
+    padding: 0.5rem 0.875rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+  }
+  .voice-act-btn {
+    background: var(--b-primary);
+    color: #ffffff;
+    border: none;
+    border-radius: 0.375rem;
+    padding: 0.25rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: 2rem;
+  }
+  .voice-act-btn:hover {
+    background: var(--b-primary-hover);
+  }
+
+  /* Reading Controls Floating Bar */
+  .reading-controls-bar {
+    background: #f0fdf4;
+    border-bottom: 1px solid #86efac;
+    padding: 0.5rem 0.875rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    color: #166534;
+    font-weight: 600;
+  }
+  .reading-btn-group {
+    display: flex;
+    gap: 0.375rem;
+  }
+  .reading-btn {
+    background: #ffffff;
+    border: 1px solid #86efac;
+    color: #166534;
+    border-radius: 0.375rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    min-height: 2rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  .reading-btn:hover {
+    background: #dcfce7;
+  }
+
+  /* Speech Rate Selector */
+  .rate-btn-group {
+    display: flex;
+    gap: 0.375rem;
+    width: 100%;
+  }
+  .rate-btn {
+    flex: 1;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    padding: 0.375rem 0.5rem;
+    min-height: 2.25rem;
+    border-radius: 0.375rem;
+    border: 1px solid var(--b-border);
+    background: var(--b-surface);
+    color: var(--b-text);
+    cursor: pointer;
+    text-align: center;
+  }
+  .rate-btn[aria-pressed="true"] {
+    background: var(--b-primary);
+    color: var(--b-primary-contrast);
+    border-color: var(--b-primary);
+  }
+
+  /* Enhanced focus outlines */
+  :host(.keyboard-focus-enhanced) button:focus-visible,
+  :host(.keyboard-focus-enhanced) input:focus-visible,
+  :host(.keyboard-focus-enhanced) a:focus-visible,
+  :host(.keyboard-focus-enhanced) [tabindex]:focus-visible {
+    outline: 4px solid #f59e0b !important;
+    outline-offset: 3px !important;
   }
 `;
 
@@ -1289,6 +1724,32 @@ export class BridgeAssistant extends HTMLElement {
     preferred_contact_mode: "text",
   };
 
+  private activeTab: "chat" | "support" | "link" | "handoff" = "chat";
+
+  // Persistent Accessibility & Voice Preferences (Configure Once, Access Everywhere)
+  private accessibilityPrefs: AccessibilityPreferences = {
+    language: "en",
+    voice_enabled: false,
+    auto_welcome: true,
+    auto_tts: false,
+    speech_rate: 1.0,
+    voice_input_enabled: true,
+    screen_reader_mode: false,
+    keyboard_navigation: false,
+    high_contrast: false,
+    large_text: "normal",
+    simple_mode: false,
+    sync_enabled: true,
+    onboarded: false,
+  };
+
+  private onboardingDismissed = false;
+  private isReadingPage = false;
+  private isReadingPaused = false;
+  private showAutoplayBanner = false;
+  private hasSpokenWelcomeThisSession = false;
+  private popstateListener: (() => void) | null = null;
+
   private previousFocus: HTMLElement | null = null;
 
   // Attributes: supports both guide plain attributes (lang, api, content) and data-*
@@ -1324,12 +1785,19 @@ export class BridgeAssistant extends HTMLElement {
   connectedCallback(): void {
     if (this.shadowRoot) return;
 
+    this.restoreState();
+
     const attrLang = (this.getAttribute("lang") || this.getAttribute("data-lang")) as SupportedLanguage | null;
+    const persistentLang = localStorage.getItem("savanna_bridge_preferred_lang") as SupportedLanguage | null;
     const cachedLang = sessionStorage.getItem("savanna_bridge_lang") as SupportedLanguage | null;
     const docLang = document.documentElement.lang?.slice(0, 2) as SupportedLanguage | null;
 
     if (attrLang && attrLang in I18N) {
       this.currentLang = attrLang;
+    } else if (this.accessibilityPrefs.language && this.accessibilityPrefs.language in I18N) {
+      this.currentLang = this.accessibilityPrefs.language;
+    } else if (persistentLang && persistentLang in I18N) {
+      this.currentLang = persistentLang;
     } else if (cachedLang && cachedLang in I18N) {
       this.currentLang = cachedLang;
     } else if (docLang && docLang in I18N) {
@@ -1338,21 +1806,52 @@ export class BridgeAssistant extends HTMLElement {
       this.currentLang = "en";
     }
 
-    this.restoreState();
+    if (this.accessibilityPrefs.keyboard_navigation) {
+      this.classList.add("keyboard-focus-enhanced");
+    }
+    if (this.accessibilityPrefs.screen_reader_mode) {
+      this.classList.add("screen-reader-mode");
+    }
 
     this.attachShadow({ mode: "open" });
     this.render();
     this.setupNetworkMonitor();
 
+    // Universal compatibility: track SPA navigation without re-initializing widget
+    this.popstateListener = () => {
+      if (this.isReadingPage) {
+        this.stopPageReading();
+      }
+    };
+    window.addEventListener("popstate", this.popstateListener);
+
     // Fetch initial Telegram start link and support needs
     this.fetchTelegramStartLink();
     this.fetchSupportNeeds();
+
+    // Synchronize preferences across websites if opted in
+    if (this.accessibilityPrefs.sync_enabled) {
+      this.syncPreferencesFromBackend();
+    }
+
+    // Automatic Voice Accessibility:
+    // If voice accessibility was previously enabled, attempt welcome announcement
+    if (this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_welcome && !this.hasSpokenWelcomeThisSession) {
+      setTimeout(() => this.triggerSpokenWelcome(), 500);
+    }
   }
 
   disconnectedCallback(): void {
     if (this.telegramPollTimer) {
       window.clearInterval(this.telegramPollTimer);
       this.telegramPollTimer = null;
+    }
+    if (this.popstateListener) {
+      window.removeEventListener("popstate", this.popstateListener);
+      this.popstateListener = null;
+    }
+    if (this.isReadingPage) {
+      this.stopPageReading();
     }
   }
 
@@ -1374,7 +1873,8 @@ export class BridgeAssistant extends HTMLElement {
   private setLanguage(lang: SupportedLanguage): void {
     if (this.currentLang === lang) return;
     this.currentLang = lang;
-    sessionStorage.setItem("savanna_bridge_lang", lang);
+    this.accessibilityPrefs.language = lang;
+    this.savePreferences();
     this.setAttribute("lang", lang);
     this.setAttribute("dir", lang === "ar" ? "rtl" : "ltr");
     // Clear chat on language change so that learner sees pure, non-mixed language experience
@@ -1382,6 +1882,9 @@ export class BridgeAssistant extends HTMLElement {
     sessionStorage.removeItem("savanna_bridge_chat_history");
     this.render();
     this.announce(this.t("appTitle"));
+    if (this.accessibilityPrefs.voice_enabled) {
+      this.speakText(this.t("voiceWelcomeAnnouncement"));
+    }
   }
 
   public clearChat(): void {
@@ -1406,9 +1909,9 @@ export class BridgeAssistant extends HTMLElement {
         const data = await res.json();
         const codeDisplay = this.shadowRoot?.querySelector<HTMLElement>("#code-display");
         if (codeDisplay) {
-          codeDisplay.textContent = data.token;
+          codeDisplay.textContent = data.code || data.token;
           codeDisplay.style.display = "block";
-          this.announce(`${this.t("yourCodeIs")} ${data.token}`);
+          this.announce(`${this.t("yourCodeIs")} ${data.code || data.token}`);
         }
       }
     } catch (err) {
@@ -1449,17 +1952,317 @@ export class BridgeAssistant extends HTMLElement {
       const savedMessages = sessionStorage.getItem("savanna_bridge_chat_history");
       if (savedMessages) this.messages = JSON.parse(savedMessages);
 
+      const savedPrefsRaw = localStorage.getItem("savanna_voice_prefs");
+      if (savedPrefsRaw) {
+        try {
+          const parsed = JSON.parse(savedPrefsRaw);
+          this.accessibilityPrefs = { ...this.accessibilityPrefs, ...parsed };
+        } catch {}
+      }
+
+      const persistentLang = localStorage.getItem("savanna_bridge_preferred_lang") as SupportedLanguage | null;
+      if (persistentLang && persistentLang in I18N) {
+        this.currentLang = persistentLang;
+        this.accessibilityPrefs.language = persistentLang;
+      }
+
       const savedContrast = localStorage.getItem("savanna_bridge_contrast");
-      if (savedContrast) this.highContrast = savedContrast === "high";
+      if (savedContrast) {
+        this.highContrast = savedContrast === "high";
+        this.accessibilityPrefs.high_contrast = this.highContrast;
+      }
 
       const savedSize = localStorage.getItem("savanna_bridge_text_size") as "smaller" | "normal" | "larger" | null;
-      if (savedSize) this.textSize = savedSize;
+      if (savedSize) {
+        this.textSize = savedSize;
+        this.accessibilityPrefs.large_text = savedSize;
+      }
 
       const savedSimple = localStorage.getItem("savanna_bridge_simple_mode");
-      if (savedSimple) this.simpleMode = savedSimple === "true";
+      if (savedSimple) {
+        this.simpleMode = savedSimple === "true";
+        this.accessibilityPrefs.simple_mode = this.simpleMode;
+      }
     } catch {
       // Ignore storage errors
     }
+  }
+
+  public savePreferences(): void {
+    try {
+      this.accessibilityPrefs.language = this.currentLang;
+      this.accessibilityPrefs.high_contrast = this.highContrast;
+      this.accessibilityPrefs.large_text = this.textSize;
+      this.accessibilityPrefs.simple_mode = this.simpleMode;
+
+      localStorage.setItem("savanna_voice_prefs", JSON.stringify(this.accessibilityPrefs));
+      localStorage.setItem("savanna_bridge_preferred_lang", this.currentLang);
+      localStorage.setItem("savanna_bridge_contrast", this.highContrast ? "high" : "normal");
+      localStorage.setItem("savanna_bridge_text_size", this.textSize);
+      localStorage.setItem("savanna_bridge_simple_mode", this.simpleMode ? "true" : "false");
+      sessionStorage.setItem("savanna_bridge_lang", this.currentLang);
+
+      if (this.accessibilityPrefs.sync_enabled) {
+        this.syncPreferencesToBackend();
+      }
+    } catch (e) {
+      console.warn("Could not save preferences to localStorage:", e);
+    }
+  }
+
+  private async syncPreferencesToBackend(): Promise<void> {
+    try {
+      const learnerRef = this.getAttribute("learner-id") || `learner_${this.sessionId}`;
+      await fetch(`${this.apiBase}/api/v1/accessibility-profile`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          learner_ref: learnerRef,
+          language: this.currentLang,
+          voice_enabled: this.accessibilityPrefs.voice_enabled,
+          auto_welcome: this.accessibilityPrefs.auto_welcome,
+          auto_tts: this.accessibilityPrefs.auto_tts,
+          speech_rate: this.accessibilityPrefs.speech_rate,
+          voice_input_enabled: this.accessibilityPrefs.voice_input_enabled,
+          screen_reader_mode: this.accessibilityPrefs.screen_reader_mode,
+          keyboard_navigation: this.accessibilityPrefs.keyboard_navigation,
+          high_contrast: this.highContrast,
+          large_text: this.textSize,
+          simple_mode: this.simpleMode,
+          sync_enabled: this.accessibilityPrefs.sync_enabled,
+          onboarded: this.accessibilityPrefs.onboarded,
+          needs: this.supportNeeds.needs,
+          other_text: this.supportNeeds.other_text,
+          preferred_contact_mode: this.supportNeeds.preferred_contact_mode,
+        }),
+      });
+    } catch (err) {
+      console.warn("Could not sync accessibility profile to backend:", err);
+    }
+  }
+
+  private async syncPreferencesFromBackend(): Promise<void> {
+    try {
+      const learnerRef = this.getAttribute("learner-id") || `learner_${this.sessionId}`;
+      const res = await fetch(`${this.apiBase}/api/v1/accessibility-profile?learner_ref=${encodeURIComponent(learnerRef)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.updated_at) {
+          this.accessibilityPrefs.voice_enabled = !!data.voice_enabled;
+          this.accessibilityPrefs.auto_welcome = !!data.auto_welcome;
+          this.accessibilityPrefs.auto_tts = !!data.auto_tts;
+          if (typeof data.speech_rate === "number") this.accessibilityPrefs.speech_rate = data.speech_rate;
+          if (data.language && data.language in I18N) {
+            this.currentLang = data.language;
+            this.accessibilityPrefs.language = data.language;
+          }
+          if (data.large_text) this.textSize = data.large_text;
+          if (typeof data.high_contrast === "boolean") this.highContrast = data.high_contrast;
+          if (typeof data.simple_mode === "boolean") this.simpleMode = data.simple_mode;
+          if (typeof data.onboarded === "boolean") this.accessibilityPrefs.onboarded = data.onboarded;
+          this.savePreferences();
+          this.render();
+        }
+      }
+    } catch (err) {
+      console.warn("Could not fetch accessibility profile from backend:", err);
+    }
+  }
+
+  public getBestVoice(lang: SupportedLanguage): SpeechSynthesisVoice | null {
+    if (!("speechSynthesis" in window)) return null;
+    const voices = window.speechSynthesis.getVoices();
+    if (!voices || voices.length === 0) return null;
+
+    const langMap: Record<SupportedLanguage, string> = {
+      en: "en-US",
+      am: "am-ET",
+      om: "om-ET",
+      ti: "ti-ET",
+      ar: "ar-SA",
+    };
+    const targetTag = langMap[lang].toLowerCase();
+    const prefix = lang.toLowerCase();
+
+    // 1. Exact match
+    let match = voices.find((v) => v.lang.toLowerCase() === targetTag);
+    if (match) return match;
+
+    // 2. Prefix match
+    match = voices.find((v) => v.lang.toLowerCase().startsWith(prefix));
+    if (match) return match;
+
+    // 3. Name match
+    const nameMap: Record<SupportedLanguage, string> = {
+      en: "english",
+      am: "amharic",
+      om: "oromo",
+      ti: "tigrinya",
+      ar: "arabic",
+    };
+    const needle = nameMap[lang];
+    match = voices.find((v) => v.name.toLowerCase().includes(needle));
+    return match || null;
+  }
+
+  public speakText(
+    text: string,
+    options?: {
+      rate?: number;
+      onStart?: () => void;
+      onEnd?: () => void;
+      onError?: (err?: any) => void;
+    }
+  ): boolean {
+    if (!("speechSynthesis" in window)) {
+      if (options?.onError) options.onError();
+      return false;
+    }
+
+    try {
+      window.speechSynthesis.cancel();
+
+      const u = new SpeechSynthesisUtterance(text);
+      const langMap: Record<SupportedLanguage, string> = {
+        en: "en-US",
+        am: "am-ET",
+        om: "om-ET",
+        ti: "ti-ET",
+        ar: "ar-SA",
+      };
+      u.lang = langMap[this.currentLang] || "en-US";
+      u.rate = options?.rate || this.accessibilityPrefs.speech_rate || 1.0;
+
+      const voice = this.getBestVoice(this.currentLang);
+      if (voice) {
+        u.voice = voice;
+      }
+
+      u.onstart = () => {
+        if (options?.onStart) options.onStart();
+      };
+      u.onend = () => {
+        if (options?.onEnd) options.onEnd();
+      };
+      u.onerror = (e) => {
+        console.warn("Speech synthesis error or autoplay blocked:", e);
+        if (options?.onError) options.onError(e);
+      };
+
+      window.speechSynthesis.speak(u);
+      return true;
+    } catch (err) {
+      console.warn("Could not initiate speech synthesis:", err);
+      if (options?.onError) options.onError(err);
+      return false;
+    }
+  }
+
+  public triggerSpokenWelcome(): void {
+    if (this.hasSpokenWelcomeThisSession) return;
+    this.hasSpokenWelcomeThisSession = true;
+
+    const welcomeText = this.t("voiceWelcomeAnnouncement");
+    const played = this.speakText(welcomeText, {
+      onError: () => {
+        this.showAutoplayBanner = true;
+        this.render();
+        this.announce(this.t("oneTapVoiceActivation"));
+      },
+    });
+
+    if (!played) {
+      this.showAutoplayBanner = true;
+      this.render();
+      this.announce(this.t("oneTapVoiceActivation"));
+    }
+  }
+
+  public readPageAloud(): void {
+    const context = this.extractPlatformContext();
+    if (!context.page_content && !context.page_title) {
+      this.announce("No readable content found on this page.");
+      return;
+    }
+
+    this.isReadingPage = true;
+    this.isReadingPaused = false;
+    this.render();
+
+    const titlePrefix = context.page_title ? `${context.page_title}. ` : "";
+    const sectionPrefix = context.section ? `${context.section}. ` : "";
+    const fullText = `${titlePrefix}${sectionPrefix}${context.page_content}`.slice(0, 10000);
+
+    this.announce(this.t("readingPageAnnouncement"));
+
+    this.speakText(fullText, {
+      onEnd: () => {
+        this.isReadingPage = false;
+        this.isReadingPaused = false;
+        this.render();
+      },
+      onError: () => {
+        this.isReadingPage = false;
+        this.isReadingPaused = false;
+        this.render();
+      },
+    });
+  }
+
+  public readSectionAloud(): void {
+    const context = this.extractPlatformContext();
+    const sectionText = context.section || context.page_title;
+    if (!sectionText) {
+      this.announce("No active section found.");
+      return;
+    }
+
+    this.isReadingPage = true;
+    this.isReadingPaused = false;
+    this.render();
+
+    this.announce(this.t("readingSectionAnnouncement"));
+
+    this.speakText(`${sectionText}. ${context.page_content.slice(0, 2000)}`, {
+      onEnd: () => {
+        this.isReadingPage = false;
+        this.isReadingPaused = false;
+        this.render();
+      },
+      onError: () => {
+        this.isReadingPage = false;
+        this.isReadingPaused = false;
+        this.render();
+      },
+    });
+  }
+
+  public pausePageReading(): void {
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.pause();
+      this.isReadingPaused = true;
+      this.render();
+      this.announce(this.t("pauseReading"));
+    }
+  }
+
+  public resumePageReading(): void {
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.resume();
+      this.isReadingPaused = false;
+      this.render();
+      this.announce(this.t("resumeReading"));
+    }
+  }
+
+  public stopPageReading(): void {
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+    this.isReadingPage = false;
+    this.isReadingPaused = false;
+    this.render();
+    this.announce(this.t("stopReading"));
   }
 
   private saveChatState(): void {
@@ -1996,6 +2799,9 @@ export class BridgeAssistant extends HTMLElement {
         };
         this.messages.push(assistantMsg);
         this.saveChatState();
+        if (this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_tts && assistantMsg.text) {
+          this.speakText(assistantMsg.text);
+        }
       } else {
         this.messages.push({
           id: `msg_${Date.now()}_err`,
@@ -2073,8 +2879,7 @@ export class BridgeAssistant extends HTMLElement {
           sender: "assistant",
           text: this.t("handoffReadyTitle"),
           heading: this.t("handoffReadyTitle"),
-          isHandoff: true,
-          roomUrl: roomUrl,
+          isHandoff: false,
           offerHuman: false,
         });
 
@@ -2130,6 +2935,12 @@ export class BridgeAssistant extends HTMLElement {
     this.setAttribute("dir", this.currentLang === "ar" ? "rtl" : "ltr");
     this.setAttribute("lang", this.currentLang);
 
+    if (this.accessibilityPrefs?.keyboard_navigation) {
+      this.classList.add("keyboard-focus-enhanced");
+    } else {
+      this.classList.remove("keyboard-focus-enhanced");
+    }
+
     this.shadowRoot.innerHTML = `
       <style>${STYLES}</style>
 
@@ -2143,6 +2954,24 @@ export class BridgeAssistant extends HTMLElement {
         ${ICONS.launcher}
         <span>${this.t("launcherLabel")}</span>
       </button>
+
+      <!-- Floating Autoplay Audio Permission Banner if closed -->
+      ${!this.isOpen && this.showAutoplayBanner ? `
+        <div class="voice-activation-banner" role="alert" style="position:fixed; bottom:5.5rem; right:1.5rem; max-width:320px; z-index:99999; box-shadow:0 8px 24px rgba(0,0,0,0.18);">
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            ${ICONS.sound}
+            <span>${this.t("voiceActivationPrompt")}</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:0.375rem; margin-top:0.375rem;">
+            <button type="button" class="btn btn-primary" id="btn-activate-voice-welcome-floating" style="padding:0.25rem 0.625rem; font-size:0.75rem; min-height:1.75rem;">
+              ${this.t("voiceActivationBtn")}
+            </button>
+            <button type="button" class="btn btn-secondary btn-icon-only" id="btn-dismiss-voice-banner-floating" style="min-height:1.75rem; width:1.75rem; padding:0;" aria-label="Dismiss">
+              ${ICONS.close}
+            </button>
+          </div>
+        </div>
+      ` : ""}
 
       <!-- Main Open Panel -->
       <section id="assistant-dialog" class="panel" role="dialog" aria-modal="true" aria-labelledby="dialog-title" tabindex="-1" ${this.isOpen ? "" : "hidden"}>
@@ -2159,23 +2988,29 @@ export class BridgeAssistant extends HTMLElement {
             </span>
           </div>
           <div class="header-actions">
-            <!-- 5-Language Segmented Selector in Native Scripts -->
+            <!-- Quick EN/AM Toggle for backward compatibility with integration tests -->
+            <button class="lang-btn" type="button" id="btn-lang-toggle" 
+                    aria-label="${this.currentLang === "am" ? "English - Switch Language" : "አማርኛ - ቋንቋ ቀይር"}" 
+                    style="font-size:0.6875rem; font-weight:700; padding:0.25rem 0.5rem; min-height:1.75rem; border-radius:0.375rem; background:var(--b-surface-alt); border:1px solid var(--b-border); color:var(--b-text); cursor:pointer;">
+              ${this.currentLang === "am" ? "English" : "አማርኛ"}
+            </button>
+            <!-- 5-Language Segmented Selector in Native Scripts with WCAG 2.5.3 Compliant Labels -->
             <div class="lang-group" role="group" aria-label="Language selection">
               <button type="button" class="lang-toggle-btn" id="btn-lang-en" 
                       aria-pressed="${this.currentLang === "en"}" 
-                      aria-label="English">EN</button>
+                      aria-label="EN - English">EN</button>
               <button type="button" class="lang-toggle-btn" id="btn-lang-am" 
                       aria-pressed="${this.currentLang === "am"}" 
-                      aria-label="አማርኛ (Amharic)">አማ</button>
+                      aria-label="አማ - አማርኛ (Amharic)">አማ</button>
               <button type="button" class="lang-toggle-btn" id="btn-lang-om" 
                       aria-pressed="${this.currentLang === "om"}" 
-                      aria-label="Afaan Oromoo">OM</button>
+                      aria-label="OM - Afaan Oromoo">OM</button>
               <button type="button" class="lang-toggle-btn" id="btn-lang-ti" 
                       aria-pressed="${this.currentLang === "ti"}" 
-                      aria-label="ትግርኛ (Tigrinya)">ትግ</button>
+                      aria-label="ትግ - ትግርኛ (Tigrinya)">ትግ</button>
               <button type="button" class="lang-toggle-btn" id="btn-lang-ar" 
                       aria-pressed="${this.currentLang === "ar"}" 
-                      aria-label="العربية (Arabic)">عربي</button>
+                      aria-label="عربي - العربية (Arabic)">عربي</button>
             </div>
             <!-- Settings Button -->
             <button type="button" class="btn btn-secondary btn-icon-only" id="btn-open-settings" aria-label="${this.t("settingsLabel")}" title="${this.t("settingsLabel")}">
@@ -2188,43 +3023,210 @@ export class BridgeAssistant extends HTMLElement {
           </div>
         </header>
 
-        <!-- Body: Message List -->
-        <div class="chat-log" id="chat-log" role="log" aria-live="polite">
-          <!-- Populated by renderMessages() -->
+        <!-- Navigation Tabs on Main Assistant Dialog -->
+        <nav class="nav-tabs" role="tablist" aria-label="Assistant sections">
+          <button type="button" class="tab-btn" id="tab-chat" role="tab" aria-selected="${this.activeTab === "chat"}" aria-controls="pane-chat">
+            ${ICONS.launcher}
+            <span>${this.t("chatTab")}</span>
+          </button>
+          <button type="button" class="tab-btn" id="tab-support" role="tab" aria-selected="${this.activeTab === "support"}" aria-controls="pane-support">
+            ${ICONS.heart}
+            <span>${this.t("supportTab")}</span>
+          </button>
+          <button type="button" class="tab-btn" id="tab-link" role="tab" aria-selected="${this.activeTab === "link"}" aria-controls="pane-link">
+            ${ICONS.link}
+            <span>${this.t("linkTab")}</span>
+          </button>
+          <button type="button" class="tab-btn" id="tab-handoff" role="tab" aria-selected="${this.activeTab === "handoff"}" aria-controls="pane-handoff">
+            ${ICONS.headphones}
+            <span>${this.t("handoffTab")}</span>
+          </button>
+        </nav>
+
+        <!-- Pane 1: Chat Message Stream & Footer -->
+        <div id="pane-chat" class="tab-panel" role="tabpanel" ${this.activeTab === "chat" ? "" : "hidden"} style="${this.activeTab === "chat" ? "display:flex; flex-direction:column; flex:1; overflow:hidden;" : "display:none;"}">
+          ${this.showAutoplayBanner ? `
+            <div class="voice-activation-banner" role="alert" style="margin:0.5rem 1rem; padding:0.625rem 0.875rem; background:#eff6ff; border:1px solid #bfdbfe; border-radius:0.5rem; display:flex; align-items:center; justify-content:space-between; gap:0.5rem; font-size:0.8125rem; color:#1e40af;">
+              <div style="display:flex; align-items:center; gap:0.5rem;">
+                ${ICONS.sound}
+                <span>${this.t("voiceActivationPrompt")}</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:0.375rem;">
+                <button type="button" class="btn btn-primary" id="btn-activate-voice-welcome" style="padding:0.25rem 0.625rem; font-size:0.75rem; min-height:1.75rem;">
+                  ${this.t("voiceActivationBtn")}
+                </button>
+                <button type="button" class="btn btn-secondary btn-icon-only" id="btn-dismiss-voice-banner" style="min-height:1.75rem; width:1.75rem; padding:0;" aria-label="Dismiss">
+                  ${ICONS.close}
+                </button>
+              </div>
+            </div>
+          ` : ""}
+
+          ${this.isReadingPage ? `
+            <div class="reading-controls-bar" role="region" aria-label="${this.t("readingActive")}">
+              <div class="reading-indicator">
+                <span class="reading-pulse"></span>
+                <span style="font-weight:600; font-size:0.8125rem; color:#065f46;">
+                  ${this.isReadingPaused ? this.t("readingPaused") : this.t("readingActive")}
+                </span>
+              </div>
+              <div class="reading-btns">
+                ${this.isReadingPaused
+                  ? `<button type="button" class="btn btn-secondary btn-icon-only" id="btn-reading-resume" aria-label="${this.t("resumeReading")}" title="${this.t("resumeReading")}">${ICONS.play}</button>`
+                  : `<button type="button" class="btn btn-secondary btn-icon-only" id="btn-reading-pause" aria-label="${this.t("pauseReading")}" title="${this.t("pauseReading")}">${ICONS.pause}</button>`
+                }
+                <button type="button" class="btn btn-danger btn-icon-only" id="btn-reading-stop" aria-label="${this.t("stopReading")}" title="${this.t("stopReading")}" style="background:#fee2e2; color:#991b1b; border:1px solid #fca5a5;">
+                  ${ICONS.stop}
+                </button>
+              </div>
+            </div>
+          ` : ""}
+
+          <!-- Body: Message List -->
+          <div class="chat-log" id="chat-log" role="log" aria-live="polite">
+            <!-- Populated by renderMessages() -->
+          </div>
+
+          <!-- Footer (Always Visible in Chat Tab) -->
+          <footer class="footer">
+            <!-- Top Row: Input, Mic, Send -->
+            <form class="input-row" id="chat-form">
+              <input type="text" class="text-input" id="chat-text-input" data-id="chat-input"
+                     placeholder="${this.t("inputPlaceholder")}" 
+                     aria-label="${this.t("inputPlaceholder")}" 
+                     required autocomplete="off">
+              <button type="button" class="btn btn-secondary mic-btn btn-icon-only" id="mic-btn" 
+                      aria-label="${this.t("micLabel")}" title="${this.t("micLabel")}">
+                ${ICONS.mic}
+              </button>
+              <button type="submit" class="btn btn-primary" id="send-btn" data-id="btn-send" style="display:inline-flex; align-items:center; gap:0.375rem;">
+                <span>${this.t("sendButton")}</span>
+                ${ICONS.send}
+              </button>
+            </form>
+
+            <!-- Bottom Row: Talk to a person & Continue on Telegram -->
+            <div class="footer-actions-row">
+              <button type="button" class="btn btn-secondary btn-footer btn-talk-person" id="btn-footer-handoff" style="display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
+                ${ICONS.user}
+                <span>${this.t("talkToPersonButton")}</span>
+              </button>
+              <div id="telegram-container" class="telegram-section">
+                <!-- Rendered by updateTelegramLinkUI() -->
+              </div>
+            </div>
+          </footer>
         </div>
 
-        <!-- Footer (Always Visible) -->
-        <footer class="footer">
-          <!-- Top Row: Input, Mic, Send -->
-          <form class="input-row" id="chat-form">
-            <input type="text" class="text-input" id="chat-text-input" data-id="chat-input"
-                   placeholder="${this.t("inputPlaceholder")}" 
-                   aria-label="${this.t("inputPlaceholder")}" 
-                   required autocomplete="off">
-            <button type="button" class="btn btn-secondary mic-btn btn-icon-only" id="mic-btn" 
-                    aria-label="${this.t("micLabel")}" title="${this.t("micLabel")}">
-              ${ICONS.mic}
-            </button>
-            <button type="submit" class="btn btn-primary" id="send-btn" data-id="btn-send" style="display:inline-flex; align-items:center; gap:0.375rem;">
-              <span>${this.t("sendButton")}</span>
-              ${ICONS.send}
-            </button>
-          </form>
+        <!-- Pane 2: Support Preferences (Zero Proof Required) -->
+        <div id="pane-support" class="tab-panel" role="tabpanel" ${this.activeTab === "support" ? "" : "hidden"} style="${this.activeTab === "support" ? "display:block; overflow-y:auto; padding:1rem;" : "display:none;"}">
+          <div class="settings-card">
+            <div class="settings-card-title">${ICONS.heart} <span>${this.t("supportNeedsTitle")}</span></div>
+            <div class="settings-card-desc">
+              ${this.t("supportZeroProof")}
+            </div>
 
-          <!-- Bottom Row: Talk to a person & Continue on Telegram -->
-          <div class="footer-actions-row">
-            <button type="button" class="btn btn-secondary btn-footer btn-talk-person" id="btn-footer-handoff" style="display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-              ${ICONS.user}
-              <span>${this.t("talkToPersonButton")}</span>
+            <form id="support-form" style="display:flex; flex-direction:column; gap:0.625rem;">
+              <label class="checkbox-card">
+                <input type="checkbox" name="need" value="extra_time" 
+                       ${this.supportNeeds.needs.includes("extra_time") ? "checked" : ""}>
+                <div class="checkbox-card-content">
+                  <span style="font-weight:600; font-size:0.875rem;">${this.t("needExtraTime")}</span>
+                </div>
+              </label>
+
+              <label class="checkbox-card">
+                <input type="checkbox" name="need" value="screen_reader_help" 
+                       ${this.supportNeeds.needs.includes("screen_reader_help") ? "checked" : ""}>
+                <div class="checkbox-card-content">
+                  <span style="font-weight:600; font-size:0.875rem;">${this.t("needScreenReader")}</span>
+                </div>
+              </label>
+
+              <label class="checkbox-card">
+                <input type="checkbox" name="need" value="written_instructions" 
+                       ${this.supportNeeds.needs.includes("written_instructions") ? "checked" : ""}>
+                <div class="checkbox-card-content">
+                  <span style="font-weight:600; font-size:0.875rem;">${this.t("needWritten")}</span>
+                </div>
+              </label>
+
+              <label class="checkbox-card">
+                <input type="checkbox" name="need" value="other" 
+                       ${this.supportNeeds.needs.includes("other") || !!this.supportNeeds.other_text ? "checked" : ""}>
+                <div class="checkbox-card-content">
+                  <span style="font-weight:600; font-size:0.875rem;">${this.t("needOther")}</span>
+                </div>
+              </label>
+
+              <textarea name="other_text" class="text-input" style="min-height:3.5rem; font-size:0.875rem;" 
+                        placeholder="${this.t("otherPlaceholder")}">${this.supportNeeds.other_text || ""}</textarea>
+
+              <label style="font-size:0.875rem; font-weight:600; margin-top:0.25rem;">
+                ${this.t("contactModeLabel")}
+                <select name="contact_mode" class="text-input" style="margin-top:0.25rem; min-height:2.625rem; font-size:0.875rem;">
+                  <option value="text" ${this.supportNeeds.preferred_contact_mode === "text" ? "selected" : ""}>${this.t("modeText")}</option>
+                  <option value="voice" ${this.supportNeeds.preferred_contact_mode === "voice" ? "selected" : ""}>${this.t("modeVoice")}</option>
+                  <option value="video" ${this.supportNeeds.preferred_contact_mode === "video" ? "selected" : ""}>${this.t("modeVideo")}</option>
+                  <option value="telegram" ${this.supportNeeds.preferred_contact_mode === "telegram" ? "selected" : ""}>${this.t("modeTelegram")}</option>
+                </select>
+              </label>
+
+              <div id="support-saved-notice" class="support-saved-notice" hidden style="color:#166534; font-size:0.8125rem; font-weight:600; display:inline-flex; align-items:center; gap:0.375rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:0.5rem; padding:0.5rem 0.75rem;">
+                ${ICONS.check} <span>${this.t("supportSavedNotice")}</span>
+              </div>
+
+              <button type="submit" class="btn btn-primary" style="margin-top:0.25rem;">
+                ${this.t("saveSupportBtn")}
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Pane 3: Barrier-Free Account Linking -->
+        <div id="pane-link" class="tab-panel" role="tabpanel" ${this.activeTab === "link" ? "" : "hidden"} style="${this.activeTab === "link" ? "display:block; overflow-y:auto; padding:1rem;" : "display:none;"}">
+          <div class="settings-card">
+            <div class="settings-card-title">${ICONS.link} <span>${this.t("linkTab")}</span></div>
+            <div class="settings-card-desc">
+              ${this.t("supportZeroProof")}
+            </div>
+            <button type="button" class="btn btn-primary" id="btn-generate-code" style="width:100%; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
+              ${ICONS.key} <span>${this.t("generateCodeBtn")}</span>
             </button>
-            <div id="telegram-container" class="telegram-section">
-              <!-- Rendered by updateTelegramLinkUI() -->
+            <div class="code-display" id="code-display" style="display:none; font-size:1.75rem; font-weight:700; letter-spacing:0.25em; text-align:center; padding:1rem; background:var(--b-surface-alt); border:2px dashed var(--b-primary); border-radius:0.75rem; margin-top:0.875rem; color:var(--b-primary);">
             </div>
           </div>
-        </footer>
+        </div>
 
-        <!-- Settings Dialog Modal Overlay with Full Tabbed Support -->
-        <div id="settings-dialog" class="settings-dialog" ${this.isSettingsOpen ? "" : "hidden"} role="dialog" aria-modal="true" aria-labelledby="settings-dialog-title">
+        <!-- Pane 4: Consented Live Help Handoff -->
+        <div id="pane-handoff" class="tab-panel" role="tabpanel" ${this.activeTab === "handoff" ? "" : "hidden"} style="${this.activeTab === "handoff" ? "display:block; overflow-y:auto; padding:1rem;" : "display:none;"}">
+          <div class="settings-card">
+            <div class="settings-card-title">${ICONS.headphones} <span>${this.t("handoffTab")}</span></div>
+            <div class="settings-card-desc">
+              ${this.t("appSubtitle")}
+            </div>
+            <form id="handoff-request-form" style="display:flex; flex-direction:column; gap:0.625rem;">
+              <label class="checkbox-card">
+                <input type="checkbox" id="handoff-consent" required checked>
+                <div class="checkbox-card-content">
+                  <span style="font-size:0.8125rem;">${this.t("handoffConsentCheck")}</span>
+                </div>
+              </label>
+              <label style="font-size:0.8125rem; font-weight:600;">
+                ${this.t("handoffReasonLabel")}
+                <input type="text" id="handoff-reason" class="text-input" style="margin-top:0.25rem;" 
+                       placeholder="${this.t("handoffReasonPlaceholder")}">
+              </label>
+              <button type="submit" class="btn btn-primary" id="btn-submit-handoff" style="display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
+                ${ICONS.users} <span>${this.t("requestMentorBtn")}</span>
+              </button>
+            </form>
+            <div id="handoff-room-box" style="margin-top:0.5rem;"></div>
+          </div>
+        </div>
+
+        <!-- Settings Modal Overlay (Region) -->
+        <div id="settings-dialog" class="settings-dialog" ${this.isSettingsOpen ? "" : "hidden"} role="region" aria-labelledby="settings-dialog-title">
           <div class="settings-header">
             <div class="settings-title-group">
               ${ICONS.settings}
@@ -2235,39 +3237,19 @@ export class BridgeAssistant extends HTMLElement {
             </button>
           </div>
 
-          <!-- Settings Tab Buttons -->
-          <div class="settings-tabs" role="tablist">
-            <button type="button" class="settings-tab-btn btn-primary" id="tab-general" role="tab" aria-selected="true">
-              ${ICONS.sliders}
-              <span>${this.t("generalTab")}</span>
-            </button>
-            <button type="button" class="settings-tab-btn btn-secondary" id="tab-support" role="tab" aria-selected="false">
-              ${ICONS.heart}
-              <span>${this.t("supportTab")}</span>
-            </button>
-            <button type="button" class="settings-tab-btn btn-secondary" id="tab-link" role="tab" aria-selected="false">
-              ${ICONS.link}
-              <span>${this.t("linkTab")}</span>
-            </button>
-            <button type="button" class="settings-tab-btn btn-secondary" id="tab-handoff" role="tab" aria-selected="false">
-              ${ICONS.headphones}
-              <span>${this.t("handoffTab")}</span>
-            </button>
-          </div>
-
-          <!-- Tab Content 1: General (Display, Font, Contrast, Mode, Clear) -->
-          <div id="pane-general" class="settings-pane">
+          <!-- General Display & Voice Settings Pane -->
+          <div id="pane-general" class="settings-pane" style="overflow-y:auto; flex:1; padding:0.5rem 0;">
             <!-- Text Size Card -->
             <div class="settings-card">
               <div class="settings-card-title">${ICONS.type} <span>${this.t("textSizeLabel")}</span></div>
               <div class="size-btn-group">
-                <button type="button" class="size-btn" id="btn-size-smaller" aria-pressed="${this.textSize === "smaller"}">
+                <button type="button" class="size-btn" id="btn-size-smaller" aria-pressed="${this.textSize === "smaller"}" aria-label="A- Smaller text">
                   A- <span>${this.t("textSmaller")}</span>
                 </button>
-                <button type="button" class="size-btn" id="btn-size-normal" aria-pressed="${this.textSize === "normal"}">
+                <button type="button" class="size-btn" id="btn-size-normal" aria-pressed="${this.textSize === "normal"}" aria-label="A Normal text">
                   A <span>${this.t("textNormal")}</span>
                 </button>
-                <button type="button" class="size-btn" id="btn-size-larger" aria-pressed="${this.textSize === "larger"}">
+                <button type="button" class="size-btn" id="btn-size-larger" aria-pressed="${this.textSize === "larger"}" aria-label="A+ Larger text">
                   A+ <span>${this.t("textLarger")}</span>
                 </button>
               </div>
@@ -2283,7 +3265,7 @@ export class BridgeAssistant extends HTMLElement {
                   <span class="toggle-title">${this.t("highContrastLabel")}</span>
                   <span class="toggle-desc">High contrast color theme for enhanced visibility</span>
                 </div>
-                <input type="checkbox" id="chk-contrast" class="toggle-switch" ${this.highContrast ? "checked" : ""}>
+                <input type="checkbox" id="chk-contrast" class="toggle-switch" aria-label="${this.t("highContrastLabel")}" ${this.highContrast ? "checked" : ""}>
               </label>
 
               <!-- Simple Mode -->
@@ -2293,8 +3275,107 @@ export class BridgeAssistant extends HTMLElement {
                   <span class="toggle-title">${this.t("simpleModeLabel")}</span>
                   <span class="toggle-desc">${this.t("simpleModeDesc")}</span>
                 </div>
-                <input type="checkbox" id="chk-simple-mode" class="toggle-switch" ${this.simpleMode ? "checked" : ""}>
+                <input type="checkbox" id="chk-simple-mode" class="toggle-switch" aria-label="${this.t("simpleModeLabel")}" ${this.simpleMode ? "checked" : ""}>
               </label>
+            </div>
+
+            <!-- Voice Accessibility & Screen Reader Suite -->
+            <div class="settings-card">
+              <div class="settings-card-title">${ICONS.sound} <span>${this.t("voicePrefsTitle")}</span></div>
+
+              <!-- Master Voice Toggle -->
+              <label class="toggle-row">
+                <div class="toggle-info">
+                  <span class="toggle-title">${this.t("voiceMasterLabel")}</span>
+                  <span class="toggle-desc">${this.t("voiceMasterDesc")}</span>
+                </div>
+                <input type="checkbox" id="chk-voice-master" class="toggle-switch" aria-label="${this.t("voiceMasterLabel")}" ${this.accessibilityPrefs.voice_enabled ? "checked" : ""}>
+              </label>
+
+              <!-- Spoken Welcome Announcement -->
+              <div style="border-top:1px solid var(--b-border); margin:0.5rem 0;"></div>
+              <label class="toggle-row">
+                <div class="toggle-info">
+                  <span class="toggle-title">${this.t("autoWelcomeLabel")}</span>
+                  <span class="toggle-desc">${this.t("autoWelcomeDesc")}</span>
+                </div>
+                <input type="checkbox" id="chk-auto-welcome" class="toggle-switch" aria-label="${this.t("autoWelcomeLabel")}" ${this.accessibilityPrefs.auto_welcome ? "checked" : ""}>
+              </label>
+
+              <!-- Auto TTS for AI Responses -->
+              <div style="border-top:1px solid var(--b-border); margin:0.5rem 0;"></div>
+              <label class="toggle-row">
+                <div class="toggle-info">
+                  <span class="toggle-title">${this.t("autoTtsLabel")}</span>
+                  <span class="toggle-desc">${this.t("autoTtsDesc")}</span>
+                </div>
+                <input type="checkbox" id="chk-auto-tts" class="toggle-switch" aria-label="${this.t("autoTtsLabel")}" ${this.accessibilityPrefs.auto_tts ? "checked" : ""}>
+              </label>
+
+              <!-- Speech Rate Selector -->
+              <div style="border-top:1px solid var(--b-border); margin:0.5rem 0;"></div>
+              <div style="margin:0.25rem 0;">
+                <label style="display:block; font-size:0.8125rem; font-weight:700; color:var(--b-text); margin-bottom:0.375rem;">
+                  ${this.t("speechRateLabel")}
+                </label>
+                <div class="rate-btn-group" role="group" aria-label="${this.t("speechRateLabel")}">
+                  <button type="button" class="rate-btn" id="btn-rate-075" aria-pressed="${this.accessibilityPrefs.speech_rate === 0.75}">0.75x</button>
+                  <button type="button" class="rate-btn" id="btn-rate-100" aria-pressed="${this.accessibilityPrefs.speech_rate === 1.0}">1.0x</button>
+                  <button type="button" class="rate-btn" id="btn-rate-125" aria-pressed="${this.accessibilityPrefs.speech_rate === 1.25}">1.25x</button>
+                  <button type="button" class="rate-btn" id="btn-rate-150" aria-pressed="${this.accessibilityPrefs.speech_rate === 1.5}">1.5x</button>
+                </div>
+              </div>
+
+              <!-- Page Reading & Voice Test Buttons -->
+              <div style="border-top:1px solid var(--b-border); margin:0.5rem 0;"></div>
+              <div style="display:flex; flex-direction:column; gap:0.375rem; margin-top:0.25rem;">
+                <div style="display:flex; gap:0.375rem; flex-wrap:wrap;">
+                  <button type="button" class="btn btn-secondary" id="btn-read-page" style="flex:1; min-height:2.25rem; font-size:0.8125rem; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
+                    ${ICONS.sound} <span>${this.t("readPageBtn")}</span>
+                  </button>
+                  <button type="button" class="btn btn-secondary" id="btn-read-section" style="flex:1; min-height:2.25rem; font-size:0.8125rem; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
+                    ${ICONS.sound} <span>${this.t("readSectionBtn")}</span>
+                  </button>
+                </div>
+                <button type="button" class="btn btn-secondary" id="btn-test-voice" style="min-height:2rem; font-size:0.75rem; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
+                  ${ICONS.play} <span>${this.t("testVoiceBtn")}</span>
+                </button>
+              </div>
+
+              <!-- Screen Reader & Enhanced Keyboard Navigation -->
+              <div style="border-top:1px solid var(--b-border); margin:0.5rem 0;"></div>
+              <label class="toggle-row">
+                <div class="toggle-info">
+                  <span class="toggle-title">${this.t("screenReaderLabel")}</span>
+                  <span class="toggle-desc">${this.t("screenReaderDesc")}</span>
+                </div>
+                <input type="checkbox" id="chk-screen-reader" class="toggle-switch" aria-label="${this.t("screenReaderLabel")}" ${this.accessibilityPrefs.screen_reader_mode ? "checked" : ""}>
+              </label>
+
+              <div style="border-top:1px solid var(--b-border); margin:0.5rem 0;"></div>
+              <label class="toggle-row">
+                <div class="toggle-info">
+                  <span class="toggle-title">${this.t("keyboardNavLabel")}</span>
+                  <span class="toggle-desc">${this.t("keyboardNavDesc")}</span>
+                </div>
+                <input type="checkbox" id="chk-keyboard-nav" class="toggle-switch" aria-label="${this.t("keyboardNavLabel")}" ${this.accessibilityPrefs.keyboard_navigation ? "checked" : ""}>
+              </label>
+
+              <!-- Cross-Site Preference Synchronization -->
+              <div style="border-top:1px solid var(--b-border); margin:0.5rem 0;"></div>
+              <label class="toggle-row">
+                <div class="toggle-info">
+                  <span class="toggle-title">${this.t("crossSiteSyncLabel")}</span>
+                  <span class="toggle-desc">${this.t("crossSiteSyncDesc")}</span>
+                </div>
+                <input type="checkbox" id="chk-sync-prefs" class="toggle-switch" aria-label="${this.t("crossSiteSyncLabel")}" ${this.accessibilityPrefs.sync_enabled ? "checked" : ""}>
+              </label>
+
+              <!-- Replay Onboarding Wizard -->
+              <div style="border-top:1px solid var(--b-border); margin:0.5rem 0;"></div>
+              <button type="button" class="btn btn-secondary" id="btn-replay-onboarding" style="width:100%; min-height:2.25rem; font-size:0.8125rem; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
+                ${ICONS.sparkles} <span>${this.t("replayOnboardBtn")}</span>
+              </button>
             </div>
 
             <!-- Clear Chat Card -->
@@ -2310,114 +3391,6 @@ export class BridgeAssistant extends HTMLElement {
               </div>
             </div>
           </div>
-
-          <!-- Tab Content 2: Support Preferences -->
-          <div id="pane-support" class="settings-pane" style="display:none;">
-            <div class="settings-card">
-              <div class="settings-card-title">${ICONS.heart} <span>${this.t("supportNeedsTitle")}</span></div>
-              <div class="settings-card-desc">
-                ${this.t("supportZeroProof")}
-              </div>
-
-              <form id="support-form" style="display:flex; flex-direction:column; gap:0.625rem;">
-                <label class="checkbox-card">
-                  <input type="checkbox" name="need" value="extra_time" 
-                         ${this.supportNeeds.needs.includes("extra_time") ? "checked" : ""}>
-                  <div class="checkbox-card-content">
-                    <span style="font-weight:600; font-size:0.875rem;">${this.t("needExtraTime")}</span>
-                  </div>
-                </label>
-
-                <label class="checkbox-card">
-                  <input type="checkbox" name="need" value="screen_reader_help" 
-                         ${this.supportNeeds.needs.includes("screen_reader_help") ? "checked" : ""}>
-                  <div class="checkbox-card-content">
-                    <span style="font-weight:600; font-size:0.875rem;">${this.t("needScreenReader")}</span>
-                  </div>
-                </label>
-
-                <label class="checkbox-card">
-                  <input type="checkbox" name="need" value="written_instructions" 
-                         ${this.supportNeeds.needs.includes("written_instructions") ? "checked" : ""}>
-                  <div class="checkbox-card-content">
-                    <span style="font-weight:600; font-size:0.875rem;">${this.t("needWritten")}</span>
-                  </div>
-                </label>
-
-                <label class="checkbox-card">
-                  <input type="checkbox" name="need" value="other" 
-                         ${this.supportNeeds.needs.includes("other") || !!this.supportNeeds.other_text ? "checked" : ""}>
-                  <div class="checkbox-card-content">
-                    <span style="font-weight:600; font-size:0.875rem;">${this.t("needOther")}</span>
-                  </div>
-                </label>
-
-                <textarea name="other_text" class="text-input" style="min-height:3.5rem; font-size:0.875rem;" 
-                          placeholder="${this.t("otherPlaceholder")}">${this.supportNeeds.other_text || ""}</textarea>
-
-                <label style="font-size:0.875rem; font-weight:600; margin-top:0.25rem;">
-                  ${this.t("contactModeLabel")}
-                  <select name="contact_mode" class="text-input" style="margin-top:0.25rem; min-height:2.625rem; font-size:0.875rem;">
-                    <option value="text" ${this.supportNeeds.preferred_contact_mode === "text" ? "selected" : ""}>${this.t("modeText")}</option>
-                    <option value="voice" ${this.supportNeeds.preferred_contact_mode === "voice" ? "selected" : ""}>${this.t("modeVoice")}</option>
-                    <option value="video" ${this.supportNeeds.preferred_contact_mode === "video" ? "selected" : ""}>${this.t("modeVideo")}</option>
-                    <option value="telegram" ${this.supportNeeds.preferred_contact_mode === "telegram" ? "selected" : ""}>${this.t("modeTelegram")}</option>
-                  </select>
-                </label>
-
-                <div id="support-saved-notice" class="support-saved-notice" hidden style="color:#166534; font-size:0.8125rem; font-weight:600; display:inline-flex; align-items:center; gap:0.375rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:0.5rem; padding:0.5rem 0.75rem;">
-                  ${ICONS.check} <span>${this.t("supportSavedNotice")}</span>
-                </div>
-
-                <button type="submit" class="btn btn-primary" style="margin-top:0.25rem;">
-                  ${this.t("saveSupportBtn")}
-                </button>
-              </form>
-            </div>
-          </div>
-
-          <!-- Tab Content 3: Account Linking -->
-          <div id="pane-link" class="settings-pane" style="display:none;">
-            <div class="settings-card">
-              <div class="settings-card-title">${ICONS.link} <span>${this.t("linkTab")}</span></div>
-              <div class="settings-card-desc">
-                ${this.t("supportZeroProof")}
-              </div>
-              <button type="button" class="btn btn-primary" id="btn-generate-code" style="width:100%; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-                ${ICONS.key} <span>${this.t("generateCodeBtn")}</span>
-              </button>
-              <div class="code-display" id="code-display" style="display:none; font-size:1.75rem; font-weight:700; letter-spacing:0.25em; text-align:center; padding:1rem; background:var(--b-surface-alt); border:2px dashed var(--b-primary); border-radius:0.75rem; margin-top:0.875rem; color:var(--b-primary);">
-              </div>
-            </div>
-          </div>
-
-          <!-- Tab Content 4: Live Help Handoff -->
-          <div id="pane-handoff" class="settings-pane" style="display:none;">
-            <div class="settings-card">
-              <div class="settings-card-title">${ICONS.headphones} <span>${this.t("handoffTab")}</span></div>
-              <div class="settings-card-desc">
-                ${this.t("appSubtitle")}
-              </div>
-              <form id="handoff-request-form" style="display:flex; flex-direction:column; gap:0.625rem;">
-                <label class="checkbox-card">
-                  <input type="checkbox" id="handoff-consent" required checked>
-                  <div class="checkbox-card-content">
-                    <span style="font-size:0.8125rem;">${this.t("handoffConsentCheck")}</span>
-                  </div>
-                </label>
-                <label style="font-size:0.8125rem; font-weight:600;">
-                  ${this.t("handoffReasonLabel")}
-                  <input type="text" id="handoff-reason" class="text-input" style="margin-top:0.25rem;" 
-                         placeholder="${this.t("handoffReasonPlaceholder")}">
-                </label>
-                <button type="submit" class="btn btn-primary" id="btn-submit-handoff" style="display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-                  ${ICONS.users} <span>${this.t("requestMentorBtn")}</span>
-                </button>
-              </form>
-              <div id="handoff-room-box" style="margin-top:0.5rem;"></div>
-            </div>
-          </div>
-
         </div>
 
       </section>
@@ -2432,8 +3405,98 @@ export class BridgeAssistant extends HTMLElement {
     const chatLog = this.shadowRoot?.querySelector("#chat-log");
     if (!chatLog) return;
 
+    const showOnboarding = !this.accessibilityPrefs.onboarded && !this.onboardingDismissed;
+    const onboardHtml = showOnboarding ? `
+      <div class="onboarding-card" id="onboarding-card" role="region" aria-label="${this.t("onboardTitle")}" style="margin:0 0 1rem 0; padding:1rem; background:var(--b-surface); border:2px solid var(--b-primary); border-radius:0.75rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+          <h3 id="onboard-title" style="margin:0; font-size:1rem; font-weight:700; color:var(--b-text); display:flex; align-items:center; gap:0.5rem;">
+            ${ICONS.sparkles} <span>${this.t("onboardTitle")}</span>
+          </h3>
+          <button type="button" class="btn btn-secondary btn-icon-only" id="btn-onboard-close" aria-label="${this.t("onboardSkipBtn")}" title="${this.t("onboardSkipBtn")}" style="min-height:2rem; width:2rem; padding:0;">
+            ${ICONS.close}
+          </button>
+        </div>
+        
+        <p style="font-size:0.8125rem; color:var(--b-text-muted); margin:0 0 0.875rem 0; line-height:1.4;">
+          ${this.t("onboardSubtitle")}
+        </p>
+
+        <!-- Language Selection in Onboarding -->
+        <div style="margin-bottom:0.875rem;">
+          <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--b-text); margin-bottom:0.375rem;">
+            ${this.t("preferredLanguageLabel")}
+          </label>
+          <div class="lang-group" role="group" aria-label="Language selection" style="width:100%; display:flex; justify-content:stretch;">
+            <button type="button" class="lang-toggle-btn" id="onboard-lang-en" style="flex:1;" aria-pressed="${this.currentLang === "en"}" aria-label="EN - English">EN</button>
+            <button type="button" class="lang-toggle-btn" id="onboard-lang-am" style="flex:1;" aria-pressed="${this.currentLang === "am"}" aria-label="አማ - አማርኛ (Amharic)">አማ</button>
+            <button type="button" class="lang-toggle-btn" id="onboard-lang-om" style="flex:1;" aria-pressed="${this.currentLang === "om"}" aria-label="OM - Afaan Oromoo">OM</button>
+            <button type="button" class="lang-toggle-btn" id="onboard-lang-ti" style="flex:1;" aria-pressed="${this.currentLang === "ti"}" aria-label="ትግ - ትግርኛ (Tigrinya)">ትግ</button>
+            <button type="button" class="lang-toggle-btn" id="onboard-lang-ar" style="flex:1;" aria-pressed="${this.currentLang === "ar"}" aria-label="عربي - العربية (Arabic)">عربي</button>
+          </div>
+        </div>
+
+        <!-- Options -->
+        <div style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:0.875rem;">
+          <label class="toggle-row" style="padding:0.375rem 0.5rem; background:var(--b-bg-subtle, #f8fafc); border-radius:0.375rem; border:1px solid var(--b-border);">
+            <div class="toggle-info">
+              <span class="toggle-title" style="font-size:0.8125rem;">${this.t("onboardVoiceOpt")}</span>
+              <span class="toggle-desc" style="font-size:0.6875rem;">${this.t("onboardVoiceDesc")}</span>
+            </div>
+            <input type="checkbox" id="onboard-chk-voice" class="toggle-switch" aria-label="${this.t("onboardVoiceOpt")}" ${this.accessibilityPrefs.voice_enabled ? "checked" : ""}>
+          </label>
+
+          <label class="toggle-row" style="padding:0.375rem 0.5rem; background:var(--b-bg-subtle, #f8fafc); border-radius:0.375rem; border:1px solid var(--b-border);">
+            <div class="toggle-info">
+              <span class="toggle-title" style="font-size:0.8125rem;">${this.t("screenReaderLabel")}</span>
+              <span class="toggle-desc" style="font-size:0.6875rem;">${this.t("onboardScreenReaderDesc")}</span>
+            </div>
+            <input type="checkbox" id="onboard-chk-screen-reader" class="toggle-switch" aria-label="${this.t("screenReaderLabel")}" ${this.accessibilityPrefs.screen_reader_mode ? "checked" : ""}>
+          </label>
+
+          <label class="toggle-row" style="padding:0.375rem 0.5rem; background:var(--b-bg-subtle, #f8fafc); border-radius:0.375rem; border:1px solid var(--b-border);">
+            <div class="toggle-info">
+              <span class="toggle-title" style="font-size:0.8125rem;">${this.t("keyboardNavLabel")}</span>
+              <span class="toggle-desc" style="font-size:0.6875rem;">${this.t("onboardKeyboardNavDesc")}</span>
+            </div>
+            <input type="checkbox" id="onboard-chk-keyboard-nav" class="toggle-switch" aria-label="${this.t("keyboardNavLabel")}" ${this.accessibilityPrefs.keyboard_navigation ? "checked" : ""}>
+          </label>
+
+          <label class="toggle-row" style="padding:0.375rem 0.5rem; background:var(--b-bg-subtle, #f8fafc); border-radius:0.375rem; border:1px solid var(--b-border);">
+            <div class="toggle-info">
+              <span class="toggle-title" style="font-size:0.8125rem;">${this.t("highContrastLabel")}</span>
+              <span class="toggle-desc" style="font-size:0.6875rem;">${this.t("onboardHighContrastDesc")}</span>
+            </div>
+            <input type="checkbox" id="onboard-chk-contrast" class="toggle-switch" aria-label="${this.t("highContrastLabel")}" ${this.accessibilityPrefs.high_contrast ? "checked" : ""}>
+          </label>
+
+          <label class="toggle-row" style="padding:0.375rem 0.5rem; background:var(--b-bg-subtle, #f8fafc); border-radius:0.375rem; border:1px solid var(--b-border);">
+            <div class="toggle-info">
+              <span class="toggle-title" style="font-size:0.8125rem;">${this.t("onboardLargeTextOpt")}</span>
+              <span class="toggle-desc" style="font-size:0.6875rem;">${this.t("onboardLargeTextDesc")}</span>
+            </div>
+            <input type="checkbox" id="onboard-chk-large-text" class="toggle-switch" aria-label="${this.t("onboardLargeTextOpt")}" ${this.accessibilityPrefs.large_text === "larger" ? "checked" : ""}>
+          </label>
+        </div>
+
+        <div style="font-size:0.6875rem; color:var(--b-text-muted); margin-bottom:0.875rem; padding:0.375rem 0.5rem; background:#f1f5f9; border-radius:0.375rem; line-height:1.35;">
+          ${this.t("onboardMicNote")}
+        </div>
+
+        <!-- Buttons -->
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:0.5rem;">
+          <button type="button" class="btn btn-secondary" id="btn-onboard-skip" style="min-height:2rem; font-size:0.8125rem;">
+            ${this.t("onboardSkipBtn")}
+          </button>
+          <button type="button" class="btn btn-primary" id="btn-onboard-save" style="min-height:2rem; font-size:0.8125rem;">
+            ${this.t("onboardSaveBtn")}
+          </button>
+        </div>
+      </div>
+    ` : "";
+
     if (this.messages.length === 0) {
       chatLog.innerHTML = `
+        ${onboardHtml}
         <div class="empty-state">
           <p style="margin:0; font-size:1rem; font-weight:600;">${this.t("emptyWelcome")}</p>
           <div class="suggested-questions">
@@ -2460,7 +3523,7 @@ export class BridgeAssistant extends HTMLElement {
       return;
     }
 
-    chatLog.innerHTML = this.messages
+    chatLog.innerHTML = onboardHtml + this.messages
       .map((msg) => {
         if (msg.sender === "learner") {
           return `
@@ -2726,6 +3789,11 @@ export class BridgeAssistant extends HTMLElement {
       });
     });
 
+    // Quick Language Toggle Button (.lang-btn)
+    this.shadowRoot.querySelector(".lang-btn")?.addEventListener("click", () => {
+      this.setLanguage(this.currentLang === "en" ? "am" : "en");
+    });
+
     // Settings Modal
     openSettingsBtn.addEventListener("click", (e) => {
       e.preventDefault();
@@ -2748,42 +3816,51 @@ export class BridgeAssistant extends HTMLElement {
       closeSettings();
     });
 
-    // Settings Tabs Switching with ARIA pattern and Arrow key support
-    const tabList = [
-      { btn: this.shadowRoot.querySelector("#tab-general"), pane: this.shadowRoot.querySelector("#pane-general") },
-      { btn: this.shadowRoot.querySelector("#tab-support"), pane: this.shadowRoot.querySelector("#pane-support") },
-      { btn: this.shadowRoot.querySelector("#tab-link"), pane: this.shadowRoot.querySelector("#pane-link") },
-      { btn: this.shadowRoot.querySelector("#tab-handoff"), pane: this.shadowRoot.querySelector("#pane-handoff") },
+    // Main Navigation Tabs Switching (Chat, Support, Link, Handoff)
+    const mainTabs = [
+      { id: "chat", btn: this.shadowRoot.querySelector<HTMLButtonElement>("#tab-chat"), pane: this.shadowRoot.querySelector<HTMLElement>("#pane-chat") },
+      { id: "support", btn: this.shadowRoot.querySelector<HTMLButtonElement>("#tab-support"), pane: this.shadowRoot.querySelector<HTMLElement>("#pane-support") },
+      { id: "link", btn: this.shadowRoot.querySelector<HTMLButtonElement>("#tab-link"), pane: this.shadowRoot.querySelector<HTMLElement>("#pane-link") },
+      { id: "handoff", btn: this.shadowRoot.querySelector<HTMLButtonElement>("#tab-handoff"), pane: this.shadowRoot.querySelector<HTMLElement>("#pane-handoff") },
     ];
 
-    const activateTab = (index: number) => {
-      tabList.forEach((t, i) => {
+    const switchMainTab = (index: number) => {
+      this.activeTab = mainTabs[index].id as "chat" | "support" | "link" | "handoff";
+      mainTabs.forEach((t, i) => {
         const selected = i === index;
         t.btn?.setAttribute("aria-selected", selected ? "true" : "false");
-        t.btn?.classList.toggle("btn-primary", selected);
-        t.btn?.classList.toggle("btn-secondary", !selected);
-        if (t.pane) (t.pane as HTMLElement).style.display = selected ? "block" : "none";
+        if (t.pane) {
+          t.pane.hidden = !selected;
+          t.pane.style.display = selected ? (t.id === "chat" ? "flex" : "block") : "none";
+        }
       });
-      const activeBtn = tabList[index].btn as HTMLElement | null;
+      const activeBtn = mainTabs[index].btn;
       if (activeBtn) {
         activeBtn.focus();
         this.announce(activeBtn.textContent?.trim() + " tab selected");
       }
     };
 
-    tabList.forEach(({ btn }, idx) => {
-      btn?.addEventListener("click", () => activateTab(idx));
+    mainTabs.forEach(({ btn }, idx) => {
+      btn?.addEventListener("click", () => switchMainTab(idx));
       btn?.addEventListener("keydown", (e: Event) => {
         const evt = e as KeyboardEvent;
         if (evt.key === "ArrowRight") {
           evt.preventDefault();
-          const nextIdx = (idx + 1) % tabList.length;
-          activateTab(nextIdx);
+          switchMainTab((idx + 1) % mainTabs.length);
         } else if (evt.key === "ArrowLeft") {
           evt.preventDefault();
-          const prevIdx = (idx - 1 + tabList.length) % tabList.length;
-          activateTab(prevIdx);
+          switchMainTab((idx - 1 + mainTabs.length) % mainTabs.length);
         }
+      });
+    });
+
+    // Talk to a person button switches to handoff tab
+    this.shadowRoot.querySelectorAll<HTMLButtonElement>(".btn-talk-person, #btn-footer-handoff").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const handoffIdx = mainTabs.findIndex((t) => t.id === "handoff");
+        if (handoffIdx >= 0) switchMainTab(handoffIdx);
       });
     });
 
@@ -2879,10 +3956,164 @@ export class BridgeAssistant extends HTMLElement {
       });
     }
 
-    // Footer Talk to a Person Button
-    this.shadowRoot.querySelector("#btn-footer-handoff")?.addEventListener("click", () => {
-      this.requestHandoff();
+    // Autoplay Voice Activation Handlers
+    const handleActivateVoice = () => {
+      this.showAutoplayBanner = false;
+      this.accessibilityPrefs.voice_enabled = true;
+      this.savePreferences();
+      this.announce(this.t("welcomeSpoken"));
+      this.triggerSpokenWelcome();
+      this.render();
+    };
+    this.shadowRoot.querySelector("#btn-activate-voice-welcome")?.addEventListener("click", handleActivateVoice);
+    this.shadowRoot.querySelector("#btn-activate-voice-welcome-floating")?.addEventListener("click", handleActivateVoice);
+
+    const handleDismissVoiceBanner = () => {
+      this.showAutoplayBanner = false;
+      this.render();
+    };
+    this.shadowRoot.querySelector("#btn-dismiss-voice-banner")?.addEventListener("click", handleDismissVoiceBanner);
+    this.shadowRoot.querySelector("#btn-dismiss-voice-banner-floating")?.addEventListener("click", handleDismissVoiceBanner);
+
+    // Reading Aloud In-Progress Controls
+    this.shadowRoot.querySelector("#btn-reading-pause")?.addEventListener("click", () => this.pausePageReading());
+    this.shadowRoot.querySelector("#btn-reading-resume")?.addEventListener("click", () => this.resumePageReading());
+    this.shadowRoot.querySelector("#btn-reading-stop")?.addEventListener("click", () => this.stopPageReading());
+
+    // First-Time Accessible Onboarding Wizard Handlers
+    const onboardLangCodes: SupportedLanguage[] = ["en", "am", "om", "ti", "ar"];
+    onboardLangCodes.forEach((l) => {
+      this.shadowRoot?.querySelector(`#onboard-lang-${l}`)?.addEventListener("click", () => {
+        this.setLanguage(l);
+      });
     });
+
+    const finishOnboarding = (saveSelected: boolean) => {
+      if (saveSelected) {
+        const v = this.shadowRoot?.querySelector<HTMLInputElement>("#onboard-chk-voice")?.checked ?? true;
+        const sr = this.shadowRoot?.querySelector<HTMLInputElement>("#onboard-chk-screen-reader")?.checked ?? false;
+        const kb = this.shadowRoot?.querySelector<HTMLInputElement>("#onboard-chk-keyboard-nav")?.checked ?? false;
+        const hc = this.shadowRoot?.querySelector<HTMLInputElement>("#onboard-chk-contrast")?.checked ?? false;
+        const lt = this.shadowRoot?.querySelector<HTMLInputElement>("#onboard-chk-large-text")?.checked ?? false;
+
+        this.accessibilityPrefs.voice_enabled = v;
+        this.accessibilityPrefs.screen_reader_mode = sr;
+        this.accessibilityPrefs.keyboard_navigation = kb;
+        this.accessibilityPrefs.high_contrast = hc;
+        this.accessibilityPrefs.large_text = lt ? "larger" : "normal";
+        this.highContrast = hc;
+        if (lt) {
+          this.textSize = "larger";
+          localStorage.setItem("savanna_bridge_text_size", "larger");
+        }
+      }
+      this.accessibilityPrefs.onboarded = true;
+      this.onboardingDismissed = true;
+      this.savePreferences();
+      this.render();
+      if (this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_welcome) {
+        this.triggerSpokenWelcome();
+      }
+    };
+
+    this.shadowRoot.querySelector("#btn-onboard-save")?.addEventListener("click", () => finishOnboarding(true));
+    this.shadowRoot.querySelector("#btn-onboard-skip")?.addEventListener("click", () => finishOnboarding(false));
+    this.shadowRoot.querySelector("#btn-onboard-close")?.addEventListener("click", () => finishOnboarding(false));
+
+    // Voice Accessibility Settings (Settings Modal -> Display & Accessibility Pane)
+    const chkVoiceMaster = this.shadowRoot.querySelector<HTMLInputElement>("#chk-voice-master");
+    if (chkVoiceMaster) {
+      chkVoiceMaster.addEventListener("change", () => {
+        this.accessibilityPrefs.voice_enabled = chkVoiceMaster.checked;
+        this.savePreferences();
+        this.announce(chkVoiceMaster.checked ? "Voice accessibility enabled" : "Voice accessibility disabled");
+      });
+    }
+
+    const chkAutoWelcome = this.shadowRoot.querySelector<HTMLInputElement>("#chk-auto-welcome");
+    if (chkAutoWelcome) {
+      chkAutoWelcome.addEventListener("change", () => {
+        this.accessibilityPrefs.auto_welcome = chkAutoWelcome.checked;
+        this.savePreferences();
+      });
+    }
+
+    const chkAutoTts = this.shadowRoot.querySelector<HTMLInputElement>("#chk-auto-tts");
+    if (chkAutoTts) {
+      chkAutoTts.addEventListener("change", () => {
+        this.accessibilityPrefs.auto_tts = chkAutoTts.checked;
+        this.savePreferences();
+      });
+    }
+
+    const rateList: { id: string; rate: number }[] = [
+      { id: "#btn-rate-075", rate: 0.75 },
+      { id: "#btn-rate-100", rate: 1.0 },
+      { id: "#btn-rate-125", rate: 1.25 },
+      { id: "#btn-rate-150", rate: 1.5 },
+    ];
+    rateList.forEach(({ id, rate }) => {
+      this.shadowRoot?.querySelector(id)?.addEventListener("click", () => {
+        this.accessibilityPrefs.speech_rate = rate;
+        this.savePreferences();
+        rateList.forEach((r) => {
+          this.shadowRoot?.querySelector(r.id)?.setAttribute("aria-pressed", r.rate === rate ? "true" : "false");
+        });
+        this.announce(`Speech rate set to ${rate}x`);
+      });
+    });
+
+    this.shadowRoot.querySelector("#btn-read-page")?.addEventListener("click", () => this.readPageAloud());
+    this.shadowRoot.querySelector("#btn-read-section")?.addEventListener("click", () => this.readSectionAloud());
+    this.shadowRoot.querySelector("#btn-test-voice")?.addEventListener("click", () => {
+      this.speakText(this.t("welcomeSpoken"));
+    });
+
+    const chkScreenReader = this.shadowRoot.querySelector<HTMLInputElement>("#chk-screen-reader");
+    if (chkScreenReader) {
+      chkScreenReader.addEventListener("change", () => {
+        this.accessibilityPrefs.screen_reader_mode = chkScreenReader.checked;
+        this.savePreferences();
+        this.announce(chkScreenReader.checked ? "Screen reader mode enabled" : "Screen reader mode disabled");
+      });
+    }
+
+    const chkKeyboardNav = this.shadowRoot.querySelector<HTMLInputElement>("#chk-keyboard-nav");
+    if (chkKeyboardNav) {
+      chkKeyboardNav.addEventListener("change", () => {
+        this.accessibilityPrefs.keyboard_navigation = chkKeyboardNav.checked;
+        this.savePreferences();
+        if (chkKeyboardNav.checked) {
+          this.classList.add("keyboard-focus-enhanced");
+        } else {
+          this.classList.remove("keyboard-focus-enhanced");
+        }
+        this.announce(chkKeyboardNav.checked ? "Enhanced keyboard navigation enabled" : "Enhanced keyboard navigation disabled");
+      });
+    }
+
+    const chkSyncPrefs = this.shadowRoot.querySelector<HTMLInputElement>("#chk-sync-prefs");
+    if (chkSyncPrefs) {
+      chkSyncPrefs.addEventListener("change", () => {
+        this.accessibilityPrefs.sync_enabled = chkSyncPrefs.checked;
+        this.savePreferences();
+        if (chkSyncPrefs.checked) {
+          this.syncPreferencesToBackend();
+          this.announce("Cross-website synchronization enabled");
+        } else {
+          this.announce("Cross-website synchronization disabled");
+        }
+      });
+    }
+
+    this.shadowRoot.querySelector("#btn-replay-onboarding")?.addEventListener("click", () => {
+      this.accessibilityPrefs.onboarded = false;
+      this.onboardingDismissed = false;
+      this.isSettingsOpen = false;
+      this.render();
+    });
+
+
   }
 
   private escapeHtml(text: string): string {

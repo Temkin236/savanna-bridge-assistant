@@ -53,3 +53,7 @@ tmp/
 docker-compose.override.yml
 compose.override.yml
 
+# Embedded static repos
+Savanna-static-pages/
+
+

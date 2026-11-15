@@ -197,11 +197,14 @@ class SavannaStaticSource(ContentSource):
         for idx, item in enumerate(parsed):
             # Detect language
             is_amharic = bool(re.search(r"[\u1200-\u137F]", item["text"] + item["heading"]))
+            chunk_title = parser.title
+            if "concept-with-navigation" in file_path.stem and "Module 2" not in chunk_title:
+                chunk_title = f"Module 2: {chunk_title}"
             chunks.append(
                 ContentChunk(
                     chunk_id=f"{file_path.stem}_{idx + 1}",
                     course_id=course_id,
-                    title=parser.title,
+                    title=chunk_title,
                     heading=item["heading"],
                     text=item["text"],
                     url=f"https://learning.example.org/courses/{course_id}/{file_path.stem}",
@@ -225,10 +228,13 @@ class SavannaStaticSource(ContentSource):
         new_chunks: list[ContentChunk] = []
         for idx, item in enumerate(parsed):
             is_amharic = bool(re.search(r"[\u1200-\u137F]", item["text"] + item["heading"]))
+            chunk_title = title or parser.title
+            if "concept-with-navigation" in url and "Module 2" not in chunk_title:
+                chunk_title = f"Module 2: {chunk_title}"
             c = ContentChunk(
                 chunk_id=f"live_{idx + 1}_{abs(hash(url)) % 10000}",
                 course_id=course_id,
-                title=title or parser.title,
+                title=chunk_title,
                 heading=item["heading"],
                 text=item["text"],
                 url=url,

@@ -1,5 +1,7 @@
 """Tests for v1 versioned endpoints and enhancements (Track 3 compliance)."""
 
+import uuid
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -144,3 +146,54 @@ def test_language_guard_detection_and_normalization() -> None:
     assert LanguageGuard.normalize_ethiopian_phone("0911223344") == "+251911223344"
     assert LanguageGuard.normalize_ethiopian_phone("0711223344") == "+251711223344"
     assert LanguageGuard.normalize_ethiopian_phone("+251911223344") == "+251911223344"
+
+
+def test_accessibility_profile_crud_and_sync() -> None:
+    ref = f"learner_voice_{uuid.uuid4().hex[:8]}"
+    # 1. Default profile
+    res = client.get(f"/api/v1/accessibility-profile?learner_ref={ref}")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["learner_ref"] == ref
+    assert data["language"] == "en"
+    assert data["voice_enabled"] is False
+
+    # 2. Update profile with voice accessibility, large text, and speech rate
+    update_payload = {
+        "learner_ref": ref,
+        "language": "am",
+        "voice_enabled": True,
+        "auto_welcome": True,
+        "auto_tts": True,
+        "speech_rate": 1.25,
+        "voice_input_enabled": True,
+        "screen_reader_mode": True,
+        "keyboard_navigation": True,
+        "high_contrast": True,
+        "large_text": "larger",
+        "simple_mode": True,
+        "sync_enabled": True,
+        "needs": ["screen_reader", "extra_time"],
+        "other_text": "Need Tigrinya and Amharic voice assistance",
+        "preferred_contact_mode": "voice",
+        "onboarded": True,
+    }
+    put_res = client.post("/api/v1/accessibility-profile", json=update_payload)
+    assert put_res.status_code == 200
+    saved = put_res.json()
+    assert saved["voice_enabled"] is True
+    assert saved["language"] == "am"
+    assert saved["speech_rate"] == 1.25
+    assert saved["onboarded"] is True
+
+    # 3. Retrieve saved profile (simulating another website restore)
+    get_res = client.get(f"/api/v1/accessibility-profile?learner_ref={ref}")
+    assert get_res.status_code == 200
+    synced = get_res.json()
+    assert synced["voice_enabled"] is True
+    assert synced["language"] == "am"
+    assert synced["high_contrast"] is True
+    assert synced["large_text"] == "larger"
+    assert synced["auto_welcome"] is True
+    assert synced["auto_tts"] is True
+
