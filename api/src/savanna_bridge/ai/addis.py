@@ -142,16 +142,18 @@ class AddisAiProvider(AIProvider):
     def transcribe(
         self, audio_bytes: bytes, media_type: str, language: Language, retain: bool = False
     ) -> str:
-        if self._client:
+        if self._client and audio_bytes:
             try:
                 res = self._client.speech.transcribe(
                     audio=audio_bytes,
-                    media_type=media_type,
                     language=language.value,
                 )
-                transcript = getattr(res, "transcript", "")
+                if isinstance(res, dict):
+                    transcript = res.get("transcript") or res.get("text") or ""
+                else:
+                    transcript = getattr(res, "transcript", "")
                 if transcript:
-                    return transcript
+                    return transcript.strip()
             except Exception as e:
                 logger.warning("AddisAI transcription failed: %s", e)
         return self._offline_fallback.transcribe(audio_bytes, media_type, language, retain)
@@ -159,14 +161,21 @@ class AddisAiProvider(AIProvider):
     def synthesize(self, text: str, language: Language, speed: float = 1.0) -> str:
         if self._client:
             try:
-                res = self._client.speech.synthesize(
-                    text=text,
+                from addisai import DEFAULT_VOICES
+                voice_id = DEFAULT_VOICES.get(language.value, DEFAULT_VOICES.get("am", "am-hamen"))
+                clip = self._client.voice.generate(
+                    voice_id=voice_id,
+                    text=text[:1000],
                     language=language.value,
-                    speed=speed,
                 )
-                audio_url = getattr(res, "audio_url", None)
-                if audio_url:
-                    return audio_url
+                if clip and hasattr(clip, "content") and clip.content:
+                    import uuid
+                    from pathlib import Path
+                    clip_id = f"addis_{uuid.uuid4().hex[:8]}.mp3"
+                    tts_dir = Path("/data/tts")
+                    tts_dir.mkdir(parents=True, exist_ok=True)
+                    (tts_dir / clip_id).write_bytes(clip.content)
+                    return f"/media/tts/{clip_id}"
             except Exception as e:
-                logger.warning("AddisAI synthesis failed: %s", e)
+                logger.warning("AddisAI voice generation failed: %s", e)
         return self._offline_fallback.synthesize(text, language, speed)

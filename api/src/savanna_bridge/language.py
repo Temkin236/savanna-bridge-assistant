@@ -116,7 +116,12 @@ class LanguageGuard:
     _ETHIOPIC_RE = re.compile(r"[\u1200-\u137F]")
 
     # Common Afaan Oromo tokens
-    _OROMO_TOKENS = {"akkam", "maal", "eessa", "barnoota", "gaaffii", "deebii", "galatoomi", "ani"}
+    _OROMO_TOKENS = {
+        "akkam", "maal", "eessa", "barnoota", "gaaffii", "deebii", "galatoomi", "ani",
+        "koorsiin", "kun", "waa'ee", "naaf", "ibsi", "dubbisi", "gabaabsi", "fuula",
+        "barumsa", "akkasumas", "waan", "eessatti", "namoota", "tajaajila", "qabiyyee",
+        "dandeettii", "qabxiilee", "kaayyolee", "ijoo", "salphaadhaan"
+    }
     # Common Somali tokens
     _SOMALI_TOKENS = {"sidee", "maxay", "waxbarasho", "su'aal", "mahadsanid", "koorsada"}
 
@@ -147,6 +152,142 @@ class LanguageGuard:
             return "so"
 
         return default
+
+    @classmethod
+    def is_read_aloud_query(cls, text: str) -> bool:
+        """Check if learner is requesting to read the page, lesson, or paragraph aloud."""
+        q = (text or "").lower().strip()
+        triggers = [
+            "read this page", "read this lesson", "read this paragraph", "read aloud",
+            "read for me", "read the page", "read out loud", "read page",
+            "read the content", "read content", "read this", "read it",
+            "tell me what content is", "tell me what the content is", "what content is",
+            "read line by line", "line by line", "read out", "read to me",
+            "read page content", "read aloud the page", "read aloud the content",
+            "አንብብልኝ", "ገጹን አንብብልኝ", "ይህንን ገጽ አንብብልኝ", "ትምህርቱን አንብብልኝ", "ጮክ ብለህ አንብብ", "አንብብ",
+            "ይዘቱን አንብብልኝ", "ይዘቱን አንብብ", "በመስመር አንብብልኝ", "ይዘቱ ምን እንደሆነ አንብብልኝ",
+            "dubbisi", "naaf dubbisi", "fuula kana naaf dubbisi", "sagaleedhaan dubbisi",
+            "qabiyyee naaf dubbisi", "sararaa sararaan naaf dubbisi", "fuula kana dubbisi",
+            "اقرأ هذه الصفحة", "اقرأ لي هذا الدرس", "اقرأ لي", "اقرأ بصوت عال", "اقرأ هذه الفقرة", "اقرأ الصفحة",
+            "اقرأ المحتوى", "اقرأ لي المحتوى", "اقرأ سطراً بسطر", "ما هو المحتوى على هذه الصفحة اقرأه لي",
+        ]
+        return any(t in q for t in triggers)
+
+    @classmethod
+    def is_summary_query(cls, text: str) -> bool:
+        """Check if learner is requesting a summary of the current page or topic."""
+        q = (text or "").lower()
+        triggers = [
+            "summarize", "summary", "main points", "key takeaways", "overview of this page",
+            "አጠቃልል", "ማጠቃለያ", "ዋና ዋና ነጥቦች", "ዋና ነጥቦች",
+            "gabaabsi", "gabaabsii", "qabxiilee ijoo", "qabxiiwwan ijoo",
+            "لخص", "تلخيص", "النقاط الرئيسية", "أهم النقاط", "ملخص",
+        ]
+        return any(t in q for t in triggers)
+
+    @classmethod
+    def is_simplify_query(cls, text: str) -> bool:
+        """Check if learner is requesting simple words or simplified explanation."""
+        q = (text or "").lower()
+        triggers = [
+            "simple words", "simplify", "simpler", "in plain terms", "easy explanation",
+            "በቀላል ቃላት", "ቀለል አድርገህ", "ቀላል ማብራሪያ", "ቀለል አድርግልኝ",
+            "salphaadhaan", "jechoota salphaadhaan", "naaf salphisi", "ibsa salphaa",
+            "بكلمات بسيطة", "بشكل مبسط", "بسيط", "اشرح ببساطة", "سهل",
+        ]
+        return any(t in q for t in triggers)
+
+    @classmethod
+    def is_example_query(cls, text: str) -> bool:
+        """Check if learner is asking for examples or practical application."""
+        q = (text or "").lower()
+        triggers = [
+            "example", "examples", "practical example", "with examples", "give me examples",
+            "explain with examples", "show an example", "concrete example",
+            "በምሳሌ", "ምሳሌ", "ምሳሌዎች", "በምሳሌ አስረዳኝ", "ምሳሌ ስጠኝ", "ምሳሌዎችን አሳየኝ",
+            "fakkeenya", "fakkeenyota", "fakkeenyaan", "fakkeenyotaan naaf ibsi", "fakkeenya naaf kenni",
+            "مثال", "أمثلة", "اشرح بالأمثلة", "أعطني مثالا", "مع أمثلة", "مثال عملي",
+        ]
+        return any(t in q for t in triggers)
+
+    @classmethod
+    def is_prerequisite_query(cls, text: str) -> bool:
+        """Check if learner is asking what to understand before moving to the next lesson."""
+        q = (text or "").lower()
+        triggers = [
+            "before moving to the next lesson", "before moving", "next lesson", "before the next lesson",
+            "prerequisite", "prerequisites", "what should i understand before", "what do i need before",
+            "ready for next lesson", "before advancing",
+            "ወደ ቀጣዩ ትምህርት ከመሄዴ በፊት", "ቀጣዩ ትምህርት", "ቅድመ ሁኔታ", "ምን ማወቅ አለብኝ", "ከመቀጠሌ በፊት",
+            "barnoota itti aanuuf", "barnoota itti aanutti darbuun dura", "maal beekuun qaba", "dura maal beekuu qaba",
+            "قبل الانتقال للدرس التالي", "الدرس التالي", "المتطلبات", "ماذا يجب أن أفهم قبل", "قبل المتابعة",
+        ]
+        return any(t in q for t in triggers)
+
+    @classmethod
+    def is_quiz_query(cls, text: str) -> bool:
+        """Check if learner is asking to be quizzed or tested on the material."""
+        q = (text or "").lower()
+        triggers = [
+            "quiz", "quiz me", "test me", "test my understanding", "check my knowledge",
+            "ask me questions", "practice questions", "knowledge check",
+            "ፈትነኝ", "ጥያቄ ጠይቀኝ", "ግንዛቤዬን ፈትነኝ", "ጥያቄዎች ጠይቀኝ", "ፈተና",
+            "na qori", "hubannoo koo na qori", "gaaffii na gaafadhu", "qormaata",
+            "اختبرني", "اختبر فهمي", "اسألني سؤالاً", "اطرح علي أسئلة", "اختبار قصير",
+        ]
+        return any(t in q for t in triggers)
+
+    @classmethod
+    def is_page_overview_query(cls, text: str) -> bool:
+        """Check if learner is asking what the course, lesson, or page is about."""
+        q = (text or "").lower().strip()
+        if cls.is_example_query(text) or cls.is_prerequisite_query(text) or cls.is_quiz_query(text):
+            return True
+        triggers = [
+            "what is this course about", "what is this page about", "what is this lesson about",
+            "what is the course about", "what is the lesson about", "what is the page about",
+            "what is this about", "what is this course", "what is this lesson", "what is this page",
+            "what is the course", "tell me about the course", "tell me about this course",
+            "tell me about course", "tell me about the lesson", "tell me about this lesson",
+            "tell me about the page", "tell me about this page", "tell me about the content",
+            "tell me about this content", "tell me about content",
+            "explain this lesson", "explain the lesson", "explain lesson",
+            "explain this course", "explain the course", "explain course",
+            "explain to me the content", "explain the content", "explain content", "explain to me",
+            "what am i supposed to learn here", "what am i supposed to learn",
+            "what do we learn", "what do i learn", "what does this lesson teach", "what does this course teach",
+            "what is this topic about", "explain this topic", "tell me about this topic",
+            "what is this concept about", "tell me about this concept",
+            "everyting", "everything", "tell me everything", "explain everything", "explain all",
+            "all of it", "all content", "whole lesson", "walk me through this", "walk me through the lesson",
+            "overview of this course", "overview of the course", "course overview", "lesson overview", "page overview",
+            # Amharic triggers
+            "ይህ ኮርስ ስለ ምንድን ነው", "ኮርሱ ስለ ምንድን ነው", "ስለ ምን ያስተምራል", "ስለ ኮርሱ ንገረኝ",
+            "ስለ ኮርሱ አብራራልኝ", "ስለ ኮርሱ አስረዳኝ", "ይዘቱን አብራራልኝ", "ይዘቱን አስረዳኝ", "ይዘቱን ንገረኝ",
+            "ስለ ይዘቱ አብራራልኝ", "ስለ ይዘቱ አስረዳኝ", "ስለ ይዘቱ ንገረኝ", "ስለዚህ ኮርስ ንገረኝ",
+            "ይህን ትምህርት አስረዳኝ", "ይህንን ትምህርት አብራራልኝ", "ትምህርቱን አስረዳኝ", "ትምህርቱን አብራራልኝ",
+            "ይህንን ርዕስ አብራራልኝ", "ምን እማራለሁ", "ስለዚህ ትምህርት ንገረኝ", "ስለዚህ ገጽ ንገረኝ",
+            # Afaan Oromo triggers
+            "koorsiin kun waa'ee maalii ti", "koorsii kana naaf ibsi", "waa'ee koorsii natti himi",
+            "waa'ee koorsii naaf ibsi", "qabiyyee naaf ibsi", "waa'ee qabiyyee naaf ibsi",
+            "naaf ibsi", "barnoota kana naaf ibsi", "barnoota kana natti himi", "maal baranna",
+            "qabiyyeen barnootaa maali", "waa'ee barnoota kanaa natti himi",
+            # Arabic triggers
+            "ما موضوع هذه الدورة", "عن ماذا تتحدث هذه الدورة", "أخبرني عن الدورة", "حدثني عن الدورة",
+            "اشرح لي هذه الدورة", "اشرح هذه الدورة", "اشرح لي المحتوى", "اشرح المحتوى",
+            "ما هو المحتوى", "ما هي الدورة", "عن ماذا يتحدث المحتوى", "اشرح لي هذا الدرس",
+            "ما الذي سأتعلمه هنا", "اشرح لي هذا الموضوع", "ما موضوع هذا الدرس", "عن ماذا يتحدث هذا الدرس",
+        ]
+        if any(t in q for t in triggers) or cls.is_summary_query(text) or cls.is_read_aloud_query(text):
+            return True
+
+        # Broad pattern: topic/course entity combined with explanatory request
+        entities = ["course", "lesson", "page", "content", "topic", "module", "curriculum", "concept"]
+        actions = ["tell", "explain", "about", "what is", "overview", "summary", "summarize", "teach", "learn", "understand"]
+        has_entity = any(e in q for e in entities)
+        has_action = any(a in q for a in actions)
+        is_off_topic = any(off in q for off in ["football", "mars", "weather", "recipe", "pizza", "celebrity", "movie"])
+        return has_entity and has_action and not is_off_topic
 
     @classmethod
     def normalize_ethiopian_phone(cls, phone: str) -> str:
