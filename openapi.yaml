@@ -244,6 +244,36 @@ paths:
               schema:
                 $ref: "#/components/schemas/LinkDisconnectResponse"
 
+  /link/revoke:
+    post:
+      tags: [Linking]
+      operationId: revokeAccountLink
+      summary: Revoke an active one-time linking code before expiry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [link_id]
+              properties:
+                link_id:
+                  type: string
+                  example: link_web_user_123
+      responses:
+        "200":
+          description: Revocation status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  revoked:
+                    type: boolean
+                    example: true
+                  link_id:
+                    type: string
+
   /support-needs:
     get:
       tags: [Support]

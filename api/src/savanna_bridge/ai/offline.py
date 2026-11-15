@@ -38,46 +38,21 @@ class OfflineFaqProvider(AIProvider):
         return Language.EN
 
     def translate(self, text: str, source_lang: str, target_lang: str) -> str:
-        if source_lang == target_lang:
-            return text
-
-        # Offline translation lexicon for common questions
-        lexicon: dict[tuple[str, str], dict[str, str]] = {
-            ("om", "en"): {
-                "maal": "what",
-                "barumsa": "lesson",
-                "moojulii 2": "module 2",
-                "akkamitti": "how",
-            },
-            ("ti", "en"): {
-                "እንታይ": "what",
-                "ሞጁል 2": "module 2",
-            },
-        }
-
-        pair = (source_lang, target_lang)
-        if pair in lexicon:
-            translated = text
-            for src, dst in lexicon[pair].items():
-                translated = translated.replace(src, dst)
-            return translated
-
-        return text
+        from savanna_bridge.language import LanguageGuard
+        return LanguageGuard.translate(text, source_lang, target_lang)
 
     def _simplify_text(self, text: str, language: Language) -> str:
         """Simple mode: rewrite answer in short, plain sentences."""
-        if language == Language.AM:
-            return "ሞጁል 2 ደንበኛን ማዳመጥ ያስተምራል። ጥያቄዎችን በግልጽ ይመልሱ።"
-        # English simple mode
-        sentences = [s.strip() for s in re.split(r"[.!?]", text) if s.strip()]
+        sentences = [s.strip() for s in re.split(r"(?<=[.!?፡።])\s+", text) if s.strip()]
         short_sentences = []
         for s in sentences:
             words = s.split()
-            if len(words) > 10:
-                short_sentences.append(" ".join(words[:10]) + ".")
+            if len(words) > 12:
+                short_sentences.append(" ".join(words[:12]) + ".")
             else:
-                short_sentences.append(s + ".")
-        return " ".join(short_sentences[:2]) if short_sentences else text
+                short_sentences.append(s)
+        res = " ".join(short_sentences[:2]) if short_sentences else text
+        return res
 
     def generate_answer(
         self,
@@ -87,41 +62,44 @@ class OfflineFaqProvider(AIProvider):
         simple_mode: bool = False,
     ) -> str:
         if not context_chunks:
-            if language == Language.AM:
-                return "ይህን ከኮርሱ ይዘት ማረጋገጥ አልቻልኩም። ከሰው እርዳታ ይፈልጋሉ?"
-            elif language == Language.OM:
-                return "Waan kana qabiyyee barnootaa keessaa mirkaneessuu hin dandeenye. Gargaarsa namaa barbaadduu?"
-            elif language == Language.TI:
-                return "እዚ ካብቲ ትሕዝቶ ኮርስ ክረጋገጽ ኣይተኻእለን። ናይ ሰብ ሓገዝ ትደልዩ ዶ?"
-            return "I cannot verify that from the course content. Would you like a person to help?"
+            from savanna_bridge.language import LanguageGuard
+            msg_en = "I cannot verify that from the course materials. A human mentor can help you directly."
+            if language == Language.EN:
+                return msg_en
+            return LanguageGuard.translate(msg_en, "en", language.value)
 
-        # Find matching chunk for requested language
-        matched_chunk = None
+        # Prefer chunk that matches question terms and requested language
+        q_tokens = [w.lower() for w in re.findall(r"[\w\u1200-\u137F]+", question)]
+        best_chunk = None
+        best_count = -1
         for c in context_chunks:
-            if c.language == language.value:
-                matched_chunk = c
-                break
-        if not matched_chunk:
-            matched_chunk = context_chunks[0]
+            count = sum(1 for tok in q_tokens if tok in c.heading.lower() or tok in c.text.lower())
+            if getattr(c, "language", "en") == language.value:
+                count += 5
+            if count > best_count:
+                best_count = count
+                best_chunk = c
+        matched_chunk = best_chunk or context_chunks[0]
 
-        # Extract answer text
+        # Extract answer text from actual platform content
         raw_text = matched_chunk.text
-        # Pick first 1-2 sentences
         sentences = [s.strip() for s in re.split(r"(?<=[.!?፡።])\s+", raw_text) if s.strip()]
-        base_answer = " ".join(sentences[:2]) if sentences else raw_text
+        
+        # Pick sentences matching question keywords
+        q_words = [w.lower() for w in re.findall(r"\w+", question) if len(w) > 3]
+        relevant_sentences = [
+            s for s in sentences if any(qw in s.lower() for qw in q_words)
+        ]
+        if relevant_sentences:
+            base_answer = " ".join(relevant_sentences[:3])
+        else:
+            base_answer = " ".join(sentences[:3]) if sentences else raw_text
 
-        # If question asked specifically in Amharic and language is Amharic
-        if language == Language.AM and (
-            (
-                "2" in question
-                or "ሁለት" in question
-                or "module 2" in question.lower()
-                or "ሞጁል 2" in question
-            )
-            or not base_answer
-            or not re.search(r"[\u1200-\u137F]", base_answer)
-        ):
-            base_answer = "ሞጁል 2 ደንበኛን ማዳመጥ፣ ፍላጎቱን ማብራራት እና ግልጽ ምላሽ መስጠትን ያስረዳል።"
+        # Translate if content language does not match learner's requested language
+        from savanna_bridge.language import LanguageGuard
+        chunk_lang = getattr(matched_chunk, "language", "en")
+        if chunk_lang != language.value:
+            base_answer = LanguageGuard.translate(base_answer, chunk_lang, language.value)
 
         if simple_mode:
             return self._simplify_text(base_answer, language)

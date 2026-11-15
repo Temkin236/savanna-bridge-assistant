@@ -38,6 +38,10 @@ class AskRequest(BaseModel):
     simple_mode: bool = False
     anonymous: bool = False
     channel: Literal["web", "telegram", "sms_sandbox"] | None = None
+    page_url: str | None = None
+    page_title: str | None = None
+    page_content: str | None = None
+    section: str | None = None
 
 
 class Answer(BaseModel):

@@ -42,17 +42,8 @@ class CloudProvider(AIProvider):
         return self._offline_fallback.detect_language(text)
 
     def translate(self, text: str, source_lang: str, target_lang: str) -> str:
-        if not self.api_key:
-            return self._offline_fallback.translate(text, source_lang, target_lang)
-
-        prompt = f"Translate the following text from {source_lang} to {target_lang}. Return ONLY the direct translation:\n\n{text}"
-        try:
-            res = self._call_gemini(prompt)
-            if res:
-                return res.strip()
-        except Exception as e:
-            logger.warning("Gemini translate error: %s, falling back to offline", e)
-        return self._offline_fallback.translate(text, source_lang, target_lang)
+        from savanna_bridge.language import LanguageGuard
+        return LanguageGuard.translate(text, source_lang, target_lang)
 
     def generate_answer(
         self,
@@ -78,7 +69,9 @@ class CloudProvider(AIProvider):
 
         lang_instruction = "Respond in Amharic (አማርኛ)." if language == Language.AM else (
             "Respond in Afaan Oromo." if language == Language.OM else (
-                "Respond in Tigrinya." if language == Language.TI else "Respond in English."
+                "Respond in Tigrinya." if language == Language.TI else (
+                    "Respond in Arabic." if language == Language.AR else "Respond in English."
+                )
             )
         )
 
@@ -98,7 +91,7 @@ Learner Question:
             if res:
                 return res.strip()
         except Exception as e:
-            logger.warning("Gemini API error: %s, falling back to offline", e)
+            logger.warning("Gemini API error: %s, falling back to grounded platform extraction", e)
 
         return self._offline_fallback.generate_answer(
             question, context_chunks, language, simple_mode
@@ -107,36 +100,77 @@ Learner Question:
     def transcribe(
         self, audio_bytes: bytes, media_type: str, language: Language, retain: bool = False
     ) -> str:
+        if self.api_key and audio_bytes and len(audio_bytes) > 64:
+            import base64
+            b64_audio = base64.b64encode(audio_bytes).decode("utf-8")
+            models = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-flash-latest"]
+            for m in models:
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={self.api_key}"
+                payload = {
+                    "contents": [{
+                        "parts": [
+                            {"inlineData": {"mimeType": media_type or "audio/webm", "data": b64_audio}},
+                            {"text": f"Transcribe this speech accurately in {language.value}. Output only the transcribed text without extra formatting, notes, or punctuation marks."}
+                        ]
+                    }],
+                    "generationConfig": {"temperature": 0.0, "maxOutputTokens": 300}
+                }
+                data = json.dumps(payload).encode("utf-8")
+                req = urllib.request.Request(
+                    url,
+                    data=data,
+                    headers={"Content-Type": "application/json"},
+                    method="POST",
+                )
+                try:
+                    with urllib.request.urlopen(req, timeout=12) as resp:
+                        resp_data = json.loads(resp.read().decode("utf-8"))
+                        candidates = resp_data.get("candidates", [])
+                        if candidates:
+                            parts = candidates[0].get("content", {}).get("parts", [])
+                            if parts:
+                                text = parts[0].get("text", "").strip()
+                                if text:
+                                    return text
+                except Exception:
+                    continue
         return self._offline_fallback.transcribe(audio_bytes, media_type, language, retain)
 
     def synthesize(self, text: str, language: Language, speed: float = 1.0) -> str:
         return self._offline_fallback.synthesize(text, language, speed)
 
     def _call_gemini(self, prompt: str) -> str:
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent?key={self.api_key}"
-        payload = {
-            "contents": [
-                {
-                    "parts": [{"text": prompt}]
-                }
-            ],
-            "generationConfig": {
-                "temperature": 0.2,
-                "maxOutputTokens": 800,
+        models = [self.model, "gemini-2.0-flash", "gemini-1.5-flash", "gemini-flash-latest"]
+        models = list(dict.fromkeys([m for m in models if m]))
+
+        last_err: Exception | None = None
+        for m in models:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={self.api_key}"
+            payload = {
+                "contents": [{"parts": [{"text": prompt}]}],
+                "generationConfig": {
+                    "temperature": 0.2,
+                    "maxOutputTokens": 800,
+                },
             }
-        }
-        data = json.dumps(payload).encode("utf-8")
-        req = urllib.request.Request(
-            url,
-            data=data,
-            headers={"Content-Type": "application/json"},
-            method="POST",
-        )
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            resp_data = json.loads(resp.read().decode("utf-8"))
-            candidates = resp_data.get("candidates", [])
-            if candidates:
-                parts = candidates[0].get("content", {}).get("parts", [])
-                if parts:
-                    return parts[0].get("text", "")
+            data = json.dumps(payload).encode("utf-8")
+            req = urllib.request.Request(
+                url,
+                data=data,
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            try:
+                with urllib.request.urlopen(req, timeout=12) as resp:
+                    resp_data = json.loads(resp.read().decode("utf-8"))
+                    candidates = resp_data.get("candidates", [])
+                    if candidates:
+                        parts = candidates[0].get("content", {}).get("parts", [])
+                        if parts:
+                            return parts[0].get("text", "")
+            except Exception as e:
+                last_err = e
+                continue
+        if last_err:
+            raise last_err
         return ""
