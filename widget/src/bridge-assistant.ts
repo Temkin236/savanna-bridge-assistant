@@ -48,6 +48,8 @@ export interface ChatMessage {
   originalQuestion?: string;
   audioUrl?: string;
   isAudioPlaying?: boolean;
+  isAudioPaused?: boolean;
+  isReadingPage?: boolean;
 }
 
 export interface SupportNeedsData {
@@ -121,7 +123,9 @@ export const ICONS = {
   sound: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`,
   volumeMute: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>`,
   play: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`,
-  stop: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect></svg>`,
+  stop: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg>`,
+  replay: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>`,
+  volume: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`,
   speed: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`,
   sync: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>`,
   sparkles: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>`,
@@ -175,7 +179,8 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     lookingInCourse: "Looking in the course...",
     answerHeading: "Answer",
     listenButton: "Listen",
-    pauseButton: "Stop",
+    pauseButton: "Pause",
+    stopButton: "Stop",
     replayButton: "Replay",
     makeSimplerButton: "Make simpler",
     sourcesTitle: "Course sources:",
@@ -207,6 +212,14 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     clearChatBtn: "Clear conversation",
     generateCodeBtn: "Generate 6-digit code",
     yourCodeIs: "Your 6-digit code:",
+    enterCodeLabel: "Enter 6-digit code from Telegram:",
+    submitCodeBtn: "Link with Code",
+    codePlaceholder: "e.g. 123456",
+    codeLinkSuccess: "Account successfully linked!",
+    codeLinkError: "Invalid or expired code. Please try again.",
+    haveCodePrompt: "Have a Telegram link code?",
+    hideCodePrompt: "Hide code entry",
+    codeInstructions: "Send this 6-digit code to the Telegram bot with: /confirm <code>",
     handoffConsentCheck: "I consent to connect with a human mentor",
     handoffReasonLabel: "What do you need help with? (optional)",
     handoffReasonPlaceholder: "e.g., I need help with Module 2 exercise...",
@@ -251,6 +264,19 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     onboardingReplay: "Setup Tour / Onboarding",
     spokenSetup: "Start spoken setup",
     voiceTab: "Voice & Audio",
+    pageContextBadge: "Current Lesson:",
+    explainLessonBtn: "Explain this lesson",
+    summarizePageBtn: "Summarize this page",
+    readingAloudHeading: "Reading page aloud",
+    speakingIndicator: "Speaking...",
+    listeningIndicator: "Listening...",
+    wakeWordSetting: "Voice activation (Wake word 'Help')",
+    wakeWordDesc: "Say 'Help' to automatically open assistant and start speaking",
+    navigatedToNotice: "Navigated to new lesson:",
+    followupTitle: "💡 Follow-up questions:",
+    followupQ1: "💡 Explain with examples",
+    followupQ2: "➡️ What to know before next lesson?",
+    followupQ3: "📝 Quiz me on this topic",
   },
   am: {
     appTitle: "የሳቫና ብሪጅ ረዳት",
@@ -300,7 +326,8 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     answerHeading: "መልስ",
     listenButton: "አዳምጥ",
     pauseButton: "አቁም",
-    replayButton: "እንደገና አጫውት",
+    stopButton: "አቁም",
+    replayButton: "ደግመህ አጫውት",
     makeSimplerButton: "ቀለል አድርግ",
     sourcesTitle: "የኮርስ ምንጮች፡",
     talkToPersonButton: "ከሰው ጋር ተነጋገር",
@@ -331,6 +358,14 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     clearChatBtn: "ውይይቱን አጽዳ",
     generateCodeBtn: "ባለ 6 አሃዝ ኮድ ፍጠር",
     yourCodeIs: "የእርስዎ ባለ 6 አሃዝ ኮድ፡",
+    enterCodeLabel: "ከቴሌግራም የተገኘውን ባለ 6 አሃዝ ኮድ ያስገቡ፡",
+    submitCodeBtn: "በኮድ አገናኝ",
+    codePlaceholder: "ምሳሌ፡ 123456",
+    codeLinkSuccess: "መለያዎ በተሳካ ሁኔታ ተገናኝቷል!",
+    codeLinkError: "የተሳሳተ ወይም ጊዜው ያለፈበት ኮድ። እባክዎ እንደገና ይሞክሩ።",
+    haveCodePrompt: "የቴሌግራም ማገናኛ ኮድ አለዎት?",
+    hideCodePrompt: "የኮድ መግቢያውን ደብቅ",
+    codeInstructions: "ይህንን ባለ 6 አሃዝ ኮድ ወደ ቴሌግራም ቦት ይላኩ፡ /confirm <ኮድ>",
     handoffConsentCheck: "ከሰው አማካሪ ጋር ለመገናኘት እስማማለሁ",
     handoffReasonLabel: "በምን ላይ እርዳታ ይፈልጋሉ? (አማራጭ)",
     handoffReasonPlaceholder: "ምሳሌ፡ በሞጁል 2 መልመጃ ላይ እገዛ እፈልጋለሁ...",
@@ -375,6 +410,19 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     onboardingReplay: "የመጀመሪያ ቅንብር መመሪያ",
     spokenSetup: "የድምጽ ቅንብርን ጀምር",
     voiceTab: "ድምጽ እና ማዳመጥ",
+    pageContextBadge: "ወቅታዊ ትምህርት፡",
+    explainLessonBtn: "ይህንን ትምህርት አስረዳኝ",
+    summarizePageBtn: "ይህንን ገጽ አጠቃልል",
+    readingAloudHeading: "ገጹን ጮክ ብሎ በማንበብ ላይ",
+    speakingIndicator: "እየተናገረ ነው...",
+    listeningIndicator: "እያዳመጠ ነው...",
+    wakeWordSetting: "የድምጽ ማግበር (የማንቂያ ቃል 'እርዳታ' / 'Help')",
+    wakeWordDesc: "ረዳቱን በራስ-ሰር ለመክፈትና ለማናገር 'እርዳታ' ወይም 'Help' ይበሉ",
+    navigatedToNotice: "ወደ አዲስ ትምህርት ገጽ ተቀይሯል፡",
+    followupTitle: "💡 ተከታይ ጥያቄዎች፡",
+    followupQ1: "💡 በምሳሌዎች አስረዳኝ",
+    followupQ2: "➡️ ወደ ቀጣዩ ትምህርት ከመሄዴ በፊት ምን ልወቅ?",
+    followupQ3: "📝 ግንዛቤዬን ፈትነኝ",
   },
   om: {
     appTitle: "Gargaaraa Savanna Bridge",
@@ -424,7 +472,8 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     answerHeading: "Deebii",
     listenButton: "Dhaggeeffadhu",
     pauseButton: "Dhaabi",
-    replayButton: "Irra deebi'i",
+    stopButton: "Dhaabi",
+    replayButton: "Irra deebi'ii taphachiisi",
     makeSimplerButton: "Salphisi",
     sourcesTitle: "Madda barnootaa:",
     talkToPersonButton: "Nama waliin dubbadhu",
@@ -455,6 +504,14 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     clearChatBtn: "Haquu",
     generateCodeBtn: "Koodii uumi",
     yourCodeIs: "Koodii keessan:",
+    enterCodeLabel: "Koodii dijiitii 6 Telegiraamii irraa galchaa:",
+    submitCodeBtn: "Koodiin walqunnamsiisi",
+    codePlaceholder: "fkn: 123456",
+    codeLinkSuccess: "Herregni milkaa'inaan walqabateera!",
+    codeLinkError: "Koodiin dogoggora ykn yeroon isaa darbeera. Mee irra deebi'aa yaalaa.",
+    haveCodePrompt: "Koodii walqunnamsiisaa qabduu?",
+    hideCodePrompt: "Koodii galchuu dhoksi",
+    codeInstructions: "Koodii dijiitii 6 kana boottii Telegiraamiitti ergaa: /confirm <koodii>",
     handoffConsentCheck: "Gorsaa waliin walqunnamuuf walii galeera",
     handoffReasonLabel: "Waan gargaarsa barbaaddan:",
     handoffReasonPlaceholder: "fkn: Kutaa 2ffaa...",
@@ -499,6 +556,19 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     onboardingReplay: "Daawwannaa Qindaa'inaa",
     spokenSetup: "Qindaa'ina sagalee jalqabi",
     voiceTab: "Sagalee & Dhaggeeffannaa",
+    pageContextBadge: "Kutaa Barnootaa Ammaa:",
+    explainLessonBtn: "Barnoota kana naaf ibsi",
+    summarizePageBtn: "Fuula kana naaf gabaabsi",
+    readingAloudHeading: "Fuula kana sagaleedhaan dubbisaa jira",
+    speakingIndicator: "Dubbataa jira...",
+    listeningIndicator: "Dhaggeeffachaa jira...",
+    wakeWordSetting: "Sagaleen kakaasuu (Jechama 'Gargaarsa' / 'Help')",
+    wakeWordDesc: "Gargaaraa ofumaan banuuf 'Gargaarsa' ykn 'Help' jedhaa",
+    navigatedToNotice: "Gara barnoota haaraatti jijjiirameera:",
+    followupTitle: "💡 Gaaffilee itti aanan:",
+    followupQ1: "💡 Fakkeenyotaan naaf ibsi",
+    followupQ2: "➡️ Barnoota itti aanuuf maal beekuun qaba?",
+    followupQ3: "📝 Hubannoo koo na qori",
   },
   ti: {
     appTitle: "ናይ ሳቫና ብሪጅ ሓጋዚ",
@@ -548,7 +618,8 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     answerHeading: "መልሲ",
     listenButton: "ስማዕ",
     pauseButton: "ኣዕርፍ",
-    replayButton: "ደጊምካ ስማዕ",
+    stopButton: "ኣቁም",
+    replayButton: "ደጊምካ ኣጻውት",
     makeSimplerButton: "ቀሊል ግበሮ",
     sourcesTitle: "ምንጭታት ኮርስ፡",
     talkToPersonButton: "ምስ ሰብ ተዛረብ",
@@ -579,6 +650,14 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     clearChatBtn: "ኣጽርዮ",
     generateCodeBtn: "ኮድ ፍጠር",
     yourCodeIs: "ናይ ስድሽተ ኣሃዝ ኮድኩም፡",
+    enterCodeLabel: "ካብ ቴሌግራም ዝረኸብክምዎ ናይ 6 ኣሃዝ ኮድ የእትዉ፡",
+    submitCodeBtn: "ብኮድ ኣላግብ",
+    codePlaceholder: "ኣብነት፡ 123456",
+    codeLinkSuccess: "ኣካውንትኩም ብዓወት ተላጊቡ ኣሎ!",
+    codeLinkError: "ዘይትክክል ወይ ዝሓለፎ ኮድ። በጃኹም ደጊምኩም ፈትኑ።",
+    haveCodePrompt: "ናይ ቴሌግራም መላገቢ ኮድ ኣለኩም ድዩ?",
+    hideCodePrompt: "መእተዊ ኮድ ሕባእ",
+    codeInstructions: "ነዚ ናይ 6 ኣሃዝ ኮድ ናብ ቴሌግራም ቦት ስደድዎ፡ /confirm <ኮድ>",
     handoffConsentCheck: "ምስ መካሪ ንምርኻብ ተሰማሚዐ ኣለኹ",
     handoffReasonLabel: "እንታይ ሓገዝ የድልየኩም?",
     handoffReasonPlaceholder: "ንኣብነት፡ ኣብ ሞጁል 2...",
@@ -623,6 +702,19 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     onboardingReplay: "ናይ መጀመርታ መምርሒ",
     spokenSetup: "ናይ ድምጺ ቅጥዒ ጀምር",
     voiceTab: "ድምጽን ምስማዕን",
+    pageContextBadge: "ህሉው ትምህርቲ፡",
+    explainLessonBtn: "እዚ ትምህርቲ ኣብርሃለይ",
+    summarizePageBtn: "እዚ ገጽ ኣጠቃልሎ",
+    readingAloudHeading: "ገጽ ብድምጺ ምንባብ",
+    speakingIndicator: "ይዛረብ ኣሎ...",
+    listeningIndicator: "ይሰምዕ ኣሎ...",
+    wakeWordSetting: "ብድምጺ ምኽፋት ('ሓገዝ' / 'Help')",
+    wakeWordDesc: "ንሓጋዚ ንምኽፋት 'ሓገዝ' ወይ 'Help' በሉ",
+    navigatedToNotice: "ናብ ሓድሽ ትምህርቲ ተቐይሩ፡",
+    followupTitle: "💡 ቀጸልቲ ሕቶታት፡",
+    followupQ1: "💡 ብኣብነታት ኣረድኣኒ",
+    followupQ2: "➡️ ናብ ዝቕጽል ትምህርቲ ቅድሚ ምኻደይ እንታይ ክፈልጥ ኣለኒ?",
+    followupQ3: "📝 ግንዛበይ ፈትነኒ",
   },
   ar: {
     appTitle: "مساعد سافانا بريدج",
@@ -671,8 +763,9 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     lookingInCourse: "جاري البحث في محتوى الدورة...",
     answerHeading: "الإجابة",
     listenButton: "استماع",
-    pauseButton: "إيقاف",
-    replayButton: "إعادة",
+    pauseButton: "إيقاف مؤقت",
+    stopButton: "إيقاف",
+    replayButton: "إعادة التشغيل",
     makeSimplerButton: "تبسيط الشرح",
     sourcesTitle: "مصادر الدورة:",
     talkToPersonButton: "التحدث مع شخص",
@@ -703,6 +796,14 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     clearChatBtn: "مسح المحادثة",
     generateCodeBtn: "توليد رمز مكون من 6 أرقام",
     yourCodeIs: "رمزك المكون من 6 أرقام:",
+    enterCodeLabel: "أدخل الرمز المكون من 6 أرقام من تيليجرام:",
+    submitCodeBtn: "ربط بالرمز",
+    codePlaceholder: "مثال: 123456",
+    codeLinkSuccess: "تم ربط الحساب بنجاح!",
+    codeLinkError: "رمز غير صالح أو منتهي الصلاحية. يرجى المحاولة مرة أخرى.",
+    haveCodePrompt: "هل لديك رمز ربط من تيليجرام؟",
+    hideCodePrompt: "إخفاء إدخال الرمز",
+    codeInstructions: "أرسل هذا الرمز إلى بوت تيليجرام باستخدام: /confirm <الرمز>",
     handoffConsentCheck: "أوافق على التواصل مع مرشد بشري",
     handoffReasonLabel: "ما الذي تحتاج إلى مساعدة فيه؟ (اختياري)",
     handoffReasonPlaceholder: "مثال: أحتاج مساعدة في تمرين الوحدة 2...",
@@ -747,6 +848,19 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     onboardingReplay: "دليل الإعداد الأولي",
     spokenSetup: "بدء الإعداد الصوتي",
     voiceTab: "الصوت والقراءة",
+    pageContextBadge: "الدرس الحالي:",
+    explainLessonBtn: "اشرح لي هذا الدرس",
+    summarizePageBtn: "لخص هذه الصفحة",
+    readingAloudHeading: "قراءة محتوى الصفحة بصوت عالٍ",
+    speakingIndicator: "جاري التحدث...",
+    listeningIndicator: "جاري الاستماع...",
+    wakeWordSetting: "التفعيل الصوتي (كلمة التنبيه 'مساعدة' / 'Help')",
+    wakeWordDesc: "قل 'مساعدة' أو 'Help' لفتح المساعد تلقائياً والتحدث مباشرة",
+    navigatedToNotice: "تم الانتقال إلى درس جديد:",
+    followupTitle: "💡 أسئلة متابعة مقترحة:",
+    followupQ1: "💡 اشرح بالأمثلة",
+    followupQ2: "➡️ ماذا يجب أن أفهم قبل الدرس التالي؟",
+    followupQ3: "📝 اختبر فهمي لهذا الموضوع",
   },
 };
 
@@ -1216,6 +1330,8 @@ const STYLES = `
   .answer-text {
     margin: 0 0 0.5rem 0;
     word-break: break-word;
+    line-height: 1.5;
+    white-space: pre-wrap;
   }
 
   .answer-actions {
@@ -1365,6 +1481,47 @@ const STYLES = `
     display: flex;
     flex-direction: column;
     gap: 0.375rem;
+  }
+
+  .settings-card {
+    background: var(--b-surface);
+    border: 1px solid var(--b-border);
+    border-radius: 0.75rem;
+    padding: 0.875rem 1rem;
+    margin-bottom: 0.875rem;
+  }
+  .settings-card-title {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    margin-bottom: 0.375rem;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+  .settings-card-desc {
+    font-size: 0.8125rem;
+    color: var(--b-text-muted);
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+  }
+  .code-display {
+    font-family: monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-align: center;
+    padding: 0.75rem;
+    background: var(--b-surface-alt, #f8fafc);
+    border: 2px dashed var(--b-primary);
+    border-radius: 0.5rem;
+    color: var(--b-primary);
+    user-select: all;
+  }
+  .link-code-box {
+    background: var(--b-surface-alt, #f8fafc);
+    border: 1px solid var(--b-border);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.625rem;
   }
 
   .settings-label {
@@ -1666,6 +1823,23 @@ export class BridgeAssistant extends HTMLElement {
   private audioChunks: Blob[] = [];
   private activeRecognition: any = null;
   private wakeWordRecognizer: any = null;
+  private activeUtterance: any = null;
+  private readingWatchdogTimer: any = null;
+  private currentReading: {
+    msgId: string;
+    items: Array<{ text: string; element?: HTMLElement | null }>;
+    currentIndex: number;
+    paragraphs?: string[];
+    audioQueue?: string[];
+    isBusy?: boolean;
+    isPaused?: boolean;
+  } | null = null;
+  private navCheckTimer: any = null;
+  private voiceActivationEnabled = false;
+  private wakeWordRecognition: any = null;
+  private lastPageUrl: string | null = null;
+  private lastPageTitle: string | null = null;
+  private lastPageSection: string | null = null;
   private activeAudio: HTMLAudioElement | null = null;
 
   private messages: ChatMessage[] = [];
@@ -1675,6 +1849,7 @@ export class BridgeAssistant extends HTMLElement {
   private telegramToken: string | null = null;
   private telegramDeepLink: string = "https://t.me/savannah_assistant3_bot";
   private isTelegramLinked = false;
+  private isLinkCodeInputVisible = false;
   private telegramPollTimer: number | null = null;
 
   // Settings dialog visibility
@@ -1836,14 +2011,23 @@ export class BridgeAssistant extends HTMLElement {
       try { this.wakeWordRecognizer.stop(); } catch {}
       this.wakeWordRecognizer = null;
     }
+    if (this.wakeWordRecognition) {
+      try { this.wakeWordRecognition.stop(); } catch {}
+      this.wakeWordRecognition = null;
+    }
     this.stopSpeaking();
     if (this.popstateListener) {
       window.removeEventListener("popstate", this.popstateListener);
       this.popstateListener = null;
     }
+    if (this.navCheckTimer) {
+      window.clearInterval(this.navCheckTimer);
+      this.navCheckTimer = null;
+    }
     if (this.isReadingPage) {
       this.stopPageReading();
     }
+    this.stopPageReadingHighlight();
   }
 
   private t(key: string): string {
@@ -1900,8 +2084,24 @@ export class BridgeAssistant extends HTMLElement {
     this.announce(this.t("emptyWelcome"));
   }
 
+  private getPlatformInfo(): { title: string; url: string; type: string } {
+    const ctx = this.extractPlatformContext();
+    const title = ctx.page_title || (typeof document !== "undefined" ? document.title : "Web Session");
+    const url = ctx.page_url || (typeof window !== "undefined" ? window.location.href : "");
+    const combined = `${title} ${url} ${this.courseId}`.toLowerCase();
+
+    let type = "general";
+    if (combined.includes("job") || combined.includes("career") || combined.includes("internship") || combined.includes("hire") || combined.includes("work")) {
+      type = "jobs";
+    } else if (combined.includes("course") || combined.includes("lesson") || combined.includes("module") || combined.includes("learn") || combined.includes("student") || combined.includes("class")) {
+      type = "course";
+    }
+    return { title, url, type };
+  }
+
   private async generateLinkCode(): Promise<void> {
     try {
+      const platform = this.getPlatformInfo();
       const res = await fetch(`${this.apiBase}/api/v1/link/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1911,19 +2111,85 @@ export class BridgeAssistant extends HTMLElement {
           learner_reference: this.getAttribute("learner-id") || `learner_${this.sessionId}`,
           platform_id: this.platformId,
           platform_name: this.platformName,
+          platform_title: platform.title,
+          platform_url: platform.url,
+          platform_type: platform.type,
+          course_id: this.courseId,
         }),
       });
       if (res.ok) {
         const data = await res.json();
+        this.telegramToken = data.token;
+        this.telegramDeepLink = data.deep_link || this.telegramDeepLink;
         const codeDisplay = this.shadowRoot?.querySelector<HTMLElement>("#code-display");
         if (codeDisplay) {
           codeDisplay.textContent = data.code || data.token;
           codeDisplay.style.display = "block";
           this.announce(`${this.t("yourCodeIs")} ${data.code || data.token}`);
         }
+        const codeInstr = this.shadowRoot?.querySelector<HTMLElement>("#code-instructions");
+        if (codeInstr) {
+          codeInstr.style.display = "block";
+        }
+        this.onTelegramLinkClicked();
       }
     } catch (err) {
       console.warn("Failed to generate link code", err);
+    }
+  }
+
+  private async confirmLinkCode(code: string, feedbackEl?: HTMLElement | null): Promise<boolean> {
+    const cleanCode = code.trim().replace(/\s+/g, "");
+    if (!cleanCode) return false;
+
+    if (feedbackEl) {
+      feedbackEl.style.display = "block";
+      feedbackEl.style.color = "var(--b-text-muted)";
+      feedbackEl.textContent = "Verifying code...";
+    }
+
+    try {
+      const res = await fetch(`${this.apiBase}/api/v1/link/confirm`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: cleanCode }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.linked) {
+          this.isTelegramLinked = true;
+          this.isLinkCodeInputVisible = false;
+          if (this.telegramPollTimer) {
+            window.clearInterval(this.telegramPollTimer);
+            this.telegramPollTimer = null;
+          }
+          if (feedbackEl) {
+            feedbackEl.style.color = "#166534";
+            feedbackEl.textContent = `✓ ${this.t("codeLinkSuccess")}`;
+          }
+          this.announce(this.t("codeLinkSuccess"));
+          setTimeout(() => {
+            this.updateTelegramLinkUI();
+            this.updateLinkCodeUI();
+            this.render();
+          }, 600);
+          return true;
+        }
+      }
+
+      if (feedbackEl) {
+        feedbackEl.style.color = "#dc2626";
+        feedbackEl.textContent = `⚠️ ${this.t("codeLinkError")}`;
+      }
+      return false;
+    } catch (err) {
+      console.warn("Error confirming link code:", err);
+      if (feedbackEl) {
+        feedbackEl.style.color = "#dc2626";
+        feedbackEl.textContent = `⚠️ ${this.t("codeLinkError")}`;
+      }
+      return false;
     }
   }
 
@@ -2005,6 +2271,8 @@ export class BridgeAssistant extends HTMLElement {
         this.simpleMode = savedSimple === "true";
         this.accessibilityPrefs.simple_mode = this.simpleMode;
       }
+      const savedWake = localStorage.getItem("savanna_bridge_wake_word");
+      if (savedWake) this.voiceActivationEnabled = savedWake === "true";
     } catch {
       // Ignore storage errors
     }
@@ -2206,24 +2474,70 @@ export class BridgeAssistant extends HTMLElement {
 
   private extractPlatformContext(): { page_url: string; page_title: string; page_content: string; section: string } {
     const page_url = typeof window !== "undefined" ? window.location.href : "";
-    const page_title = typeof document !== "undefined" ? document.title || "Savanna Platform" : "Savanna Platform";
-
+    let page_title = typeof document !== "undefined" ? document.title || "Savanna Platform" : "Savanna Platform";
     let section = "Current Lesson";
     if (typeof document !== "undefined") {
-      const heading = document.querySelector("h1, h2, [aria-current='page'], .active-lesson, .module-title");
+      // Find course title if on dashboard or course page
+      const courseTitleEl = document.querySelector(
+        ".curriculum-switcher-label span, .curriculum-title, .course-header h1, h1.course-name"
+      );
+      if (courseTitleEl && courseTitleEl.textContent?.trim()) {
+        page_title = courseTitleEl.textContent.trim();
+      } else if (page_title.includes("|")) {
+        page_title = page_title.split("|")[0].replace(/^Concept page:\s*/i, "").trim();
+      }
+
+      // Find active lesson heading
+      const heading = document.querySelector(
+        ".homepage-card h5, .formatted-content h5, .active-lesson, [aria-current='page'], #curriculum_navigation_content .active, .card-title, h2, h1"
+      );
       if (heading && heading.textContent) {
-        section = heading.textContent.trim();
+        section = heading.textContent.trim().replace(/^[\s\n\r]+|[\s\n\r]+$/g, "");
       }
     }
 
     let page_content = "";
     if (typeof document !== "undefined") {
-      const mainEl = document.querySelector("main") || document.querySelector("article") || document.querySelector(".content") || document.body;
+      const mainEl =
+        document.querySelector("#curriculum_navigation_content") ||
+        document.querySelector("#static-track-host") ||
+        document.querySelector(".homepage-card:not(.d-none)") ||
+        document.querySelector(".formatted-content") ||
+        document.querySelector("article") ||
+        document.querySelector("main") ||
+        document.querySelector(".card-body") ||
+        document.querySelector(".content") ||
+        document.body;
+
       if (mainEl) {
         try {
           const clone = mainEl.cloneNode(true) as HTMLElement;
-          clone.querySelectorAll("script, style, db-assistant, bridge-assistant, noscript, nav, footer, header").forEach((el) => el.remove());
-          page_content = (clone.textContent || "").replace(/\s+/g, " ").trim().slice(0, 15000);
+          clone
+            .querySelectorAll(
+              "script, style, db-assistant, bridge-assistant, noscript, nav, footer, header, #sidebar, .sidebar, button, input"
+            )
+            .forEach((el) => el.remove());
+
+          const blocks: string[] = [];
+          clone.querySelectorAll("h1, h2, h3, h4, h5, p, li").forEach((node) => {
+            const txt = (node.textContent || "").replace(/\s+/g, " ").trim();
+            if (txt) {
+              const tag = node.tagName.toLowerCase();
+              if (tag.startsWith("h")) {
+                blocks.push(`\n${txt}\n`);
+              } else if (tag === "li") {
+                blocks.push(`• ${txt}`);
+              } else {
+                blocks.push(txt);
+              }
+            }
+          });
+
+          if (blocks.length > 0) {
+            page_content = blocks.join("\n\n").slice(0, 15000);
+          } else {
+            page_content = (clone.textContent || "").replace(/\s+/g, " ").trim().slice(0, 15000);
+          }
         } catch {
           page_content = "";
         }
@@ -2456,6 +2770,7 @@ export class BridgeAssistant extends HTMLElement {
   }
 
   public openAssistant(): void {
+    if (this.isOpen) return;
     this.isOpen = true;
     const dialog = this.shadowRoot?.querySelector<HTMLElement>("#assistant-dialog");
     const launcher = this.shadowRoot?.querySelector<HTMLButtonElement>("#launcher-btn");
@@ -2499,6 +2814,7 @@ export class BridgeAssistant extends HTMLElement {
 
   private async fetchTelegramStartLink(): Promise<void> {
     try {
+      const platform = this.getPlatformInfo();
       const res = await fetch(`${this.apiBase}/api/v1/link/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -2508,6 +2824,10 @@ export class BridgeAssistant extends HTMLElement {
           learner_reference: `learner_${this.sessionId}`,
           platform_id: this.platformId,
           platform_name: this.platformName,
+          platform_title: platform.title,
+          platform_url: platform.url,
+          platform_type: platform.type,
+          course_id: this.courseId,
         }),
       });
       if (res.ok) {
@@ -2573,6 +2893,59 @@ export class BridgeAssistant extends HTMLElement {
     this.isTelegramLinked = false;
     await this.fetchTelegramStartLink();
     this.updateTelegramLinkUI();
+    this.updateLinkCodeUI();
+    this.render();
+  }
+
+  private updateLinkCodeUI(): void {
+    const container = this.shadowRoot?.querySelector("#link-code-container");
+    if (!container) return;
+
+    if (this.isTelegramLinked) {
+      container.innerHTML = "";
+      return;
+    }
+
+    container.innerHTML = `
+      <div style="display:flex; justify-content:center; margin-top:0.25rem;">
+        <button type="button" class="btn-toggle-link-code" id="btn-toggle-link-code" style="background:none; border:none; color:var(--b-primary); font-size:0.75rem; text-decoration:underline; cursor:pointer; padding:0.125rem 0;">
+          ${this.isLinkCodeInputVisible ? "▲ " + this.t("hideCodePrompt") : "🔗 " + this.t("haveCodePrompt")}
+        </button>
+      </div>
+      ${
+        this.isLinkCodeInputVisible
+          ? `
+        <div class="link-code-box" style="margin-top:0.375rem;">
+          <div style="font-size:0.75rem; font-weight:600; margin-bottom:0.25rem; color:var(--b-text);">${this.t("enterCodeLabel")}</div>
+          <form id="footer-code-form" style="display:flex; gap:0.25rem;">
+            <input type="text" id="footer-input-code" class="text-input" placeholder="${this.t("codePlaceholder")}" maxlength="8" style="min-height:2.25rem; font-size:0.9375rem; font-weight:700; letter-spacing:0.15em; text-align:center; padding:0.25rem 0.5rem; flex:1;" required autocomplete="off" />
+            <button type="submit" class="btn btn-primary" id="btn-footer-submit-code" style="min-height:2.25rem; font-size:0.75rem; padding:0.25rem 0.625rem; white-space:nowrap;">
+              ${this.t("submitCodeBtn")}
+            </button>
+          </form>
+          <div id="footer-code-msg" style="font-size:0.6875rem; font-weight:600; margin-top:0.25rem; text-align:center; display:none;"></div>
+        </div>
+      `
+          : ""
+      }
+    `;
+
+    container.querySelector("#btn-toggle-link-code")?.addEventListener("click", () => {
+      this.isLinkCodeInputVisible = !this.isLinkCodeInputVisible;
+      this.updateLinkCodeUI();
+    });
+
+    const form = container.querySelector<HTMLFormElement>("#footer-code-form");
+    if (form) {
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const input = container.querySelector<HTMLInputElement>("#footer-input-code");
+        const msg = container.querySelector<HTMLElement>("#footer-code-msg");
+        if (input && input.value) {
+          this.confirmLinkCode(input.value, msg);
+        }
+      });
+    }
   }
 
   private updateTelegramLinkUI(): void {
@@ -3179,6 +3552,11 @@ export class BridgeAssistant extends HTMLElement {
           const confidence = Number(data.language_confidence || 0);
           if (detected && detected in I18N && confidence >= 0.82 && detected !== this.currentLang) {
             this.setLanguage(detected, false);
+          } else {
+            const fallbackDetected = this.detectLanguage(data.transcript);
+            if (fallbackDetected !== this.currentLang) {
+              this.setLanguage(fallbackDetected, false);
+            }
           }
           await this.handleVoiceTranscript(data.transcript, inputEl);
           this.playEarcon("transcribed");
@@ -3306,20 +3684,6 @@ export class BridgeAssistant extends HTMLElement {
     this.fallbackTTS(cleanText, msg);
   }
 
-  private fallbackTTS(text: string, msg: ChatMessage): void {
-    const started = this.speakText(text, {
-      onStart: () => {
-        this.isSpeaking = true;
-        msg.isAudioPlaying = true;
-        this.renderMessages();
-        this.updateVoiceStatusUI();
-      },
-      onEnd: () => this.finishSpeaking(msg),
-      onError: () => this.finishSpeaking(msg),
-    });
-    if (!started) this.finishSpeaking(msg);
-  }
-
   private finishSpeaking(msg: ChatMessage): void {
     this.isSpeaking = false;
     msg.isAudioPlaying = false;
@@ -3342,11 +3706,612 @@ export class BridgeAssistant extends HTMLElement {
     this.updateVoiceStatusUI();
   }
 
+
+  // --- TTS Audio & Read Aloud Controls ---
+
+  private ensureHighlightStyles(): void {
+    if (typeof document === "undefined") return;
+    if (!document.getElementById("sb-reading-highlight-styles")) {
+      const style = document.createElement("style");
+      style.id = "sb-reading-highlight-styles";
+      style.textContent = `
+        .sb-reading-highlight {
+          background-color: rgba(254, 240, 138, 0.9) !important;
+          outline: 3.5px solid #eab308 !important;
+          box-shadow: 0 0 16px rgba(234, 179, 8, 0.5) !important;
+          border-radius: 6px !important;
+          padding: 4px 8px !important;
+          transition: background-color 0.25s ease, outline 0.25s ease, box-shadow 0.25s ease !important;
+        }
+        .answer-para-item {
+          transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+        .answer-para-item:hover {
+          background-color: rgba(254, 240, 138, 0.25);
+          border-radius: 4px;
+        }
+        .active-reading-para {
+          background-color: rgba(254, 240, 138, 0.35) !important;
+          border-left: 4px solid #eab308 !important;
+          border-radius: 4px !important;
+          padding-left: 0.5rem !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }
+
+  private highlightElement(el: HTMLElement | null): void {
+    this.ensureHighlightStyles();
+    this.stopPageReadingHighlight();
+    if (el) {
+      el.classList.add("sb-reading-highlight");
+
+      // If element is inside an overflow-clipped card or preview container (e.g. Savanna dashboard card with height:400px & overflow-y-hidden),
+      // ensure the parent expands or scrolls so the highlighted paragraph is 100% visible!
+      let parent = el.parentElement;
+      while (parent && parent !== document.body) {
+        const computed = window.getComputedStyle(parent);
+        if (
+          computed.overflowY === "hidden" ||
+          computed.overflow === "hidden" ||
+          parent.classList.contains("overflow-y-hidden") ||
+          parent.style.height === "400px" ||
+          parent.getAttribute("style")?.includes("400px")
+        ) {
+          parent.style.overflowY = "visible";
+          parent.style.height = "auto";
+          parent.style.maxHeight = "none";
+          parent.classList.remove("overflow-y-hidden", "pe-none");
+        }
+        parent = parent.parentElement;
+      }
+
+      try {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      } catch {}
+    }
+  }
+
+  private stopPageReadingHighlight(): void {
+    if (typeof document !== "undefined") {
+      document.querySelectorAll(".sb-reading-highlight").forEach((node) => {
+        node.classList.remove("sb-reading-highlight");
+      });
+    }
+  }
+
+  private getReadablePageElements(): HTMLElement[] {
+    if (typeof document === "undefined") return [];
+    
+    // Selectors covering all major LMS and educational platforms:
+    // Canvas LMS: #content, .user_content, .show-content, #wiki_page_show
+    // Moodle: #region-main, .course-content, .activity-information, .format-topics, .format-weeks
+    // Blackboard: #content-frame, .vcr-content, .contentBox
+    // Coursera / edX: [role="main"], main, article, .rc-ItemContent
+    // Savanna: #curriculum_navigation_content, #static-track-host, .formatted-content, .homepage-card
+    // WordPress LMS / Generic: .lesson-content, .course-content, .entry-content, main, article, .card-body
+    const containerSelectors = [
+      "#curriculum_navigation_content",
+      "#static-track-host:not([hidden])",
+      "#static-track-host",
+      "[role='main']",
+      "main",
+      "article",
+      ".course-content",
+      ".lesson-content",
+      ".activity-information",
+      "#region-main",
+      ".user_content",
+      ".formatted-content",
+      ".homepage-card:not(.d-none) .card-body:not(.d-none)",
+      ".homepage-card:not(.d-none)",
+      ".card-body",
+      "#content",
+      ".content",
+      "body",
+    ];
+
+    let foundElements: HTMLElement[] = [];
+    for (const sel of containerSelectors) {
+      const container = document.querySelector<HTMLElement>(sel);
+      if (!container) continue;
+
+      const candidates = Array.from(
+        container.querySelectorAll<HTMLElement>("p, h1, h2, h3, h4, h5, li, blockquote, pre")
+      ).filter((el) => {
+        // Exclude UI controls, assistants, sidebars, navigation, footers, scripts
+        if (el.closest("bridge-assistant, db-assistant, nav, footer, header, #sidebar, .sidebar, script, style, noscript, dialog, .modal, template")) {
+          return false;
+        }
+        // Exclude elements that are hidden or in inactive tabs
+        if (el.offsetParent === null && el.offsetWidth === 0 && el.offsetHeight === 0) {
+          return false;
+        }
+        const text = el.textContent?.trim() || "";
+        return text.length > 15;
+      });
+
+      if (candidates.length > 0) {
+        foundElements = candidates;
+        break;
+      }
+    }
+
+    if (foundElements.length === 0 && document.body) {
+      foundElements = Array.from(
+        document.body.querySelectorAll<HTMLElement>("p, h2, h3, h4, h5")
+      ).filter((el) => {
+        if (el.closest("bridge-assistant, db-assistant, nav, footer, header, #sidebar, .sidebar, script, style, template")) return false;
+        return (el.textContent?.trim() || "").length > 15;
+      });
+    }
+
+    return foundElements;
+  }
+
+  private startSequentialReading(msg: ChatMessage, startIndex: number = 0): void {
+    if (this.readingWatchdogTimer) {
+      clearTimeout(this.readingWatchdogTimer);
+      this.readingWatchdogTimer = null;
+    }
+    this.activeUtterance = null;
+    (window as any).__activeUtterance = null;
+
+    if (this.activeAudio) {
+      this.activeAudio.pause();
+      this.activeAudio = null;
+    }
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+
+    const pageElements = this.getReadablePageElements();
+
+    // Split message into paragraphs/sections, ignoring follow-up suggestions
+    const rawParagraphs = msg.text
+      .split(/\n\s*\n|\n/)
+      .map((p) => p.trim())
+      .filter((p) => {
+        if (!p || p.length < 5) return false;
+        if (
+          /^(Would you like|የሚከተሉትን|Maal gochuu|هل ترغب|•\s*Explain|•\s*Quiz|•\s*What|•\s*ይህንን|•\s*ወደ|•\s*ግንዛቤ|•\s*Yaada|•\s*Barnoota|•\s*Hubannoo|•\s*أشرح|•\s*أوضح|•\s*أطرح)/i.test(
+            p
+          )
+        ) {
+          return false;
+        }
+        return true;
+      });
+
+    const paragraphs = rawParagraphs.length > 0 ? rawParagraphs : [msg.text];
+
+    let lastMatchedIdx = -1;
+    const items = paragraphs.map((para, i) => {
+      const cleanPara = para.replace(/[#*•_`]/g, " ").replace(/\s+/g, " ").trim().toLowerCase();
+      const isIntro = /^(this course|this lesson|summary of|የዚህ|ይህ ትምህርት|barnoonni|يشرح|ملخص)/i.test(cleanPara);
+      const searchSnippet = cleanPara.slice(0, 35);
+      
+      let matchedEl: HTMLElement | null = null;
+      let matchedIdx = -1;
+
+      // Try finding the matching element starting forward from lastMatchedIdx
+      for (let idx = 0; idx < pageElements.length; idx++) {
+        const el = pageElements[idx];
+        const elText = (el.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+        if (
+          (searchSnippet.length > 10 && elText.includes(searchSnippet)) ||
+          (cleanPara.length > 20 && elText.includes(cleanPara.slice(10, 45))) ||
+          (elText.length > 15 && cleanPara.includes(elText.slice(0, 35)))
+        ) {
+          // If advancing sequentially, prioritize elements after the last one used
+          if (idx > lastMatchedIdx || matchedIdx === -1) {
+            matchedEl = el;
+            matchedIdx = idx;
+            if (idx > lastMatchedIdx) break;
+          }
+        }
+      }
+
+      // If no text match found, advance sequentially through page elements!
+      if (!matchedEl) {
+        if (isIntro && pageElements.length > 0) {
+          matchedEl = pageElements[0];
+          matchedIdx = 0;
+        } else {
+          const nextIdx = lastMatchedIdx + 1;
+          if (nextIdx < pageElements.length) {
+            matchedEl = pageElements[nextIdx];
+            matchedIdx = nextIdx;
+          } else if (i < pageElements.length) {
+            matchedEl = pageElements[i];
+            matchedIdx = i;
+          }
+        }
+      }
+
+      if (matchedIdx !== -1) {
+        lastMatchedIdx = matchedIdx;
+      }
+
+      return {
+        text: para,
+        element: matchedEl || null,
+      };
+    });
+
+    this.currentReading = {
+      msgId: msg.id,
+      items,
+      currentIndex: startIndex,
+      isPaused: false,
+    };
+
+    msg.isAudioPlaying = true;
+    msg.isAudioPaused = false;
+    this.renderMessages();
+    this.playNextReadingItem(msg);
+  }
+
+  private playNextReadingItem(msg: ChatMessage): void {
+    if (this.readingWatchdogTimer) {
+      clearTimeout(this.readingWatchdogTimer);
+      this.readingWatchdogTimer = null;
+    }
+
+    if (!this.currentReading || this.currentReading.msgId !== msg.id || this.currentReading.isPaused) {
+      return;
+    }
+
+    if (this.currentReading.currentIndex >= this.currentReading.items.length) {
+      this.stopPageReadingHighlight();
+      msg.isAudioPlaying = false;
+      msg.isAudioPaused = false;
+      this.currentReading = null;
+      this.activeUtterance = null;
+      (window as any).__activeUtterance = null;
+      this.renderMessages();
+      return;
+    }
+
+    const currentItem = this.currentReading.items[this.currentReading.currentIndex];
+
+    // Advance highlight smoothly to the current paragraph and scroll it into view!
+    if (currentItem.element) {
+      this.highlightElement(currentItem.element);
+    } else {
+      this.stopPageReadingHighlight();
+    }
+
+    // Update UI so the active paragraph in the widget shows the reading indicator
+    this.renderMessages();
+
+    const cleanSpoken = currentItem.text.replace(/[#*•_`]/g, " ").replace(/\s+/g, " ").trim();
+    if (!cleanSpoken) {
+      this.currentReading.currentIndex++;
+      this.playNextReadingItem(msg);
+      return;
+    }
+
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      try {
+        window.speechSynthesis.resume();
+      } catch {}
+
+      const advanceNext = () => {
+        if (this.readingWatchdogTimer) {
+          clearTimeout(this.readingWatchdogTimer);
+          this.readingWatchdogTimer = null;
+        }
+        this.activeUtterance = null;
+        (window as any).__activeUtterance = null;
+
+        if (!this.currentReading || this.currentReading.msgId !== msg.id || this.currentReading.isPaused) {
+          return;
+        }
+        // Advance to next paragraph sequentially!
+        this.currentReading.currentIndex++;
+        this.playNextReadingItem(msg);
+      };
+
+      const u = new SpeechSynthesisUtterance(cleanSpoken);
+      // Retain strong reference to prevent Chromium garbage collection of utterance during speech!
+      this.activeUtterance = u;
+      (window as any).__activeUtterance = u;
+
+      const langMap: Record<SupportedLanguage, string> = {
+        en: "en-US",
+        am: "am-ET",
+        om: "om-ET",
+        ti: "ti-ET",
+        ar: "ar-SA",
+      };
+      u.lang = langMap[this.currentLang] || "en-US";
+      u.rate = 1.0;
+
+      u.onstart = () => {
+        msg.isAudioPlaying = true;
+        msg.isAudioPaused = false;
+      };
+
+      u.onend = () => {
+        advanceNext();
+      };
+
+      u.onerror = (e) => {
+        console.warn("TTS segment error:", e);
+        advanceNext();
+      };
+
+      // Watchdog timer: If Chrome drops onend or speech gets stuck, automatically advance to next paragraph!
+      const words = cleanSpoken.split(/\s+/).filter(Boolean).length;
+      const estimatedDurationMs = Math.min(14000, Math.max(3000, Math.ceil((words / 2.0) * 1000) + 1200));
+      this.readingWatchdogTimer = setTimeout(() => {
+        advanceNext();
+      }, estimatedDurationMs);
+
+      // Short delay ensures window.speechSynthesis.cancel() has completed before speak() is scheduled
+      setTimeout(() => {
+        try {
+          window.speechSynthesis.speak(u);
+        } catch {
+          advanceNext();
+        }
+      }, 40);
+    } else {
+      msg.isAudioPlaying = false;
+      msg.isAudioPaused = false;
+      this.stopPageReadingHighlight();
+      this.renderMessages();
+    }
+  }
+
+  private async handleListen(msg: ChatMessage): Promise<void> {
+    if (this.readingWatchdogTimer) {
+      clearTimeout(this.readingWatchdogTimer);
+      this.readingWatchdogTimer = null;
+    }
+
+    if (msg.isAudioPlaying) {
+      if (this.currentReading && this.currentReading.msgId === msg.id) {
+        this.currentReading.isPaused = true;
+      }
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.pause();
+      }
+      if (this.activeAudio && !this.activeAudio.paused) {
+        this.activeAudio.pause();
+      }
+      msg.isAudioPlaying = false;
+      msg.isAudioPaused = true;
+      this.renderMessages();
+      this.announce(this.t("pauseButton"));
+      return;
+    }
+
+    if (msg.isAudioPaused) {
+      if (this.currentReading && this.currentReading.msgId === msg.id) {
+        this.currentReading.isPaused = false;
+        msg.isAudioPlaying = true;
+        msg.isAudioPaused = false;
+        if ("speechSynthesis" in window && window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+        } else {
+          this.playNextReadingItem(msg);
+        }
+        this.renderMessages();
+        this.announce(this.t("listenButton"));
+        return;
+      }
+      if (this.activeAudio && this.activeAudio.paused) {
+        this.activeAudio.play().catch(() => this.startSequentialReading(msg, 0));
+        msg.isAudioPlaying = true;
+        msg.isAudioPaused = false;
+        this.renderMessages();
+        this.announce(this.t("listenButton"));
+        return;
+      }
+    }
+
+    this.startSequentialReading(msg, 0);
+  }
+
+  private handleStop(msg: ChatMessage): void {
+    if (this.readingWatchdogTimer) {
+      clearTimeout(this.readingWatchdogTimer);
+      this.readingWatchdogTimer = null;
+    }
+    this.activeUtterance = null;
+    (window as any).__activeUtterance = null;
+
+    if (this.currentReading) {
+      this.currentReading.isPaused = true;
+      this.currentReading = null;
+    }
+    if (this.activeAudio) {
+      this.activeAudio.pause();
+      this.activeAudio.currentTime = 0;
+      this.activeAudio = null;
+    }
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+    this.stopPageReadingHighlight();
+    msg.isAudioPlaying = false;
+    msg.isAudioPaused = false;
+    this.renderMessages();
+    this.announce(this.t("stopButton"));
+  }
+
+  private handleReplay(msg: ChatMessage): void {
+    this.handleStop(msg);
+    setTimeout(() => {
+      this.startSequentialReading(msg, 0);
+    }, 120);
+  }
+
+  private fallbackTTS(text: string, msg?: ChatMessage): void {
+    if (msg) {
+      this.startSequentialReading(msg, 0);
+    } else {
+      const dummyMsg: ChatMessage = {
+        id: `msg_tts_${Date.now()}`,
+        sender: "assistant",
+        text,
+      };
+      this.startSequentialReading(dummyMsg, 0);
+    }
+  }
+
+  // --- Page Navigation and Context Monitoring ---
+
+  private setupPageNavigationMonitor(): void {
+    if (typeof window === "undefined") return;
+
+    const updateContext = () => {
+      const currentUrl = window.location.href;
+      const currentTitle = document.title || "";
+      const currentCtx = this.extractPlatformContext();
+
+      const changed =
+        (this.lastPageUrl && this.lastPageUrl !== currentUrl) ||
+        (this.lastPageSection && this.lastPageSection !== currentCtx.section);
+
+      if (changed) {
+        this.stopPageReadingHighlight();
+        if (this.activeAudio) {
+          this.activeAudio.pause();
+          this.activeAudio = null;
+        }
+        if ("speechSynthesis" in window) {
+          window.speechSynthesis.cancel();
+        }
+        this.announce(`${this.t("navigatedToNotice")} ${currentCtx.section}`);
+        if (this.messages.length === 0) {
+          this.renderMessages();
+        }
+      }
+
+      this.lastPageUrl = currentUrl;
+      this.lastPageTitle = currentTitle;
+      this.lastPageSection = currentCtx.section;
+    };
+
+    window.addEventListener("popstate", updateContext);
+    window.addEventListener("hashchange", updateContext);
+
+    const originalPush = history.pushState;
+    if (originalPush) {
+      history.pushState = function (...args) {
+        const ret = originalPush.apply(this, args);
+        setTimeout(updateContext, 50);
+        return ret;
+      };
+    }
+    const originalReplace = history.replaceState;
+    if (originalReplace) {
+      history.replaceState = function (...args) {
+        const ret = originalReplace.apply(this, args);
+        setTimeout(updateContext, 50);
+        return ret;
+      };
+    }
+
+    this.navCheckTimer = window.setInterval(updateContext, 1500);
+    updateContext();
+  }
+
+  // --- Voice Activation & Wake Word ("Help") ---
+
+  private setupWakeWordDetector(): void {
+    if (typeof window === "undefined") return;
+    const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRec) return;
+
+    try {
+      this.wakeWordRecognition = new SpeechRec();
+      this.wakeWordRecognition.continuous = true;
+      this.wakeWordRecognition.interimResults = false;
+      this.wakeWordRecognition.lang =
+        this.currentLang === "ar"
+          ? "ar-SA"
+          : this.currentLang === "am"
+            ? "am-ET"
+            : this.currentLang === "om"
+              ? "om-ET"
+              : "en-US";
+
+      this.wakeWordRecognition.onresult = (e: any) => {
+        const last = e.results[e.results.length - 1];
+        if (!last || !last[0]) return;
+        const phrase = (last[0].transcript || "").trim().toLowerCase();
+        if (
+          phrase.includes("help") ||
+          phrase.includes("እርዳታ") ||
+          phrase.includes("gargaarsa") ||
+          phrase.includes("مساعدة")
+        ) {
+          this.triggerVoiceActivation();
+        }
+      };
+
+      this.wakeWordRecognition.onerror = () => {
+        if (this.voiceActivationEnabled && !this.isRecording) {
+          setTimeout(() => {
+            try {
+              this.wakeWordRecognition?.start();
+            } catch {}
+          }, 1000);
+        }
+      };
+
+      this.wakeWordRecognition.onend = () => {
+        if (this.voiceActivationEnabled && !this.isRecording) {
+          setTimeout(() => {
+            try {
+              this.wakeWordRecognition?.start();
+            } catch {}
+          }, 500);
+        }
+      };
+
+      this.wakeWordRecognition.start();
+    } catch (err) {
+      console.warn("Wake word detector error:", err);
+    }
+  }
+
+  private triggerVoiceActivation(): void {
+    this.openAssistant();
+    const chatInput = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-text-input");
+    if (chatInput) {
+      setTimeout(() => {
+        this.toggleVoiceInput(chatInput);
+      }, 250);
+    }
+  }
   // --- Q&A / Ask ---
 
-  public async askQuestion(questionText: string, forceSimple = false): Promise<void> {
+  public async askQuestion(questionText: string, forceSimple = false, fromVoice = false): Promise<void> {
     const q = questionText.trim();
     if (!q || this.isThinking) return;
+
+    // Check if user entered a 6-digit linking code or /confirm <code> directly in chat
+    const codeMatch = q.match(/^(?:\/confirm|\/link)?\s*([0-9]{6})$/i);
+    if (codeMatch) {
+      const code = codeMatch[1];
+      const success = await this.confirmLinkCode(code);
+      if (success) {
+        this.messages.push({
+          id: `msg_link_${Date.now()}`,
+          sender: "assistant",
+          text: `✅ ${this.t("codeLinkSuccess")}`,
+        });
+        this.renderMessages();
+        return;
+      }
+    }
 
     this.stopSpeaking();
 
@@ -3424,8 +4389,11 @@ export class BridgeAssistant extends HTMLElement {
         this.saveChatState();
         this.renderMessages();
 
-        // Automatically read response aloud in appropriate language
-        if (this.autoReadSpeech || (this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_tts)) {
+        if (fromVoice) {
+          setTimeout(() => {
+            this.handleListen(assistantMsg);
+          }, 300);
+        } else if (this.autoReadSpeech || (this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_tts)) {
           this.speakResponse(assistantMsg);
         }
       } else {
@@ -3734,6 +4702,10 @@ export class BridgeAssistant extends HTMLElement {
                 <!-- Rendered by updateTelegramLinkUI() -->
               </div>
             </div>
+            <!-- Space to enter / toggle link code -->
+            <div id="link-code-container" class="link-code-section" style="width:100%;">
+              <!-- Rendered by updateLinkCodeUI() -->
+            </div>
           </footer>
         </div>
 
@@ -3979,6 +4951,55 @@ export class BridgeAssistant extends HTMLElement {
               </button>
             </div>
 
+            <!-- Account & Telegram Linking Card -->
+            <div class="settings-card" id="card-account-linking">
+              <div class="settings-card-title">${ICONS.link} <span>${this.t("linkTab")}</span></div>
+              <div class="settings-card-desc">
+                ${this.t("supportZeroProof")}
+              </div>
+
+              ${this.isTelegramLinked ? `
+                <div style="display:flex; align-items:center; justify-content:space-between; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:0.5rem; padding:0.625rem 0.75rem; margin-bottom:0.75rem;">
+                  <span style="font-size:0.875rem; font-weight:600; color:#166534;">✓ ${this.t("connectedToTelegram")}</span>
+                  <button type="button" class="btn btn-secondary btn-sm" id="btn-settings-disconnect-tg" style="font-size:0.75rem;">
+                    ${this.t("disconnectTelegram")}
+                  </button>
+                </div>
+              ` : `
+                <!-- Enter Code from Telegram -->
+                <form id="settings-code-form" style="margin-bottom:0.875rem;">
+                  <label style="display:block; font-size:0.8125rem; font-weight:600; margin-bottom:0.375rem;">
+                    ${this.t("enterCodeLabel")}
+                  </label>
+                  <div style="display:flex; gap:0.375rem;">
+                    <input type="text" id="settings-input-code" class="text-input" placeholder="${this.t("codePlaceholder")}" maxlength="8" style="font-size:1rem; font-weight:700; letter-spacing:0.15em; text-align:center; flex:1;" required autocomplete="off" />
+                    <button type="submit" class="btn btn-primary" id="btn-settings-submit-code" style="white-space:nowrap; padding:0 0.875rem;">
+                      ${this.t("submitCodeBtn")}
+                    </button>
+                  </div>
+                  <div id="settings-code-msg" style="font-size:0.75rem; font-weight:600; margin-top:0.375rem; display:none;"></div>
+                </form>
+
+                <div style="display:flex; align-items:center; gap:0.5rem; margin:0.75rem 0;">
+                  <div style="flex:1; border-top:1px solid var(--b-border);"></div>
+                  <span style="font-size:0.75rem; color:var(--b-text-muted); font-weight:600;">OR</span>
+                  <div style="flex:1; border-top:1px solid var(--b-border);"></div>
+                </div>
+
+                <!-- Generate Code for Telegram -->
+                <div>
+                  <button type="button" class="btn btn-secondary" id="btn-generate-code" style="width:100%; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
+                    ${ICONS.link} <span>${this.t("generateCodeBtn")}</span>
+                  </button>
+                  <div class="code-display" id="code-display" style="display:none; font-size:1.5rem; font-weight:700; letter-spacing:0.25em; text-align:center; padding:0.75rem; background:var(--b-surface-alt, #f8fafc); border:2px dashed var(--b-primary); border-radius:0.5rem; margin-top:0.625rem; color:var(--b-primary);">
+                  </div>
+                  <div id="code-instructions" style="display:none; font-size:0.75rem; color:var(--b-text-muted); text-align:center; margin-top:0.375rem;">
+                    ${this.t("codeInstructions")}
+                  </div>
+                </div>
+              `}
+            </div>
+
             <!-- Clear Chat Card -->
             <div class="settings-card" style="border-color:#fecaca; background:#fff5f5;">
               <div style="display:flex; justify-content:space-between; align-items:center; gap:0.5rem; flex-wrap:wrap;">
@@ -3999,6 +5020,7 @@ export class BridgeAssistant extends HTMLElement {
 
     this.renderMessages();
     this.updateTelegramLinkUI();
+    this.updateLinkCodeUI();
     this.updateVoiceStatusUI();
     this.bindEvents();
   }
@@ -4106,14 +5128,23 @@ export class BridgeAssistant extends HTMLElement {
           <p style="margin:0; font-size:1rem; font-weight:600;">${this.t("emptyWelcome")}</p>
           <div class="suggested-questions">
             <span style="font-size:0.8125rem; font-weight:700; color:var(--b-text-muted);">${this.t("suggestedTitle")}</span>
-            <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ1"))}">
-              ${ICONS.arrowRight} ${this.escapeHtml(this.t("suggestedQ1"))}
+            <button type="button" class="btn btn-suggested btn-quick-explain" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
+              ${ICONS.lightbulb} <span>${this.escapeHtml(this.t("explainLessonBtn"))}</span>
             </button>
-            <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ2"))}">
-              ${ICONS.arrowRight} ${this.escapeHtml(this.t("suggestedQ2"))}
+            <button type="button" class="btn btn-suggested btn-quick-summarize" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
+              ${ICONS.book} <span>${this.escapeHtml(this.t("summarizePageBtn"))}</span>
             </button>
-            <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ3"))}">
-              ${ICONS.arrowRight} ${this.escapeHtml(this.t("suggestedQ3"))}
+            <button type="button" class="btn btn-suggested btn-quick-read" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
+              ${ICONS.listen} <span>${this.escapeHtml(this.t("readPageBtn"))}</span>
+            </button>
+            <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ1"))}" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
+              ${ICONS.arrowRight} <span>${this.escapeHtml(this.t("suggestedQ1"))}</span>
+            </button>
+            <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ2"))}" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
+              ${ICONS.arrowRight} <span>${this.escapeHtml(this.t("suggestedQ2"))}</span>
+            </button>
+            <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ3"))}" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
+              ${ICONS.arrowRight} <span>${this.escapeHtml(this.t("suggestedQ3"))}</span>
             </button>
           </div>
         </div>
@@ -4141,11 +5172,21 @@ export class BridgeAssistant extends HTMLElement {
         // Assistant Message Card
         const hasCitations = msg.citations && msg.citations.length > 0;
         const isRefusal = !!msg.isRefusal;
+        const headingText = msg.heading || (msg.isHandoff ? this.t("handoffReadyTitle") : this.t("answerHeading"));
+        const isThisReading = !!(this.currentReading && this.currentReading.msgId === msg.id);
+
+        const paragraphs = msg.text.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+        const renderedTextHtml = paragraphs
+          .map((p, idx) => {
+            const isActive = isThisReading && this.currentReading!.currentIndex === idx;
+            return `<div class="answer-para-item ${isActive ? "active-reading-para" : ""}" data-msg-id="${msg.id}" data-idx="${idx}" title="Click to read and highlight this paragraph" style="cursor:pointer; margin-bottom:0.625rem; line-height:1.5;">${this.escapeHtml(p)}</div>`;
+          })
+          .join("");
 
         return `
           <div class="msg-row msg-assistant" id="${msg.id}">
-            <h4 class="answer-heading">${this.escapeHtml(msg.heading || this.t("answerHeading"))}</h4>
-            <p class="answer-text">${this.escapeHtml(msg.text)}</p>
+            <h4 class="answer-heading">${this.escapeHtml(headingText)}</h4>
+            <div class="answer-text">${renderedTextHtml}</div>
 
             ${
               msg.isHandoff
@@ -4191,9 +5232,19 @@ export class BridgeAssistant extends HTMLElement {
               <button type="button" class="btn btn-secondary btn-listen" data-msg-id="${msg.id}">
                 ${msg.isAudioPlaying ? `${ICONS.pause} ${this.t("pauseButton")}` : `${ICONS.sound} ${this.t("listenButton")}`}
               </button>
-              <button type="button" class="btn btn-secondary btn-simpler" data-msg-id="${msg.id}">
-                ${ICONS.lightbulb} ${this.t("makeSimplerButton")}
+              <button type="button" class="btn btn-secondary btn-stop" data-msg-id="${msg.id}" style="display:inline-flex; align-items:center; gap:0.375rem;" ${msg.isAudioPlaying || msg.isAudioPaused ? "" : "hidden"}>
+                ${ICONS.stop}
+                <span>${this.t("stopButton")}</span>
               </button>
+              <button type="button" class="btn btn-secondary btn-replay" data-msg-id="${msg.id}" style="display:inline-flex; align-items:center; gap:0.375rem;">
+                ${ICONS.replay}
+                <span>${this.t("replayButton")}</span>
+              </button>
+              <button type="button" class="btn btn-secondary btn-simpler" data-msg-id="${msg.id}" style="display:inline-flex; align-items:center; gap:0.375rem;">
+                ${ICONS.lightbulb}
+                <span>${this.t("makeSimplerButton")}</span>
+              </button>
+              ${msg.isAudioPlaying ? `<span class="speaking-indicator-pill" role="status" aria-live="polite">${ICONS.volume} <span>${this.t("speakingIndicator")}</span></span>` : ""}
             </div>
 
             <!-- Citations / Sources with readable names -->
@@ -4201,19 +5252,44 @@ export class BridgeAssistant extends HTMLElement {
             ? `
                 <div class="sources-box">
                   <div class="sources-title">${this.t("sourcesTitle")}</div>
-                  ${msg.citations!
-              .map(
-                (c) => `
-                    <a href="${this.escapeHtml(c.url)}" target="_blank" rel="noopener noreferrer" class="source-link">
-                      📖 ${this.escapeHtml(c.title || c.heading)}
+                  ${(msg.citations || [])
+                    .filter((c, idx, arr) => arr.findIndex((x) => x.url === c.url) === idx)
+                    .map(
+                      (c) => `
+                    <a href="${this.escapeHtml(c.url)}" target="_blank" rel="noopener noreferrer" class="source-link citation-link" style="display:inline-flex; align-items:center; gap:0.375rem;">
+                      ${ICONS.book} <span>${this.escapeHtml(c.title || c.heading)}</span>
                     </a>
                   `
-              )
-              .join("")}
+                    )
+                    .join("")}
                 </div>
               `
-            : ""
-          }
+                : ""
+            }
+
+            <!-- Suggested Follow-up Questions -->
+            ${
+              !isRefusal && !msg.isHandoff
+                ? `
+                <div class="followup-box">
+                  <div class="followup-title">
+                    <span>${this.t("followupTitle")}</span>
+                  </div>
+                  <div class="followup-chips">
+                    <button type="button" class="btn btn-secondary btn-followup" data-query="${this.escapeHtml(this.t("followupQ1"))}">
+                      ${this.t("followupQ1")}
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-followup" data-query="${this.escapeHtml(this.t("followupQ2"))}">
+                      ${this.t("followupQ2")}
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-followup" data-query="${this.escapeHtml(this.t("followupQ3"))}">
+                      ${this.t("followupQ3")}
+                    </button>
+                  </div>
+                </div>
+              `
+                : ""
+            }
           </div>
         `;
       })
@@ -4335,11 +5411,15 @@ export class BridgeAssistant extends HTMLElement {
       }
     });
 
-    // 4-Language Switcher
-    this.shadowRoot.querySelector("#btn-lang-en")?.addEventListener("click", () => this.setLanguage("en"));
-    this.shadowRoot.querySelector("#btn-lang-am")?.addEventListener("click", () => this.setLanguage("am"));
-    this.shadowRoot.querySelector("#btn-lang-om")?.addEventListener("click", () => this.setLanguage("om"));
-    this.shadowRoot.querySelector("#btn-lang-ar")?.addEventListener("click", () => this.setLanguage("ar"));
+    // 5-Language Switcher (en, am, om, ti, ar)
+    this.shadowRoot.querySelectorAll<HTMLButtonElement>(".lang-toggle-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const langCode = btn.id.replace("btn-lang-", "") as SupportedLanguage;
+        if (langCode && ["en", "am", "om", "ti", "ar"].includes(langCode)) {
+          this.setLanguage(langCode);
+        }
+      });
+    });
 
     // Quick Language Toggle Button (.lang-btn)
     this.shadowRoot.querySelector(".lang-btn")?.addEventListener("click", () => {
@@ -4455,6 +5535,62 @@ export class BridgeAssistant extends HTMLElement {
         if (!this.autoReadSpeech && this.isSpeaking) {
           this.stopSpeaking();
         }
+
+      });
+    }
+
+    // Wake Word Toggle
+    const chkWakeWord = this.shadowRoot.querySelector<HTMLInputElement>("#chk-wake-word");
+    if (chkWakeWord) {
+      chkWakeWord.addEventListener("change", () => {
+        this.voiceActivationEnabled = chkWakeWord.checked;
+        localStorage.setItem("savanna_bridge_wake_word", this.voiceActivationEnabled ? "true" : "false");
+        if (this.voiceActivationEnabled) {
+          this.setupWakeWordDetector();
+        } else if (this.wakeWordRecognition) {
+          try {
+            this.wakeWordRecognition.stop();
+          } catch {}
+          this.wakeWordRecognition = null;
+        }
+      });
+    }
+
+    // Settings Code Form
+    const settingsCodeForm = this.shadowRoot.querySelector<HTMLFormElement>("#settings-code-form");
+    if (settingsCodeForm) {
+      settingsCodeForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const input = this.shadowRoot?.querySelector<HTMLInputElement>("#settings-input-code");
+        const msg = this.shadowRoot?.querySelector<HTMLElement>("#settings-code-msg");
+        if (input && input.value) {
+          this.confirmLinkCode(input.value, msg);
+        }
+      });
+    }
+
+    // Settings Disconnect Telegram
+    this.shadowRoot.querySelector("#btn-settings-disconnect-tg")?.addEventListener("click", () => {
+      this.disconnectTelegram();
+    });
+
+    // Clear Chat Button
+    this.shadowRoot.querySelector("#btn-clear-chat")?.addEventListener("click", () => {
+      this.clearChat();
+    });
+
+    // Generate Link Code Button
+    this.shadowRoot.querySelector("#btn-generate-code")?.addEventListener("click", () => {
+      this.generateLinkCode();
+    });
+
+    // Handoff Request Form in Settings
+    const settingsHandoffForm = this.shadowRoot.querySelector<HTMLFormElement>("#handoff-request-form");
+    if (settingsHandoffForm) {
+      settingsHandoffForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const reasonInput = this.shadowRoot?.querySelector<HTMLInputElement>("#handoff-reason");
+        this.requestHandoff(reasonInput?.value || undefined);
       });
     }
 
