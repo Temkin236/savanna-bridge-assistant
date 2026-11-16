@@ -146,23 +146,37 @@ class GroqProvider(AIProvider):
         return self._with_rotation(request)
 
     def _chat(self, system: str, user: str) -> str:
-        response = self._post_json(
-            "/chat/completions",
-            {
-                "model": self.chat_model,
-                "messages": [
-                    {"role": "system", "content": system},
-                    {"role": "user", "content": user},
-                ],
-                "temperature": 0.1,
-                "max_tokens": 800,
-            },
-        )
-        choices = response.get("choices", [])
-        if not isinstance(choices, list) or not choices:
-            return ""
-        message = choices[0].get("message", {})
-        return str(message.get("content", "")).strip()
+        models = [self.chat_model]
+        if "qwen/qwen3.8-27b" not in models:
+            models.append("qwen/qwen3.8-27b")
+        if "openai/gpt-oss-120b" not in models:
+            models.append("openai/gpt-oss-120b")
+
+        for model in models:
+            try:
+                response = self._post_json(
+                    "/chat/completions",
+                    {
+                        "model": model,
+                        "messages": [
+                            {"role": "system", "content": system},
+                            {"role": "user", "content": user},
+                        ],
+                        "temperature": 0.1,
+                        "max_tokens": 800,
+                    },
+                )
+                choices = response.get("choices", [])
+                if isinstance(choices, list) and choices:
+                    message = choices[0].get("message", {})
+                    content = str(message.get("content", "")).strip()
+                    if content:
+                        self.chat_model = model
+                        return content
+            except Exception as exc:
+                logger.warning("Groq model %s unavailable (%s); checking next model", model, type(exc).__name__)
+                continue
+        return ""
 
     def generate_answer(
         self,
