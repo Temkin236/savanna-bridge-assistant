@@ -15,6 +15,10 @@ async function configureWidget(page: import("@playwright/test").Page, path = "/s
     element.setAttribute("data-api", api);
   }, apiBase);
   await page.locator("bridge-assistant #launcher-btn").click();
+  const skipOnboarding = page.locator("bridge-assistant #btn-onboard-skip");
+  if (await skipOnboarding.isVisible()) {
+    await skipOnboarding.click();
+  }
 }
 
 test.describe("Savanna Bridge integration", () => {
@@ -26,15 +30,15 @@ test.describe("Savanna Bridge integration", () => {
     await expect(dialog).toBeVisible();
     await expect(dialog.locator("#dialog-title")).toContainText("Savanna Bridge Assistant");
 
-    const input = page.locator("bridge-assistant #chat-text-input");
+    const input = page.locator("bridge-assistant #chat-input");
     await input.fill("Explain Module 2");
-    await page.locator("bridge-assistant #send-btn").click();
+    await page.locator("bridge-assistant #btn-send").click();
     await expect(page.locator("bridge-assistant .source-link").first()).toBeVisible({
       timeout: 10_000,
     });
 
     await input.fill("Who won the football match on Mars?");
-    await page.locator("bridge-assistant #send-btn").click();
+    await page.locator("bridge-assistant #btn-send").click();
     await expect(page.locator("bridge-assistant .not-verified-box").first()).toBeVisible({
       timeout: 10_000,
     });

@@ -5,10 +5,16 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 # Paths
 API_DIR = Path(__file__).resolve().parents[2]
 ROOT_DIR = API_DIR.parent
 DEFAULT_DB_PATH = str(API_DIR / "savanna_bridge.db")
+
+# Local development uses the repository-level environment file. Values already
+# provided by the process or deployment platform keep precedence.
+load_dotenv(ROOT_DIR / ".env", override=False)
 
 # Provider settings: "auto", "offline", "addis", "cloud"
 AI_PROVIDER: str = os.getenv("AI_PROVIDER", "auto").lower()

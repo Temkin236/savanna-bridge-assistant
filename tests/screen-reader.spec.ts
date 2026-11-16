@@ -17,10 +17,12 @@ test.describe("screen-reader and non-visual interaction contract", () => {
       const host = document.querySelector("bridge-assistant");
       return host?.shadowRoot?.activeElement?.id;
     });
-    expect(["chat-text-input", "dialog-title"]).toContain(focusedId);
+    expect(["chat-input", "dialog-title", "onboard-title"]).toContain(focusedId);
     await expect(page.locator("bridge-assistant #chat-log")).toHaveAttribute("role", "log");
 
-    const focusables = dialog.locator(
+    const onboarding = dialog.locator("#onboarding-overlay");
+    const focusScope = (await onboarding.isVisible()) ? onboarding : dialog;
+    const focusables = focusScope.locator(
       'button:visible, a[href]:visible, input:visible, select:visible, textarea:visible'
     );
     const last = focusables.last();
@@ -42,12 +44,12 @@ test.describe("screen-reader and non-visual interaction contract", () => {
     );
     await expect(languageButtons).toHaveCount(5);
 
-    await page.locator("bridge-assistant #btn-lang-ar").click();
+    await page.locator("bridge-assistant #onboard-lang-ar").click();
     const dialog = page.locator("bridge-assistant #assistant-dialog");
     await expect(dialog).toHaveAttribute("lang", "ar");
     await expect(dialog).toHaveAttribute("dir", "rtl");
 
-    await page.locator("bridge-assistant #btn-lang-om").click();
+    await page.locator("bridge-assistant #onboard-lang-om").click();
     await expect(page.locator("bridge-assistant #assistant-dialog")).toHaveAttribute("lang", "om");
   });
 
@@ -57,6 +59,7 @@ test.describe("screen-reader and non-visual interaction contract", () => {
         configurable: true,
         value: {
           cancel: () => undefined,
+          getVoices: () => [],
           speak: (utterance: SpeechSynthesisUtterance) => {
             (window as typeof window & { __spoken?: string }).__spoken = utterance.text;
           },
@@ -94,8 +97,9 @@ test.describe("screen-reader and non-visual interaction contract", () => {
     await page.goto(`${demoBase}/savanna/`);
     await page.evaluate(() => customElements.whenDefined("bridge-assistant"));
     await page.locator("bridge-assistant #launcher-btn").click();
-    await page.locator("bridge-assistant #chat-text-input").fill("Explain the lesson");
-    await page.locator("bridge-assistant #send-btn").click();
+    await page.locator("bridge-assistant #btn-onboard-skip").click();
+    await page.locator("bridge-assistant #chat-input").fill("Explain the lesson");
+    await page.locator("bridge-assistant #btn-send").click();
     const answer = page.getByText("The written answer stays available.");
     await expect(answer).toBeVisible();
     await page.locator("bridge-assistant .btn-listen").click();
@@ -135,6 +139,7 @@ test.describe("screen-reader and non-visual interaction contract", () => {
         configurable: true,
         value: {
           cancel: () => undefined,
+          getVoices: () => [],
           speak: (utterance: SpeechSynthesisUtterance) => {
             (window as typeof window & { __spoken?: string }).__spoken = utterance.text;
           },
@@ -158,11 +163,32 @@ test.describe("screen-reader and non-visual interaction contract", () => {
       .poll(() => page.evaluate(() => (window as typeof window & { __spoken?: string }).__spoken))
       .toContain("voice assistance");
 
-    for (const selector of ["#launcher-btn", "#send-btn", "#mic-btn", "#btn-onboard-skip"]) {
+    for (const selector of ["#launcher-btn", "#btn-send", "#mic-btn", "#btn-onboard-skip"]) {
       const box = await page.locator(`bridge-assistant ${selector}`).boundingBox();
       expect(box, `${selector} must be visible`).not.toBeNull();
       expect(box!.height, `${selector} target height`).toBeGreaterThanOrEqual(44);
       expect(box!.width, `${selector} target width`).toBeGreaterThanOrEqual(44);
     }
+  });
+
+  test("onboarding is sequential and the desktop panel is large and resizable", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto(`${demoBase}/savanna/`);
+    await page.evaluate(() => customElements.whenDefined("bridge-assistant"));
+    await page.locator("bridge-assistant #launcher-btn").click();
+
+    const panel = page.locator("bridge-assistant .panel");
+    const panelBox = await panel.boundingBox();
+    expect(panelBox).not.toBeNull();
+    expect(panelBox!.width).toBeGreaterThanOrEqual(700);
+    expect(panelBox!.height).toBeGreaterThanOrEqual(700);
+    await expect(panel).toHaveCSS("resize", "both");
+
+    await expect(page.locator("bridge-assistant .wizard-step-label")).toHaveText("Step 1 of 4");
+    await page.locator("bridge-assistant #btn-onboard-next").click();
+    await expect(page.locator("bridge-assistant .wizard-step-label")).toHaveText("Step 2 of 4");
+    await expect(page.locator("bridge-assistant #onboard-chk-screen-reader")).toBeVisible();
+    await page.locator("bridge-assistant #btn-onboard-back").click();
+    await expect(page.locator("bridge-assistant .wizard-step-label")).toHaveText("Step 1 of 4");
   });
 });

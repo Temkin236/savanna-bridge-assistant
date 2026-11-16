@@ -1,0 +1,34 @@
+services:
+  # 1. FastAPI API Service
+  - type: web
+    name: savanna-bridge-api
+    env: docker
+    dockerfilePath: ./api/Dockerfile
+    dockerContext: ./api
+    plan: free
+    region: frankfurt
+    envVars:
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: AI_PROVIDER
+        value: auto
+      - key: TOKEN_SECRET
+        generateValue: true
+      - key: BOT_API_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        value: sqlite:////tmp/savanna_bridge.db
+      - key: DB_PATH
+        value: /tmp/savanna_bridge.db
+      - key: PORT
+        value: 8000
+
+  # 2. Demo Host (Savanna static pages + widget)
+  - type: web
+    name: savanna-bridge-demo
+    env: docker
+    dockerfilePath: ./demo-host/Dockerfile
+    dockerContext: .
+    plan: free
+    region: frankfurt
+

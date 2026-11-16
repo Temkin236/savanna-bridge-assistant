@@ -108,6 +108,9 @@ export const ICONS = {
   key: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 2l-2 2m-1.5 1.5L14 9l-1.5-1.5-3 3L8 9 5 12l3 3 4.5-4.5"></path><circle cx="7.5" cy="16.5" r="4.5"></circle></svg>`,
   listen: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`,
   pause: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>`,
+  stop: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg>`,
+  replay: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>`,
+  volume: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`,
   lightbulb: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="9" y1="18" x2="15" y2="18"></line><line x1="10" y1="22" x2="14" y2="22"></line><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5.76.76 1.23 1.52 1.41 2.5"></path></svg>`,
   book: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>`,
   arrowRight: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>`,
@@ -123,9 +126,7 @@ export const ICONS = {
   sound: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`,
   volumeMute: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>`,
   play: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`,
-  stop: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg>`,
-  replay: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>`,
-  volume: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`,
+  lock: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`,
   speed: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`,
   sync: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>`,
   sparkles: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>`,
@@ -273,10 +274,10 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     wakeWordSetting: "Voice activation (Wake word 'Help')",
     wakeWordDesc: "Say 'Help' to automatically open assistant and start speaking",
     navigatedToNotice: "Navigated to new lesson:",
-    followupTitle: "💡 Follow-up questions:",
-    followupQ1: "💡 Explain with examples",
-    followupQ2: "➡️ What to know before next lesson?",
-    followupQ3: "📝 Quiz me on this topic",
+    followupTitle: "Follow-up questions:",
+    followupQ1: "Explain with examples",
+    followupQ2: "What to know before next lesson?",
+    followupQ3: "Quiz me on this topic",
   },
   am: {
     appTitle: "የሳቫና ብሪጅ ረዳት",
@@ -419,10 +420,10 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     wakeWordSetting: "የድምጽ ማግበር (የማንቂያ ቃል 'እርዳታ' / 'Help')",
     wakeWordDesc: "ረዳቱን በራስ-ሰር ለመክፈትና ለማናገር 'እርዳታ' ወይም 'Help' ይበሉ",
     navigatedToNotice: "ወደ አዲስ ትምህርት ገጽ ተቀይሯል፡",
-    followupTitle: "💡 ተከታይ ጥያቄዎች፡",
-    followupQ1: "💡 በምሳሌዎች አስረዳኝ",
-    followupQ2: "➡️ ወደ ቀጣዩ ትምህርት ከመሄዴ በፊት ምን ልወቅ?",
-    followupQ3: "📝 ግንዛቤዬን ፈትነኝ",
+    followupTitle: "ተከታይ ጥያቄዎች፡",
+    followupQ1: "በምሳሌዎች አስረዳኝ",
+    followupQ2: "ወደ ቀጣዩ ትምህርት ከመሄዴ በፊት ምን ልወቅ?",
+    followupQ3: "ግንዛቤዬን ፈትነኝ",
   },
   om: {
     appTitle: "Gargaaraa Savanna Bridge",
@@ -565,10 +566,10 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     wakeWordSetting: "Sagaleen kakaasuu (Jechama 'Gargaarsa' / 'Help')",
     wakeWordDesc: "Gargaaraa ofumaan banuuf 'Gargaarsa' ykn 'Help' jedhaa",
     navigatedToNotice: "Gara barnoota haaraatti jijjiirameera:",
-    followupTitle: "💡 Gaaffilee itti aanan:",
-    followupQ1: "💡 Fakkeenyotaan naaf ibsi",
-    followupQ2: "➡️ Barnoota itti aanuuf maal beekuun qaba?",
-    followupQ3: "📝 Hubannoo koo na qori",
+    followupTitle: "Gaaffilee itti aanan:",
+    followupQ1: "Fakkeenyotaan naaf ibsi",
+    followupQ2: "Barnoota itti aanuuf maal beekuun qaba?",
+    followupQ3: "Hubannoo koo na qori",
   },
   ti: {
     appTitle: "ናይ ሳቫና ብሪጅ ሓጋዚ",
@@ -711,10 +712,10 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     wakeWordSetting: "ብድምጺ ምኽፋት ('ሓገዝ' / 'Help')",
     wakeWordDesc: "ንሓጋዚ ንምኽፋት 'ሓገዝ' ወይ 'Help' በሉ",
     navigatedToNotice: "ናብ ሓድሽ ትምህርቲ ተቐይሩ፡",
-    followupTitle: "💡 ቀጸልቲ ሕቶታት፡",
-    followupQ1: "💡 ብኣብነታት ኣረድኣኒ",
-    followupQ2: "➡️ ናብ ዝቕጽል ትምህርቲ ቅድሚ ምኻደይ እንታይ ክፈልጥ ኣለኒ?",
-    followupQ3: "📝 ግንዛበይ ፈትነኒ",
+    followupTitle: "ቀጸልቲ ሕቶታት፡",
+    followupQ1: "ብኣብነታት ኣረድኣኒ",
+    followupQ2: "ናብ ዝቕጽል ትምህርቲ ቅድሚ ምኻደይ እንታይ ክፈልጥ ኣለኒ?",
+    followupQ3: "ግንዛበይ ፈትነኒ",
   },
   ar: {
     appTitle: "مساعد سافانا بريدج",
@@ -857,10 +858,10 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     wakeWordSetting: "التفعيل الصوتي (كلمة التنبيه 'مساعدة' / 'Help')",
     wakeWordDesc: "قل 'مساعدة' أو 'Help' لفتح المساعد تلقائياً والتحدث مباشرة",
     navigatedToNotice: "تم الانتقال إلى درس جديد:",
-    followupTitle: "💡 أسئلة متابعة مقترحة:",
-    followupQ1: "💡 اشرح بالأمثلة",
-    followupQ2: "➡️ ماذا يجب أن أفهم قبل الدرس التالي؟",
-    followupQ3: "📝 اختبر فهمي لهذا الموضوع",
+    followupTitle: "أسئلة متابعة مقترحة:",
+    followupQ1: "اشرح بالأمثلة",
+    followupQ2: "ماذا يجب أن أفهم قبل الدرس التالي؟",
+    followupQ3: "اختبر فهمي لهذا الموضوع",
   },
 };
 
@@ -876,7 +877,7 @@ const STYLES = `
     --b-primary-contrast: #ffffff;
     --b-surface: #f8fafc;
     --b-surface-alt: #f1f5f9;
-    --b-focus: #b91c1c;
+    --b-focus: #2563eb;
     --b-radius: 0.75rem;
     --b-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
     font-family: var(--b-font);
@@ -891,16 +892,16 @@ const STYLES = `
   :host([data-size="larger"]) { font-size: 1.25rem; }
 
   :host([data-contrast="high"]) {
-    --b-bg: #000000;
-    --b-text: #ffffff;
-    --b-text-muted: #e2e8f0;
-    --b-border: #ffffff;
-    --b-primary: #facc15;
-    --b-primary-hover: #eab308;
-    --b-primary-contrast: #000000;
-    --b-surface: #0a0a0a;
-    --b-surface-alt: #1a1a1a;
-    --b-focus: #facc15;
+    --b-bg: #ffffff;
+    --b-text: #000000;
+    --b-text-muted: #111111;
+    --b-border: #000000;
+    --b-primary: #000080;
+    --b-primary-hover: #000050;
+    --b-primary-contrast: #ffffff;
+    --b-surface: #ffffff;
+    --b-surface-alt: #f0f0f0;
+    --b-focus: #000000;
   }
 
   *, *::before, *::after {
@@ -990,7 +991,7 @@ const STYLES = `
     border-color: var(--b-border);
   }
 
-  /* Floating Accessibility Launcher Button */
+  /* Floating Launcher Button */
   .launcher {
     position: fixed;
     inset-block-end: 1.25rem;
@@ -1000,33 +1001,15 @@ const STYLES = `
     color: #ffffff;
     border: 2px solid #ffffff;
     border-radius: 2rem;
-    padding: 0.625rem 1.25rem;
-    box-shadow: 0 4px 14px rgba(185, 28, 28, 0.4), 0 2px 6px rgba(0, 0, 0, 0.15);
+    padding: 0.5rem 1.25rem;
+    box-shadow: var(--b-shadow);
     font-weight: 700;
     display: inline-flex;
     align-items: center;
     gap: 0.625rem;
-    cursor: pointer;
-    transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
   }
   .launcher:hover {
     background: #991b1b;
-    box-shadow: 0 6px 20px rgba(185, 28, 28, 0.5), 0 3px 8px rgba(0, 0, 0, 0.2);
-    transform: translateY(-2px);
-  }
-
-  :host([data-contrast="high"]) .launcher {
-    background: #000000;
-    color: #facc15;
-    border: 3px solid #facc15;
-    box-shadow: 0 0 0 2px #000000, 0 0 16px rgba(250, 204, 21, 0.6);
-  }
-  :host([data-contrast="high"]) .launcher .launcher-icon-badge {
-    background: #facc15;
-    color: #000000;
-  }
-  :host([data-contrast="high"]) .launcher span {
-    color: #facc15 !important;
   }
 
   /* Nav Tabs */
@@ -1083,9 +1066,11 @@ const STYLES = `
   /* Open Panel */
   .panel {
     position: fixed;
-    inset: auto 1rem 5rem auto;
-    width: min(30rem, calc(100vw - 1.5rem));
-    height: min(46rem, calc(100vh - 6.5rem));
+    inset: auto 1.25rem 5.5rem auto;
+    width: min(52rem, calc(100vw - 2rem));
+    height: min(52rem, calc(100vh - 7rem));
+    min-width: min(26rem, calc(100vw - 2rem));
+    min-height: min(34rem, calc(100vh - 7rem));
     max-height: calc(100vh - 6.5rem);
     display: flex;
     flex-direction: column;
@@ -1096,33 +1081,30 @@ const STYLES = `
     box-shadow: var(--b-shadow);
     z-index: 2147483640;
     overflow: hidden;
+    resize: both;
   }
   .panel[hidden] { display: none !important; }
 
   /* Header */
   .header {
-    padding: 0.625rem 0.75rem;
+    padding: 0.5rem 0.75rem;
     border-bottom: 1px solid var(--b-border);
     background: var(--b-surface);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.5rem;
+    gap: 0.375rem;
     flex-shrink: 0;
   }
 
   .header-titles {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    flex: 1;
     min-width: 0;
-    flex: 1 1 auto;
-    overflow: hidden;
   }
 
   .title {
     margin: 0;
-    font-size: 0.9375rem;
+    font-size: 1rem;
     font-weight: 700;
     white-space: nowrap;
     overflow: hidden;
@@ -1132,19 +1114,22 @@ const STYLES = `
   .header-actions {
     display: flex;
     align-items: center;
-    gap: 0.25rem;
-    flex-shrink: 0;
-    flex-wrap: nowrap;
+    justify-content: flex-end;
+    gap: 0.375rem;
+    flex-wrap: wrap;
+    min-width: 0;
   }
 
-  .lang-group {
-    display: inline-flex;
+  @media (max-width: 880px) {
+    .header { flex-wrap: wrap; }
+    .header-actions { width: 100%; justify-content: space-between; }
+    .lang-group { flex: 1; justify-content: space-between; }
+  }
+
+  .lang-bar {
+    display: flex;
     align-items: center;
-    background: var(--b-surface-alt);
-    border: 1px solid var(--b-border);
-    border-radius: 0.375rem;
-    padding: 1px;
-    gap: 1px;
+    gap: 0.2rem;
   }
 
   .lang-toggle-btn {
@@ -1357,6 +1342,46 @@ const STYLES = `
     font-size: 0.8125rem;
   }
 
+  .followup-box {
+    margin-top: 0.625rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed var(--b-border);
+  }
+
+  .followup-title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--b-text-muted);
+    margin-bottom: 0.375rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .followup-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+  }
+
+  .btn-followup {
+    font-size: 0.8125rem !important;
+    padding: 0.25rem 0.625rem !important;
+    min-height: 2rem !important;
+    border-radius: 1rem !important;
+    background: #f8fafc !important;
+    border: 1px solid #cbd5e1 !important;
+    color: var(--b-text) !important;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+
+  .btn-followup:hover {
+    background: #e2e8f0 !important;
+    border-color: var(--b-primary) !important;
+    color: var(--b-primary) !important;
+  }
+
   .sources-title {
     font-weight: 700;
     margin-bottom: 0.25rem;
@@ -1387,6 +1412,53 @@ const STYLES = `
     padding: 0.5rem 0.875rem;
     font-style: italic;
     color: var(--b-text-muted);
+  }
+
+  .page-context-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    background: var(--b-surface-alt);
+    border: 1px solid var(--b-border);
+    padding: 0.375rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.8125rem;
+    color: var(--b-primary);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .speaking-indicator-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1d4ed8;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    animation: sb-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .listening-indicator-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    animation: sb-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes sb-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
   }
 
   /* Footer (Always Visible) */
@@ -1599,6 +1671,9 @@ const STYLES = `
       border-radius: 0 !important;
       border: none !important;
       box-shadow: none !important;
+      min-width: 0 !important;
+      min-height: 0 !important;
+      resize: none !important;
     }
     .panel[hidden] {
       display: none !important;
@@ -1655,7 +1730,7 @@ const STYLES = `
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1rem;
+    padding: clamp(0.75rem, 3vw, 2rem);
     box-sizing: border-box;
   }
   .onboarding-card {
@@ -1664,11 +1739,12 @@ const STYLES = `
     border-radius: var(--b-radius);
     border: 2px solid var(--b-primary);
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
-    max-width: 28rem;
+    max-width: 40rem;
     width: 100%;
-    max-height: 90vh;
+    min-height: min(31rem, calc(100% - 1rem));
+    max-height: calc(100% - 1rem);
     overflow-y: auto;
-    padding: 1.25rem;
+    padding: clamp(1rem, 3vw, 1.75rem);
     display: flex;
     flex-direction: column;
     gap: 1rem;
@@ -1695,6 +1771,7 @@ const STYLES = `
     flex-direction: column;
     gap: 0.875rem;
     font-size: 0.875rem;
+    flex: 1;
   }
   .onboarding-actions {
     display: flex;
@@ -1703,6 +1780,38 @@ const STYLES = `
     border-top: 1px solid var(--b-border);
     padding-top: 0.75rem;
     flex-wrap: wrap;
+  }
+  .wizard-progress {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.375rem;
+  }
+  .wizard-progress span {
+    height: 0.375rem;
+    border-radius: 999px;
+    background: var(--b-border);
+  }
+  .wizard-progress span.active { background: var(--b-primary); }
+  .wizard-step-label {
+    color: var(--b-primary);
+    font-size: 0.8125rem;
+    font-weight: 700;
+  }
+  .onboarding-option-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+  .onboarding-option-grid .toggle-row {
+    height: 100%;
+    padding: 0.875rem;
+    border: 1px solid var(--b-border);
+    border-radius: 0.625rem;
+    background: var(--b-surface-alt);
+  }
+  @media (max-width: 540px) {
+    .onboarding-option-grid { grid-template-columns: 1fr; }
+    .onboarding-card { min-height: calc(100% - 0.5rem); }
   }
 
   /* Voice Autoplay Activation Banner */
@@ -1885,6 +1994,7 @@ export class BridgeAssistant extends HTMLElement {
   };
 
   private onboardingDismissed = false;
+  private onboardingStep = 0;
   private isReadingPage = false;
   private isReadingPaused = false;
   private showAutoplayBanner = false;
@@ -1901,7 +2011,32 @@ export class BridgeAssistant extends HTMLElement {
 
   // Attributes: supports both guide plain attributes (lang, api, content) and data-*
   get apiBase(): string {
-    return this.getAttribute("api") || this.getAttribute("data-api") || "http://localhost:8000";
+    if (typeof window !== "undefined" && (window as any).SAVANNA_API_URL) {
+      return (window as any).SAVANNA_API_URL;
+    }
+
+    if (typeof window !== "undefined" && window.location) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const paramApi = urlParams.get("api");
+      if (paramApi) return paramApi;
+    }
+
+    const attr = this.getAttribute("api") || this.getAttribute("data-api");
+
+    if (typeof window !== "undefined" && window.location && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1") {
+      if (attr && !attr.includes("localhost") && !attr.includes("127.0.0.1")) {
+        return attr;
+      }
+      const host = window.location.hostname;
+      if (host.includes("-demo.onrender.com")) {
+        return `${window.location.protocol}//${host.replace("-demo.onrender.com", "-api.onrender.com")}`;
+      }
+      if (host.includes(".onrender.com")) {
+        return window.location.origin;
+      }
+    }
+
+    return attr || "http://localhost:8000";
   }
 
   get courseId(): string {
@@ -1967,6 +2102,10 @@ export class BridgeAssistant extends HTMLElement {
     this.attachShadow({ mode: "open" });
     this.render();
     this.setupNetworkMonitor();
+    this.setupPageNavigationMonitor();
+    if (this.voiceActivationEnabled) {
+      this.setupWakeWordDetector();
+    }
 
     // Universal compatibility: track SPA navigation without re-initializing widget
     this.popstateListener = () => {
@@ -2361,7 +2500,6 @@ export class BridgeAssistant extends HTMLElement {
 
   public getBestVoice(lang: SupportedLanguage): SpeechSynthesisVoice | null {
     if (!("speechSynthesis" in window)) return null;
-    if (typeof window.speechSynthesis.getVoices !== "function") return null;
     const voices = window.speechSynthesis.getVoices();
     if (!voices || voices.length === 0) return null;
 
@@ -2747,7 +2885,7 @@ export class BridgeAssistant extends HTMLElement {
     this.openAssistant();
     this.playEarcon("wake");
     this.announce(this.t("voiceListening"));
-    const inputEl = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-text-input");
+    const inputEl = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-input");
     if (inputEl) {
       this.startVoiceRecording(inputEl);
     }
@@ -2755,14 +2893,14 @@ export class BridgeAssistant extends HTMLElement {
 
   private initGlobalKeyboardShortcuts(): void {
     window.addEventListener("keydown", (e: KeyboardEvent) => {
-      // Alt + Shift + V or Alt + Shift + A toggles voice assistant listening
+      // Alt+Shift+A opens the assistant; Alt+Shift+V explicitly starts voice input.
       if (e.altKey && e.shiftKey && (e.key === "V" || e.key === "v" || e.key === "A" || e.key === "a")) {
         e.preventDefault();
         if (!this.isOpen) {
           this.openAssistant();
         }
-        const inputEl = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-text-input");
-        if (inputEl) {
+        const inputEl = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-input");
+        if ((e.key === "V" || e.key === "v") && inputEl) {
           this.toggleVoiceInput(inputEl);
         }
       }
@@ -2780,11 +2918,12 @@ export class BridgeAssistant extends HTMLElement {
       dialog.style.display = "flex";
       launcher.setAttribute("aria-expanded", "true");
       this.announce("Savanna Bridge Assistant opened. Use Tab to navigate or Escape to close.");
-      const chatInput = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-text-input");
+      const chatInput = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-input");
       const title = this.shadowRoot?.querySelector<HTMLElement>("#dialog-title");
+      const onboardingTitle = this.shadowRoot?.querySelector<HTMLElement>("#onboard-title");
       setTimeout(
         () => {
-          const initialTarget = this.accessibilityPrefs.screen_reader_mode ? title : chatInput;
+          const initialTarget = onboardingTitle ?? (this.accessibilityPrefs.screen_reader_mode ? title : chatInput);
           if (initialTarget) initialTarget.focus();
           else dialog.focus();
         },
@@ -2798,9 +2937,7 @@ export class BridgeAssistant extends HTMLElement {
     const dialog = this.shadowRoot?.querySelector<HTMLElement>("#assistant-dialog");
     const launcher = this.shadowRoot?.querySelector<HTMLButtonElement>("#launcher-btn");
     if (dialog && launcher) {
-      dialog.hidden = true;
       dialog.setAttribute("hidden", "true");
-      dialog.style.display = "none";
       launcher.setAttribute("aria-expanded", "false");
       (this.previousFocus ?? launcher).focus();
     }
@@ -2909,7 +3046,7 @@ export class BridgeAssistant extends HTMLElement {
     container.innerHTML = `
       <div style="display:flex; justify-content:center; margin-top:0.25rem;">
         <button type="button" class="btn-toggle-link-code" id="btn-toggle-link-code" style="background:none; border:none; color:var(--b-primary); font-size:0.75rem; text-decoration:underline; cursor:pointer; padding:0.125rem 0;">
-          ${this.isLinkCodeInputVisible ? "▲ " + this.t("hideCodePrompt") : "🔗 " + this.t("haveCodePrompt")}
+          ${this.isLinkCodeInputVisible ? this.t("hideCodePrompt") : `${ICONS.link} <span>${this.t("haveCodePrompt")}</span>`}
         </button>
       </div>
       ${
@@ -2956,7 +3093,7 @@ export class BridgeAssistant extends HTMLElement {
       container.innerHTML = `
         <div style="display:flex; align-items:center; gap:0.375rem; width:100%;">
           <span style="font-size:0.8125rem; font-weight:600; color:#166534; flex:1;">
-            ${ICONS.check} ${this.t("connectedToTelegram")}
+            ✓ ${this.t("connectedToTelegram")}
           </span>
           <button type="button" class="btn btn-secondary" id="btn-disconnect-tg">
             ${this.t("disconnectTelegram")}
@@ -2967,12 +3104,10 @@ export class BridgeAssistant extends HTMLElement {
       container.querySelector("#btn-disconnect-tg")?.addEventListener("click", () => this.disconnectTelegram());
     } else {
       container.innerHTML = `
-        <a href="${this.telegramDeepLink}" target="_blank" rel="noopener noreferrer"
-           class="btn btn-secondary btn-footer" id="tg-deep-link"
-           aria-label="${this.t("continueOnTelegramAria")}"
-           style="display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-          ${ICONS.telegram}
-          <span>${this.t("continueOnTelegram")}</span>
+        <a href="${this.telegramDeepLink}" target="_blank" rel="noopener noreferrer" 
+           class="btn btn-secondary btn-footer" id="tg-deep-link" 
+           aria-label="${this.t("continueOnTelegramAria")}">
+          ${this.t("continueOnTelegram")}
         </a>
         <div class="telegram-privacy-note">${this.t("telegramPrivacyNotice")}</div>
       `;
@@ -3170,7 +3305,7 @@ export class BridgeAssistant extends HTMLElement {
         }
         return;
       case "submit": {
-        const chatInput = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-text-input");
+        const chatInput = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-input");
         if (!target && chatInput?.value.trim()) {
           const text = chatInput.value;
           chatInput.value = "";
@@ -3308,7 +3443,7 @@ export class BridgeAssistant extends HTMLElement {
     this.announce(spoken);
     this.speakText(spoken, {
       onEnd: () => {
-        const input = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-text-input");
+        const input = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-input");
         if (input && this.spokenOnboardingActive) this.startVoiceRecording(input);
       },
     });
@@ -3506,7 +3641,7 @@ export class BridgeAssistant extends HTMLElement {
     if (hadDirectTranscript) {
       this.playEarcon("transcribed");
       this.announce(this.t("voicePreviewNotice"));
-      const chatInput = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-text-input");
+      const chatInput = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-input");
       if (chatInput) chatInput.focus();
     }
 
@@ -3561,6 +3696,7 @@ export class BridgeAssistant extends HTMLElement {
           await this.handleVoiceTranscript(data.transcript, inputEl);
           this.playEarcon("transcribed");
           this.announce(this.t("voicePreviewNotice"));
+          await this.askQuestion(data.transcript, false, true);
         }
       }
     } catch (err) {
@@ -3684,6 +3820,26 @@ export class BridgeAssistant extends HTMLElement {
     this.fallbackTTS(cleanText, msg);
   }
 
+  private fallbackTTS(text: string, msg: ChatMessage): void {
+    if (!("speechSynthesis" in window)) {
+      this.finishSpeaking(msg);
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    const langMap: Record<string, string> = {
+      en: "en-US",
+      am: "am-ET",
+      om: "om-ET",
+      ti: "ti-ET",
+      ar: "ar-SA",
+    };
+    utterance.lang = langMap[this.currentLang] || "en-US";
+    utterance.onend = () => this.finishSpeaking(msg);
+    utterance.onerror = () => this.finishSpeaking(msg);
+    window.speechSynthesis.speak(utterance);
+  }
+
   private finishSpeaking(msg: ChatMessage): void {
     this.isSpeaking = false;
     msg.isAudioPlaying = false;
@@ -3705,7 +3861,6 @@ export class BridgeAssistant extends HTMLElement {
     this.renderMessages();
     this.updateVoiceStatusUI();
   }
-
 
   // --- TTS Audio & Read Aloud Controls ---
 
@@ -4151,19 +4306,6 @@ export class BridgeAssistant extends HTMLElement {
     }, 120);
   }
 
-  private fallbackTTS(text: string, msg?: ChatMessage): void {
-    if (msg) {
-      this.startSequentialReading(msg, 0);
-    } else {
-      const dummyMsg: ChatMessage = {
-        id: `msg_tts_${Date.now()}`,
-        sender: "assistant",
-        text,
-      };
-      this.startSequentialReading(dummyMsg, 0);
-    }
-  }
-
   // --- Page Navigation and Context Monitoring ---
 
   private setupPageNavigationMonitor(): void {
@@ -4284,7 +4426,7 @@ export class BridgeAssistant extends HTMLElement {
 
   private triggerVoiceActivation(): void {
     this.openAssistant();
-    const chatInput = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-text-input");
+    const chatInput = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-input");
     if (chatInput) {
       setTimeout(() => {
         this.toggleVoiceInput(chatInput);
@@ -4500,6 +4642,7 @@ export class BridgeAssistant extends HTMLElement {
             </div>
           `;
         }
+
         this.renderMessages();
       } else {
         alert(this.t("serverErrorNotice"));
@@ -4507,6 +4650,135 @@ export class BridgeAssistant extends HTMLElement {
     } catch {
       alert(this.t("serverErrorNotice"));
     }
+  }
+
+  private renderOnboardingWizard(): string {
+    if (this.accessibilityPrefs.onboarded || this.onboardingDismissed) return "";
+
+    const copy = {
+      en: { step: "Step", of: "of", back: "Back", next: "Next", finish: "Finish setup", skip: "Skip for now" },
+      am: { step: "ደረጃ", of: "ከ", back: "ተመለስ", next: "ቀጣይ", finish: "ቅንብሩን ጨርስ", skip: "ለጊዜው ዝለል" },
+      om: { step: "Tarkaanfii", of: "kan", back: "Duubatti", next: "Itti aanu", finish: "Qindaa'ina xumuri", skip: "Ammaaf darbi" },
+      ti: { step: "ስጉምቲ", of: "ካብ", back: "ተመለስ", next: "ቀጻሊ", finish: "ቅጥዒ ዛዝም", skip: "ንሕጂ ሕለፎ" },
+      ar: { step: "الخطوة", of: "من", back: "رجوع", next: "التالي", finish: "إنهاء الإعداد", skip: "تخطي الآن" },
+    }[this.currentLang];
+
+    const steps = [
+      `
+        <p class="onboarding-subtitle">${this.t("onboardingSubtitle")}</p>
+        <label class="settings-label">${this.t("onboardingLangPrompt")}</label>
+        <div class="lang-group onboarding-languages" role="group" aria-label="${this.t("onboardingLangPrompt")}" style="display:grid; grid-template-columns:repeat(5, minmax(44px,1fr)); gap:0.375rem; padding:0.375rem;">
+          <button type="button" class="lang-toggle-btn" id="onboard-lang-en" aria-pressed="${this.currentLang === "en"}" aria-label="EN, English">EN</button>
+          <button type="button" class="lang-toggle-btn" id="onboard-lang-am" aria-pressed="${this.currentLang === "am"}" aria-label="አማ, አማርኛ">አማ</button>
+          <button type="button" class="lang-toggle-btn" id="onboard-lang-om" aria-pressed="${this.currentLang === "om"}" aria-label="OM, Afaan Oromoo">OM</button>
+          <button type="button" class="lang-toggle-btn" id="onboard-lang-ti" aria-pressed="${this.currentLang === "ti"}" aria-label="ትግ, ትግርኛ">ትግ</button>
+          <button type="button" class="lang-toggle-btn" id="onboard-lang-ar" aria-pressed="${this.currentLang === "ar"}" aria-label="عربي, العربية">عربي</button>
+        </div>
+        <button type="button" class="btn btn-secondary" id="btn-spoken-onboarding" style="align-self:flex-start;">
+          ${ICONS.sound} <span>${this.t("spokenSetup")}</span>
+        </button>
+      `,
+      `
+        <p class="onboarding-subtitle">Choose how the assistant should work with your assistive technology.</p>
+        <div class="onboarding-option-grid">
+          <label class="toggle-row">
+            <div class="toggle-info"><span class="toggle-title">${this.t("screenReaderModeLabel")}</span><span class="toggle-desc">${this.t("screenReaderModeDesc")}</span></div>
+            <input type="checkbox" id="onboard-chk-screen-reader" class="toggle-switch" ${this.accessibilityPrefs.screen_reader_mode ? "checked" : ""}>
+          </label>
+          <label class="toggle-row">
+            <div class="toggle-info"><span class="toggle-title">${this.t("keyboardNavLabel")}</span><span class="toggle-desc">${this.t("keyboardNavDesc")}</span></div>
+            <input type="checkbox" id="onboard-chk-keyboard-nav" class="toggle-switch" ${this.accessibilityPrefs.keyboard_navigation ? "checked" : ""}>
+          </label>
+        </div>
+      `,
+      `
+        <p class="onboarding-subtitle">Adjust the visual presentation. You can change these choices later in Settings.</p>
+        <div class="onboarding-option-grid">
+          <label class="toggle-row">
+            <div class="toggle-info"><span class="toggle-title">${this.t("highContrastLabel")}</span><span class="toggle-desc">Increase separation between text, controls, and backgrounds.</span></div>
+            <input type="checkbox" id="onboard-chk-contrast" class="toggle-switch" ${this.accessibilityPrefs.high_contrast ? "checked" : ""}>
+          </label>
+          <label class="toggle-row">
+            <div class="toggle-info"><span class="toggle-title">${this.t("textLarger")}</span><span class="toggle-desc">${this.t("textSizeLabel")}</span></div>
+            <input type="checkbox" id="onboard-chk-large-text" class="toggle-switch" ${this.accessibilityPrefs.large_text === "larger" ? "checked" : ""}>
+          </label>
+        </div>
+      `,
+      `
+        <p class="onboarding-subtitle">Choose voice assistance. Written content always remains available.</p>
+        <div class="onboarding-option-grid">
+          <label class="toggle-row">
+            <div class="toggle-info"><span class="toggle-title">${this.t("onboardingVoiceEnable")}</span><span class="toggle-desc">${this.t("onboardingVoiceDesc")}</span></div>
+            <input type="checkbox" id="onboard-chk-voice" class="toggle-switch" ${this.accessibilityPrefs.voice_enabled ? "checked" : ""}>
+          </label>
+          <label class="toggle-row">
+            <div class="toggle-info"><span class="toggle-title">${this.t("autoTtsLabel")}</span><span class="toggle-desc">${this.t("autoTtsDesc")}</span></div>
+            <input type="checkbox" id="onboard-chk-auto-tts" class="toggle-switch" ${this.accessibilityPrefs.auto_tts ? "checked" : ""}>
+          </label>
+        </div>
+        <div class="privacy-note">${ICONS.lock} <span>${this.t("onboardingMicExplain")}</span></div>
+      `,
+    ];
+
+    const progress = [0, 1, 2, 3]
+      .map((index) => `<span class="${index <= this.onboardingStep ? "active" : ""}"></span>`)
+      .join("");
+
+    return `
+      <div class="onboarding-overlay" id="onboarding-overlay">
+        <section class="onboarding-card" role="dialog" aria-modal="true" aria-labelledby="onboard-title">
+          <div class="onboarding-header">
+            <h3 class="onboarding-title" id="onboard-title" tabindex="-1">${ICONS.accessibility}<span>${this.t("onboardingTitle")}</span></h3>
+            <button type="button" class="btn btn-secondary btn-icon-only" id="btn-onboard-close" aria-label="${copy.skip}">${ICONS.close}</button>
+          </div>
+          <div class="wizard-progress" role="progressbar" aria-label="${copy.step} ${this.onboardingStep + 1} ${copy.of} 4" aria-valuemin="1" aria-valuemax="4" aria-valuenow="${this.onboardingStep + 1}">${progress}</div>
+          <div class="wizard-step-label">${copy.step} ${this.onboardingStep + 1} ${copy.of} 4</div>
+          <div class="onboarding-body">${steps[this.onboardingStep]}</div>
+          <div class="onboarding-actions">
+            <button type="button" class="btn btn-secondary" id="btn-onboard-skip">${copy.skip}</button>
+            <span style="flex:1;"></span>
+            ${this.onboardingStep > 0 ? `<button type="button" class="btn btn-secondary" id="btn-onboard-back">${copy.back}</button>` : ""}
+            ${this.onboardingStep < 3
+              ? `<button type="button" class="btn btn-primary" id="btn-onboard-next">${copy.next} ${ICONS.arrowRight}</button>`
+              : `<button type="button" class="btn btn-primary" id="btn-onboard-save">${copy.finish}</button>`}
+          </div>
+        </section>
+      </div>`;
+  }
+
+  private captureOnboardingStep(): void {
+    const value = (id: string): boolean | null => {
+      const input = this.shadowRoot?.querySelector<HTMLInputElement>(`#${id}`);
+      return input ? input.checked : null;
+    };
+    const screenReader = value("onboard-chk-screen-reader");
+    const keyboard = value("onboard-chk-keyboard-nav");
+    const contrast = value("onboard-chk-contrast");
+    const largeText = value("onboard-chk-large-text");
+    const voice = value("onboard-chk-voice");
+    const autoTts = value("onboard-chk-auto-tts");
+    if (screenReader !== null) this.accessibilityPrefs.screen_reader_mode = screenReader;
+    if (keyboard !== null) this.accessibilityPrefs.keyboard_navigation = keyboard;
+    if (contrast !== null) this.accessibilityPrefs.high_contrast = contrast;
+    if (largeText !== null) this.accessibilityPrefs.large_text = largeText ? "larger" : "normal";
+    if (voice !== null) this.accessibilityPrefs.voice_enabled = voice;
+    if (autoTts !== null) this.accessibilityPrefs.auto_tts = autoTts;
+    if (this.accessibilityPrefs.screen_reader_mode) this.accessibilityPrefs.auto_tts = false;
+    this.highContrast = this.accessibilityPrefs.high_contrast;
+    this.textSize = this.accessibilityPrefs.large_text;
+  }
+
+  private completeOnboarding(saveSelected: boolean): void {
+    if (saveSelected) this.captureOnboardingStep();
+    this.accessibilityPrefs.onboarded = true;
+    this.onboardingDismissed = true;
+    this.onboardingStep = 0;
+    this.savePreferences();
+    this.render();
+    if (saveSelected && this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_welcome) {
+      this.triggerSpokenWelcome();
+    }
+    if (saveSelected && this.accessibilityPrefs.voice_enabled) this.initWakeWordDetection();
   }
 
   // --- Rendering ---
@@ -4567,8 +4839,8 @@ export class BridgeAssistant extends HTMLElement {
       ` : ""}
 
       <!-- Main Open Panel -->
-      <section id="assistant-dialog" class="panel" role="dialog" aria-modal="true" aria-labelledby="dialog-title" lang="${this.currentLang}" dir="${this.currentLang === "ar" ? "rtl" : "ltr"}" tabindex="-1" ${this.isOpen ? "" : "hidden"}>
-
+      <section id="assistant-dialog" class="panel" role="dialog" aria-modal="true" aria-labelledby="dialog-title" tabindex="-1" lang="${this.currentLang}" dir="${this.currentLang === "ar" ? "rtl" : "ltr"}" ${this.isOpen ? "" : "hidden"}>
+        
         ${this.isOffline ? `<div class="offline-bar" role="alert">${this.t("offlineBanner")}</div>` : ""}
 
         <!-- Header -->
@@ -4580,22 +4852,28 @@ export class BridgeAssistant extends HTMLElement {
             <h2 id="dialog-title" class="title" tabindex="-1">${this.t("appTitle")}</h2>
           </div>
           <div class="header-actions">
+            <!-- Quick EN/AM Toggle for backward compatibility with integration tests -->
+            <button class="lang-btn" type="button" id="btn-lang-toggle" 
+                    aria-label="${this.currentLang === "am" ? "English - Switch Language" : "አማርኛ - ቋንቋ ቀይር"}" 
+                    style="font-size:0.6875rem; font-weight:700; padding:0.25rem 0.5rem; min-height:1.75rem; border-radius:0.375rem; background:var(--b-surface-alt); border:1px solid var(--b-border); color:var(--b-text); cursor:pointer;">
+              ${this.currentLang === "am" ? "English" : "አማርኛ"}
+            </button>
             <!-- 5-Language Segmented Selector in Native Scripts with WCAG 2.5.3 Compliant Labels -->
             <div class="lang-group" role="group" aria-label="Language selection">
-              <button type="button" class="lang-toggle-btn" id="btn-lang-en"
-                      aria-pressed="${this.currentLang === "en"}"
+              <button type="button" class="lang-toggle-btn lang-btn" id="btn-lang-en" 
+                      aria-pressed="${this.currentLang === "en"}" 
                       aria-label="EN - English">EN</button>
-              <button type="button" class="lang-toggle-btn" id="btn-lang-am"
-                      aria-pressed="${this.currentLang === "am"}"
+              <button type="button" class="lang-toggle-btn" id="btn-lang-am" 
+                      aria-pressed="${this.currentLang === "am"}" 
                       aria-label="አማ - አማርኛ (Amharic)">አማ</button>
-              <button type="button" class="lang-toggle-btn" id="btn-lang-om"
-                      aria-pressed="${this.currentLang === "om"}"
+              <button type="button" class="lang-toggle-btn" id="btn-lang-om" 
+                      aria-pressed="${this.currentLang === "om"}" 
                       aria-label="OM - Afaan Oromoo">OM</button>
-              <button type="button" class="lang-toggle-btn" id="btn-lang-ti"
-                      aria-pressed="${this.currentLang === "ti"}"
+              <button type="button" class="lang-toggle-btn" id="btn-lang-ti" 
+                      aria-pressed="${this.currentLang === "ti"}" 
                       aria-label="ትግ - ትግርኛ (Tigrinya)">ትግ</button>
-              <button type="button" class="lang-toggle-btn" id="btn-lang-ar"
-                      aria-pressed="${this.currentLang === "ar"}"
+              <button type="button" class="lang-toggle-btn" id="btn-lang-ar" 
+                      aria-pressed="${this.currentLang === "ar"}" 
                       aria-label="عربي - العربية (Arabic)">عربي</button>
             </div>
 
@@ -4613,7 +4891,7 @@ export class BridgeAssistant extends HTMLElement {
         <!-- Navigation Tabs on Main Assistant Dialog -->
         <nav class="nav-tabs" role="tablist" aria-label="Assistant sections">
           <button type="button" class="tab-btn" id="tab-chat" role="tab" aria-selected="${this.activeTab === "chat"}" aria-controls="pane-chat">
-            ${ICONS.chat}
+            ${ICONS.launcher}
             <span>${this.t("chatTab")}</span>
           </button>
           <button type="button" class="tab-btn" id="tab-support" role="tab" aria-selected="${this.activeTab === "support"}" aria-controls="pane-support">
@@ -4677,16 +4955,16 @@ export class BridgeAssistant extends HTMLElement {
           <footer class="footer">
             <!-- Top Row: Input, Mic, Send -->
             <form class="input-row" id="chat-form">
-              <input type="text" class="text-input" id="chat-text-input" data-id="chat-input"
-                     placeholder="${this.t("inputPlaceholder")}"
-                     aria-label="${this.t("inputPlaceholder")}"
+              <input type="text" class="text-input" id="chat-input" data-id="chat-input"
+                     placeholder="${this.t("inputPlaceholder")}" 
+                     aria-label="${this.t("inputPlaceholder")}" 
                      dir="${this.currentLang === "ar" ? "rtl" : "ltr"}"
                      required autocomplete="off">
               <button type="button" class="btn btn-secondary mic-btn btn-icon-only" id="mic-btn"
                       aria-label="${this.t("micLabel")}" title="${this.t("micLabel")}" aria-keyshortcuts="Alt+Shift+V">
                 ${ICONS.mic}
               </button>
-              <button type="submit" class="btn btn-primary" id="send-btn" data-id="btn-send" style="display:inline-flex; align-items:center; gap:0.375rem;">
+              <button type="submit" class="btn btn-primary" id="btn-send" data-id="btn-send" style="display:inline-flex; align-items:center; gap:0.375rem;">
                 <span>${this.t("sendButton")}</span>
                 ${ICONS.send}
               </button>
@@ -4719,7 +4997,7 @@ export class BridgeAssistant extends HTMLElement {
 
             <form id="support-form" style="display:flex; flex-direction:column; gap:0.625rem;">
               <label class="checkbox-card">
-                <input type="checkbox" name="need" value="extra_time"
+                <input type="checkbox" name="need" value="extra_time" 
                        ${this.supportNeeds.needs.includes("extra_time") ? "checked" : ""}>
                 <div class="checkbox-card-content">
                   <span style="font-weight:600; font-size:0.875rem;">${this.t("needExtraTime")}</span>
@@ -4727,7 +5005,7 @@ export class BridgeAssistant extends HTMLElement {
               </label>
 
               <label class="checkbox-card">
-                <input type="checkbox" name="need" value="screen_reader_help"
+                <input type="checkbox" name="need" value="screen_reader_help" 
                        ${this.supportNeeds.needs.includes("screen_reader_help") ? "checked" : ""}>
                 <div class="checkbox-card-content">
                   <span style="font-weight:600; font-size:0.875rem;">${this.t("needScreenReader")}</span>
@@ -4735,7 +5013,7 @@ export class BridgeAssistant extends HTMLElement {
               </label>
 
               <label class="checkbox-card">
-                <input type="checkbox" name="need" value="written_instructions"
+                <input type="checkbox" name="need" value="written_instructions" 
                        ${this.supportNeeds.needs.includes("written_instructions") ? "checked" : ""}>
                 <div class="checkbox-card-content">
                   <span style="font-weight:600; font-size:0.875rem;">${this.t("needWritten")}</span>
@@ -4743,14 +5021,14 @@ export class BridgeAssistant extends HTMLElement {
               </label>
 
               <label class="checkbox-card">
-                <input type="checkbox" name="need" value="other"
+                <input type="checkbox" name="need" value="other" 
                        ${this.supportNeeds.needs.includes("other") || !!this.supportNeeds.other_text ? "checked" : ""}>
                 <div class="checkbox-card-content">
                   <span style="font-weight:600; font-size:0.875rem;">${this.t("needOther")}</span>
                 </div>
               </label>
 
-              <textarea name="other_text" class="text-input" style="min-height:3.5rem; font-size:0.875rem;"
+              <textarea name="other_text" class="text-input" style="min-height:3.5rem; font-size:0.875rem;" 
                         placeholder="${this.t("otherPlaceholder")}">${this.supportNeeds.other_text || ""}</textarea>
 
               <label style="font-size:0.875rem; font-weight:600; margin-top:0.25rem;">
@@ -4790,7 +5068,7 @@ export class BridgeAssistant extends HTMLElement {
               </label>
               <label style="font-size:0.8125rem; font-weight:600;">
                 ${this.t("handoffReasonLabel")}
-                <input type="text" id="handoff-reason" class="text-input" style="margin-top:0.25rem;"
+                <input type="text" id="handoff-reason" class="text-input" style="margin-top:0.25rem;" 
                        placeholder="${this.t("handoffReasonPlaceholder")}">
               </label>
               <button type="submit" class="btn btn-primary" id="btn-submit-handoff" style="display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
@@ -4831,7 +5109,7 @@ export class BridgeAssistant extends HTMLElement {
             <!-- Accessibility Card -->
             <div class="settings-card">
               <div class="settings-card-title">${ICONS.contrast} <span>Display & Accessibility</span></div>
-
+              
               <!-- High Contrast -->
               <label class="toggle-row">
                 <div class="toggle-info">
@@ -4849,6 +5127,16 @@ export class BridgeAssistant extends HTMLElement {
                   <span class="toggle-desc">${this.t("simpleModeDesc")}</span>
                 </div>
                 <input type="checkbox" id="chk-simple-mode" class="toggle-switch" aria-label="${this.t("simpleModeLabel")}" ${this.simpleMode ? "checked" : ""}>
+              </label>
+
+              <!-- Wake Word Voice Activation -->
+              <div style="border-top:1px solid var(--b-border); margin:0.5rem 0;"></div>
+              <label class="toggle-row">
+                <div class="toggle-info">
+                  <span class="toggle-title">${this.t("wakeWordSetting")}</span>
+                  <span class="toggle-desc">${this.t("wakeWordDesc")}</span>
+                </div>
+                <input type="checkbox" id="chk-wake-word" class="toggle-switch" ${this.voiceActivationEnabled ? "checked" : ""}>
               </label>
             </div>
 
@@ -4994,7 +5282,7 @@ export class BridgeAssistant extends HTMLElement {
                   <div class="code-display" id="code-display" style="display:none; font-size:1.5rem; font-weight:700; letter-spacing:0.25em; text-align:center; padding:0.75rem; background:var(--b-surface-alt, #f8fafc); border:2px dashed var(--b-primary); border-radius:0.5rem; margin-top:0.625rem; color:var(--b-primary);">
                   </div>
                   <div id="code-instructions" style="display:none; font-size:0.75rem; color:var(--b-text-muted); text-align:center; margin-top:0.375rem;">
-                    ${this.t("codeInstructions")}
+                    ${this.escapeHtml(this.t("codeInstructions"))}
                   </div>
                 </div>
               `}
@@ -5015,6 +5303,8 @@ export class BridgeAssistant extends HTMLElement {
           </div>
         </div>
 
+        ${this.renderOnboardingWizard()}
+
       </section>
     `;
 
@@ -5029,7 +5319,8 @@ export class BridgeAssistant extends HTMLElement {
     const chatLog = this.shadowRoot?.querySelector("#chat-log");
     if (!chatLog) return;
 
-    const showOnboarding = !this.accessibilityPrefs.onboarded && !this.onboardingDismissed;
+    // Onboarding is rendered as a full dialog overlay, not inside the scrolling chat log.
+    const showOnboarding = false;
     const onboardHtml = showOnboarding ? `
       <div class="onboarding-card" id="onboarding-card" role="region" aria-labelledby="onboard-title" style="margin:0 0 1rem 0; padding:1rem; background:var(--b-surface); border:2px solid var(--b-primary); border-radius:0.75rem;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
@@ -5040,7 +5331,7 @@ export class BridgeAssistant extends HTMLElement {
             ${ICONS.close}
           </button>
         </div>
-
+        
         <p style="font-size:0.8125rem; color:var(--b-text-muted); margin:0 0 0.875rem 0; line-height:1.4;">
           ${this.t("onboardingSubtitle")}
         </p>
@@ -5122,10 +5413,14 @@ export class BridgeAssistant extends HTMLElement {
     ` : "";
 
     if (this.messages.length === 0) {
+      const sectionName = this.lastPageSection || "The Future of the VA Industry";
       chatLog.innerHTML = `
         ${onboardHtml}
         <div class="empty-state">
-          <p style="margin:0; font-size:1rem; font-weight:600;">${this.t("emptyWelcome")}</p>
+          <div class="page-context-pill">
+            ${ICONS.book} <span>${this.t("pageContextBadge")} <strong>${this.escapeHtml(sectionName)}</strong></span>
+          </div>
+          <p style="margin:0 0 0.5rem 0; font-size:1rem; font-weight:600;">${this.t("emptyWelcome")}</p>
           <div class="suggested-questions">
             <span style="font-size:0.8125rem; font-weight:700; color:var(--b-text-muted);">${this.t("suggestedTitle")}</span>
             <button type="button" class="btn btn-suggested btn-quick-explain" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
@@ -5150,7 +5445,16 @@ export class BridgeAssistant extends HTMLElement {
         </div>
       `;
 
-      chatLog.querySelectorAll<HTMLButtonElement>(".btn-suggested").forEach((btn) => {
+      chatLog.querySelector<HTMLButtonElement>(".btn-quick-explain")?.addEventListener("click", () => {
+        this.askQuestion(this.t("explainLessonBtn"));
+      });
+      chatLog.querySelector<HTMLButtonElement>(".btn-quick-summarize")?.addEventListener("click", () => {
+        this.askQuestion(this.t("summarizePageBtn"));
+      });
+      chatLog.querySelector<HTMLButtonElement>(".btn-quick-read")?.addEventListener("click", () => {
+        this.askQuestion(this.t("readPageBtn"));
+      });
+      chatLog.querySelectorAll<HTMLButtonElement>(".btn-suggested[data-q]").forEach((btn) => {
         btn.addEventListener("click", () => {
           const q = btn.getAttribute("data-q");
           if (q) this.askQuestion(q);
@@ -5170,7 +5474,19 @@ export class BridgeAssistant extends HTMLElement {
         }
 
         // Assistant Message Card
-        const hasCitations = msg.citations && msg.citations.length > 0;
+        const uniqueCitations: Citation[] = [];
+        const seenCit = new Set<string>();
+        if (msg.citations) {
+          for (const cit of msg.citations) {
+            const rawLabel = cit.title || cit.heading || "";
+            const label = rawLabel.replace(/\s*\|\s*.*$/, "").replace(/^Concept page:\s*/i, "").trim();
+            if (label && !seenCit.has(label)) {
+              seenCit.add(label);
+              uniqueCitations.push({ ...cit, title: label });
+            }
+          }
+        }
+        const hasCitations = uniqueCitations.length > 0;
         const isRefusal = !!msg.isRefusal;
         const headingText = msg.heading || (msg.isHandoff ? this.t("handoffReadyTitle") : this.t("answerHeading"));
         const isThisReading = !!(this.currentReading && this.currentReading.msgId === msg.id);
@@ -5203,20 +5519,18 @@ export class BridgeAssistant extends HTMLElement {
                       ${ICONS.copy} <span>${this.t("copyRoomBtn")}</span>
                     </button>
                   </div>
-                  <div style="font-size:0.75rem; color:#15803d; margin-top:0.5rem;">${this.t("androidFallbackNote")}</div>
                 </div>
               `
                 : ""
             }
 
-            ${
-              isRefusal
-                ? `
-                <div class="not-verified-box refusal-box" role="alert">
+            ${isRefusal
+            ? `
+                <div class="not-verified-box" role="alert">
                   <div>${this.t("notVerifiedNotice")}</div>
                   <div style="display:flex; gap:0.375rem; flex-wrap:wrap;">
-                    <button type="button" class="btn btn-primary btn-talk-person" data-msg-id="${msg.id}" style="font-size:0.8125rem; min-height:44px;">
-                      ${ICONS.user} ${this.t("talkToPersonButton")}
+                    <button type="button" class="btn btn-primary btn-talk-person" data-msg-id="${msg.id}" style="font-size:0.8125rem; min-height:44px; display:inline-flex; align-items:center; gap:0.375rem;">
+                      ${ICONS.user} <span>${this.t("talkToPersonButton")}</span>
                     </button>
                     <button type="button" class="btn btn-secondary btn-try-another" style="font-size:0.8125rem; min-height:44px;">
                       ${this.t("tryAnotherQuestion")}
@@ -5227,10 +5541,10 @@ export class BridgeAssistant extends HTMLElement {
             : ""
           }
 
-            <!-- Listen & Make Simpler action buttons -->
+            <!-- Listen, Stop, Replay & Make Simpler action buttons -->
             <div class="answer-actions">
               <button type="button" class="btn btn-secondary btn-listen" data-msg-id="${msg.id}">
-                ${msg.isAudioPlaying ? `${ICONS.pause} ${this.t("pauseButton")}` : `${ICONS.sound} ${this.t("listenButton")}`}
+                ${msg.isAudioPlaying ? `${ICONS.pause} <span>${this.t("pauseButton")}</span>` : `${ICONS.sound} <span>${this.t("listenButton")}</span>`}
               </button>
               <button type="button" class="btn btn-secondary btn-stop" data-msg-id="${msg.id}" style="display:inline-flex; align-items:center; gap:0.375rem;" ${msg.isAudioPlaying || msg.isAudioPaused ? "" : "hidden"}>
                 ${ICONS.stop}
@@ -5303,7 +5617,48 @@ export class BridgeAssistant extends HTMLElement {
       `;
     }
 
+    if (this.isRecording) {
+      chatLog.innerHTML += `
+        <div class="live-status-indicator" style="display:inline-flex; align-items:center; gap:0.375rem;">
+          <span class="listening-indicator-pill">${ICONS.mic} <span>${this.t("listeningIndicator")}</span></span>
+        </div>
+      `;
+    }
+
     // Attach listeners for dynamic answer buttons
+    chatLog.querySelectorAll<HTMLElement>(".answer-para-item").forEach((el) => {
+      el.addEventListener("click", () => {
+        const msgId = el.getAttribute("data-msg-id");
+        const idx = parseInt(el.getAttribute("data-idx") || "0", 10);
+        const msg = this.messages.find((m) => m.id === msgId);
+        if (msg) {
+          this.startSequentialReading(msg, idx);
+        }
+      });
+    });
+
+    chatLog.querySelectorAll<HTMLButtonElement>(".btn-prev-para").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const msgId = btn.getAttribute("data-msg-id");
+        const msg = this.messages.find((m) => m.id === msgId);
+        if (msg && this.currentReading && this.currentReading.currentIndex > 0) {
+          this.currentReading.currentIndex--;
+          this.playNextReadingItem(msg);
+        }
+      });
+    });
+
+    chatLog.querySelectorAll<HTMLButtonElement>(".btn-next-para").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const msgId = btn.getAttribute("data-msg-id");
+        const msg = this.messages.find((m) => m.id === msgId);
+        if (msg && this.currentReading && this.currentReading.currentIndex < this.currentReading.items.length - 1) {
+          this.currentReading.currentIndex++;
+          this.playNextReadingItem(msg);
+        }
+      });
+    });
+
     chatLog.querySelectorAll<HTMLButtonElement>(".btn-listen").forEach((btn) => {
       btn.addEventListener("click", () => {
         const msgId = btn.getAttribute("data-msg-id");
@@ -5318,11 +5673,36 @@ export class BridgeAssistant extends HTMLElement {
       });
     });
 
+    chatLog.querySelectorAll<HTMLButtonElement>(".btn-stop").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const msgId = btn.getAttribute("data-msg-id");
+        const msg = this.messages.find((m) => m.id === msgId);
+        if (msg) this.handleStop(msg);
+      });
+    });
+
+    chatLog.querySelectorAll<HTMLButtonElement>(".btn-replay").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const msgId = btn.getAttribute("data-msg-id");
+        const msg = this.messages.find((m) => m.id === msgId);
+        if (msg) this.handleReplay(msg);
+      });
+    });
+
     chatLog.querySelectorAll<HTMLButtonElement>(".btn-simpler").forEach((btn) => {
       btn.addEventListener("click", () => {
         const msgId = btn.getAttribute("data-msg-id");
         const msg = this.messages.find((m) => m.id === msgId);
         if (msg) this.askQuestion(`Explain simpler: ${msg.text}`, true);
+      });
+    });
+
+    chatLog.querySelectorAll<HTMLButtonElement>(".btn-followup").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const query = btn.getAttribute("data-query");
+        if (query) {
+          this.askQuestion(query);
+        }
       });
     });
 
@@ -5336,7 +5716,7 @@ export class BridgeAssistant extends HTMLElement {
 
     chatLog.querySelectorAll<HTMLButtonElement>(".btn-try-another").forEach((btn) => {
       btn.addEventListener("click", () => {
-        const input = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-text-input");
+        const input = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-input");
         if (input) {
           input.value = "";
           input.focus();
@@ -5345,6 +5725,9 @@ export class BridgeAssistant extends HTMLElement {
     });
 
     chatLog.scrollTop = chatLog.scrollHeight;
+    setTimeout(() => {
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }, 40);
   }
 
   private bindEvents(): void {
@@ -5357,13 +5740,11 @@ export class BridgeAssistant extends HTMLElement {
     const closeSettingsBtn = this.shadowRoot.querySelector<HTMLButtonElement>("#btn-close-settings")!;
 
     // Open/Close Dialog
-    launcher.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      this.previousFocus = launcher;
+    launcher.addEventListener("click", () => {
       if (this.isOpen) {
         this.closeAssistant();
       } else {
+        this.previousFocus = launcher;
         this.openAssistant();
       }
     });
@@ -5384,29 +5765,29 @@ export class BridgeAssistant extends HTMLElement {
         } else {
           this.closeAssistant();
         }
-        return;
       }
 
       if (e.key === "Tab") {
-        const activeContainer = this.isSettingsOpen
-          ? this.shadowRoot?.querySelector<HTMLElement>("#settings-dialog")
-          : dialog;
-        if (!activeContainer) return;
-        const focusables = Array.from(
-          activeContainer.querySelectorAll<HTMLElement>(
-            'button:not([disabled]):not([hidden]), [href]:not([disabled]), input:not([disabled]):not([hidden]), select:not([disabled]):not([hidden]), textarea:not([disabled]):not([hidden]), [tabindex]:not([tabindex="-1"])'
+        const onboarding = this.shadowRoot?.querySelector<HTMLElement>("#onboarding-overlay");
+        const settings = this.shadowRoot?.querySelector<HTMLElement>("#settings-dialog:not([hidden])");
+        const scope = onboarding || settings || dialog;
+        const focusable = Array.from(
+          scope.querySelectorAll<HTMLElement>(
+            'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
           )
-        ).filter((element) => element.offsetParent !== null);
-        if (focusables.length === 0) return;
-        const first = focusables[0];
-        const last = focusables[focusables.length - 1];
-        const activeElement = this.shadowRoot?.activeElement ?? document.activeElement;
-        if (e.shiftKey && activeElement === first) {
-          e.preventDefault();
-          last.focus();
-        } else if (!e.shiftKey && activeElement === last) {
-          e.preventDefault();
-          first.focus();
+        ).filter((element) => element.getClientRects().length > 0);
+
+        if (focusable.length > 0) {
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+          const active = this.shadowRoot?.activeElement;
+          if (e.shiftKey && active === first) {
+            e.preventDefault();
+            last.focus();
+          } else if (!e.shiftKey && active === last) {
+            e.preventDefault();
+            first.focus();
+          }
         }
       }
     });
@@ -5414,7 +5795,7 @@ export class BridgeAssistant extends HTMLElement {
     // 5-Language Switcher (en, am, om, ti, ar)
     this.shadowRoot.querySelectorAll<HTMLButtonElement>(".lang-toggle-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
-        const langCode = btn.id.replace("btn-lang-", "") as SupportedLanguage;
+        const langCode = btn.id.replace(/^btn-lang-|^onboard-lang-/, "") as SupportedLanguage;
         if (langCode && ["en", "am", "om", "ti", "ar"].includes(langCode)) {
           this.setLanguage(langCode);
         }
@@ -5535,7 +5916,6 @@ export class BridgeAssistant extends HTMLElement {
         if (!this.autoReadSpeech && this.isSpeaking) {
           this.stopSpeaking();
         }
-
       });
     }
 
@@ -5607,29 +5987,9 @@ export class BridgeAssistant extends HTMLElement {
       });
     }
 
-    // Human Handoff Form
-    const handoffForm = this.shadowRoot.querySelector<HTMLFormElement>("#handoff-request-form, #handoff-form");
-    if (handoffForm) {
-      handoffForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const reasonInput = this.shadowRoot?.querySelector<HTMLInputElement>("#handoff-reason");
-        const reason = reasonInput?.value?.trim() || undefined;
-        this.requestHandoff(reason);
-      });
-    }
-    const btnSubmitHandoff = this.shadowRoot.querySelector<HTMLButtonElement>("#btn-submit-handoff");
-    if (btnSubmitHandoff) {
-      btnSubmitHandoff.addEventListener("click", (e) => {
-        e.preventDefault();
-        const reasonInput = this.shadowRoot?.querySelector<HTMLInputElement>("#handoff-reason");
-        const reason = reasonInput?.value?.trim() || undefined;
-        this.requestHandoff(reason);
-      });
-    }
-
     // Chat Form Submit
     const chatForm = this.shadowRoot.querySelector<HTMLFormElement>("#chat-form");
-    const chatInput = this.shadowRoot.querySelector<HTMLInputElement>("#chat-text-input");
+    const chatInput = this.shadowRoot.querySelector<HTMLInputElement>("#chat-input");
     const micBtn = this.shadowRoot.querySelector<HTMLButtonElement>("#mic-btn");
 
     if (chatForm && chatInput) {
@@ -5683,40 +6043,20 @@ export class BridgeAssistant extends HTMLElement {
       this.startSpokenOnboarding();
     });
 
-    const finishOnboarding = (saveSelected: boolean) => {
-      if (saveSelected) {
-        const v = this.shadowRoot?.querySelector<HTMLInputElement>("#onboard-chk-voice")?.checked ?? true;
-        const sr = this.shadowRoot?.querySelector<HTMLInputElement>("#onboard-chk-screen-reader")?.checked ?? false;
-        const kb = this.shadowRoot?.querySelector<HTMLInputElement>("#onboard-chk-keyboard-nav")?.checked ?? false;
-        const hc = this.shadowRoot?.querySelector<HTMLInputElement>("#onboard-chk-contrast")?.checked ?? false;
-        const lt = this.shadowRoot?.querySelector<HTMLInputElement>("#onboard-chk-large-text")?.checked ?? false;
-
-        this.accessibilityPrefs.voice_enabled = v;
-        this.accessibilityPrefs.screen_reader_mode = sr;
-        this.accessibilityPrefs.keyboard_navigation = kb;
-        this.accessibilityPrefs.high_contrast = hc;
-        this.accessibilityPrefs.large_text = lt ? "larger" : "normal";
-        this.highContrast = hc;
-        if (lt) {
-          this.textSize = "larger";
-          localStorage.setItem("savanna_bridge_text_size", "larger");
-        }
-      }
-      this.accessibilityPrefs.onboarded = true;
-      this.onboardingDismissed = true;
-      this.savePreferences();
+    this.shadowRoot.querySelector("#btn-onboard-next")?.addEventListener("click", () => {
+      this.captureOnboardingStep();
+      this.onboardingStep = Math.min(3, this.onboardingStep + 1);
       this.render();
-      if (this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_welcome) {
-        this.triggerSpokenWelcome();
-      }
-      if (this.accessibilityPrefs.voice_enabled) {
-        this.initWakeWordDetection();
-      }
-    };
-
-    this.shadowRoot.querySelector("#btn-onboard-save")?.addEventListener("click", () => finishOnboarding(true));
-    this.shadowRoot.querySelector("#btn-onboard-skip")?.addEventListener("click", () => finishOnboarding(false));
-    this.shadowRoot.querySelector("#btn-onboard-close")?.addEventListener("click", () => finishOnboarding(false));
+      setTimeout(() => this.shadowRoot?.querySelector<HTMLElement>("#onboard-title")?.focus(), 0);
+    });
+    this.shadowRoot.querySelector("#btn-onboard-back")?.addEventListener("click", () => {
+      this.captureOnboardingStep();
+      this.onboardingStep = Math.max(0, this.onboardingStep - 1);
+      this.render();
+    });
+    this.shadowRoot.querySelector("#btn-onboard-save")?.addEventListener("click", () => this.completeOnboarding(true));
+    this.shadowRoot.querySelector("#btn-onboard-skip")?.addEventListener("click", () => this.completeOnboarding(false));
+    this.shadowRoot.querySelector("#btn-onboard-close")?.addEventListener("click", () => this.completeOnboarding(false));
 
     // Voice Accessibility Settings (Settings Modal -> Display & Accessibility Pane)
     const chkVoiceMaster = this.shadowRoot.querySelector<HTMLInputElement>("#chk-voice-master");
@@ -5819,6 +6159,7 @@ export class BridgeAssistant extends HTMLElement {
     this.shadowRoot.querySelector("#btn-replay-onboarding")?.addEventListener("click", () => {
       this.accessibilityPrefs.onboarded = false;
       this.onboardingDismissed = false;
+      this.onboardingStep = 0;
       this.isSettingsOpen = false;
       this.render();
     });
@@ -5838,5 +6179,6 @@ if (!customElements.get("bridge-assistant")) {
   customElements.define("bridge-assistant", BridgeAssistant);
 }
 if (!customElements.get("db-assistant")) {
-  customElements.define("db-assistant", BridgeAssistant);
+  class DBAssistant extends BridgeAssistant {}
+  customElements.define("db-assistant", DBAssistant);
 }

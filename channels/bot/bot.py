@@ -86,6 +86,8 @@ def get_user_state(user_id: int) -> dict[str, Any]:
             "last_context": "Exploring courses on Telegram",
             "platform_id": "generic",
             "platform_name": "this platform",
+            "platform_title": "Savanna Platform",
+            "platform_type": "course",
             "notification_setup": {},
             "notification_prefs": {
                 "deadlines": True,
@@ -94,8 +96,6 @@ def get_user_state(user_id: int) -> dict[str, Any]:
                 "muted": False,
                 "low_bandwidth": True,
             },
-            "platform_title": "Savanna Platform",
-            "platform_type": "course",
         }
     return USER_SESSIONS[user_id]
 
@@ -295,26 +295,25 @@ async def handle_start(message: types.Message) -> None:
                 state["learner_ref"] = res["learner_ref"]
             state["platform_id"] = res.get("platform_id", "generic")
             state["platform_name"] = res.get("platform_name") or res.get("platform_title") or "this platform"
-            platform_title = res.get("platform_title") or res.get("platform_name") or "Savanna"
-            platform_type = res.get("platform_type") or "course"
-            state["platform_title"] = platform_title
-            state["platform_type"] = platform_type
+            state["platform_title"] = res.get("platform_title") or state["platform_name"]
+            state["platform_type"] = res.get("platform_type") or state["platform_id"]
             if res.get("course_id"):
                 state["course_id"] = res["course_id"]
 
-            prefs = state.get(
-                "notification_prefs",
-                {
-                    "deadlines": True,
-                    "job_alerts": True,
-                    "new_lessons": True,
-                    "muted": False,
-                    "low_bandwidth": True,
-                },
-            )
-            state["notification_prefs"] = prefs
-            is_platform_aware = bool(res.get("platform_title") or res.get("platform_type"))
-            if is_platform_aware:
+            has_custom_platform = bool(res.get("platform_title") or (res.get("platform_type") and res.get("platform_type") not in ("generic", "course")))
+            if has_custom_platform:
+                platform_title = res.get("platform_title") or state["platform_name"]
+                prefs = state.get(
+                    "notification_prefs",
+                    {
+                        "deadlines": True,
+                        "job_alerts": True,
+                        "new_lessons": True,
+                        "muted": False,
+                        "low_bandwidth": True,
+                    },
+                )
+                state["notification_prefs"] = prefs
                 success_msgs = {
                     "am": (
                         f"✅ **ከ{platform_title} ክፍለ-ጊዜዎ ጋር ተገናኝቷል!**\n\n"
@@ -359,14 +358,18 @@ async def handle_start(message: types.Message) -> None:
                 )
                 return
             else:
-                connected_msgs = {
-                    "am": "✅ ከዚህ ክፍለ-ጊዜዎ ጋር ተገናኝቷል! / Connected to your session!",
-                    "om": "✅ Kutaan keessan waliin walqabateera! / Connected to your session!",
-                    "ti": "✅ ምስ ክፍለ-ግዜኹም ተላጊቡ ኣሎ! / Connected to your session!",
-                    "ar": "✅ تم الاتصال بنجاح مع جلستك! / Connected to your session!",
-                    "en": "✅ Connected to your session!",
+                success_msgs = {
+                    "am": "የኮርስ ክፍለ-ጊዜዎ ተገናኝቷል። ማንኛውንም ጥያቄ በጽሑፍ ይጠይቁ ወይም 'ከሰው ጋር ተገናኝ' የሚለውን ይጫኑ።",
+                    "om": "Kutaan barnootaa keessan walqabateera. Gaaffii keessan barreeffamaan gaafadhaa ykn 'Nama Waliin Dubbadhu' kan jedhu tuqaa.",
+                    "ti": "ናይ ኮርስ ክፍለ-ግዜኹም ተላጊቡ ኣሎ። ዝኾነ ሕቶ ብጽሑፍ ሕተቱ ወይ 'ምስ ሰብ ተራኸብ' ዝብል ጠውቑ።",
+                    "ar": "تم ربط جلستك بنجاح. اطرح سؤالك بنص عادي أو اضغط 'التحدث مع شخص'.",
+                    "en": "Connected to your course session. Ask any question in plain text or tap Talk to a person.",
                 }
-                await send_safe_message(message, connected_msgs.get(lang, connected_msgs["en"]))
+                await send_safe_message(
+                    message,
+                    success_msgs.get(lang, success_msgs["en"]),
+                    reply_markup=make_main_keyboard(lang, state["lite_mode"]),
+                )
                 notification_prompt = {
                     "am": f"{state['platform_name']} ላይ ስለ ማጠናቀቂያ ቀኖች፣ አዲስ ትምህርቶች እና የሥራ እድሎች በቴሌግራም ማሳወቂያ ይፈልጋሉ?",
                     "om": f"Waa'ee yeroo xumuraa, barnoota haaraa fi carraa hojii {state['platform_name']} irraa beeksisa Telegram barbaadduu?",

@@ -167,6 +167,10 @@ class Database:
         expires_at = (datetime.now(UTC) + timedelta(seconds=expires_in)).isoformat()
         created_at = datetime.now(UTC).isoformat()
         deep_link = f"https://t.me/{TELEGRAM_BOT_USERNAME}?start={token}"
+        if platform_title and platform_name == "this platform":
+            platform_name = platform_title
+        if platform_type and platform_id == "generic":
+            platform_id = platform_type
         with get_connection(self.db_path) as conn:
             conn.execute(
                 """
@@ -206,6 +210,9 @@ class Database:
             "mocked": False,
             "platform_id": platform_id,
             "platform_name": platform_name,
+            "platform_title": platform_title,
+            "platform_type": platform_type,
+            "course_id": course_id,
         }
 
     def get_link_status(self, token: str) -> dict[str, Any]:
@@ -223,23 +230,33 @@ class Database:
                 return {"linked": True, "channel": "telegram"}
             return {"linked": False, "channel": None}
 
-    def get_link_context(self, token: str) -> dict[str, str]:
+    def get_link_context(self, token: str) -> dict[str, Any]:
         with get_connection(self.db_path) as conn:
             row = conn.execute(
-                "SELECT platform_id, platform_name FROM links WHERE token = ? OR link_id = ? ORDER BY created_at DESC LIMIT 1",
+                "SELECT * FROM links WHERE token = ? OR link_id = ? ORDER BY created_at DESC LIMIT 1",
                 (token, token),
             ).fetchone()
             if not row:
-                return {"platform_id": "generic", "platform_name": "this platform"}
+                return {
+                    "platform_id": "generic",
+                    "platform_name": "this platform",
+                    "platform_title": None,
+                    "platform_type": None,
+                    "course_id": None,
+                }
+            keys = row.keys()
             return {
-                "platform_id": row["platform_id"] or "generic",
-                "platform_name": row["platform_name"] or "this platform",
+                "platform_id": row["platform_id"] if "platform_id" in keys and row["platform_id"] else "generic",
+                "platform_name": row["platform_name"] if "platform_name" in keys and row["platform_name"] else "this platform",
+                "platform_title": row["platform_title"] if "platform_title" in keys else None,
+                "platform_type": row["platform_type"] if "platform_type" in keys else None,
+                "course_id": row["course_id"] if "course_id" in keys else None,
             }
 
     def verify_and_consume_token_link(
         self, token: str, telegram_chat_id: str | int | None = None
-    ) -> tuple[bool, str, str, dict[str, Any]]:
-        """Returns (success, learner_ref, error_reason, metadata).
+    ) -> tuple[bool, str, str]:
+        """Returns (success, learner_ref, error_reason).
         error_reason: "ok", "expired", "already_used", "not_found"
         """
         with get_connection(self.db_path) as conn:
@@ -248,12 +265,12 @@ class Database:
                 (token, token),
             ).fetchone()
             if not row:
-                return False, "", "not_found", {}
+                return False, "", "not_found"
             if row["used"]:
-                return False, "", "already_used", {}
+                return False, "", "already_used"
             now_iso = datetime.now(UTC).isoformat()
             if row["expires_at"] < now_iso:
-                return False, "", "expired", {}
+                return False, "", "expired"
 
             chat_id_str = str(telegram_chat_id) if telegram_chat_id is not None else None
             conn.execute(
@@ -261,13 +278,7 @@ class Database:
                 (chat_id_str, row["link_id"]),
             )
             conn.commit()
-            keys = row.keys()
-            meta = {
-                "platform_title": row["platform_title"] if "platform_title" in keys else None,
-                "platform_type": row["platform_type"] if "platform_type" in keys else None,
-                "course_id": row["course_id"] if "course_id" in keys else None,
-            }
-            return True, row["learner_ref"], "ok", meta
+            return True, row["learner_ref"], "ok"
 
     def disconnect_link(
         self, token: str | None = None, learner_ref: str | None = None

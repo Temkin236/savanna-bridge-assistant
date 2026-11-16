@@ -669,8 +669,8 @@ def link_start(payload: LinkStartRequest | None = None) -> LinkStartResponse:
         channel=channel,
         learner_ref=learner_ref,
         token=token,
-        platform_id=getattr(payload, "platform_id", "generic") if payload else "generic",
-        platform_name=getattr(payload, "platform_name", "this platform") if payload else "this platform",
+        platform_id=payload.platform_id if payload else "generic",
+        platform_name=payload.platform_name if payload else "this platform",
         platform_title=platform_title,
         platform_type=platform_type,
         course_id=course_id,
@@ -708,7 +708,8 @@ def link_confirm(
                 detail="Forbidden: Invalid or missing X-Bot-Secret header.",
             )
         token_to_verify = payload.token or payload.link_id or ""
-        success, learner_ref, reason, meta = db.verify_and_consume_token_link(
+        link_context = db.get_link_context(token_to_verify)
+        success, learner_ref, reason = db.verify_and_consume_token_link(
             token=token_to_verify,
             telegram_chat_id=payload.telegram_chat_id,
         )
@@ -737,11 +738,7 @@ def link_confirm(
             channel="telegram",
             learner_ref=learner_ref,
             mocked=False,
-            platform_id=meta.get("platform_id", "generic"),
-            platform_name=meta.get("platform_name", "this platform"),
-            platform_title=meta.get("platform_title"),
-            platform_type=meta.get("platform_type"),
-            course_id=meta.get("course_id"),
+            **link_context,
         )
 
     # Legacy 6-digit code flow
@@ -761,8 +758,8 @@ def link_confirm(
         channel="telegram",
         learner_ref=learner_ref,
         mocked=False,
-        platform_id="generic",
-        platform_name="this platform",
+        platform_id=meta.get("platform_id", "generic"),
+        platform_name=meta.get("platform_name", "this platform"),
         platform_title=meta.get("platform_title"),
         platform_type=meta.get("platform_type"),
         course_id=meta.get("course_id"),
