@@ -31,3 +31,4 @@ services:
     dockerContext: .
     plan: free
     region: frankfurt
+
