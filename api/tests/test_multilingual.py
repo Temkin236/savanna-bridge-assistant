@@ -102,6 +102,6 @@ def test_translate_endpoint_labels_offline_fallback() -> None:
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload["provider"] == "gemini"
+    assert payload["provider"] == "auto/google"
     assert payload["mocked"] is True
     assert payload["target_language"] == "ar"

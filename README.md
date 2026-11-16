@@ -41,11 +41,14 @@ docker compose up --build -d
 | Variable | Default / Example | Purpose |
 |---|---|---|
 | `API_PORT` | `8000` | Port for the core FastAPI backend. |
-| `AI_PROVIDER` | `offline` | Active AI provider: `offline` (extractive BM25), `cloud` (Gemini), or `addis`. |
+| `AI_PROVIDER` | `auto` | `auto` uses language-aware Addis AI/Google/Groq routing with labelled offline fallback. Direct modes: `offline`, `cloud`, `addis`, `groq`. |
+| `ADDIS_API_KEY` | `""` | Server-side Addis AI credential for Amharic, Afaan Oromo, and Tigrinya. |
 | `TELEGRAM_BOT_TOKEN` | `""` | Telegram Bot token issued by BotFather. |
 | `TELEGRAM_BOT_USERNAME` | `savannah_assistant3_bot` | Bot username used to construct seamless one-button deep links. |
 | `BOT_API_SECRET` | `change-me-bot-secret` | Shared secret header (`X-Bot-Secret`) required to confirm link tokens. |
 | `GOOGLE_AI_API_KEY` | `""` | Optional Google Gemini key used when `AI_PROVIDER=cloud`. |
+| `GROQ_API_KEY`, `GROQ_API_KEY_2` | `""` | Server-side supporting-provider keys. The API rotates to the next key on auth, rate-limit, timeout, or service failures. |
+| `CORS_ORIGINS` | local hosts | Comma-separated host-platform origins allowed to call the browser API. |
 
 *(On Windows PowerShell, use `./scripts/dev.ps1 up`)*
 
@@ -104,6 +107,8 @@ Embed the assistant into any HTML page using **one classic script tag** and **on
 | `api` | `data-api` | `"http://localhost:8000"` | Base URL of the Savanna Bridge Assistant REST API. |
 | `content` | `data-course` | `"course_demo"` | Course or curriculum identifier used for context-bounded retrieval. |
 | `token` | `data-token` | `null` | Optional HMAC-SHA256 widget session token (`X-Widget-Token`). |
+| `platform` | `data-platform` | `"generic"` | Stable host-platform id used for contextual linking and notifications. |
+| `platform-name` | `data-platform-name` | `"this platform"` | Human-readable platform name spoken and shown during Telegram consent. |
 
 ### 3. Events Dispatched by the Module
 
@@ -396,9 +401,9 @@ The system currently supports:
   - The assistant announces: *"Saved on this phone. It will send when you are online."*
   - As soon as the `online` event fires, queued questions automatically flush and submit.
 - **Measured Production Bundle Size**:
-  - Classic IIFE bundle (`widget.iife.js`): **55.7 KB uncompressed, 15.35 KB gzipped**.
-  - Modern ES bundle (`widget.js`): **62.6 KB uncompressed, 16.06 KB gzipped**.
-  - *Well below the 500 KB hackathon target, matching the ~15 KB budget.*
+  - Classic IIFE bundle (`widget.iife.js`): **163.73 KB uncompressed, 38.73 KB gzipped**.
+  - Modern ES bundle (`widget.js`): **181.55 KB uncompressed, 40.60 KB gzipped**.
+  - *Both remain below the 100 KB gzipped widget requirement.*
 - **Measured Load Time on Slow 3G** (Chrome DevTools Throttling: 400ms RTT, 400 kbps down):
   - Blank page load & custom element mount: **~1.15 seconds**.
 
@@ -414,7 +419,7 @@ The system currently supports:
   - The system **never** asks for kebele ID, national identification, medical history, or diagnosis proof.
 - **Third-Party AI Consent Disclosure**:
   - In default `offline` mode, **zero** data leaves the host container.
-  - When `AI_PROVIDER=cloud` (Google Gemini) or `addis` is enabled, question text is sent to the respective third-party API without learner identifiers.
+  - In `auto` or direct cloud modes, question or voice content may be sent to the configured Addis AI, Google, or Groq provider without learner identifiers. Voice retention remains off by default.
 - **Data Export & Deletion**:
   - Learners can view and export all data held about them via `GET /api/v1/me/export`.
   - Learners can permanently erase all their data with `DELETE /api/v1/me`.

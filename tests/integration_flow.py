@@ -114,6 +114,18 @@ def main() -> None:
             "active": True,
         },
     )
+    request_json(
+        args.api,
+        "PUT",
+        "/api/v1/notification-settings?learner_ref=integration_learner",
+        {
+            "telegram_enabled": True,
+            "consent_granted": True,
+            "job_alerts": True,
+            "frequency": "immediate",
+            "platform_id": "integration-test",
+        },
+    )
     jobs = request_json(args.api, "GET", "/jobs")
     require(bool(jobs.get("items")), "No job fixture is available")
     job = jobs["items"][0]
@@ -137,6 +149,7 @@ def main() -> None:
         job,
         recipient="integration-chat-id",
         channel="telegram",
+        learner_ref="integration_learner",
     )
     require(delivered, "Mock Telegram job alert was not delivered")
     require(len(telegram.sent_log) == 1, "Telegram delivery evidence was not recorded")

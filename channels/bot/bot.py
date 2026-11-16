@@ -84,6 +84,11 @@ def get_user_state(user_id: int) -> dict[str, Any]:
             "learner_ref": f"tg_{user_id}",
             "last_job_id": None,
             "last_context": "Exploring courses on Telegram",
+            "platform_id": "generic",
+            "platform_name": "this platform",
+            "platform_title": "Savanna Platform",
+            "platform_type": "course",
+            "notification_setup": {},
             "notification_prefs": {
                 "deadlines": True,
                 "job_alerts": True,
@@ -91,8 +96,6 @@ def get_user_state(user_id: int) -> dict[str, Any]:
                 "muted": False,
                 "low_bandwidth": True,
             },
-            "platform_title": "Savanna Platform",
-            "platform_type": "course",
         }
     return USER_SESSIONS[user_id]
 
@@ -290,69 +293,105 @@ async def handle_start(message: types.Message) -> None:
             state["linked"] = True
             if res.get("learner_ref"):
                 state["learner_ref"] = res["learner_ref"]
-
-            platform_title = res.get("platform_title") or "Savanna"
-            platform_type = res.get("platform_type") or "course"
-            state["platform_title"] = platform_title
-            state["platform_type"] = platform_type
+            state["platform_id"] = res.get("platform_id", "generic")
+            state["platform_name"] = res.get("platform_name") or res.get("platform_title") or "this platform"
+            state["platform_title"] = res.get("platform_title") or state["platform_name"]
+            state["platform_type"] = res.get("platform_type") or state["platform_id"]
             if res.get("course_id"):
                 state["course_id"] = res["course_id"]
 
-            prefs = state.get(
-                "notification_prefs",
-                {
-                    "deadlines": True,
-                    "job_alerts": True,
-                    "new_lessons": True,
-                    "muted": False,
-                    "low_bandwidth": True,
-                },
-            )
-            state["notification_prefs"] = prefs
+            has_custom_platform = bool(res.get("platform_title") or (res.get("platform_type") and res.get("platform_type") not in ("generic", "course")))
+            if has_custom_platform:
+                platform_title = res.get("platform_title") or state["platform_name"]
+                prefs = state.get(
+                    "notification_prefs",
+                    {
+                        "deadlines": True,
+                        "job_alerts": True,
+                        "new_lessons": True,
+                        "muted": False,
+                        "low_bandwidth": True,
+                    },
+                )
+                state["notification_prefs"] = prefs
 
-            success_msgs = {
-                "am": (
-                    f"✅ **ከ{platform_title} ክፍለ-ጊዜዎ ጋር ተገናኝቷል!**\n\n"
-                    f"🔔 **የማሳወቂያ ምርጫዎች**\n"
-                    f"ይህ ረዳት በበርካታ መድረኮች (ትምህርት፣ ሥራ፣ ስልጠና) ላይ ያገለግላል። "
-                    f"ለዚህ መድረክ በቴሌግራም ምን ዓይነት ማሳወቂያዎችን ማግኘት ይፈልጋሉ?\n\n"
-                    f"ከታች ያሉትን ቁልፎች በመጫን ምርጫዎችዎን ያብሩ/ያጥፉ፣ ሲጨርሱ **መዝግብና ቀጥል** የሚለውን ይጫኑ፡"
-                ),
-                "om": (
-                    f"✅ **Kutaan keessan {platform_title} waliin walqabateera!**\n\n"
-                    f"🔔 **Filannoo Beeksisaa**\n"
-                    f"Gargaaraan kun platformiiwwan hedduu (barnoota, carraa hojii, leenjii) tajaajila. "
-                    f"Platformii kanaaf beeksisa akkamii Telegram irratti argachuu barbaaddu?\n\n"
-                    f"Banuuf ykn cufuuf cuqqaallawwan armaan gadii tuqaa, yommuu xumurtan **Olkaa'iitii Itti Fufi** tuqaa:"
-                ),
-                "ti": (
-                    f"✅ **ምስ {platform_title} ክፍለ-ግዜኹም ተላጊቡ ኣሎ!**\n\n"
-                    f"🔔 **ናይ መተሓሳሰቢ ምርጫታት**\n"
-                    f"እዚ ረዳኢ ኣብ ዝተፈላለዩ መድረኻት (ትምህርቲ፣ ስራሕ፣ ስልጠና) የገልግል እዩ። "
-                    f"ነዚ መድረኽ ዝምልከት ኣብ ቴሌግራም እንታይ ዓይነት መተሓሳሰቢታት ክበጽሓኩም ትደልዩ?\n\n"
-                    f"ንምኽፋት ወይ ንምዕጻው ካብ ታሕቲ ዘለዉ መተሓሳሰቢታት ጠውቑ፣ ምስ ወደእኹም **ኣቐምጥ እሞ ቐጽል** ጠውቑ፡"
-                ),
-                "ar": (
-                    f"✅ **تم الاتصال بنجاح مع جلستك في {platform_title}!**\n\n"
-                    f"🔔 **تفضيلات الإشعارات**\n"
-                    f"يعمل هذا المساعد عبر منصات متعددة (دورات، فرص عمل، وتدريب). "
-                    f"ما هي التحديثات التي ترغب في تلقيها على تيليجرام لهذه المنصة؟\n\n"
-                    f"اضغط على الأزرار أدناه للتبديل، وعند الانتهاء اضغط على **حفظ ومتابعة**:"
-                ),
-                "en": (
-                    f"✅ **Connected to your session on {platform_title}!**\n\n"
-                    f"🔔 **Notification Preferences**\n"
-                    f"This assistant supports multiple platforms (courses, job alerts, training). "
-                    f"What updates would you like to receive on Telegram for this platform?\n\n"
-                    f"Tap the buttons below to customize your alerts, then tap **Save & Continue**:"
-                ),
-            }
-            await send_safe_message(
-                message,
-                success_msgs.get(lang, success_msgs["en"]),
-                reply_markup=make_notification_inline(prefs, lang=lang),
-            )
-            return
+                success_msgs = {
+                    "am": (
+                        f"✅ **ከ{platform_title} ክፍለ-ጊዜዎ ጋር ተገናኝቷል!**\n\n"
+                        f"🔔 **የማሳወቂያ ምርጫዎች**\n"
+                        f"ይህ ረዳት በበርካታ መድረኮች (ትምህርት፣ ሥራ፣ ስልጠና) ላይ ያገለግላል። "
+                        f"ለዚህ መድረክ በቴሌግራም ምን ዓይነት ማሳወቂያዎችን ማግኘት ይፈልጋሉ?\n\n"
+                        f"ከታች ያሉትን ቁልፎች በመጫን ምርጫዎችዎን ያብሩ/ያጥፉ፣ ሲጨርሱ **መዝግብና ቀጥል** የሚለውን ይጫኑ፡"
+                    ),
+                    "om": (
+                        f"✅ **Kutaan keessan {platform_title} waliin walqabateera!**\n\n"
+                        f"🔔 **Filannoo Beeksisaa**\n"
+                        f"Gargaaraan kun platformiiwwan hedduu (barnoota, carraa hojii, leenjii) tajaajila. "
+                        f"Platformii kanaaf beeksisa akkamii Telegram irratti argachuu barbaaddu?\n\n"
+                        f"Banuuf ykn cufuuf cuqqaallawwan armaan gadii tuqaa, yommuu xumurtan **Olkaa'iitii Itti Fufi** tuqaa:"
+                    ),
+                    "ti": (
+                        f"✅ **ምስ {platform_title} ክፍለ-ግዜኹም ተላጊቡ ኣሎ!**\n\n"
+                        f"🔔 **ናይ መተሓሳሰቢ ምርጫታት**\n"
+                        f"እዚ ረዳኢ ኣብ ዝተፈላለዩ መድረኻት (ትምህርቲ፣ ስራሕ፣ ስልጠና) የገልግል እዩ። "
+                        f"ነዚ መድረኽ ዝምልከት ኣብ ቴሌግራም እንታይ ዓይነት መተሓሳሰቢታት ክበጽሓኩም ትደልዩ?\n\n"
+                        f"ንምኽፋት ወይ ንምዕጻው ካብ ታሕቲ ዘለዉ መተሓሳሰቢታት ጠውቑ፣ ምስ ወደእኹም **ኣቐምጥ እሞ ቐጽል** ጠውቑ፡"
+                    ),
+                    "ar": (
+                        f"✅ **تم الاتصال بنجاح مع جلستك في {platform_title}!**\n\n"
+                        f"🔔 **تفضيلات الإشعارات**\n"
+                        f"يعمل هذا المساعد عبر منصات متعددة (دورات، فرص عمل، وتدريب). "
+                        f"ما هي التحديثات التي ترغب في تلقيها على تيليجرام لهذه المنصة؟\n\n"
+                        f"اضغط على الأزرار أدناه للتبديل، وعند الانتهاء اضغط على **حفظ ومتابعة**:"
+                    ),
+                    "en": (
+                        f"✅ **Connected to your session on {platform_title}!**\n\n"
+                        f"🔔 **Notification Preferences**\n"
+                        f"This assistant supports multiple platforms (courses, job alerts, training). "
+                        f"What updates would you like to receive on Telegram for this platform?\n\n"
+                        f"Tap the buttons below to customize your alerts, then tap **Save & Continue**:"
+                    ),
+                }
+                await send_safe_message(
+                    message,
+                    success_msgs.get(lang, success_msgs["en"]),
+                    reply_markup=make_notification_inline(prefs, lang=lang),
+                )
+                return
+            else:
+                success_msgs = {
+                    "am": "የኮርስ ክፍለ-ጊዜዎ ተገናኝቷል። ማንኛውንም ጥያቄ በጽሑፍ ይጠይቁ ወይም 'ከሰው ጋር ተገናኝ' የሚለውን ይጫኑ።",
+                    "om": "Kutaan barnootaa keessan walqabateera. Gaaffii keessan barreeffamaan gaafadhaa ykn 'Nama Waliin Dubbadhu' kan jedhu tuqaa.",
+                    "ti": "ናይ ኮርስ ክፍለ-ግዜኹም ተላጊቡ ኣሎ። ዝኾነ ሕቶ ብጽሑፍ ሕተቱ ወይ 'ምስ ሰብ ተራኸብ' ዝብል ጠውቑ።",
+                    "ar": "تم ربط جلستك بنجاح. اطرح سؤالك بنص عادي أو اضغط 'التحدث مع شخص'.",
+                    "en": f"Connected to your course session. Ask any question in plain text or tap Talk to a person.",
+                }
+                await send_safe_message(
+                    message,
+                    success_msgs.get(lang, success_msgs["en"]),
+                    reply_markup=make_main_keyboard(lang, state["lite_mode"]),
+                )
+                notification_prompt = {
+                    "am": f"{state['platform_name']} ላይ ስለ ማጠናቀቂያ ቀኖች፣ አዲስ ትምህርቶች እና የሥራ እድሎች በቴሌግራም ማሳወቂያ ይፈልጋሉ?",
+                    "om": f"Waa'ee yeroo xumuraa, barnoota haaraa fi carraa hojii {state['platform_name']} irraa beeksisa Telegram barbaadduu?",
+                    "ti": f"ካብ {state['platform_name']} ናይ ዕለት፣ ሓድሽ ትምህርቲን ስራሕን መተሓሳሰቢ ብቴሌግራም ትደልዩ ዶ?",
+                    "ar": f"هل تريد إشعارات تيليجرام بالمواعيد والدروس الجديدة وفرص العمل من {state['platform_name']}؟",
+                    "en": f"Would you like Telegram notifications about deadlines, new lessons, and job alerts from {state['platform_name']}?",
+                }
+                yes_no = InlineKeyboardMarkup(
+                    inline_keyboard=[
+                        [
+                            InlineKeyboardButton(text="Yes / አዎ", callback_data="notify_consent_yes"),
+                            InlineKeyboardButton(text="No / አይ", callback_data="notify_consent_no"),
+                        ]
+                    ]
+                )
+                await send_safe_message(
+                    message,
+                    notification_prompt.get(lang, notification_prompt["en"]),
+                    reply_markup=yes_no,
+                )
+                return
         else:
             fail_msgs = {
                 "am": "ይህ ሊንክ ጊዜው አልፏል ወይም አስቀድሞ ስራ ላይ ውሏል። እባክዎ በድረ-ገጹ ረዳት ውስጥ 'በቴሌግራም ቀጥል' የሚለውን ተጭነው አዲስ ሊንክ ያግኙ።",
@@ -381,6 +420,126 @@ async def handle_start(message: types.Message) -> None:
         parse_mode="Markdown",
         reply_markup=make_language_inline(),
     )
+
+
+@router.callback_query(F.data == "notify_consent_no")
+async def decline_notifications(callback: types.CallbackQuery) -> None:
+    state = get_user_state(callback.from_user.id)
+    await call_api(
+        "PUT",
+        f"/api/v1/notification-settings?learner_ref={state['learner_ref']}",
+        {
+            "telegram_enabled": False,
+            "consent_granted": False,
+            "platform_id": state["platform_id"],
+            "language": state["language"],
+        },
+    )
+    await callback.answer("Notifications remain off")
+    await send_safe_message(
+        callback.message,
+        "Notifications are off. You can enable them later with /settings.",
+    )
+
+
+@router.callback_query(F.data == "notify_consent_yes")
+async def choose_notification_categories(callback: types.CallbackQuery) -> None:
+    state = get_user_state(callback.from_user.id)
+    state["notification_setup"] = {"consent_granted": True, "telegram_enabled": True}
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="All updates", callback_data="notify_categories_all")],
+            [
+                InlineKeyboardButton(text="Jobs only", callback_data="notify_categories_jobs"),
+                InlineKeyboardButton(text="Deadlines only", callback_data="notify_categories_deadlines"),
+            ],
+        ]
+    )
+    await callback.answer()
+    await send_safe_message(
+        callback.message,
+        "Which updates should I send? You can change this later in /settings.",
+        reply_markup=keyboard,
+    )
+
+
+@router.callback_query(F.data.startswith("notify_categories_"))
+async def choose_notification_frequency(callback: types.CallbackQuery) -> None:
+    state = get_user_state(callback.from_user.id)
+    choice = callback.data.removeprefix("notify_categories_")
+    setup = state.setdefault("notification_setup", {})
+    setup.update(
+        {
+            "deadlines": choice in {"all", "deadlines"},
+            "new_lessons": choice == "all",
+            "job_alerts": choice in {"all", "jobs"},
+        }
+    )
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text="Immediately", callback_data="notify_frequency_immediate"),
+                InlineKeyboardButton(text="Daily summary", callback_data="notify_frequency_daily"),
+            ]
+        ]
+    )
+    await callback.answer()
+    await send_safe_message(callback.message, "When should I send them?", reply_markup=keyboard)
+
+
+@router.callback_query(F.data.startswith("notify_frequency_"))
+async def choose_notification_quiet_hours(callback: types.CallbackQuery) -> None:
+    state = get_user_state(callback.from_user.id)
+    frequency = callback.data.removeprefix("notify_frequency_")
+    state.setdefault("notification_setup", {})["frequency"] = frequency
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text="Quiet 22:00–07:00", callback_data="notify_quiet_yes"),
+                InlineKeyboardButton(text="No quiet hours", callback_data="notify_quiet_no"),
+            ]
+        ]
+    )
+    await callback.answer()
+    await send_safe_message(
+        callback.message,
+        "Should I avoid notifications overnight in the platform time zone?",
+        reply_markup=keyboard,
+    )
+
+
+@router.callback_query(F.data.startswith("notify_quiet_"))
+async def finish_notification_setup(callback: types.CallbackQuery) -> None:
+    state = get_user_state(callback.from_user.id)
+    use_quiet_hours = callback.data.endswith("yes")
+    setup = state.setdefault("notification_setup", {})
+    setup.update(
+        {
+            "quiet_hours_start": "22:00" if use_quiet_hours else None,
+            "quiet_hours_end": "07:00" if use_quiet_hours else None,
+            "timezone": "Africa/Addis_Ababa",
+            "language": state["language"],
+            "platform_id": state["platform_id"],
+            "muted": False,
+            "low_bandwidth": state["lite_mode"],
+        }
+    )
+    saved = await call_api(
+        "PUT",
+        f"/api/v1/notification-settings?learner_ref={state['learner_ref']}",
+        setup,
+    )
+    await callback.answer()
+    if saved:
+        await send_safe_message(
+            callback.message,
+            "Notification preferences saved. Use /settings to review or /mute at any time.",
+        )
+    else:
+        await send_safe_message(
+            callback.message,
+            "I could not save notification preferences. Notifications remain off; try /settings later.",
+        )
 
 
 @router.callback_query(F.data.startswith("lang_"))
@@ -1104,18 +1263,20 @@ async def handle_settings(message: types.Message) -> None:
     learner_ref = state.get("learner_ref", f"tg_{user_id}")
     platform_title = state.get("platform_title") or "Savanna"
 
-    res = await call_api("GET", f"/notification-settings?learner_ref={learner_ref}")
+    res = await call_api(
+        "GET",
+        f"/api/v1/notification-settings?learner_ref={state['learner_ref']}",
+    )
+    if not res:
+        res = await call_api("GET", f"/notification-settings?learner_ref={state['learner_ref']}")
     if not res or not isinstance(res, dict):
-        res = state.get(
-            "notification_prefs",
-            {
-                "deadlines": True,
-                "new_lessons": True,
-                "job_alerts": True,
-                "muted": False,
-                "low_bandwidth": True,
-            },
-        )
+        res = {
+            "deadlines": True,
+            "new_lessons": True,
+            "job_alerts": True,
+            "muted": False,
+            "low_bandwidth": True,
+        }
     state["notification_prefs"] = res
 
     muted = res.get("muted", False)
@@ -1189,7 +1350,11 @@ async def handle_mute(message: types.Message) -> None:
     state = get_user_state(user_id)
     lang = state.get("language", "en")
 
-    await call_api("PUT", "/notification-settings", {"muted": True})
+    await call_api(
+        "PUT",
+        f"/api/v1/notification-settings?learner_ref={state['learner_ref']}",
+        {"muted": True},
+    )
     mute_msgs = {
         "am": "🔕 ማሳወቂያዎች ድምጽ አልባ ሆነዋል።",
         "om": "🔕 Beeksisawwan sagalee dhabaniiru.",
@@ -1206,7 +1371,11 @@ async def handle_unmute(message: types.Message) -> None:
     state = get_user_state(user_id)
     lang = state.get("language", "en")
 
-    await call_api("PUT", "/notification-settings", {"muted": False})
+    await call_api(
+        "PUT",
+        f"/api/v1/notification-settings?learner_ref={state['learner_ref']}",
+        {"muted": False},
+    )
     unmute_msgs = {
         "am": "🔔 ማሳወቂያዎች ተከፍተዋል።",
         "om": "🔔 Beeksisawwan banamaniiru.",
@@ -1327,6 +1496,9 @@ async def handle_voice_message(message: types.Message, bot: Bot) -> None:
         if transcribe_res
         else "Please explain Module 2."
     )
+    if transcribe_res and transcribe_res.get("language_confidence", 0) >= 0.82:
+        lang = transcribe_res.get("detected_language", lang)
+        state["language"] = lang
 
     trans_labels = {
         "am": f"📝 **የድምጽ ግልባጭ:**\n_{transcript}_",
@@ -1357,6 +1529,10 @@ async def handle_voice_message(message: types.Message, bot: Bot) -> None:
         }
         await send_safe_message(message, no_ans.get(lang, no_ans["en"]))
         return
+
+    if ask_res.get("language_changed") and ask_res.get("language"):
+        lang = ask_res["language"]
+        state["language"] = lang
 
     answer_text = ask_res.get("answer", "")
     citations = ask_res.get("citations", [])
@@ -1440,6 +1616,10 @@ async def handle_text_question(message: types.Message) -> None:
         }
         await send_safe_message(message, err_msg.get(lang, err_msg["en"]))
         return
+
+    if res.get("language_changed") and res.get("language"):
+        lang = res["language"]
+        state["language"] = lang
 
     answer_text = res.get("answer", "")
     citations = res.get("citations", [])

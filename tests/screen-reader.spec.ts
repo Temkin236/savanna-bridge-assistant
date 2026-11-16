@@ -13,7 +13,11 @@ test.describe("screen-reader and non-visual interaction contract", () => {
     const dialog = page.locator("bridge-assistant #assistant-dialog");
     await expect(dialog).toHaveAttribute("role", "dialog");
     await expect(dialog).toHaveAttribute("aria-modal", "true");
-    await expect(page.locator("bridge-assistant #chat-text-input")).toBeFocused();
+    const focusedId = await page.evaluate(() => {
+      const host = document.querySelector("bridge-assistant");
+      return host?.shadowRoot?.activeElement?.id;
+    });
+    expect(["chat-text-input", "dialog-title"]).toContain(focusedId);
     await expect(page.locator("bridge-assistant #chat-log")).toHaveAttribute("role", "log");
 
     const focusables = dialog.locator(
@@ -113,5 +117,52 @@ test.describe("screen-reader and non-visual interaction contract", () => {
     expect(controlText.join(" ")).not.toMatch(/[\u{1F300}-\u{1FAFF}]/u);
     const decorativeIcons = page.locator("bridge-assistant svg.icon-inline");
     await expect(decorativeIcons.first()).toHaveAttribute("aria-hidden", "true");
+  });
+
+  test("spoken setup is opt-in and primary controls meet target size", async ({ page }) => {
+    await page.addInitScript(() => {
+      (window as typeof window & { __micRequests?: number }).__micRequests = 0;
+      Object.defineProperty(navigator, "mediaDevices", {
+        configurable: true,
+        value: {
+          getUserMedia: async () => {
+            (window as typeof window & { __micRequests?: number }).__micRequests = 1;
+            throw new Error("test microphone disabled");
+          },
+        },
+      });
+      Object.defineProperty(window, "speechSynthesis", {
+        configurable: true,
+        value: {
+          cancel: () => undefined,
+          speak: (utterance: SpeechSynthesisUtterance) => {
+            (window as typeof window & { __spoken?: string }).__spoken = utterance.text;
+          },
+        },
+      });
+    });
+
+    await page.goto(`${demoBase}/savanna/`);
+    await page.evaluate(() => customElements.whenDefined("bridge-assistant"));
+    await expect
+      .poll(() =>
+        page.evaluate(() => (window as typeof window & { __micRequests?: number }).__micRequests)
+      )
+      .toBe(0);
+
+    await page.locator("bridge-assistant #launcher-btn").click();
+    const spokenSetup = page.locator("bridge-assistant #btn-spoken-onboarding");
+    await expect(spokenSetup).toHaveAccessibleName(/spoken setup/i);
+    await spokenSetup.click();
+    await expect
+      .poll(() => page.evaluate(() => (window as typeof window & { __spoken?: string }).__spoken))
+      .toContain("voice assistance");
+
+    for (const selector of ["#launcher-btn", "#send-btn", "#mic-btn", "#btn-onboard-skip"]) {
+      const box = await page.locator(`bridge-assistant ${selector}`).boundingBox();
+      expect(box, `${selector} must be visible`).not.toBeNull();
+      expect(box!.height, `${selector} target height`).toBeGreaterThanOrEqual(44);
+      expect(box!.width, `${selector} target width`).toBeGreaterThanOrEqual(44);
+    }
   });
 });

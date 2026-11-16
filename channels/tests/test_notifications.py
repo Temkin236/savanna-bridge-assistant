@@ -34,6 +34,13 @@ def test_job_alert_numeric_reply_options_included() -> None:
     mock_sms = MockSmsDriver()
     tg = TelegramDriver()
     scheduler = NotificationScheduler(telegram_driver=tg, sms_driver=mock_sms)
+    scheduler.get_settings = lambda _client, _learner_ref="default": {
+        "job_alerts": True,
+        "muted": False,
+        "telegram_enabled": True,
+        "consent_granted": True,
+        "frequency": "immediate",
+    }
 
     job_data = {
         "title": "Customer Support Assistant",
