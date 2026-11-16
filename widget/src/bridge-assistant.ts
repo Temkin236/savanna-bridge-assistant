@@ -1960,7 +1960,32 @@ export class BridgeAssistant extends HTMLElement {
 
   // Attributes: supports both guide plain attributes (lang, api, content) and data-*
   get apiBase(): string {
-    return this.getAttribute("api") || this.getAttribute("data-api") || "http://localhost:8000";
+    if (typeof window !== "undefined" && (window as any).SAVANNA_API_URL) {
+      return (window as any).SAVANNA_API_URL;
+    }
+
+    if (typeof window !== "undefined" && window.location) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const paramApi = urlParams.get("api");
+      if (paramApi) return paramApi;
+    }
+
+    const attr = this.getAttribute("api") || this.getAttribute("data-api");
+
+    if (typeof window !== "undefined" && window.location && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1") {
+      if (attr && !attr.includes("localhost") && !attr.includes("127.0.0.1")) {
+        return attr;
+      }
+      const host = window.location.hostname;
+      if (host.includes("-demo.onrender.com")) {
+        return `${window.location.protocol}//${host.replace("-demo.onrender.com", "-api.onrender.com")}`;
+      }
+      if (host.includes(".onrender.com")) {
+        return window.location.origin;
+      }
+    }
+
+    return attr || "http://localhost:8000";
   }
 
   get courseId(): string {

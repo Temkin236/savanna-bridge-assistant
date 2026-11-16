@@ -1850,7 +1850,23 @@ class N extends HTMLElement {
   }
   // Attributes: supports both guide plain attributes (lang, api, content) and data-*
   get apiBase() {
-    return this.getAttribute("api") || this.getAttribute("data-api") || "http://localhost:8000";
+    if (typeof window < "u" && window.SAVANNA_API_URL)
+      return window.SAVANNA_API_URL;
+    if (typeof window < "u" && window.location) {
+      const a = new URLSearchParams(window.location.search).get("api");
+      if (a) return a;
+    }
+    const e = this.getAttribute("api") || this.getAttribute("data-api");
+    if (typeof window < "u" && window.location && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1") {
+      if (e && !e.includes("localhost") && !e.includes("127.0.0.1"))
+        return e;
+      const t = window.location.hostname;
+      if (t.includes("-demo.onrender.com"))
+        return `${window.location.protocol}//${t.replace("-demo.onrender.com", "-api.onrender.com")}`;
+      if (t.includes(".onrender.com"))
+        return window.location.origin;
+    }
+    return e || "http://localhost:8000";
   }
   get courseId() {
     return this.getAttribute("content") || this.getAttribute("data-course") || "course_demo";
