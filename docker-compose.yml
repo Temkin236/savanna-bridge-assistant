@@ -19,6 +19,13 @@ services:
       CLOUD_MODEL: ${CLOUD_MODEL:-gemini-3.8-flash}
       GOOGLE_TTS_MODEL: ${GOOGLE_TTS_MODEL:-gemini-3.8-flash-tts}
       GOOGLE_TTS_VOICE: ${GOOGLE_TTS_VOICE:-Kore}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      GROQ_API_KEY_2: ${GROQ_API_KEY_2:-}
+      GROQ_API_KEYS: ${GROQ_API_KEYS:-}
+      GROQ_CHAT_MODEL: ${GROQ_CHAT_MODEL:-llama-3.3-70b-versatile}
+      GROQ_STT_MODEL: ${GROQ_STT_MODEL:-whisper-large-v3-turbo}
+      GROQ_TTS_MODEL_EN: ${GROQ_TTS_MODEL_EN:-canopylabs/orpheus-v1-english}
+      GROQ_TTS_MODEL_AR: ${GROQ_TTS_MODEL_AR:-canopylabs/orpheus-arabic-saudi}
       TOKEN_SECRET: ${TOKEN_SECRET:-local-development-only}
       SECRET_KEY: ${TOKEN_SECRET:-local-development-only}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:4173,http://localhost:8080},http://demo-host,http://console

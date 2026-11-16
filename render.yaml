@@ -12,6 +12,14 @@ services:
         value: "*"
       - key: AI_PROVIDER
         value: auto
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_API_KEY_2
+        sync: false
+      - key: GROQ_CHAT_MODEL
+        value: llama-3.3-70b-versatile
+      - key: GROQ_STT_MODEL
+        value: whisper-large-v3-turbo
       - key: TOKEN_SECRET
         generateValue: true
       - key: BOT_API_SECRET
