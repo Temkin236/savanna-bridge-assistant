@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -11,8 +12,6 @@ from dotenv import load_dotenv
 API_DIR = Path(__file__).resolve().parents[2]
 ROOT_DIR = API_DIR.parent
 DEFAULT_DB_PATH = str(API_DIR / "savanna_bridge.db")
-
-import sys
 
 # Local development uses the repository-level environment file. Values already
 # provided by the process or deployment platform keep precedence.
