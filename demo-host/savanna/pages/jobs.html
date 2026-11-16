@@ -3,30 +3,112 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Savanna Career Gateway - Job Opportunities</title>
+    <title>Savanna Career Gateway - Inclusive Job Opportunities</title>
     <!-- schema.org JobPosting JSON-LD (Level 3 Open Standards Compliance) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "JobPosting",
-      "title": "Junior Front-End Developer",
-      "description": "Accessible front-end development position with inclusive mentoring and flexible working conditions.",
-      "datePosted": "2026-11-14",
-      "employmentType": "FULL_TIME",
-      "jobLocationType": "TELECOMMUTE",
-      "hiringOrganization": {
-        "@type": "Organization",
-        "name": "Test Employer PLC"
-      },
-      "jobLocation": {
-        "@type": "Place",
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": "Addis Ababa",
-          "addressCountry": "ET"
+      "@graph": [
+        {
+          "@type": "JobPosting",
+          "title": "Junior Front-End Developer",
+          "description": "Accessible front-end development position with inclusive mentoring, screen-reader friendly toolchain, and flexible working conditions.",
+          "datePosted": "2026-11-14",
+          "validThrough": "2027-01-31",
+          "employmentType": "FULL_TIME",
+          "jobLocationType": "TELECOMMUTE",
+          "hiringOrganization": {
+            "@type": "Organization",
+            "name": "Test Employer PLC",
+            "sameAs": "https://savanna.example.org"
+          },
+          "jobLocation": {
+            "@type": "Place",
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Addis Ababa",
+              "addressCountry": "ET"
+            }
+          },
+          "baseSalary": {
+            "@type": "MonetaryAmount",
+            "currency": "ETB",
+            "value": {
+              "@type": "QuantitativeValue",
+              "minValue": 22000,
+              "maxValue": 30000,
+              "unitText": "MONTH"
+            }
+          },
+          "jobBenefits": "Remote work, flexible hours, sign language interpreter for interviews, screen reader friendly toolchain"
+        },
+        {
+          "@type": "JobPosting",
+          "title": "Bilingual Customer Support Specialist",
+          "description": "Provide compassionate, omnichannel customer service for African educational platforms in Amharic and English.",
+          "datePosted": "2026-11-16",
+          "validThrough": "2026-12-30",
+          "employmentType": "FULL_TIME",
+          "jobLocationType": "TELECOMMUTE",
+          "hiringOrganization": {
+            "@type": "Organization",
+            "name": "Savanna Support Solutions",
+            "sameAs": "https://savanna.example.org"
+          },
+          "jobLocation": {
+            "@type": "Place",
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Addis Ababa",
+              "addressCountry": "ET"
+            }
+          },
+          "baseSalary": {
+            "@type": "MonetaryAmount",
+            "currency": "ETB",
+            "value": {
+              "@type": "QuantitativeValue",
+              "minValue": 18000,
+              "maxValue": 24000,
+              "unitText": "MONTH"
+            }
+          },
+          "jobBenefits": "Ergonomic equipment grant, health insurance, paid leave, NVDA screen-reader support"
+        },
+        {
+          "@type": "JobPosting",
+          "title": "Remote Virtual Assistant and Operations Coordinator",
+          "description": "Coordinate digital calendars, Notion workspaces, and stakeholder communications in Afaan Oromoo and English.",
+          "datePosted": "2026-11-16",
+          "validThrough": "2027-01-15",
+          "employmentType": "FULL_TIME",
+          "jobLocationType": "TELECOMMUTE",
+          "hiringOrganization": {
+            "@type": "Organization",
+            "name": "Oromia Digital Ventures",
+            "sameAs": "https://savanna.example.org"
+          },
+          "jobLocation": {
+            "@type": "Place",
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Adama",
+              "addressCountry": "ET"
+            }
+          },
+          "baseSalary": {
+            "@type": "MonetaryAmount",
+            "currency": "ETB",
+            "value": {
+              "@type": "QuantitativeValue",
+              "minValue": 20000,
+              "maxValue": 26000,
+              "unitText": "MONTH"
+            }
+          },
+          "jobBenefits": "Asynchronous working hours, home office stipend, speech-to-text dictation licenses"
         }
-      },
-      "jobBenefits": "Remote work, flexible hours, interpreter for interviews, screen reader friendly toolchain"
+      ]
     }
     </script>
     <style>
@@ -39,46 +121,144 @@
         color: #0f172a;
       }
       main {
-        max-width: 800px;
+        max-width: 860px;
         margin: 0 auto;
         background: #fff;
-        padding: 2rem;
+        padding: 2.5rem;
         border-radius: 8px;
         box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
       }
+      h1 {
+        color: #991b1b;
+        margin-top: 0;
+      }
       .job-card {
         border: 1px solid #e2e8f0;
+        border-left: 4px solid #b91c1c;
         padding: 1.5rem;
         border-radius: 6px;
-        margin-top: 1rem;
+        margin-top: 1.5rem;
+        background: #ffffff;
+      }
+      .job-card h2 {
+        margin-top: 0;
+        color: #1e293b;
+      }
+      .job-meta {
+        color: #64748b;
+        font-size: 0.9375rem;
+        margin-bottom: 0.75rem;
       }
       .tag {
         display: inline-block;
+        background: #fee2e2;
+        color: #991b1b;
+        padding: 0.25rem 0.625rem;
+        border-radius: 4px;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+      .tag-blue {
         background: #e0f2fe;
         color: #0369a1;
-        padding: 0.25rem 0.5rem;
-        border-radius: 4px;
-        font-size: 0.875rem;
-        margin-right: 0.5rem;
+      }
+      .policy-box {
+        background: #f1f5f9;
+        border: 1px solid #cbd5e1;
+        padding: 1.25rem;
+        border-radius: 6px;
+        margin-top: 2rem;
       }
     </style>
   </head>
   <body>
     <main>
       <h1>Savanna Career Gateway</h1>
-      <p>Explore inclusive job opportunities with verified employer accessibility accommodations.</p>
+      <p>Explore inclusive job opportunities with verified employer accessibility accommodations across Ethiopia and East Africa.</p>
       
+      <!-- Job 1 -->
       <article class="job-card">
         <h2>Junior Front-End Developer</h2>
-        <p><strong>Employer:</strong> Test Employer PLC &bull; Addis Ababa (Remote / Telecommute)</p>
-        <p>Accessible front-end development position with inclusive mentoring and flexible working conditions.</p>
+        <div class="job-meta">
+          <strong>Employer:</strong> Test Employer PLC &bull; 
+          <strong>Location:</strong> Addis Ababa (Remote / Telecommute) &bull; 
+          <strong>Salary:</strong> 22,000 - 30,000 ETB / month &bull; 
+          <strong>Deadline:</strong> January 31, 2027
+        </div>
+        <p>Accessible front-end development position with inclusive mentoring, screen-reader friendly toolchain, and flexible working conditions.</p>
         <div>
           <span class="tag">Remote Work</span>
           <span class="tag">Flexible Hours</span>
-          <span class="tag">Interview Accommodations</span>
-          <span class="tag">Screen Reader Friendly</span>
+          <span class="tag tag-blue">Interview Accommodations</span>
+          <span class="tag tag-blue">Screen Reader Friendly</span>
         </div>
+        <h3>Key Responsibilities:</h3>
+        <ul>
+          <li>Build accessible UI components with TypeScript, React, and semantic HTML5.</li>
+          <li>Ensure WCAG 2.2 AA conformance for keyboard navigation and screen readers.</li>
+          <li>Collaborate with cross-functional team members through asynchronous pull requests.</li>
+        </ul>
       </article>
+
+      <!-- Job 2 -->
+      <article class="job-card">
+        <h2>Bilingual Customer Support Specialist (Amharic &amp; English)</h2>
+        <div class="job-meta">
+          <strong>Employer:</strong> Savanna Support Solutions &bull; 
+          <strong>Location:</strong> Addis Ababa (Hybrid / Remote) &bull; 
+          <strong>Salary:</strong> 18,000 - 24,000 ETB / month &bull; 
+          <strong>Deadline:</strong> December 30, 2026
+        </div>
+        <p>Provide compassionate, omnichannel customer service for African educational platforms in Amharic and English.</p>
+        <div>
+          <span class="tag">Amharic &amp; English</span>
+          <span class="tag">Omnichannel Chat/Email</span>
+          <span class="tag tag-blue">Ergonomic Grant</span>
+          <span class="tag tag-blue">NVDA / JAWS Tested</span>
+        </div>
+        <h3>Key Responsibilities:</h3>
+        <ul>
+          <li>Manage ticket queues in Zendesk with a First Response Time under 15 minutes.</li>
+          <li>Communicate with learners in Amharic (Ge'ez script) and English clearly and respectfully.</li>
+          <li>Identify user experience barriers and escalate accessibility bugs to product teams.</li>
+        </ul>
+      </article>
+
+      <!-- Job 3 -->
+      <article class="job-card">
+        <h2>Remote Virtual Assistant &amp; Operations Coordinator (Afaan Oromoo &amp; English)</h2>
+        <div class="job-meta">
+          <strong>Employer:</strong> Oromia Digital Ventures &bull; 
+          <strong>Location:</strong> Adama / Remote &bull; 
+          <strong>Salary:</strong> 20,000 - 26,000 ETB / month &bull; 
+          <strong>Deadline:</strong> January 15, 2027
+        </div>
+        <p>Coordinate digital calendars, Notion workspaces, and stakeholder communications in Afaan Oromoo and English.</p>
+        <div>
+          <span class="tag">Afaan Oromoo</span>
+          <span class="tag">Asynchronous Schedule</span>
+          <span class="tag tag-blue">Dictation Support</span>
+          <span class="tag tag-blue">Mental Health Stipend</span>
+        </div>
+        <h3>Key Responsibilities:</h3>
+        <ul>
+          <li>Coordinate scheduling, agendas, and meeting notes in Google Workspace.</li>
+          <li>Draft bilingual business reports and client presentations in Afaan Oromoo and English.</li>
+          <li>Manage basic budget reconciliation and track contractor deliverables.</li>
+        </ul>
+      </article>
+
+      <!-- Policy Box -->
+      <section class="policy-box">
+        <h3 style="margin-top:0;">Inclusive Hiring &amp; Accommodation Policy</h3>
+        <p>
+          All employers on the Savanna Career Gateway are pledged to provide equitable interview environments. 
+          Candidates can request sign language interpreters, additional interview response time, live captioning, or interview questions in advance. 
+          Contact <a href="mailto:inclusion@savanna-jobs.org">inclusion@savanna-jobs.org</a> or ask the assistant widget on this page.
+        </p>
+      </section>
     </main>
 
     <!-- Mount Assistant Widget -->
@@ -86,4 +266,3 @@
     <script src="/widget/widget.iife.js" defer></script>
   </body>
 </html>
-
