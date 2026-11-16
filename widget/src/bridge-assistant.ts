@@ -1087,55 +1087,88 @@ const STYLES = `
 
   /* Header */
   .header {
-    padding: 0.5rem 0.75rem;
+    padding: 0.625rem 0.75rem 0.5rem;
     border-bottom: 1px solid var(--b-border);
     background: var(--b-surface);
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.375rem;
+    flex-direction: column;
+    gap: 0.5rem;
     flex-shrink: 0;
   }
 
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    width: 100%;
+    min-width: 0;
+  }
+
   .header-titles {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     flex: 1;
     min-width: 0;
+  }
+
+  .header-accessibility-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    min-width: 2rem;
+    min-height: 2rem;
+    border-radius: 50%;
+    background: #fef2f2;
+    color: #b91c1c;
+    flex-shrink: 0;
   }
 
   .title {
     margin: 0;
     font-size: 1rem;
     font-weight: 700;
+    line-height: 1.25;
+    color: var(--b-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
+  .header-window-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    flex-shrink: 0;
+  }
+
   .header-actions {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
-    gap: 0.375rem;
-    flex-wrap: wrap;
+    width: 100%;
     min-width: 0;
   }
 
-  @media (max-width: 880px) {
-    .header { flex-wrap: wrap; }
-    .header-actions { width: 100%; justify-content: space-between; }
-    .lang-group { flex: 1; justify-content: space-between; }
-  }
-
-  .lang-bar {
+  .lang-group {
     display: flex;
     align-items: center;
-    gap: 0.2rem;
+    width: 100%;
+    gap: 0.25rem;
+    background: var(--b-surface-alt, #f8fafc);
+    padding: 0.1875rem;
+    border-radius: 0.375rem;
+    border: 1px solid var(--b-border, #e2e8f0);
+    box-sizing: border-box;
   }
 
   .lang-toggle-btn {
+    flex: 1;
     font-size: 0.75rem;
-    padding: 0.2rem 0.35rem;
-    min-height: 44px;
+    padding: 0.35rem 0.25rem;
+    min-height: 38px;
     min-width: 44px;
     border: none;
     border-radius: 0.25rem;
@@ -1146,14 +1179,19 @@ const STYLES = `
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: background-color 0.15s ease, color 0.15s ease;
+    transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+  }
+
+  .lang-toggle-btn:hover {
+    background: var(--b-border, #e2e8f0);
   }
 
   .lang-toggle-btn[aria-pressed="true"] {
-    background: var(--b-primary);
-    color: var(--b-primary-contrast);
-    border-color: var(--b-primary);
+    background: #b91c1c !important;
+    color: #ffffff !important;
+    border-color: #b91c1c !important;
     font-weight: 700;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
   }
 
   /* Offline Bar */
@@ -3340,6 +3378,16 @@ export class BridgeAssistant extends HTMLElement {
       return;
     }
 
+    // A bare yes/no while the onboarding dialog is visible must never be sent
+    // to the page-action planner. Only spoken setup owns onboarding answers.
+    if (
+      this.shadowRoot?.querySelector("#onboarding-overlay") &&
+      (this.isAffirmative(transcript) || this.isNegative(transcript))
+    ) {
+      this.speakText("Choose Start spoken setup before answering yes or no.");
+      return;
+    }
+
     if (this.pendingVoiceAction) {
       if (this.isAffirmative(transcript)) {
         const action = this.pendingVoiceAction;
@@ -3384,45 +3432,57 @@ export class BridgeAssistant extends HTMLElement {
   }
 
   private spokenOnboardingQuestions(): string[] {
+    const languageConfirmation: Record<SupportedLanguage, string> = {
+      en: "English is selected. Continue in English? Say yes or no.",
+      am: "አማርኛ ተመርጧል። በአማርኛ እንቀጥል? አዎ ወይም አይ ይበሉ።",
+      om: "Afaan Oromoo filatameera. Afaan Oromootiin itti fufnaa? Eeyyee ykn lakki jedhaa.",
+      ti: "ትግርኛ ተመሪጹ። ብትግርኛ ንቐጽል? እወ ወይ ኣይፋል በሉ።",
+      ar: "تم اختيار العربية. هل نتابع بالعربية؟ قل نعم أو لا.",
+    };
     const questions: Record<SupportedLanguage, string[]> = {
       en: [
-        "Would you like voice assistance? Say yes or no.",
+        languageConfirmation.en,
         "Are you using a screen reader such as NVDA, TalkBack, or VoiceOver?",
         "Would you like enhanced keyboard focus?",
         "Would you like high contrast colors?",
         "Would you like larger text?",
+        "Would you like voice assistance? Say yes or no.",
         "Should I read new answers aloud automatically?",
       ],
       am: [
-        "የድምጽ እርዳታ ይፈልጋሉ? አዎ ወይም አይ ይበሉ።",
+        languageConfirmation.am,
         "NVDA፣ TalkBack ወይም VoiceOver የሚባል የማያ አንባቢ ይጠቀማሉ?",
         "ግልጽ የቁልፍ ሰሌዳ ትኩረት ይፈልጋሉ?",
         "ከፍተኛ ንፅፅር ቀለም ይፈልጋሉ?",
         "ትልቅ ጽሑፍ ይፈልጋሉ?",
+        "የድምጽ እርዳታ ይፈልጋሉ? አዎ ወይም አይ ይበሉ።",
         "አዲስ መልሶችን በራስ-ሰር እንዳነብልዎት ይፈልጋሉ?",
       ],
       om: [
-        "Gargaarsa sagalee barbaadduu? Eeyyee ykn lakki jedhaa.",
+        languageConfirmation.om,
         "Dubbisaa iskiriinii akka NVDA, TalkBack ykn VoiceOver fayyadamtu?",
         "Xiyyeeffannoo kiiboodii ifaa barbaadduu?",
         "Halluu walbira qabuu olaanaa barbaadduu?",
         "Barreeffama guddaa barbaadduu?",
+        "Gargaarsa sagalee barbaadduu? Eeyyee ykn lakki jedhaa.",
         "Deebii haaraa ofumaan sagaleedhaan dubbisuu qabaa?",
       ],
       ti: [
-        "ናይ ድምጺ ሓገዝ ትደልዩ ዶ? እወ ወይ ኣይፋል በሉ።",
+        languageConfirmation.ti,
         "ከም NVDA፣ TalkBack ወይ VoiceOver ዝኣመሰለ ኣንባቢ ስክሪን ትጥቀሙ ዶ?",
         "ንጹር ናይ ኪቦርድ ትኹረት ትደልዩ ዶ?",
         "ልዑል ንጽጽር ሕብሪ ትደልዩ ዶ?",
         "ዓቢ ጽሑፍ ትደልዩ ዶ?",
+        "ናይ ድምጺ ሓገዝ ትደልዩ ዶ? እወ ወይ ኣይፋል በሉ።",
         "ሓደስቲ መልስታት ብኣውቶማቲክ ከንብበልኩም ዶ?",
       ],
       ar: [
-        "هل تريد المساعدة الصوتية؟ قل نعم أو لا.",
+        languageConfirmation.ar,
         "هل تستخدم قارئ شاشة مثل NVDA أو TalkBack أو VoiceOver؟",
         "هل تريد مؤشراً أوضح للتركيز عند استخدام لوحة المفاتيح؟",
         "هل تريد ألواناً عالية التباين؟",
         "هل تريد نصاً أكبر؟",
+        "هل تريد المساعدة الصوتية؟ قل نعم أو لا.",
         "هل تريد قراءة الإجابات الجديدة بصوت عال تلقائياً؟",
       ],
     };
@@ -3430,9 +3490,10 @@ export class BridgeAssistant extends HTMLElement {
   }
 
   private startSpokenOnboarding(): void {
+    this.stopPageReading();
+    this.pendingVoiceAction = null;
     this.spokenOnboardingActive = true;
-    this.spokenOnboardingIndex = 0;
-    this.accessibilityPrefs.voice_enabled = true;
+    this.spokenOnboardingIndex = [0, 1, 3, 5][this.onboardingStep] ?? 0;
     this.speakSpokenOnboardingQuestion();
   }
 
@@ -3462,23 +3523,50 @@ export class BridgeAssistant extends HTMLElement {
       ti: ["እወ ተመሪጹ።", "ኣይፋል ተመሪጹ።"],
       ar: ["تم اختيار نعم.", "تم اختيار لا."],
     };
+
+    if (this.spokenOnboardingIndex === 0 && !selected) {
+      this.spokenOnboardingActive = false;
+      const chooseLanguage: Record<SupportedLanguage, string> = {
+        en: "Choose another language, then select Start spoken setup again.",
+        am: "ሌላ ቋንቋ ይምረጡ፣ ከዚያ የድምጽ ቅንብርን እንደገና ይጀምሩ።",
+        om: "Afaan biraa filadhaa, sana booda qindaa'ina sagalee irra deebi'aa jalqabaa.",
+        ti: "ካልእ ቋንቋ ምረጹ፣ ድሕሪኡ ናይ ድምጺ ቅጥዒ እንደገና ጀምሩ።",
+        ar: "اختر لغة أخرى، ثم ابدأ الإعداد الصوتي مرة أخرى.",
+      };
+      this.speakText(chooseLanguage[this.currentLang]);
+      return;
+    }
+
     switch (this.spokenOnboardingIndex) {
-      case 0: this.accessibilityPrefs.voice_enabled = selected; break;
-      case 1:
-        this.accessibilityPrefs.screen_reader_mode = selected;
-        if (selected) this.accessibilityPrefs.auto_tts = false;
-        break;
+      case 0: break;
+      case 1: this.accessibilityPrefs.screen_reader_mode = selected; break;
       case 2: this.accessibilityPrefs.keyboard_navigation = selected; break;
-      case 3: this.highContrast = selected; break;
+      case 3:
+        this.highContrast = selected;
+        this.accessibilityPrefs.high_contrast = selected;
+        break;
       case 4:
         this.textSize = selected ? "larger" : "normal";
         this.accessibilityPrefs.large_text = this.textSize;
         break;
-      case 5: this.accessibilityPrefs.auto_tts = selected; break;
+      case 5: this.accessibilityPrefs.voice_enabled = selected; break;
+      case 6: this.accessibilityPrefs.auto_tts = selected; break;
     }
     this.spokenOnboardingIndex += 1;
     if (this.spokenOnboardingIndex < this.spokenOnboardingQuestions().length) {
-      this.speakSpokenOnboardingQuestion(acknowledgements[this.currentLang][selected ? 0 : 1]);
+      this.onboardingStep = this.spokenOnboardingIndex < 1
+        ? 0
+        : this.spokenOnboardingIndex < 3
+          ? 1
+          : this.spokenOnboardingIndex < 5
+            ? 2
+            : 3;
+      this.savePreferences();
+      this.render();
+      setTimeout(
+        () => this.speakSpokenOnboardingQuestion(acknowledgements[this.currentLang][selected ? 0 : 1]),
+        0
+      );
       return;
     }
     this.spokenOnboardingActive = false;
@@ -4763,7 +4851,6 @@ export class BridgeAssistant extends HTMLElement {
     if (largeText !== null) this.accessibilityPrefs.large_text = largeText ? "larger" : "normal";
     if (voice !== null) this.accessibilityPrefs.voice_enabled = voice;
     if (autoTts !== null) this.accessibilityPrefs.auto_tts = autoTts;
-    if (this.accessibilityPrefs.screen_reader_mode) this.accessibilityPrefs.auto_tts = false;
     this.highContrast = this.accessibilityPrefs.high_contrast;
     this.textSize = this.accessibilityPrefs.large_text;
   }
@@ -4845,19 +4932,25 @@ export class BridgeAssistant extends HTMLElement {
 
         <!-- Header -->
         <header class="header">
-          <div class="header-titles">
-            <span class="header-accessibility-icon" aria-hidden="true" style="display:inline-flex; align-items:center; justify-content:center; width:1.875rem; height:1.875rem; border-radius:50%; background:#fef2f2; color:#b91c1c; flex-shrink:0;">
-              ${ICONS.accessibility}
-            </span>
-            <h2 id="dialog-title" class="title" tabindex="-1">${this.t("appTitle")}</h2>
+          <div class="header-top">
+            <div class="header-titles">
+              <span class="header-accessibility-icon" aria-hidden="true">
+                ${ICONS.accessibility}
+              </span>
+              <h2 id="dialog-title" class="title" tabindex="-1">${this.t("appTitle")}</h2>
+            </div>
+            <div class="header-window-controls">
+              <!-- Settings Button -->
+              <button type="button" class="btn btn-secondary" id="btn-open-settings" aria-label="${this.t("settingsLabel")}" title="${this.t("settingsLabel")}" style="min-height:38px; min-width:38px; width:38px; height:38px; padding:0; display:inline-flex; align-items:center; justify-content:center;">
+                ${ICONS.settings}
+              </button>
+              <!-- Close Button -->
+              <button type="button" class="btn btn-secondary" id="btn-close-dialog" aria-label="${this.t("closeLabel")}" style="min-height:38px; min-width:38px; width:38px; height:38px; padding:0; display:inline-flex; align-items:center; justify-content:center;">
+                ${ICONS.close}
+              </button>
+            </div>
           </div>
           <div class="header-actions">
-            <!-- Quick EN/AM Toggle for backward compatibility with integration tests -->
-            <button class="lang-btn" type="button" id="btn-lang-toggle" 
-                    aria-label="${this.currentLang === "am" ? "English - Switch Language" : "አማርኛ - ቋንቋ ቀይር"}" 
-                    style="font-size:0.6875rem; font-weight:700; padding:0.25rem 0.5rem; min-height:1.75rem; border-radius:0.375rem; background:var(--b-surface-alt); border:1px solid var(--b-border); color:var(--b-text); cursor:pointer;">
-              ${this.currentLang === "am" ? "English" : "አማርኛ"}
-            </button>
             <!-- 5-Language Segmented Selector in Native Scripts with WCAG 2.5.3 Compliant Labels -->
             <div class="lang-group" role="group" aria-label="Language selection">
               <button type="button" class="lang-toggle-btn lang-btn" id="btn-lang-en" 
@@ -4876,15 +4969,6 @@ export class BridgeAssistant extends HTMLElement {
                       aria-pressed="${this.currentLang === "ar"}" 
                       aria-label="عربي - العربية (Arabic)">عربي</button>
             </div>
-
-            <!-- Settings Button -->
-            <button type="button" class="btn btn-secondary" id="btn-open-settings" aria-label="${this.t("settingsLabel")}" title="${this.t("settingsLabel")}" style="min-height:44px; min-width:44px; width:44px; padding:0;">
-              ${ICONS.settings}
-            </button>
-            <!-- Close Button -->
-            <button type="button" class="btn btn-secondary" id="btn-close-dialog" aria-label="${this.t("closeLabel")}" style="min-height:44px; min-width:44px; width:44px; padding:0;">
-              ${ICONS.close}
-            </button>
           </div>
         </header>
 
@@ -5800,11 +5884,6 @@ export class BridgeAssistant extends HTMLElement {
           this.setLanguage(langCode);
         }
       });
-    });
-
-    // Quick Language Toggle Button (.lang-btn)
-    this.shadowRoot.querySelector(".lang-btn")?.addEventListener("click", () => {
-      this.setLanguage(this.currentLang === "en" ? "am" : "en");
     });
 
     // Settings Modal

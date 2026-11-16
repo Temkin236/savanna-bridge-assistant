@@ -156,12 +156,42 @@ test.describe("screen-reader and non-visual interaction contract", () => {
       .toBe(0);
 
     await page.locator("bridge-assistant #launcher-btn").click();
+    await page.locator("bridge-assistant").evaluate((element) => {
+      const assistant = element as HTMLElement & { readPageAloud: () => void };
+      (window as typeof window & { __pageReadCount?: number }).__pageReadCount = 0;
+      assistant.readPageAloud = () => {
+        (window as typeof window & { __pageReadCount?: number }).__pageReadCount! += 1;
+      };
+    });
     const spokenSetup = page.locator("bridge-assistant #btn-spoken-onboarding");
     await expect(spokenSetup).toHaveAccessibleName(/spoken setup/i);
     await spokenSetup.click();
     await expect
       .poll(() => page.evaluate(() => (window as typeof window & { __spoken?: string }).__spoken))
-      .toContain("voice assistance");
+      .toContain("English is selected");
+
+    const answerOnboarding = async (answer: string) => {
+      await page.locator("bridge-assistant").evaluate((element, spokenAnswer) => {
+        const assistant = element as HTMLElement & {
+          handleVoiceTranscript: (value: string, input: HTMLInputElement) => Promise<void>;
+        };
+        const input = element.shadowRoot?.querySelector<HTMLInputElement>("#chat-input");
+        if (!input) throw new Error("Chat input not found for spoken onboarding test");
+        return assistant.handleVoiceTranscript(spokenAnswer, input);
+      }, answer);
+    };
+
+    await answerOnboarding("yes");
+    await expect(page.locator("bridge-assistant .wizard-step-label")).toHaveText("Step 2 of 4");
+    await expect.poll(() => page.evaluate(() => (window as typeof window & { __spoken?: string }).__spoken)).toContain("screen reader");
+
+    await answerOnboarding("yes");
+    await expect(page.locator("bridge-assistant #onboard-chk-screen-reader")).toBeChecked();
+    await expect.poll(() => page.evaluate(() => (window as typeof window & { __spoken?: string }).__spoken)).toContain("keyboard focus");
+
+    await answerOnboarding("no");
+    await expect(page.locator("bridge-assistant .wizard-step-label")).toHaveText("Step 3 of 4");
+    await expect.poll(() => page.evaluate(() => (window as typeof window & { __pageReadCount?: number }).__pageReadCount)).toBe(0);
 
     for (const selector of ["#launcher-btn", "#btn-send", "#mic-btn", "#btn-onboard-skip"]) {
       const box = await page.locator(`bridge-assistant ${selector}`).boundingBox();
@@ -169,6 +199,16 @@ test.describe("screen-reader and non-visual interaction contract", () => {
       expect(box!.height, `${selector} target height`).toBeGreaterThanOrEqual(44);
       expect(box!.width, `${selector} target width`).toBeGreaterThanOrEqual(44);
     }
+
+    await answerOnboarding("yes");
+    await expect(page.locator("bridge-assistant #onboard-chk-contrast")).toBeChecked();
+    await answerOnboarding("no");
+    await expect(page.locator("bridge-assistant .wizard-step-label")).toHaveText("Step 4 of 4");
+    await answerOnboarding("yes");
+    await expect(page.locator("bridge-assistant #onboard-chk-voice")).toBeChecked();
+    await answerOnboarding("no");
+    await expect(page.locator("bridge-assistant #onboarding-overlay")).toHaveCount(0);
+    await expect.poll(() => page.evaluate(() => (window as typeof window & { __pageReadCount?: number }).__pageReadCount)).toBe(0);
   });
 
   test("onboarding is sequential and the desktop panel is large and resizable", async ({ page }) => {

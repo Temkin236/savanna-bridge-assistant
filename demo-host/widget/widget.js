@@ -993,55 +993,88 @@ const o = {
 
   /* Header */
   .header {
-    padding: 0.5rem 0.75rem;
+    padding: 0.625rem 0.75rem 0.5rem;
     border-bottom: 1px solid var(--b-border);
     background: var(--b-surface);
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.375rem;
+    flex-direction: column;
+    gap: 0.5rem;
     flex-shrink: 0;
   }
 
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    width: 100%;
+    min-width: 0;
+  }
+
   .header-titles {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     flex: 1;
     min-width: 0;
+  }
+
+  .header-accessibility-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    min-width: 2rem;
+    min-height: 2rem;
+    border-radius: 50%;
+    background: #fef2f2;
+    color: #b91c1c;
+    flex-shrink: 0;
   }
 
   .title {
     margin: 0;
     font-size: 1rem;
     font-weight: 700;
+    line-height: 1.25;
+    color: var(--b-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
+  .header-window-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    flex-shrink: 0;
+  }
+
   .header-actions {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
-    gap: 0.375rem;
-    flex-wrap: wrap;
+    width: 100%;
     min-width: 0;
   }
 
-  @media (max-width: 880px) {
-    .header { flex-wrap: wrap; }
-    .header-actions { width: 100%; justify-content: space-between; }
-    .lang-group { flex: 1; justify-content: space-between; }
-  }
-
-  .lang-bar {
+  .lang-group {
     display: flex;
     align-items: center;
-    gap: 0.2rem;
+    width: 100%;
+    gap: 0.25rem;
+    background: var(--b-surface-alt, #f8fafc);
+    padding: 0.1875rem;
+    border-radius: 0.375rem;
+    border: 1px solid var(--b-border, #e2e8f0);
+    box-sizing: border-box;
   }
 
   .lang-toggle-btn {
+    flex: 1;
     font-size: 0.75rem;
-    padding: 0.2rem 0.35rem;
-    min-height: 44px;
+    padding: 0.35rem 0.25rem;
+    min-height: 38px;
     min-width: 44px;
     border: none;
     border-radius: 0.25rem;
@@ -1052,14 +1085,19 @@ const o = {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: background-color 0.15s ease, color 0.15s ease;
+    transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+  }
+
+  .lang-toggle-btn:hover {
+    background: var(--b-border, #e2e8f0);
   }
 
   .lang-toggle-btn[aria-pressed="true"] {
-    background: var(--b-primary);
-    color: var(--b-primary-contrast);
-    border-color: var(--b-primary);
+    background: #b91c1c !important;
+    color: #ffffff !important;
+    border-color: #b91c1c !important;
     font-weight: 700;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
   }
 
   /* Offline Bar */
@@ -2635,6 +2673,10 @@ ${c}
       this.handleSpokenOnboardingAnswer(t);
       return;
     }
+    if (this.shadowRoot?.querySelector("#onboarding-overlay") && (this.isAffirmative(t) || this.isNegative(t))) {
+      this.speakText("Choose Start spoken setup before answering yes or no.");
+      return;
+    }
     if (this.pendingVoiceAction) {
       if (this.isAffirmative(t)) {
         const d = this.pendingVoiceAction;
@@ -2654,51 +2696,63 @@ ${c}
     this.announce(s), this.speakText(s);
   }
   spokenOnboardingQuestions() {
+    const e = {
+      en: "English is selected. Continue in English? Say yes or no.",
+      am: "አማርኛ ተመርጧል። በአማርኛ እንቀጥል? አዎ ወይም አይ ይበሉ።",
+      om: "Afaan Oromoo filatameera. Afaan Oromootiin itti fufnaa? Eeyyee ykn lakki jedhaa.",
+      ti: "ትግርኛ ተመሪጹ። ብትግርኛ ንቐጽል? እወ ወይ ኣይፋል በሉ።",
+      ar: "تم اختيار العربية. هل نتابع بالعربية؟ قل نعم أو لا."
+    };
     return {
       en: [
-        "Would you like voice assistance? Say yes or no.",
+        e.en,
         "Are you using a screen reader such as NVDA, TalkBack, or VoiceOver?",
         "Would you like enhanced keyboard focus?",
         "Would you like high contrast colors?",
         "Would you like larger text?",
+        "Would you like voice assistance? Say yes or no.",
         "Should I read new answers aloud automatically?"
       ],
       am: [
-        "የድምጽ እርዳታ ይፈልጋሉ? አዎ ወይም አይ ይበሉ።",
+        e.am,
         "NVDA፣ TalkBack ወይም VoiceOver የሚባል የማያ አንባቢ ይጠቀማሉ?",
         "ግልጽ የቁልፍ ሰሌዳ ትኩረት ይፈልጋሉ?",
         "ከፍተኛ ንፅፅር ቀለም ይፈልጋሉ?",
         "ትልቅ ጽሑፍ ይፈልጋሉ?",
+        "የድምጽ እርዳታ ይፈልጋሉ? አዎ ወይም አይ ይበሉ።",
         "አዲስ መልሶችን በራስ-ሰር እንዳነብልዎት ይፈልጋሉ?"
       ],
       om: [
-        "Gargaarsa sagalee barbaadduu? Eeyyee ykn lakki jedhaa.",
+        e.om,
         "Dubbisaa iskiriinii akka NVDA, TalkBack ykn VoiceOver fayyadamtu?",
         "Xiyyeeffannoo kiiboodii ifaa barbaadduu?",
         "Halluu walbira qabuu olaanaa barbaadduu?",
         "Barreeffama guddaa barbaadduu?",
+        "Gargaarsa sagalee barbaadduu? Eeyyee ykn lakki jedhaa.",
         "Deebii haaraa ofumaan sagaleedhaan dubbisuu qabaa?"
       ],
       ti: [
-        "ናይ ድምጺ ሓገዝ ትደልዩ ዶ? እወ ወይ ኣይፋል በሉ።",
+        e.ti,
         "ከም NVDA፣ TalkBack ወይ VoiceOver ዝኣመሰለ ኣንባቢ ስክሪን ትጥቀሙ ዶ?",
         "ንጹር ናይ ኪቦርድ ትኹረት ትደልዩ ዶ?",
         "ልዑል ንጽጽር ሕብሪ ትደልዩ ዶ?",
         "ዓቢ ጽሑፍ ትደልዩ ዶ?",
+        "ናይ ድምጺ ሓገዝ ትደልዩ ዶ? እወ ወይ ኣይፋል በሉ።",
         "ሓደስቲ መልስታት ብኣውቶማቲክ ከንብበልኩም ዶ?"
       ],
       ar: [
-        "هل تريد المساعدة الصوتية؟ قل نعم أو لا.",
+        e.ar,
         "هل تستخدم قارئ شاشة مثل NVDA أو TalkBack أو VoiceOver؟",
         "هل تريد مؤشراً أوضح للتركيز عند استخدام لوحة المفاتيح؟",
         "هل تريد ألواناً عالية التباين؟",
         "هل تريد نصاً أكبر؟",
+        "هل تريد المساعدة الصوتية؟ قل نعم أو لا.",
         "هل تريد قراءة الإجابات الجديدة بصوت عال تلقائياً؟"
       ]
     }[this.currentLang];
   }
   startSpokenOnboarding() {
-    this.spokenOnboardingActive = !0, this.spokenOnboardingIndex = 0, this.accessibilityPrefs.voice_enabled = !0, this.speakSpokenOnboardingQuestion();
+    this.stopPageReading(), this.pendingVoiceAction = null, this.spokenOnboardingActive = !0, this.spokenOnboardingIndex = [0, 1, 3, 5][this.onboardingStep] ?? 0, this.speakSpokenOnboardingQuestion();
   }
   speakSpokenOnboardingQuestion(e = "") {
     const i = this.spokenOnboardingQuestions()[this.spokenOnboardingIndex];
@@ -2723,28 +2777,45 @@ ${c}
       ti: ["እወ ተመሪጹ።", "ኣይፋል ተመሪጹ።"],
       ar: ["تم اختيار نعم.", "تم اختيار لا."]
     };
+    if (this.spokenOnboardingIndex === 0 && !i) {
+      this.spokenOnboardingActive = !1;
+      const n = {
+        en: "Choose another language, then select Start spoken setup again.",
+        am: "ሌላ ቋንቋ ይምረጡ፣ ከዚያ የድምጽ ቅንብርን እንደገና ይጀምሩ።",
+        om: "Afaan biraa filadhaa, sana booda qindaa'ina sagalee irra deebi'aa jalqabaa.",
+        ti: "ካልእ ቋንቋ ምረጹ፣ ድሕሪኡ ናይ ድምጺ ቅጥዒ እንደገና ጀምሩ።",
+        ar: "اختر لغة أخرى، ثم ابدأ الإعداد الصوتي مرة أخرى."
+      };
+      this.speakText(n[this.currentLang]);
+      return;
+    }
     switch (this.spokenOnboardingIndex) {
       case 0:
-        this.accessibilityPrefs.voice_enabled = i;
         break;
       case 1:
-        this.accessibilityPrefs.screen_reader_mode = i, i && (this.accessibilityPrefs.auto_tts = !1);
+        this.accessibilityPrefs.screen_reader_mode = i;
         break;
       case 2:
         this.accessibilityPrefs.keyboard_navigation = i;
         break;
       case 3:
-        this.highContrast = i;
+        this.highContrast = i, this.accessibilityPrefs.high_contrast = i;
         break;
       case 4:
         this.textSize = i ? "larger" : "normal", this.accessibilityPrefs.large_text = this.textSize;
         break;
       case 5:
+        this.accessibilityPrefs.voice_enabled = i;
+        break;
+      case 6:
         this.accessibilityPrefs.auto_tts = i;
         break;
     }
     if (this.spokenOnboardingIndex += 1, this.spokenOnboardingIndex < this.spokenOnboardingQuestions().length) {
-      this.speakSpokenOnboardingQuestion(t[this.currentLang][i ? 0 : 1]);
+      this.onboardingStep = this.spokenOnboardingIndex < 1 ? 0 : this.spokenOnboardingIndex < 3 ? 1 : this.spokenOnboardingIndex < 5 ? 2 : 3, this.savePreferences(), this.render(), setTimeout(
+        () => this.speakSpokenOnboardingQuestion(t[this.currentLang][i ? 0 : 1]),
+        0
+      );
       return;
     }
     this.spokenOnboardingActive = !1, this.accessibilityPrefs.onboarded = !0, this.onboardingDismissed = !0, this.savePreferences(), this.render();
@@ -3057,8 +3128,8 @@ ${c}
       const p = r.replace(/[#*•_`]/g, " ").replace(/\s+/g, " ").trim().toLowerCase(), v = /^(this course|this lesson|summary of|የዚህ|ይህ ትምህርት|barnoonni|يشرح|ملخص)/i.test(p), g = p.slice(0, 35);
       let m = null, b = -1;
       for (let y = 0; y < t.length; y++) {
-        const L = t[y], R = (L.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
-        if ((g.length > 10 && R.includes(g) || p.length > 20 && R.includes(p.slice(10, 45)) || R.length > 15 && p.includes(R.slice(0, 35))) && (y > s || b === -1) && (m = L, b = y, y > s))
+        const R = t[y], L = (R.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+        if ((g.length > 10 && L.includes(g) || p.length > 20 && L.includes(p.slice(10, 45)) || L.length > 15 && p.includes(L.slice(0, 35))) && (y > s || b === -1) && (m = R, b = y, y > s))
           break;
       }
       if (!m)
@@ -3465,7 +3536,7 @@ ${c}
       const c = this.shadowRoot?.querySelector(`#${r}`);
       return c ? c.checked : null;
     }, i = e("onboard-chk-screen-reader"), t = e("onboard-chk-keyboard-nav"), a = e("onboard-chk-contrast"), n = e("onboard-chk-large-text"), s = e("onboard-chk-voice"), d = e("onboard-chk-auto-tts");
-    i !== null && (this.accessibilityPrefs.screen_reader_mode = i), t !== null && (this.accessibilityPrefs.keyboard_navigation = t), a !== null && (this.accessibilityPrefs.high_contrast = a), n !== null && (this.accessibilityPrefs.large_text = n ? "larger" : "normal"), s !== null && (this.accessibilityPrefs.voice_enabled = s), d !== null && (this.accessibilityPrefs.auto_tts = d), this.accessibilityPrefs.screen_reader_mode && (this.accessibilityPrefs.auto_tts = !1), this.highContrast = this.accessibilityPrefs.high_contrast, this.textSize = this.accessibilityPrefs.large_text;
+    i !== null && (this.accessibilityPrefs.screen_reader_mode = i), t !== null && (this.accessibilityPrefs.keyboard_navigation = t), a !== null && (this.accessibilityPrefs.high_contrast = a), n !== null && (this.accessibilityPrefs.large_text = n ? "larger" : "normal"), s !== null && (this.accessibilityPrefs.voice_enabled = s), d !== null && (this.accessibilityPrefs.auto_tts = d), this.highContrast = this.accessibilityPrefs.high_contrast, this.textSize = this.accessibilityPrefs.large_text;
   }
   completeOnboarding(e) {
     e && this.captureOnboardingStep(), this.accessibilityPrefs.onboarded = !0, this.onboardingDismissed = !0, this.onboardingStep = 0, this.savePreferences(), this.render(), e && this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_welcome && this.triggerSpokenWelcome(), e && this.accessibilityPrefs.voice_enabled && this.initWakeWordDetection();
@@ -3516,19 +3587,25 @@ ${c}
 
         <!-- Header -->
         <header class="header">
-          <div class="header-titles">
-            <span class="header-accessibility-icon" aria-hidden="true" style="display:inline-flex; align-items:center; justify-content:center; width:1.875rem; height:1.875rem; border-radius:50%; background:#fef2f2; color:#b91c1c; flex-shrink:0;">
-              ${o.accessibility}
-            </span>
-            <h2 id="dialog-title" class="title" tabindex="-1">${this.t("appTitle")}</h2>
+          <div class="header-top">
+            <div class="header-titles">
+              <span class="header-accessibility-icon" aria-hidden="true">
+                ${o.accessibility}
+              </span>
+              <h2 id="dialog-title" class="title" tabindex="-1">${this.t("appTitle")}</h2>
+            </div>
+            <div class="header-window-controls">
+              <!-- Settings Button -->
+              <button type="button" class="btn btn-secondary" id="btn-open-settings" aria-label="${this.t("settingsLabel")}" title="${this.t("settingsLabel")}" style="min-height:38px; min-width:38px; width:38px; height:38px; padding:0; display:inline-flex; align-items:center; justify-content:center;">
+                ${o.settings}
+              </button>
+              <!-- Close Button -->
+              <button type="button" class="btn btn-secondary" id="btn-close-dialog" aria-label="${this.t("closeLabel")}" style="min-height:38px; min-width:38px; width:38px; height:38px; padding:0; display:inline-flex; align-items:center; justify-content:center;">
+                ${o.close}
+              </button>
+            </div>
           </div>
           <div class="header-actions">
-            <!-- Quick EN/AM Toggle for backward compatibility with integration tests -->
-            <button class="lang-btn" type="button" id="btn-lang-toggle" 
-                    aria-label="${this.currentLang === "am" ? "English - Switch Language" : "አማርኛ - ቋንቋ ቀይር"}" 
-                    style="font-size:0.6875rem; font-weight:700; padding:0.25rem 0.5rem; min-height:1.75rem; border-radius:0.375rem; background:var(--b-surface-alt); border:1px solid var(--b-border); color:var(--b-text); cursor:pointer;">
-              ${this.currentLang === "am" ? "English" : "አማርኛ"}
-            </button>
             <!-- 5-Language Segmented Selector in Native Scripts with WCAG 2.5.3 Compliant Labels -->
             <div class="lang-group" role="group" aria-label="Language selection">
               <button type="button" class="lang-toggle-btn lang-btn" id="btn-lang-en" 
@@ -3547,15 +3624,6 @@ ${c}
                       aria-pressed="${this.currentLang === "ar"}" 
                       aria-label="عربي - العربية (Arabic)">عربي</button>
             </div>
-
-            <!-- Settings Button -->
-            <button type="button" class="btn btn-secondary" id="btn-open-settings" aria-label="${this.t("settingsLabel")}" title="${this.t("settingsLabel")}" style="min-height:44px; min-width:44px; width:44px; padding:0;">
-              ${o.settings}
-            </button>
-            <!-- Close Button -->
-            <button type="button" class="btn btn-secondary" id="btn-close-dialog" aria-label="${this.t("closeLabel")}" style="min-height:44px; min-width:44px; width:44px; padding:0;">
-              ${o.close}
-            </button>
           </div>
         </header>
 
@@ -4222,8 +4290,6 @@ ${c}
         const u = h.id.replace(/^btn-lang-|^onboard-lang-/, "");
         u && ["en", "am", "om", "ti", "ar"].includes(u) && this.setLanguage(u);
       });
-    }), this.shadowRoot.querySelector(".lang-btn")?.addEventListener("click", () => {
-      this.setLanguage(this.currentLang === "en" ? "am" : "en");
     }), a.addEventListener("click", () => {
       this.isSettingsOpen = !0;
       const h = this.shadowRoot?.querySelector("#settings-dialog");
@@ -4315,13 +4381,13 @@ ${c}
       const u = new FormData(b), f = u.getAll("need"), w = u.get("other_text") || "", x = u.get("contact_mode") || "text";
       this.saveSupportNeeds(f, w, x);
     });
-    const y = this.shadowRoot.querySelector("#chat-form"), L = this.shadowRoot.querySelector("#chat-input"), R = this.shadowRoot.querySelector("#mic-btn");
-    y && L && y.addEventListener("submit", (h) => {
+    const y = this.shadowRoot.querySelector("#chat-form"), R = this.shadowRoot.querySelector("#chat-input"), L = this.shadowRoot.querySelector("#mic-btn");
+    y && R && y.addEventListener("submit", (h) => {
       h.preventDefault();
-      const u = L.value;
-      L.value = "", this.askQuestion(u);
-    }), R && L && R.addEventListener("click", () => {
-      this.toggleVoiceInput(L);
+      const u = R.value;
+      R.value = "", this.askQuestion(u);
+    }), L && R && L.addEventListener("click", () => {
+      this.toggleVoiceInput(R);
     });
     const E = () => {
       this.showAutoplayBanner = !1, this.accessibilityPrefs.voice_enabled = !0, this.savePreferences(), this.announce(this.t("voiceWelcomeAnnouncement")), this.triggerSpokenWelcome(), this.render();
