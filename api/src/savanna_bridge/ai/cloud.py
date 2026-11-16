@@ -1,11 +1,13 @@
-"""Gemini / Cloud AI provider."""
+"""Google Gemini, Translation, and Speech provider with labelled fallback."""
 
 from __future__ import annotations
 
+import base64
+import html
 import json
 import logging
 import os
-import urllib.error
+import urllib.parse
 import urllib.request
 
 from adapters.base import ContentChunk
@@ -17,85 +19,93 @@ logger = logging.getLogger("savanna_bridge.ai.cloud")
 
 
 class CloudProvider(AIProvider):
-    """Google Gemini AI Provider."""
+    """Google services for grounded answers, translation, STT, and TTS."""
 
     def __init__(self) -> None:
         self._offline_fallback = OfflineFaqProvider()
+        shared_key = os.getenv("GOOGLE_API_KEY", "")
         self.api_key = (
-            os.getenv("CLOUD_AI_API_KEY")
+            os.getenv("GOOGLE_AI_API_KEY")
+            or os.getenv("CLOUD_AI_API_KEY")
             or os.getenv("CLOUD_API_KEY")
             or os.getenv("GOOGLE_AI_API")
-            or os.getenv("GOOGLE_API_KEY")
-            or ""
+            or shared_key
         )
+        self.translate_key = os.getenv("GOOGLE_TRANSLATE_API_KEY") or shared_key
+        self.speech_key = os.getenv("GOOGLE_SPEECH_API_KEY") or shared_key
         self.model = os.getenv("CLOUD_MODEL", "gemini-2.5-flash")
+        self.tts_model = os.getenv("GOOGLE_TTS_MODEL", "gemini-3.8-flash-tts")
+        self.tts_voice = os.getenv("GOOGLE_TTS_VOICE", "Kore")
+        self._last_call_mocked = not bool(
+            self.api_key or self.translate_key or self.speech_key
+        )
 
     @property
     def name(self) -> str:
-        return "cloud"
+        return "google"
 
     @property
     def is_mocked(self) -> bool:
-        return not bool(self.api_key)
+        return self._last_call_mocked
 
     def detect_language(self, text: str) -> Language:
         return self._offline_fallback.detect_language(text)
 
     def translate_direct(self, text: str, source_lang: str, target_lang: str) -> str:
-        """Call Gemini to translate English and Arabic."""
+        """Translate directly with Google Cloud Translation or Gemini."""
         if not text or not text.strip():
             return text
-        src = (source_lang or "en").lower().split("-")[0].strip()
-        tgt = (target_lang or "en").lower().split("-")[0].strip()
-        if src == tgt:
+        source = (source_lang or "en").lower().split("-")[0].strip()
+        target = (target_lang or "en").lower().split("-")[0].strip()
+        if source == target:
+            self._last_call_mocked = False
             return text
 
-        if self.api_key:
-            lang_names = {
-                "en": "English",
-                "ar": "Arabic",
-                "am": "Amharic",
-                "om": "Afaan Oromo",
-                "ti": "Tigrinya",
-            }
-            src_name = lang_names.get(src, src)
-            tgt_name = lang_names.get(tgt, tgt)
-
-            prompt = (
-                f"You are a professional educational translator. "
-                f"Translate the following text accurately from {src_name} to {tgt_name}. "
-                f"Preserve terminology and tone. Output ONLY the raw translated text without quotes or notes:\n\n{text}"
-            )
+        if self.translate_key:
             try:
-                res = self._call_gemini(prompt)
-                if res and res.strip():
-                    return res.strip()
-            except Exception as e:
-                logger.warning("Gemini translate call error: %s", e)
+                translated = self._call_cloud_translate(text, source, target)
+                if translated:
+                    self._last_call_mocked = False
+                    return translated
+            except Exception as exc:
+                logger.warning("Google Cloud Translation error: %s", exc)
+
+        prompt = (
+            f"Translate the following text from {source} to {target}. "
+            f"Return only the direct translation:\n\n{text}"
+        )
+        try:
+            translated = self._call_gemini(prompt) if self.api_key else ""
+            if translated.strip():
+                self._last_call_mocked = False
+                return translated.strip()
+        except Exception as exc:
+            logger.warning("Gemini translation error: %s", exc)
+
+        self._last_call_mocked = True
         return ""
 
     def translate(self, text: str, source_lang: str, target_lang: str) -> str:
-        """Translate text using Gemini for English and Arabic, delegating local languages to Addis AI."""
-        if not text or not text.strip():
-            return text
-        src = (source_lang or "en").lower().split("-")[0].strip()
-        tgt = (target_lang or "en").lower().split("-")[0].strip()
-        if src == tgt:
+        source = (source_lang or "en").lower().split("-")[0].strip()
+        target = (target_lang or "en").lower().split("-")[0].strip()
+        if source == target:
+            self._last_call_mocked = False
             return text
 
-        # If local language, route to Addis AI
-        local_langs = {"am", "om", "ti", "so"}
-        if src in local_langs or tgt in local_langs:
+        if {source, target} & {"am", "om", "ti", "so"}:
             from savanna_bridge.ai.addis import AddisAiProvider
 
-            return AddisAiProvider().translate(text, src, tgt)
+            addis = AddisAiProvider()
+            translated = addis.translate(text, source, target)
+            self._last_call_mocked = addis.is_mocked
+            return translated
 
-        # For English and Arabic, call Gemini directly
-        direct = self.translate_direct(text, src, tgt)
-        if direct:
-            return direct
+        translated = self.translate_direct(text, source, target)
+        if translated:
+            return translated
 
-        return text
+        self._last_call_mocked = True
+        return self._offline_fallback.translate(text, source, target)
 
     def generate_answer(
         self,
@@ -104,74 +114,32 @@ class CloudProvider(AIProvider):
         language: Language,
         simple_mode: bool = False,
     ) -> str:
-        from savanna_bridge.language import LanguageGuard
-
-        if not context_chunks:
-            return self._offline_fallback.generate_answer(
-                question, context_chunks, language, simple_mode
-            )
-
-        # If read aloud request, return verbatim structured text
-        if LanguageGuard.is_read_aloud_query(question):
-            return self._offline_fallback.generate_answer(
-                question, context_chunks, language, simple_mode
-            )
-
         if not self.api_key:
+            self._last_call_mocked = True
             return self._offline_fallback.generate_answer(
                 question, context_chunks, language, simple_mode
             )
 
         context_text = "\n\n".join(
-            [f"--- Section: {c.heading} ---\n{getattr(c, 'text', getattr(c, 'content', ''))}" for c in context_chunks]
+            f"--- Section: {chunk.heading} ---\n{chunk.text}"
+            for chunk in context_chunks
         )
-        
         simplicity_instruction = (
             "Keep the response simple, short, and in very plain language."
-            if simple_mode or LanguageGuard.is_simplify_query(question)
-            else "Provide a clear, accurate, and helpful educational response."
+            if simple_mode
+            else "Provide a clear, accurate, and helpful response."
         )
-
-        task_instruction = (
-            "The learner is asking to read the page content aloud line by line. Present the educational text clearly line by line in its original sequence without omitting content."
-            if LanguageGuard.is_read_aloud_query(question)
-            else (
-                "The learner is asking for practical examples. Provide clear, concrete, practical examples that illustrate the concepts in the provided course material."
-                if LanguageGuard.is_example_query(question)
-                else (
-                    "The learner is asking what to understand before moving to the next lesson. Explain the key concepts, prerequisites, and foundational points they must master from this content before advancing."
-                    if LanguageGuard.is_prerequisite_query(question)
-                    else (
-                        "The learner is asking to be quizzed on this material. Create a 2-question quick interactive knowledge check based on this content to test their understanding, and invite them to answer."
-                        if LanguageGuard.is_quiz_query(question)
-                        else (
-                            "The learner is asking for a summary of this page/lesson. Provide a concise, well-structured summary of the key learning points in 3-5 clean bullet points. At the end, invite them to ask follow-up questions."
-                            if LanguageGuard.is_summary_query(question)
-                            else (
-                                "The learner is asking what this course or lesson is about. Explain the subject, key concepts, and practical skills from the provided content. At the end, invite them to ask follow-up questions."
-                                if LanguageGuard.is_page_overview_query(question)
-                                else "Answer the question directly based on the provided material."
-                            )
-                        )
-                    )
-                )
-            )
-        )
-
-        lang_instruction = "Respond in Amharic (አማርኛ) using proper Ethiopic script." if language == Language.AM else (
-            "Respond in Afaan Oromo using standard Latin orthography." if language == Language.OM else (
-                "Respond in Tigrinya using proper Ethiopic script." if language == Language.TI else (
-                    "Respond in Arabic (العربية) using proper Arabic script." if language == Language.AR else "Respond in English."
-                )
-            )
-        )
-
-        prompt = f"""You are the Savanna Bridge Assistant, an intelligent multilingual AI learning companion and tutor.
-You MUST base your answer strictly and solely on the provided Course Content below.
-Do not invent information or outside facts.
-{task_instruction}
-{simplicity_instruction}
-{lang_instruction}
+        language_instruction = {
+            Language.AM: "Respond in Amharic.",
+            Language.OM: "Respond in Afaan Oromo.",
+            Language.TI: "Respond in Tigrinya.",
+            Language.AR: "Respond in Arabic.",
+            Language.EN: "Respond in English.",
+        }[language]
+        prompt = f"""You are the Savanna Bridge Assistant, an accessible tutor.
+Base your answer strictly and solely on the Course Content below.
+Do not invent information. {simplicity_instruction}
+{language_instruction}
 
 Course Content:
 {context_text}
@@ -180,12 +148,14 @@ Learner Question:
 {question}
 """
         try:
-            res = self._call_gemini(prompt)
-            if res:
-                return res.strip()
-        except Exception as e:
-            logger.warning("Gemini API error: %s, falling back to grounded platform extraction", e)
+            answer = self._call_gemini(prompt)
+            if answer.strip():
+                self._last_call_mocked = False
+                return answer.strip()
+        except Exception as exc:
+            logger.warning("Gemini API error: %s", exc)
 
+        self._last_call_mocked = True
         return self._offline_fallback.generate_answer(
             question, context_chunks, language, simple_mode
         )
@@ -193,77 +163,224 @@ Learner Question:
     def transcribe(
         self, audio_bytes: bytes, media_type: str, language: Language, retain: bool = False
     ) -> str:
-        if self.api_key and audio_bytes and len(audio_bytes) > 64:
-            import base64
-            b64_audio = base64.b64encode(audio_bytes).decode("utf-8")
-            models = ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-pro"]
-            for m in models:
-                url = f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={self.api_key}"
-                payload = {
-                    "contents": [{
-                        "parts": [
-                            {"inlineData": {"mimeType": media_type or "audio/webm", "data": b64_audio}},
-                            {"text": f"Transcribe this speech accurately in {language.value}. Output only the transcribed text without extra formatting, notes, or punctuation marks."}
-                        ]
-                    }],
-                    "generationConfig": {"temperature": 0.0, "maxOutputTokens": 300}
-                }
-                data = json.dumps(payload).encode("utf-8")
-                req = urllib.request.Request(
-                    url,
-                    data=data,
-                    headers={"Content-Type": "application/json"},
-                    method="POST",
-                )
-                try:
-                    with urllib.request.urlopen(req, timeout=12) as resp:
-                        resp_data = json.loads(resp.read().decode("utf-8"))
-                        candidates = resp_data.get("candidates", [])
-                        if candidates:
-                            parts = candidates[0].get("content", {}).get("parts", [])
-                            if parts:
-                                text = parts[0].get("text", "").strip()
-                                if text:
-                                    return text
-                except Exception:
-                    continue
+        if self.speech_key and audio_bytes:
+            try:
+                transcript = self._call_speech_to_text(audio_bytes, language)
+                if transcript:
+                    self._last_call_mocked = False
+                    return transcript
+            except Exception as exc:
+                logger.warning("Google Speech-to-Text error: %s", exc)
+        if self.api_key and len(audio_bytes) > 64:
+            try:
+                transcript = self._call_gemini_transcribe(audio_bytes, media_type, language)
+                if transcript:
+                    self._last_call_mocked = False
+                    return transcript
+            except Exception as exc:
+                logger.warning("Gemini transcription error: %s", exc)
+        self._last_call_mocked = True
         return self._offline_fallback.transcribe(audio_bytes, media_type, language, retain)
 
     def synthesize(self, text: str, language: Language, speed: float = 1.0) -> str:
+        if self.speech_key:
+            try:
+                audio = self._call_text_to_speech(text, language, speed)
+                if audio:
+                    self._last_call_mocked = False
+                    return f"data:audio/mp3;base64,{audio}"
+            except Exception as exc:
+                logger.warning("Google Text-to-Speech error: %s", exc)
+        if self.api_key:
+            try:
+                audio, media_type = self._call_gemini_tts(text, language, speed)
+                if audio:
+                    self._last_call_mocked = False
+                    return f"data:{media_type};base64,{audio}"
+            except Exception as exc:
+                logger.warning("Gemini Text-to-Speech error: %s", exc)
+        self._last_call_mocked = True
         return self._offline_fallback.synthesize(text, language, speed)
 
-    def _call_gemini(self, prompt: str) -> str:
-        models = [self.model, "gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-pro"]
-        models = list(dict.fromkeys([m for m in models if m]))
+    def _call_cloud_translate(
+        self, text: str, source_lang: str, target_lang: str
+    ) -> str:
+        url = (
+            "https://translation.googleapis.com/language/translate/v2?key="
+            + urllib.parse.quote(self.translate_key)
+        )
+        response = self._post_json(
+            url,
+            {"q": text, "source": source_lang, "target": target_lang, "format": "text"},
+        )
+        translations = response.get("data", {}).get("translations", [])
+        if not isinstance(translations, list) or not translations:
+            return ""
+        first = translations[0]
+        return html.unescape(first.get("translatedText", "")) if isinstance(first, dict) else ""
 
-        last_err: Exception | None = None
-        for m in models:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={self.api_key}"
-            payload = {
-                "contents": [{"parts": [{"text": prompt}]}],
-                "generationConfig": {
-                    "temperature": 0.2,
-                    "maxOutputTokens": 800,
+    def _call_speech_to_text(self, audio_bytes: bytes, language: Language) -> str:
+        url = (
+            "https://speech.googleapis.com/v1/speech:recognize?key="
+            + urllib.parse.quote(self.speech_key)
+        )
+        response = self._post_json(
+            url,
+            {
+                "config": {
+                    "languageCode": self._language_code(language),
+                    "enableAutomaticPunctuation": True,
                 },
-            }
-            data = json.dumps(payload).encode("utf-8")
-            req = urllib.request.Request(
-                url,
-                data=data,
-                headers={"Content-Type": "application/json"},
-                method="POST",
-            )
-            try:
-                with urllib.request.urlopen(req, timeout=12) as resp:
-                    resp_data = json.loads(resp.read().decode("utf-8"))
-                    candidates = resp_data.get("candidates", [])
-                    if candidates:
-                        parts = candidates[0].get("content", {}).get("parts", [])
-                        if parts:
-                            return parts[0].get("text", "")
-            except Exception as e:
-                last_err = e
-                continue
-        if last_err:
-            raise last_err
-        return ""
+                "audio": {"content": base64.b64encode(audio_bytes).decode("ascii")},
+            },
+        )
+        results = response.get("results", [])
+        if not isinstance(results, list) or not results:
+            return ""
+        alternatives = results[0].get("alternatives", [])
+        return alternatives[0].get("transcript", "") if alternatives else ""
+
+    def _call_text_to_speech(
+        self, text: str, language: Language, speed: float
+    ) -> str:
+        url = (
+            "https://texttospeech.googleapis.com/v1/text:synthesize?key="
+            + urllib.parse.quote(self.speech_key)
+        )
+        response = self._post_json(
+            url,
+            {
+                "input": {"text": text},
+                "voice": {"languageCode": self._language_code(language)},
+                "audioConfig": {"audioEncoding": "MP3", "speakingRate": speed},
+            },
+        )
+        audio = response.get("audioContent", "")
+        return audio if isinstance(audio, str) else ""
+
+    def _call_gemini_transcribe(
+        self, audio_bytes: bytes, media_type: str, language: Language
+    ) -> str:
+        url = (
+            f"https://generativelanguage.googleapis.com/v1beta/models/"
+            f"{self.model}:generateContent?key={urllib.parse.quote(self.api_key)}"
+        )
+        response = self._post_json(
+            url,
+            {
+                "contents": [
+                    {
+                        "parts": [
+                            {
+                                "inlineData": {
+                                    "mimeType": media_type or "audio/webm",
+                                    "data": base64.b64encode(audio_bytes).decode("ascii"),
+                                }
+                            },
+                            {
+                                "text": (
+                                    "Transcribe this audio accurately in "
+                                    f"{language.value}. Return only the transcript."
+                                )
+                            },
+                        ]
+                    }
+                ],
+                "generationConfig": {"temperature": 0.0, "maxOutputTokens": 500},
+            },
+        )
+        candidates = response.get("candidates", [])
+        if not isinstance(candidates, list) or not candidates:
+            return ""
+        parts = candidates[0].get("content", {}).get("parts", [])
+        return parts[0].get("text", "").strip() if parts else ""
+
+    def _call_gemini_tts(
+        self, text: str, language: Language, speed: float
+    ) -> tuple[str, str]:
+        url = (
+            f"https://generativelanguage.googleapis.com/v1beta/models/"
+            f"{self.tts_model}:generateContent?key={urllib.parse.quote(self.api_key)}"
+        )
+        response = self._post_json(
+            url,
+            {
+                "contents": [
+                    {
+                        "parts": [
+                            {
+                                "text": (
+                                    f"Read this at {speed:.2f}x speed, preserving its "
+                                    f"language and meaning: {text}"
+                                )
+                            }
+                        ]
+                    }
+                ],
+                "generationConfig": {
+                    "responseModalities": ["AUDIO"],
+                    "speechConfig": {
+                        "languageCode": self._language_code(language),
+                        "voiceConfig": {
+                            "prebuiltVoiceConfig": {"voiceName": self.tts_voice}
+                        },
+                    },
+                    "responseFormat": {
+                        "audio": {"mimeType": "AUDIO_MP3", "delivery": "INLINE"}
+                    },
+                },
+            },
+        )
+        candidates = response.get("candidates", [])
+        if not isinstance(candidates, list) or not candidates:
+            return "", "audio/mp3"
+        parts = candidates[0].get("content", {}).get("parts", [])
+        if not parts:
+            return "", "audio/mp3"
+        inline = parts[0].get("inlineData", {})
+        audio = inline.get("data", "") if isinstance(inline, dict) else ""
+        media_type = inline.get("mimeType", "audio/mp3") if isinstance(inline, dict) else "audio/mp3"
+        return (
+            audio if isinstance(audio, str) else "",
+            media_type if isinstance(media_type, str) else "audio/mp3",
+        )
+
+    @staticmethod
+    def _language_code(language: Language) -> str:
+        return {
+            Language.AR: "ar-XA",
+            Language.AM: "am-ET",
+            Language.OM: "om-ET",
+            Language.TI: "ti-ET",
+            Language.EN: "en-US",
+        }[language]
+
+    @staticmethod
+    def _post_json(url: str, payload: dict[str, object]) -> dict[str, object]:
+        request = urllib.request.Request(
+            url,
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(request, timeout=20) as response:
+            value = json.loads(response.read().decode("utf-8"))
+            return value if isinstance(value, dict) else {}
+
+    def _call_gemini(self, prompt: str) -> str:
+        url = (
+            f"https://generativelanguage.googleapis.com/v1beta/models/"
+            f"{self.model}:generateContent?key={urllib.parse.quote(self.api_key)}"
+        )
+        response = self._post_json(
+            url,
+            {
+                "contents": [{"parts": [{"text": prompt}]}],
+                "generationConfig": {"temperature": 0.2, "maxOutputTokens": 800},
+            },
+        )
+        candidates = response.get("candidates", [])
+        if not isinstance(candidates, list) or not candidates:
+            return ""
+        parts = candidates[0].get("content", {}).get("parts", [])
+        return parts[0].get("text", "") if parts else ""

@@ -32,7 +32,7 @@ savanna/
 │   │   ├── notifications.py         # Africa's Talking & Mock SMS drivers
 │   │   └── savanna.py               # Savanna HTML parser & section chunker
 │   └── src/savanna_bridge/
-│       ├── ai/                      # AI provider factory (offline, ollama, addis, cloud)
+│       ├── ai/                      # AI provider factory (auto, offline, addis, Google cloud)
 │       ├── auth.py                  # Widget token generation & verification
 │       ├── database.py              # SQLite storage for tickets, preferences, links, stats
 │       ├── main.py                  # FastAPI application & router endpoints
@@ -76,7 +76,7 @@ savanna/
 | **Secret Leak Checks** | **Verified Working** | `python tests/check_secrets.py` (zero high-risk credentials) |
 | **BM25 Offline Retrieval** | **Verified Working** | Retrieval tests pass for English & Amharic |
 | **Low-Confidence Refusal** | **Verified Working** | Tested: refuses hallucination, returns citation empty, offers human |
-| **Provider Architecture** | **Verified Working** | Offline, Ollama, Addis AI, Gemini/Cloud adapters present |
+| **Provider Architecture** | **Verified Working** | Automatic routing, offline fallback, Addis AI, and Google cloud adapters present |
 | **Telegram Bot** | **Verified Working** | Multilingual handlers, OGG voice conversion, link confirmation |
 | **Helper Support Console** | **Verified Working** | Static console at `channels/console/index.html` (port 8080) |
 | **Account Linking** | **Verified Working** | 6-digit one-time code generation, expiry, single-use |

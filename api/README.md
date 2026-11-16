@@ -64,7 +64,7 @@ The API implements all Person A milestones:
   - Grounded `/ask`: answers include page, heading, and URL citations. Low-confidence queries safely refuse and offer human assistance (`offer_human: true`).
 - **A-M2 (Languages, Providers, Linking)**:
   - `AddisAiProvider`: integration with the `addisai` SDK for Amharic, Afaan Oromo, Tigrinya, and English speech-to-text, text-to-speech, and chat.
-  - Pluggable AI switching via `AI_PROVIDER` (`offline`, `addis`, `ollama`, `cloud`).
+  - Pluggable AI switching via `AI_PROVIDER` (`auto`, `offline`, `addis`, `cloud`). `auto` routes Ethiopian languages to Addis AI and Arabic to Google.
   - Simple mode flag (`simple_mode: true`) to rewrite answers in short, plain sentences.
   - Expiring, single-use 6-digit account linking (`POST /link/start` and `POST /link/confirm`) with 10-minute expiry.
   - Barrier-free `GET` and `PUT /support-needs` (no ID or medical proof asked).
@@ -175,9 +175,9 @@ Switch AI providers via the `AI_PROVIDER` environment variable:
 
 | Provider | `AI_PROVIDER` | Latency Target | Description |
 |---|---|---|---|
-| **Offline FAQ** | `offline` (default) | `< 50 ms` | 100% offline rule-based & extractive BM25 QA. Zero external calls. |
+| **Automatic multilingual** | `auto` (default) | Provider dependent | Addis AI for Amharic/Oromo/Tigrinya, Google for Arabic, with labelled offline fallback. |
+| **Offline FAQ** | `offline` | `< 50 ms` | 100% offline rule-based & extractive BM25 QA. Zero external calls. |
 | **Addis AI** | `addis` | `< 3.5 s` | Cloud SDK for Amharic, Afaan Oromo, Tigrinya speech and chat. Requires `ADDIS_API_KEY`. |
-| **Ollama** | `ollama` | `< 12 s` | Local LLM via HTTP (`http://localhost:11434`), configured by `OLLAMA_MODEL` (`llama3.2`). |
 | **Cloud** | `cloud` | `< 4 s` | General cloud provider integration. |
 
 ---

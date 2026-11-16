@@ -28,8 +28,7 @@ flowchart TD
         BM25["Offline BM25 Index\nCourse-Grounded Engine"]
         ADAPT["Pluggable AI Adapters"]
         OFFLINE["Offline Static Adapter\n(Zero Cost / Default)"]
-        LOCAL["Ollama Adapter\n(Local Inference)"]
-        CLOUD["Addis AI / Gemini / OpenAI\n(Optional Cloud Models)"]
+        CLOUD["Addis AI / Google AI\nMultilingual Cloud Services"]
     end
 
     subgraph Live Handoff
@@ -51,7 +50,6 @@ flowchart TD
     V1 --> BM25
     BM25 --> ADAPT
     ADAPT --> OFFLINE
-    ADAPT --> LOCAL
     ADAPT --> CLOUD
 
     QUEUE --> JITSI

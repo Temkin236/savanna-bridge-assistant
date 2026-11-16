@@ -5,7 +5,6 @@ from fastapi.testclient import TestClient
 from savanna_bridge.ai.addis import AddisAiProvider
 from savanna_bridge.ai.factory import get_ai_provider
 from savanna_bridge.ai.offline import OfflineFaqProvider
-from savanna_bridge.ai.ollama import OllamaProvider
 from savanna_bridge.main import app
 
 client = TestClient(app)
@@ -19,11 +18,6 @@ def test_provider_factory_switches_properly() -> None:
     addis = get_ai_provider("addis")
     assert isinstance(addis, AddisAiProvider)
     assert addis.name == "addis"
-
-    ollama = get_ai_provider("ollama")
-    assert isinstance(ollama, OllamaProvider)
-    assert ollama.name == "ollama"
-
 
 def test_transcribe_endpoint() -> None:
     res = client.post(

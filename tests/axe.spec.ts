@@ -2,7 +2,11 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
 const demoBase = process.env.DEMO_BASE_URL ?? "http://localhost:4173";
-const consoleBase = process.env.CONSOLE_BASE_URL ?? "http://localhost:8080";
+const consoleBase =
+  process.env.CONSOLE_BASE_URL ??
+  (process.env.CONSOLE_PORT
+    ? `http://localhost:${process.env.CONSOLE_PORT}`
+    : "http://localhost:8090");
 
 for (const target of [
   { name: "Savanna demo", url: `${demoBase}/savanna/` },

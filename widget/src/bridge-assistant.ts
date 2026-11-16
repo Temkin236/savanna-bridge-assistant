@@ -75,7 +75,9 @@ export interface AccessibilityPreferences {
 }
 
 export const ICONS = {
-  launcher: `<svg class="icon-inline" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M8 10h.01M12 10h.01M16 10h.01"></path></svg>`,
+  launcher: `<svg class="icon-inline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="7.2" r="1.5" fill="currentColor"></circle><path d="M5.5 10.5h13"></path><path d="M12 10.5v4"></path><path d="M12 14.5l-2.8 5"></path><path d="M12 14.5l2.8 5"></path></svg>`,
+  accessibility: `<svg class="icon-inline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="7.2" r="1.5" fill="currentColor"></circle><path d="M5.5 10.5h13"></path><path d="M12 10.5v4"></path><path d="M12 14.5l-2.8 5"></path><path d="M12 14.5l2.8 5"></path></svg>`,
+  chat: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`,
   settings: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>`,
   close: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
   mic: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>`,
@@ -117,8 +119,8 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     appTitle: "Savanna Bridge Assistant",
     appSubtitle: "Ask questions, adjust support, or connect with a mentor",
     closeLabel: "Close dialog",
-    launcherLabel: "Help & Assistant",
-    wakeHint: "Say \"Help\" or tap to open",
+    launcherLabel: "Accessibility & Assistant",
+    wakeHint: "Tap or press Alt+A to open",
     settingsLabel: "Settings",
     settingsTitle: "Assistant Settings",
     closeSettings: "Done",
@@ -253,17 +255,17 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     wakeWordSetting: "Voice activation (Wake word 'Help')",
     wakeWordDesc: "Say 'Help' to automatically open assistant and start speaking",
     navigatedToNotice: "Navigated to new lesson:",
-    followupTitle: "💡 Follow-up questions:",
-    followupQ1: "💡 Explain with examples",
-    followupQ2: "➡️ What to know before next lesson?",
-    followupQ3: "📝 Quiz me on this topic",
+    followupTitle: "Follow-up questions:",
+    followupQ1: "Explain with examples",
+    followupQ2: "What to know before next lesson?",
+    followupQ3: "Quiz me on this topic",
   },
   am: {
     appTitle: "የሳቫና ብሪጅ ረዳት",
     appSubtitle: "ጥያቄዎችን ይጠይቁ፣ ድጋፍዎን ያስተካክሉ፣ ወይም ከአማካሪ ጋር ይገናኙ",
     closeLabel: "መስኮቱን ዝጋ",
-    launcherLabel: "እርዳታ እና ረዳት",
-    wakeHint: "\"እርዳታ\" ይበሉ ወይም ይንኩ",
+    launcherLabel: "ተደራሽነት እና ረዳት",
+    wakeHint: "ይንኩ ወይም Alt+A ን ይጫኑ",
     settingsLabel: "ቅንብሮች",
     settingsTitle: "የረዳት ቅንብሮች",
     closeSettings: "ጨርስ",
@@ -398,17 +400,17 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     wakeWordSetting: "የድምጽ ማግበር (የማንቂያ ቃል 'እርዳታ' / 'Help')",
     wakeWordDesc: "ረዳቱን በራስ-ሰር ለመክፈትና ለማናገር 'እርዳታ' ወይም 'Help' ይበሉ",
     navigatedToNotice: "ወደ አዲስ ትምህርት ገጽ ተቀይሯል፡",
-    followupTitle: "💡 ተከታይ ጥያቄዎች፡",
-    followupQ1: "💡 በምሳሌዎች አስረዳኝ",
-    followupQ2: "➡️ ወደ ቀጣዩ ትምህርት ከመሄዴ በፊት ምን ልወቅ?",
-    followupQ3: "📝 ግንዛቤዬን ፈትነኝ",
+    followupTitle: "ተከታይ ጥያቄዎች፡",
+    followupQ1: "በምሳሌዎች አስረዳኝ",
+    followupQ2: "ወደ ቀጣዩ ትምህርት ከመሄዴ በፊት ምን ልወቅ?",
+    followupQ3: "ግንዛቤዬን ፈትነኝ",
   },
   om: {
     appTitle: "Gargaaraa Savanna Bridge",
     appSubtitle: "Gaaffii gaafadhaa, deeggarsa madaalsisaa, ykn gorsaa waliin walqunnamaa",
     closeLabel: "Cufi",
-    launcherLabel: "Gargaarsa & Deeggarsa",
-    wakeHint: "\"Gargaarsa\" jedhaa ykn tuqaa",
+    launcherLabel: "Qaqqabummaa & Deeggarsa",
+    wakeHint: "Tuqaa ykn Alt+A dhiibaa",
     settingsLabel: "Qindaa'ina",
     settingsTitle: "Qindaa'ina Gargaaraa",
     closeSettings: "Xumuri",
@@ -543,17 +545,17 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     wakeWordSetting: "Sagaleen kakaasuu (Jechama 'Gargaarsa' / 'Help')",
     wakeWordDesc: "Gargaaraa ofumaan banuuf 'Gargaarsa' ykn 'Help' jedhaa",
     navigatedToNotice: "Gara barnoota haaraatti jijjiirameera:",
-    followupTitle: "💡 Gaaffilee itti aanan:",
-    followupQ1: "💡 Fakkeenyotaan naaf ibsi",
-    followupQ2: "➡️ Barnoota itti aanuuf maal beekuun qaba?",
-    followupQ3: "📝 Hubannoo koo na qori",
+    followupTitle: "Gaaffilee itti aanan:",
+    followupQ1: "Fakkeenyotaan naaf ibsi",
+    followupQ2: "Barnoota itti aanuuf maal beekuun qaba?",
+    followupQ3: "Hubannoo koo na qori",
   },
   ti: {
     appTitle: "ናይ ሳቫና ብሪጅ ሓጋዚ",
     appSubtitle: "ሕቶታት ሕተቱ፡ ድሌትኩም ኣመዓራርዩ፡ ወይ ምስ መካሪ ተራኸቡ",
     closeLabel: "ዕጾ",
-    launcherLabel: "ሓገዝ & ሓጋዚ",
-    wakeHint: "\"ሓገዝ\" በሉ ወይ ንከፉ",
+    launcherLabel: "ተበጻሕነት & ሓጋዚ",
+    wakeHint: "ንከፉ ወይ Alt+A ጸቕጡ",
     settingsLabel: "ቅጥዕታት",
     settingsTitle: "ናይ ሓጋዚ ቅጥዕታት",
     closeSettings: "ወዲአ",
@@ -688,17 +690,17 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     wakeWordSetting: "ብድምጺ ምኽፋት ('ሓገዝ' / 'Help')",
     wakeWordDesc: "ንሓጋዚ ንምኽፋት 'ሓገዝ' ወይ 'Help' በሉ",
     navigatedToNotice: "ናብ ሓድሽ ትምህርቲ ተቐይሩ፡",
-    followupTitle: "💡 ቀጸልቲ ሕቶታት፡",
-    followupQ1: "💡 ብኣብነታት ኣረድኣኒ",
-    followupQ2: "➡️ ናብ ዝቕጽል ትምህርቲ ቅድሚ ምኻደይ እንታይ ክፈልጥ ኣለኒ?",
-    followupQ3: "📝 ግንዛበይ ፈትነኒ",
+    followupTitle: "ቀጸልቲ ሕቶታት፡",
+    followupQ1: "ብኣብነታት ኣረድኣኒ",
+    followupQ2: "ናብ ዝቕጽል ትምህርቲ ቅድሚ ምኻደይ እንታይ ክፈልጥ ኣለኒ?",
+    followupQ3: "ግንዛበይ ፈትነኒ",
   },
   ar: {
     appTitle: "مساعد سافانا بريدج",
     appSubtitle: "اطرح أسئلة، خصص دعمك، أو تواصل مع مرشد",
     closeLabel: "إغلاق النافذة",
-    launcherLabel: "المساعدة والمساعد",
-    wakeHint: "قل \"مساعدة\" أو اضغط للفتح",
+    launcherLabel: "إمكانية الوصول والمساعد",
+    wakeHint: "انقر أو اضغط Alt+A للفتح",
     settingsLabel: "الإعدادات",
     settingsTitle: "إعدادات المساعد",
     closeSettings: "تم",
@@ -833,10 +835,10 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     wakeWordSetting: "التفعيل الصوتي (كلمة التنبيه 'مساعدة' / 'Help')",
     wakeWordDesc: "قل 'مساعدة' أو 'Help' لفتح المساعد تلقائياً والتحدث مباشرة",
     navigatedToNotice: "تم الانتقال إلى درس جديد:",
-    followupTitle: "💡 أسئلة متابعة مقترحة:",
-    followupQ1: "💡 اشرح بالأمثلة",
-    followupQ2: "➡️ ماذا يجب أن أفهم قبل الدرس التالي؟",
-    followupQ3: "📝 اختبر فهمي لهذا الموضوع",
+    followupTitle: "أسئلة متابعة مقترحة:",
+    followupQ1: "اشرح بالأمثلة",
+    followupQ2: "ماذا يجب أن أفهم قبل الدرس التالي؟",
+    followupQ3: "اختبر فهمي لهذا الموضوع",
   },
 };
 
@@ -2754,8 +2756,9 @@ export class BridgeAssistant extends HTMLElement {
       dialog.removeAttribute("hidden");
       dialog.style.display = "flex";
       launcher.setAttribute("aria-expanded", "true");
-      dialog.focus();
-      this.announce("Savanna Bridge Assistant opened.");
+      this.announce("Savanna Bridge Assistant opened. Use Tab to navigate or Escape to close.");
+      const chatInput = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-text-input");
+      setTimeout(() => (chatInput ?? dialog).focus(), 60);
     }
   }
 
@@ -2871,7 +2874,7 @@ export class BridgeAssistant extends HTMLElement {
     container.innerHTML = `
       <div style="display:flex; justify-content:center; margin-top:0.25rem;">
         <button type="button" class="btn-toggle-link-code" id="btn-toggle-link-code" style="background:none; border:none; color:var(--b-primary); font-size:0.75rem; text-decoration:underline; cursor:pointer; padding:0.125rem 0;">
-          ${this.isLinkCodeInputVisible ? "▲ " + this.t("hideCodePrompt") : "🔗 " + this.t("haveCodePrompt")}
+          ${this.isLinkCodeInputVisible ? this.t("hideCodePrompt") : `${ICONS.link} <span>${this.t("haveCodePrompt")}</span>`}
         </button>
       </div>
       ${
@@ -3187,7 +3190,8 @@ export class BridgeAssistant extends HTMLElement {
           if (detected !== this.currentLang) {
             this.setLanguage(detected, false);
           }
-          inputEl.value = "";
+          inputEl.value = (inputEl.value ? inputEl.value + " " : "") + data.transcript;
+          inputEl.focus();
           this.playEarcon("transcribed");
           this.announce(this.t("voicePreviewNotice"));
           await this.askQuestion(data.transcript, false, true);
@@ -3281,54 +3285,7 @@ export class BridgeAssistant extends HTMLElement {
     this.renderMessages();
     this.updateVoiceStatusUI();
 
-    // 1. Web Speech API SpeechSynthesis
-    if ("speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(cleanText);
-
-      const voiceLangMap: Record<SupportedLanguage, string[]> = {
-        en: ["en-US", "en-GB", "en"],
-        am: ["am-ET", "am"],
-        om: ["om-ET", "om", "en-US"],
-        ar: ["ar-SA", "ar-EG", "ar-AE", "ar"],
-        ti: ["ti-ET", "ti", "am-ET"],
-      };
-
-      const targetPrefixes = voiceLangMap[this.currentLang] || ["en"];
-      const voices = window.speechSynthesis.getVoices();
-      const matchedVoice = voices.find((v) =>
-        targetPrefixes.some((p) => v.lang.toLowerCase().startsWith(p.toLowerCase()))
-      );
-
-      if (matchedVoice) {
-        utterance.voice = matchedVoice;
-        utterance.lang = matchedVoice.lang;
-      } else {
-        utterance.lang = targetPrefixes[0];
-      }
-
-      utterance.rate = 1.0;
-      utterance.pitch = 1.0;
-
-      utterance.onend = () => {
-        this.isSpeaking = false;
-        msg.isAudioPlaying = false;
-        this.renderMessages();
-        this.updateVoiceStatusUI();
-      };
-
-      utterance.onerror = () => {
-        this.isSpeaking = false;
-        msg.isAudioPlaying = false;
-        this.renderMessages();
-        this.updateVoiceStatusUI();
-      };
-
-      window.speechSynthesis.speak(utterance);
-      return;
-    }
-
-    // 2. Server-side TTS synthesis fallback
+    // Prefer language-aware server TTS (Addis AI / Google), then use browser speech.
     try {
       const res = await fetch(`${this.apiBase}/api/v1/speech/synthesize`, {
         method: "POST",
@@ -3342,24 +3299,45 @@ export class BridgeAssistant extends HTMLElement {
 
       if (res.ok) {
         const data = await res.json();
-        const audioUrl = data.audio_url?.startsWith("http")
-          ? data.audio_url
-          : `${this.apiBase}${data.audio_url || ""}`;
-        this.activeAudio = new Audio(audioUrl);
-        this.activeAudio.onended = () => {
-          this.isSpeaking = false;
-          msg.isAudioPlaying = false;
-          this.renderMessages();
-          this.updateVoiceStatusUI();
-        };
-        await this.activeAudio.play();
+        if (!data.mocked && data.audio_url) {
+          const rawAudioUrl = String(data.audio_url);
+          const audioUrl = /^(https?:|data:|blob:)/.test(rawAudioUrl)
+            ? rawAudioUrl
+            : `${this.apiBase}${rawAudioUrl}`;
+          this.activeAudio = new Audio(audioUrl);
+          this.activeAudio.onended = () => this.finishSpeaking(msg);
+          this.activeAudio.onerror = () => this.fallbackTTS(cleanText, msg);
+          await this.activeAudio.play();
+          return;
+        }
       }
-    } catch {
-      this.isSpeaking = false;
-      msg.isAudioPlaying = false;
-      this.renderMessages();
-      this.updateVoiceStatusUI();
+    } catch (error) {
+      console.warn("Server TTS unavailable; using browser speech fallback.", error);
     }
+
+    this.fallbackTTS(cleanText, msg);
+  }
+
+  private fallbackTTS(text: string, msg: ChatMessage): void {
+    const started = this.speakText(text, {
+      onStart: () => {
+        this.isSpeaking = true;
+        msg.isAudioPlaying = true;
+        this.renderMessages();
+        this.updateVoiceStatusUI();
+      },
+      onEnd: () => this.finishSpeaking(msg),
+      onError: () => this.finishSpeaking(msg),
+    });
+    if (!started) this.finishSpeaking(msg);
+  }
+
+  private finishSpeaking(msg: ChatMessage): void {
+    this.isSpeaking = false;
+    msg.isAudioPlaying = false;
+    this.activeAudio = null;
+    this.renderMessages();
+    this.updateVoiceStatusUI();
   }
 
   public stopSpeaking(): void {
@@ -3818,19 +3796,6 @@ export class BridgeAssistant extends HTMLElement {
     setTimeout(() => {
       this.startSequentialReading(msg, 0);
     }, 120);
-  }
-
-  private fallbackTTS(text: string, msg?: ChatMessage): void {
-    if (msg) {
-      this.startSequentialReading(msg, 0);
-    } else {
-      const dummyMsg: ChatMessage = {
-        id: `msg_tts_${Date.now()}`,
-        sender: "assistant",
-        text,
-      };
-      this.startSequentialReading(dummyMsg, 0);
-    }
   }
 
   // --- Page Navigation and Context Monitoring ---
@@ -4858,7 +4823,7 @@ export class BridgeAssistant extends HTMLElement {
               isThisReading
                 ? `
                 <div class="reading-nav-bar" style="display:flex; align-items:center; justify-content:space-between; margin:0.5rem 0; padding:0.375rem 0.625rem; background:#fef9c3; border:1px solid #facc15; border-radius:0.375rem; font-size:0.8125rem;">
-                  <span style="font-weight:600; color:#854d0e;">📖 Reading Paragraph ${this.currentReading!.currentIndex + 1} of ${this.currentReading!.items.length}</span>
+                  <span style="font-weight:600; color:#854d0e; display:inline-flex; align-items:center; gap:0.375rem;">${ICONS.book} <span>Reading Paragraph ${this.currentReading!.currentIndex + 1} of ${this.currentReading!.items.length}</span></span>
                   <div style="display:flex; gap:0.25rem;">
                     <button type="button" class="btn btn-secondary btn-prev-para" data-msg-id="${msg.id}" style="padding:0.125rem 0.5rem; font-size:0.75rem;" ${this.currentReading!.currentIndex === 0 ? "disabled" : ""}>⏮ Prev</button>
                     <button type="button" class="btn btn-secondary btn-next-para" data-msg-id="${msg.id}" style="padding:0.125rem 0.5rem; font-size:0.75rem;" ${this.currentReading!.currentIndex >= this.currentReading!.items.length - 1 ? "disabled" : ""}>Next ⏭</button>
@@ -4874,7 +4839,7 @@ export class BridgeAssistant extends HTMLElement {
                   <div>${this.t("notVerifiedNotice")}</div>
                   <div style="display:flex; gap:0.375rem; flex-wrap:wrap;">
                     <button type="button" class="btn btn-primary btn-talk-person" data-msg-id="${msg.id}" style="font-size:0.8125rem; min-height:2.25rem;">
-                      👤 ${this.t("talkToPersonButton")}
+                      ${ICONS.user} <span>${this.t("talkToPersonButton")}</span>
                     </button>
                     <button type="button" class="btn btn-secondary btn-try-another" style="font-size:0.8125rem; min-height:2.25rem;">
                       ${this.t("tryAnotherQuestion")}
@@ -4888,7 +4853,7 @@ export class BridgeAssistant extends HTMLElement {
             <!-- Listen, Stop, Replay & Make Simpler action buttons -->
             <div class="answer-actions">
               <button type="button" class="btn btn-secondary btn-listen" data-msg-id="${msg.id}">
-                ${msg.isAudioPlaying ? `⏸️ ${this.t("pauseButton")}` : `🔊 ${this.t("listenButton")}`}
+                ${msg.isAudioPlaying ? `${ICONS.pause} <span>${this.t("pauseButton")}</span>` : `${ICONS.sound} <span>${this.t("listenButton")}</span>`}
               </button>
               <button type="button" class="btn btn-secondary btn-stop" data-msg-id="${msg.id}" style="display:inline-flex; align-items:center; gap:0.375rem;" ${msg.isAudioPlaying || msg.isAudioPaused ? "" : "hidden"}>
                 ${ICONS.stop}

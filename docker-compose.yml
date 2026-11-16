@@ -6,12 +6,19 @@ services:
       context: ./api
     command: uvicorn savanna_bridge.main:app --host 0.0.0.0 --port 8000 --reload
     environment:
-      AI_PROVIDER: ${AI_PROVIDER:-offline}
+      AI_PROVIDER: ${AI_PROVIDER:-auto}
       ADDIS_API_KEY: ${ADDIS_API_KEY:-}
+      ADDIS_BASE_URL: ${ADDIS_BASE_URL:-https://api.addisassistant.com}
       CLOUD_AI_API_KEY: ${CLOUD_AI_API_KEY:-}
-      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
-      OLLAMA_HOST: ${OLLAMA_BASE_URL:-http://ollama:11434}
-      OLLAMA_MODEL: ${OLLAMA_MODEL:-}
+      CLOUD_API_KEY: ${CLOUD_API_KEY:-}
+      GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY:-}
+      GOOGLE_AI_API: ${GOOGLE_AI_API:-}
+      GOOGLE_TRANSLATE_API_KEY: ${GOOGLE_TRANSLATE_API_KEY:-}
+      GOOGLE_SPEECH_API_KEY: ${GOOGLE_SPEECH_API_KEY:-}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      CLOUD_MODEL: ${CLOUD_MODEL:-gemini-3.8-flash}
+      GOOGLE_TTS_MODEL: ${GOOGLE_TTS_MODEL:-gemini-3.8-flash-tts}
+      GOOGLE_TTS_VOICE: ${GOOGLE_TTS_VOICE:-Kore}
       TOKEN_SECRET: ${TOKEN_SECRET:-local-development-only}
       SECRET_KEY: ${TOKEN_SECRET:-local-development-only}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:4173,http://localhost:8080},http://demo-host,http://console
@@ -103,8 +110,6 @@ services:
       dockerfile: demo-host/Dockerfile
     ports:
       - "${DEMO_PORT:-4173}:80"
-    volumes:
-      - ./demo-host:/usr/share/nginx/html:ro
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "-", "http://localhost/health.html"]
       interval: 5s
@@ -141,15 +146,6 @@ services:
       - ./channels:/work:ro
     command: /bin/sh -lc "pip install --no-cache-dir pytest && pytest -q"
 
-  ollama:
-    image: ollama/ollama:0.5.4
-    profiles: [ollama]
-    volumes:
-      - ollama-data:/root/.ollama
-    ports:
-      - "${OLLAMA_PORT:-11434}:11434"
-
 volumes:
   app-data:
-  ollama-data:
 

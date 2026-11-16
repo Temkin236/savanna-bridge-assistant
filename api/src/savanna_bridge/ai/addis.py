@@ -22,6 +22,7 @@ class AddisAiProvider(AIProvider):
         self.base_url = base_url or ADDIS_BASE_URL
         self._offline_fallback = OfflineFaqProvider()
         self._client: Any = None
+        self._last_call_mocked = True
 
         if self.api_key:
             try:
@@ -40,7 +41,7 @@ class AddisAiProvider(AIProvider):
 
     @property
     def is_mocked(self) -> bool:
-        return self._client is None
+        return self._last_call_mocked
 
     def detect_language(self, text: str) -> Language:
         return self._offline_fallback.detect_language(text)
@@ -52,23 +53,33 @@ class AddisAiProvider(AIProvider):
         src = (source_lang or "en").lower().split("-")[0].strip()
         tgt = (target_lang or "en").lower().split("-")[0].strip()
         if src == tgt:
+            self._last_call_mocked = False
             return text
 
         if self._client and src in ("am", "om", "ti", "en") and tgt in ("am", "om", "ti", "en"):
             try:
-                res = self._client.translate.create(
-                    text=text,
-                    source=src,
-                    target=tgt,
-                )
+                try:
+                    res = self._client.translate.create(text=text, source=src, target=tgt)
+                except TypeError:
+                    res = self._client.translate.create(
+                        text=text,
+                        source_language=src,
+                        target_language=tgt,
+                    )
                 if isinstance(res, dict):
                     translated = res.get("text") or res.get("translation")
                     if translated and str(translated).strip():
+                        self._last_call_mocked = False
                         return str(translated).strip()
                 elif hasattr(res, "text") and res.text:
+                    self._last_call_mocked = False
                     return str(res.text).strip()
+                elif hasattr(res, "translation") and res.translation:
+                    self._last_call_mocked = False
+                    return str(res.translation).strip()
             except Exception as e:
                 logger.warning("AddisAI translate call failed: %s", e)
+        self._last_call_mocked = True
         return ""
 
     def translate(self, text: str, source_lang: str, target_lang: str) -> str:
@@ -91,7 +102,21 @@ class AddisAiProvider(AIProvider):
         if direct:
             return direct
 
-        return text
+        # Fallback to Google Gemini if Addis AI is unavailable or fails
+        try:
+            from savanna_bridge.ai.cloud import CloudProvider
+
+            cloud = CloudProvider()
+            if cloud.api_key:
+                gemini_trans = cloud.translate_direct(text, src, tgt)
+                if gemini_trans:
+                    self._last_call_mocked = cloud.is_mocked
+                    return gemini_trans
+        except Exception as exc:
+            logger.warning("Gemini fallback translation error: %s", exc)
+
+        self._last_call_mocked = True
+        return self._offline_fallback.translate(text, src, tgt)
 
     def generate_answer(
         self,
@@ -131,10 +156,29 @@ class AddisAiProvider(AIProvider):
                 )
                 answer_content = res.choices[0].message.content
                 if answer_content:
+                    self._last_call_mocked = False
                     return answer_content.strip()
             except Exception as e:
-                logger.warning("AddisAI chat call failed: %s. Falling back to offline FAQ.", e)
+                logger.warning(
+                    "AddisAI chat call failed: %s. Falling back to Gemini / offline FAQ.", e
+                )
 
+        # Fallback to Google Gemini if Addis AI is unavailable or fails
+        try:
+            from savanna_bridge.ai.cloud import CloudProvider
+
+            cloud = CloudProvider()
+            if cloud.api_key:
+                gemini_ans = cloud.generate_answer(
+                    question, context_chunks, language, simple_mode
+                )
+                if gemini_ans and not cloud.is_mocked:
+                    self._last_call_mocked = False
+                    return gemini_ans
+        except Exception as exc:
+            logger.warning("Gemini fallback answer error: %s", exc)
+
+        self._last_call_mocked = True
         return self._offline_fallback.generate_answer(
             question, context_chunks, language, simple_mode
         )
@@ -142,40 +186,63 @@ class AddisAiProvider(AIProvider):
     def transcribe(
         self, audio_bytes: bytes, media_type: str, language: Language, retain: bool = False
     ) -> str:
-        if self._client and audio_bytes:
+        if self._client:
             try:
                 res = self._client.speech.transcribe(
                     audio=audio_bytes,
+                    media_type=media_type,
                     language=language.value,
                 )
-                if isinstance(res, dict):
-                    transcript = res.get("transcript") or res.get("text") or ""
-                else:
-                    transcript = getattr(res, "transcript", "")
+                transcript = getattr(res, "transcript", "")
                 if transcript:
-                    return transcript.strip()
+                    self._last_call_mocked = False
+                    return transcript
             except Exception as e:
                 logger.warning("AddisAI transcription failed: %s", e)
+
+        # Fallback to Google Gemini / Cloud STT
+        try:
+            from savanna_bridge.ai.cloud import CloudProvider
+
+            cloud = CloudProvider()
+            if cloud.api_key or cloud.speech_key:
+                gemini_stt = cloud.transcribe(audio_bytes, media_type, language, retain)
+                if gemini_stt and not cloud.is_mocked:
+                    self._last_call_mocked = False
+                    return gemini_stt
+        except Exception as exc:
+            logger.warning("Gemini fallback transcription error: %s", exc)
+
+        self._last_call_mocked = True
         return self._offline_fallback.transcribe(audio_bytes, media_type, language, retain)
 
     def synthesize(self, text: str, language: Language, speed: float = 1.0) -> str:
         if self._client:
             try:
-                from addisai import DEFAULT_VOICES
-                voice_id = DEFAULT_VOICES.get(language.value, DEFAULT_VOICES.get("am", "am-hamen"))
-                clip = self._client.voice.generate(
-                    voice_id=voice_id,
-                    text=text[:1000],
+                res = self._client.speech.synthesize(
+                    text=text,
                     language=language.value,
+                    speed=speed,
                 )
-                if clip and hasattr(clip, "content") and clip.content:
-                    import uuid
-                    from pathlib import Path
-                    clip_id = f"addis_{uuid.uuid4().hex[:8]}.mp3"
-                    tts_dir = Path("/data/tts")
-                    tts_dir.mkdir(parents=True, exist_ok=True)
-                    (tts_dir / clip_id).write_bytes(clip.content)
-                    return f"/media/tts/{clip_id}"
+                audio_url = getattr(res, "audio_url", None)
+                if audio_url:
+                    self._last_call_mocked = False
+                    return audio_url
             except Exception as e:
-                logger.warning("AddisAI voice generation failed: %s", e)
+                logger.warning("AddisAI synthesis failed: %s", e)
+
+        # Fallback to Google Gemini / Cloud TTS
+        try:
+            from savanna_bridge.ai.cloud import CloudProvider
+
+            cloud = CloudProvider()
+            if cloud.api_key or cloud.speech_key:
+                gemini_tts = cloud.synthesize(text, language, speed)
+                if gemini_tts and not cloud.is_mocked:
+                    self._last_call_mocked = False
+                    return gemini_tts
+        except Exception as exc:
+            logger.warning("Gemini fallback synthesis error: %s", exc)
+
+        self._last_call_mocked = True
         return self._offline_fallback.synthesize(text, language, speed)

@@ -1,8 +1,10 @@
 var j = Object.defineProperty;
 var W = (R, w, e) => w in R ? j(R, w, { enumerable: !0, configurable: !0, writable: !0, value: e }) : R[w] = e;
 var l = (R, w, e) => W(R, typeof w != "symbol" ? w + "" : w, e);
-const d = {
-  launcher: '<svg class="icon-inline" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M8 10h.01M12 10h.01M16 10h.01"></path></svg>',
+const c = {
+  launcher: '<svg class="icon-inline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="7.2" r="1.5" fill="currentColor"></circle><path d="M5.5 10.5h13"></path><path d="M12 10.5v4"></path><path d="M12 14.5l-2.8 5"></path><path d="M12 14.5l2.8 5"></path></svg>',
+  accessibility: '<svg class="icon-inline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="7.2" r="1.5" fill="currentColor"></circle><path d="M5.5 10.5h13"></path><path d="M12 10.5v4"></path><path d="M12 14.5l-2.8 5"></path><path d="M12 14.5l2.8 5"></path></svg>',
+  chat: '<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>',
   settings: '<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>',
   close: '<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
   mic: '<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>',
@@ -42,8 +44,8 @@ const d = {
     appTitle: "Savanna Bridge Assistant",
     appSubtitle: "Ask questions, adjust support, or connect with a mentor",
     closeLabel: "Close dialog",
-    launcherLabel: "Help & Assistant",
-    wakeHint: 'Say "Help" or tap to open',
+    launcherLabel: "Accessibility & Assistant",
+    wakeHint: "Tap or press Alt+A to open",
     settingsLabel: "Settings",
     settingsTitle: "Assistant Settings",
     closeSettings: "Done",
@@ -178,17 +180,17 @@ const d = {
     wakeWordSetting: "Voice activation (Wake word 'Help')",
     wakeWordDesc: "Say 'Help' to automatically open assistant and start speaking",
     navigatedToNotice: "Navigated to new lesson:",
-    followupTitle: "💡 Follow-up questions:",
-    followupQ1: "💡 Explain with examples",
-    followupQ2: "➡️ What to know before next lesson?",
-    followupQ3: "📝 Quiz me on this topic"
+    followupTitle: "Follow-up questions:",
+    followupQ1: "Explain with examples",
+    followupQ2: "What to know before next lesson?",
+    followupQ3: "Quiz me on this topic"
   },
   am: {
     appTitle: "የሳቫና ብሪጅ ረዳት",
     appSubtitle: "ጥያቄዎችን ይጠይቁ፣ ድጋፍዎን ያስተካክሉ፣ ወይም ከአማካሪ ጋር ይገናኙ",
     closeLabel: "መስኮቱን ዝጋ",
-    launcherLabel: "እርዳታ እና ረዳት",
-    wakeHint: '"እርዳታ" ይበሉ ወይም ይንኩ',
+    launcherLabel: "ተደራሽነት እና ረዳት",
+    wakeHint: "ይንኩ ወይም Alt+A ን ይጫኑ",
     settingsLabel: "ቅንብሮች",
     settingsTitle: "የረዳት ቅንብሮች",
     closeSettings: "ጨርስ",
@@ -323,17 +325,17 @@ const d = {
     wakeWordSetting: "የድምጽ ማግበር (የማንቂያ ቃል 'እርዳታ' / 'Help')",
     wakeWordDesc: "ረዳቱን በራስ-ሰር ለመክፈትና ለማናገር 'እርዳታ' ወይም 'Help' ይበሉ",
     navigatedToNotice: "ወደ አዲስ ትምህርት ገጽ ተቀይሯል፡",
-    followupTitle: "💡 ተከታይ ጥያቄዎች፡",
-    followupQ1: "💡 በምሳሌዎች አስረዳኝ",
-    followupQ2: "➡️ ወደ ቀጣዩ ትምህርት ከመሄዴ በፊት ምን ልወቅ?",
-    followupQ3: "📝 ግንዛቤዬን ፈትነኝ"
+    followupTitle: "ተከታይ ጥያቄዎች፡",
+    followupQ1: "በምሳሌዎች አስረዳኝ",
+    followupQ2: "ወደ ቀጣዩ ትምህርት ከመሄዴ በፊት ምን ልወቅ?",
+    followupQ3: "ግንዛቤዬን ፈትነኝ"
   },
   om: {
     appTitle: "Gargaaraa Savanna Bridge",
     appSubtitle: "Gaaffii gaafadhaa, deeggarsa madaalsisaa, ykn gorsaa waliin walqunnamaa",
     closeLabel: "Cufi",
-    launcherLabel: "Gargaarsa & Deeggarsa",
-    wakeHint: '"Gargaarsa" jedhaa ykn tuqaa',
+    launcherLabel: "Qaqqabummaa & Deeggarsa",
+    wakeHint: "Tuqaa ykn Alt+A dhiibaa",
     settingsLabel: "Qindaa'ina",
     settingsTitle: "Qindaa'ina Gargaaraa",
     closeSettings: "Xumuri",
@@ -468,17 +470,17 @@ const d = {
     wakeWordSetting: "Sagaleen kakaasuu (Jechama 'Gargaarsa' / 'Help')",
     wakeWordDesc: "Gargaaraa ofumaan banuuf 'Gargaarsa' ykn 'Help' jedhaa",
     navigatedToNotice: "Gara barnoota haaraatti jijjiirameera:",
-    followupTitle: "💡 Gaaffilee itti aanan:",
-    followupQ1: "💡 Fakkeenyotaan naaf ibsi",
-    followupQ2: "➡️ Barnoota itti aanuuf maal beekuun qaba?",
-    followupQ3: "📝 Hubannoo koo na qori"
+    followupTitle: "Gaaffilee itti aanan:",
+    followupQ1: "Fakkeenyotaan naaf ibsi",
+    followupQ2: "Barnoota itti aanuuf maal beekuun qaba?",
+    followupQ3: "Hubannoo koo na qori"
   },
   ti: {
     appTitle: "ናይ ሳቫና ብሪጅ ሓጋዚ",
     appSubtitle: "ሕቶታት ሕተቱ፡ ድሌትኩም ኣመዓራርዩ፡ ወይ ምስ መካሪ ተራኸቡ",
     closeLabel: "ዕጾ",
-    launcherLabel: "ሓገዝ & ሓጋዚ",
-    wakeHint: '"ሓገዝ" በሉ ወይ ንከፉ',
+    launcherLabel: "ተበጻሕነት & ሓጋዚ",
+    wakeHint: "ንከፉ ወይ Alt+A ጸቕጡ",
     settingsLabel: "ቅጥዕታት",
     settingsTitle: "ናይ ሓጋዚ ቅጥዕታት",
     closeSettings: "ወዲአ",
@@ -613,17 +615,17 @@ const d = {
     wakeWordSetting: "ብድምጺ ምኽፋት ('ሓገዝ' / 'Help')",
     wakeWordDesc: "ንሓጋዚ ንምኽፋት 'ሓገዝ' ወይ 'Help' በሉ",
     navigatedToNotice: "ናብ ሓድሽ ትምህርቲ ተቐይሩ፡",
-    followupTitle: "💡 ቀጸልቲ ሕቶታት፡",
-    followupQ1: "💡 ብኣብነታት ኣረድኣኒ",
-    followupQ2: "➡️ ናብ ዝቕጽል ትምህርቲ ቅድሚ ምኻደይ እንታይ ክፈልጥ ኣለኒ?",
-    followupQ3: "📝 ግንዛበይ ፈትነኒ"
+    followupTitle: "ቀጸልቲ ሕቶታት፡",
+    followupQ1: "ብኣብነታት ኣረድኣኒ",
+    followupQ2: "ናብ ዝቕጽል ትምህርቲ ቅድሚ ምኻደይ እንታይ ክፈልጥ ኣለኒ?",
+    followupQ3: "ግንዛበይ ፈትነኒ"
   },
   ar: {
     appTitle: "مساعد سافانا بريدج",
     appSubtitle: "اطرح أسئلة، خصص دعمك، أو تواصل مع مرشد",
     closeLabel: "إغلاق النافذة",
-    launcherLabel: "المساعدة والمساعد",
-    wakeHint: 'قل "مساعدة" أو اضغط للفتح',
+    launcherLabel: "إمكانية الوصول والمساعد",
+    wakeHint: "انقر أو اضغط Alt+A للفتح",
     settingsLabel: "الإعدادات",
     settingsTitle: "إعدادات المساعد",
     closeSettings: "تم",
@@ -758,10 +760,10 @@ const d = {
     wakeWordSetting: "التفعيل الصوتي (كلمة التنبيه 'مساعدة' / 'Help')",
     wakeWordDesc: "قل 'مساعدة' أو 'Help' لفتح المساعد تلقائياً والتحدث مباشرة",
     navigatedToNotice: "تم الانتقال إلى درس جديد:",
-    followupTitle: "💡 أسئلة متابعة مقترحة:",
-    followupQ1: "💡 اشرح بالأمثلة",
-    followupQ2: "➡️ ماذا يجب أن أفهم قبل الدرس التالي؟",
-    followupQ3: "📝 اختبر فهمي لهذا الموضوع"
+    followupTitle: "أسئلة متابعة مقترحة:",
+    followupQ1: "اشرح بالأمثلة",
+    followupQ2: "ماذا يجب أن أفهم قبل الدرس التالي؟",
+    followupQ3: "اختبر فهمي لهذا الموضوع"
   }
 }, D = `
   :host {
@@ -1956,8 +1958,8 @@ class N extends HTMLElement {
       const i = localStorage.getItem("savanna_voice_prefs");
       if (i)
         try {
-          const c = JSON.parse(i);
-          this.accessibilityPrefs = { ...this.accessibilityPrefs, ...c };
+          const d = JSON.parse(i);
+          this.accessibilityPrefs = { ...this.accessibilityPrefs, ...d };
         } catch {
         }
       const a = localStorage.getItem("savanna_bridge_preferred_lang");
@@ -2034,8 +2036,8 @@ class N extends HTMLElement {
       ti: "ti-ET",
       ar: "ar-SA"
     }[e].toLowerCase(), n = e.toLowerCase();
-    let s = i.find((c) => c.lang.toLowerCase() === t);
-    if (s || (s = i.find((c) => c.lang.toLowerCase().startsWith(n)), s)) return s;
+    let s = i.find((d) => d.lang.toLowerCase() === t);
+    if (s || (s = i.find((d) => d.lang.toLowerCase().startsWith(n)), s)) return s;
     const o = {
       en: "english",
       am: "amharic",
@@ -2043,7 +2045,7 @@ class N extends HTMLElement {
       ti: "tigrinya",
       ar: "arabic"
     }[e];
-    return s = i.find((c) => c.name.toLowerCase().includes(o)), s || null;
+    return s = i.find((d) => d.name.toLowerCase().includes(o)), s || null;
   }
   speakText(e, i) {
     if (!("speechSynthesis" in window))
@@ -2105,12 +2107,12 @@ class N extends HTMLElement {
           ).forEach((o) => o.remove());
           const r = [];
           s.querySelectorAll("h1, h2, h3, h4, h5, p, li").forEach((o) => {
-            const c = (o.textContent || "").replace(/\s+/g, " ").trim();
-            if (c) {
+            const d = (o.textContent || "").replace(/\s+/g, " ").trim();
+            if (d) {
               const b = o.tagName.toLowerCase();
               b.startsWith("h") ? r.push(`
-${c}
-`) : b === "li" ? r.push(`• ${c}`) : r.push(c);
+${d}
+`) : b === "li" ? r.push(`• ${d}`) : r.push(d);
             }
           }), r.length > 0 ? t = r.join(`
 
@@ -2225,7 +2227,11 @@ ${c}
     if (this.isOpen) return;
     this.isOpen = !0;
     const e = this.shadowRoot?.querySelector("#assistant-dialog"), i = this.shadowRoot?.querySelector("#launcher-btn");
-    e && i && (e.hidden = !1, e.removeAttribute("hidden"), e.style.display = "flex", i.setAttribute("aria-expanded", "true"), e.focus(), this.announce("Savanna Bridge Assistant opened."));
+    if (e && i) {
+      e.hidden = !1, e.removeAttribute("hidden"), e.style.display = "flex", i.setAttribute("aria-expanded", "true"), this.announce("Savanna Bridge Assistant opened. Use Tab to navigate or Escape to close.");
+      const a = this.shadowRoot?.querySelector("#chat-text-input");
+      setTimeout(() => (a ?? e).focus(), 60);
+    }
   }
   closeAssistant() {
     this.isOpen = !1;
@@ -2298,7 +2304,7 @@ ${c}
     e.innerHTML = `
       <div style="display:flex; justify-content:center; margin-top:0.25rem;">
         <button type="button" class="btn-toggle-link-code" id="btn-toggle-link-code" style="background:none; border:none; color:var(--b-primary); font-size:0.75rem; text-decoration:underline; cursor:pointer; padding:0.125rem 0;">
-          ${this.isLinkCodeInputVisible ? "▲ " + this.t("hideCodePrompt") : "🔗 " + this.t("haveCodePrompt")}
+          ${this.isLinkCodeInputVisible ? this.t("hideCodePrompt") : `${c.link} <span>${this.t("haveCodePrompt")}</span>`}
         </button>
       </div>
       ${this.isLinkCodeInputVisible ? `
@@ -2462,11 +2468,11 @@ ${c}
   async sendAudioForTranscription(e, i, a) {
     this.isProcessingSpeech = !0, this.updateVoiceStatusUI(), this.announce(this.t("voiceProcessing"));
     try {
-      const t = new FileReader(), n = new Promise((o, c) => {
+      const t = new FileReader(), n = new Promise((o, d) => {
         t.onloadend = () => {
           const b = t.result;
           o(b.split(",")[1] || "");
-        }, t.onerror = c;
+        }, t.onerror = d;
       });
       t.readAsDataURL(e);
       const s = await n, r = await fetch(`${this.apiBase}/api/v1/speech/transcribe`, {
@@ -2482,8 +2488,8 @@ ${c}
       if (r.ok) {
         const o = await r.json();
         if (o.transcript) {
-          const c = this.detectLanguage(o.transcript);
-          c !== this.currentLang && this.setLanguage(c, !1), a.value = "", this.playEarcon("transcribed"), this.announce(this.t("voicePreviewNotice")), await this.askQuestion(o.transcript, !1, !0);
+          const d = this.detectLanguage(o.transcript);
+          d !== this.currentLang && this.setLanguage(d, !1), a.value = (a.value ? a.value + " " : "") + o.transcript, a.focus(), this.playEarcon("transcribed"), this.announce(this.t("voicePreviewNotice")), await this.askQuestion(o.transcript, !1, !0);
         }
       }
     } catch (t) {
@@ -2535,24 +2541,7 @@ ${c}
     this.stopSpeaking();
     const i = this.cleanTextForSpeech(e.text);
     if (i) {
-      if (this.isSpeaking = !0, e.isAudioPlaying = !0, this.renderMessages(), this.updateVoiceStatusUI(), "speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
-        const a = new SpeechSynthesisUtterance(i), n = {
-          en: ["en-US", "en-GB", "en"],
-          am: ["am-ET", "am"],
-          om: ["om-ET", "om", "en-US"],
-          ar: ["ar-SA", "ar-EG", "ar-AE", "ar"],
-          ti: ["ti-ET", "ti", "am-ET"]
-        }[this.currentLang] || ["en"], r = window.speechSynthesis.getVoices().find(
-          (o) => n.some((c) => o.lang.toLowerCase().startsWith(c.toLowerCase()))
-        );
-        r ? (a.voice = r, a.lang = r.lang) : a.lang = n[0], a.rate = 1, a.pitch = 1, a.onend = () => {
-          this.isSpeaking = !1, e.isAudioPlaying = !1, this.renderMessages(), this.updateVoiceStatusUI();
-        }, a.onerror = () => {
-          this.isSpeaking = !1, e.isAudioPlaying = !1, this.renderMessages(), this.updateVoiceStatusUI();
-        }, window.speechSynthesis.speak(a);
-        return;
-      }
+      this.isSpeaking = !0, e.isAudioPlaying = !0, this.renderMessages(), this.updateVoiceStatusUI();
       try {
         const a = await fetch(`${this.apiBase}/api/v1/speech/synthesize`, {
           method: "POST",
@@ -2564,15 +2553,30 @@ ${c}
           })
         });
         if (a.ok) {
-          const t = await a.json(), n = t.audio_url?.startsWith("http") ? t.audio_url : `${this.apiBase}${t.audio_url || ""}`;
-          this.activeAudio = new Audio(n), this.activeAudio.onended = () => {
-            this.isSpeaking = !1, e.isAudioPlaying = !1, this.renderMessages(), this.updateVoiceStatusUI();
-          }, await this.activeAudio.play();
+          const t = await a.json();
+          if (!t.mocked && t.audio_url) {
+            const n = String(t.audio_url), s = /^(https?:|data:|blob:)/.test(n) ? n : `${this.apiBase}${n}`;
+            this.activeAudio = new Audio(s), this.activeAudio.onended = () => this.finishSpeaking(e), this.activeAudio.onerror = () => this.fallbackTTS(i, e), await this.activeAudio.play();
+            return;
+          }
         }
-      } catch {
-        this.isSpeaking = !1, e.isAudioPlaying = !1, this.renderMessages(), this.updateVoiceStatusUI();
+      } catch (a) {
+        console.warn("Server TTS unavailable; using browser speech fallback.", a);
       }
+      this.fallbackTTS(i, e);
     }
+  }
+  fallbackTTS(e, i) {
+    this.speakText(e, {
+      onStart: () => {
+        this.isSpeaking = !0, i.isAudioPlaying = !0, this.renderMessages(), this.updateVoiceStatusUI();
+      },
+      onEnd: () => this.finishSpeaking(i),
+      onError: () => this.finishSpeaking(i)
+    }) || this.finishSpeaking(i);
+  }
+  finishSpeaking(e) {
+    this.isSpeaking = !1, e.isAudioPlaying = !1, this.activeAudio = null, this.renderMessages(), this.updateVoiceStatusUI();
   }
   stopSpeaking() {
     "speechSynthesis" in window && window.speechSynthesis.cancel(), this.activeAudio && (this.activeAudio.pause(), this.activeAudio = null), this.isSpeaking = !1, this.messages.forEach((e) => e.isAudioPlaying = !1), this.renderMessages(), this.updateVoiceStatusUI();
@@ -2669,12 +2673,12 @@ ${c}
       o
     ))), n = t.length > 0 ? t : [e.text];
     let s = -1;
-    const r = n.map((o, c) => {
-      const b = o.replace(/[#*•_`]/g, " ").replace(/\s+/g, " ").trim().toLowerCase(), v = /^(this course|this lesson|summary of|የዚህ|ይህ ትምህርት|barnoonni|يشرح|ملخص)/i.test(b), L = b.slice(0, 35);
+    const r = n.map((o, d) => {
+      const b = o.replace(/[#*•_`]/g, " ").replace(/\s+/g, " ").trim().toLowerCase(), v = /^(this course|this lesson|summary of|የዚህ|ይህ ትምህርት|barnoonni|يشرح|ملخص)/i.test(b), T = b.slice(0, 35);
       let g = null, f = -1;
       for (let m = 0; m < a.length; m++) {
-        const x = a[m], T = (x.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
-        if ((L.length > 10 && T.includes(L) || b.length > 20 && T.includes(b.slice(10, 45)) || T.length > 15 && b.includes(T.slice(0, 35))) && (m > s || f === -1) && (g = x, f = m, m > s))
+        const x = a[m], L = (x.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+        if ((T.length > 10 && L.includes(T) || b.length > 20 && L.includes(b.slice(10, 45)) || L.length > 15 && b.includes(L.slice(0, 35))) && (m > s || f === -1) && (g = x, f = m, m > s))
           break;
       }
       if (!g)
@@ -2682,7 +2686,7 @@ ${c}
           g = a[0], f = 0;
         else {
           const m = s + 1;
-          m < a.length ? (g = a[m], f = m) : c < a.length && (g = a[c], f = c);
+          m < a.length ? (g = a[m], f = m) : d < a.length && (g = a[d], f = d);
         }
       return f !== -1 && (s = f), {
         text: o,
@@ -2731,8 +2735,8 @@ ${c}
         e.isAudioPlaying = !0, e.isAudioPaused = !1;
       }, n.onend = () => {
         t();
-      }, n.onerror = (c) => {
-        console.warn("TTS segment error:", c), t();
+      }, n.onerror = (d) => {
+        console.warn("TTS segment error:", d), t();
       };
       const r = a.split(/\s+/).filter(Boolean).length, o = Math.min(14e3, Math.max(3e3, Math.ceil(r / 2 * 1e3) + 1200));
       this.readingWatchdogTimer = setTimeout(() => {
@@ -2771,18 +2775,6 @@ ${c}
     this.handleStop(e), setTimeout(() => {
       this.startSequentialReading(e, 0);
     }, 120);
-  }
-  fallbackTTS(e, i) {
-    if (i)
-      this.startSequentialReading(i, 0);
-    else {
-      const a = {
-        id: `msg_tts_${Date.now()}`,
-        sender: "assistant",
-        text: e
-      };
-      this.startSequentialReading(a, 0);
-    }
   }
   // --- Page Navigation and Context Monitoring ---
   setupPageNavigationMonitor() {
@@ -2894,32 +2886,32 @@ ${c}
           channel: "web"
         })
       })), this.isThinking = !1, o.ok) {
-        const c = await o.json(), b = !!c.offer_human || c.reason === "low_confidence", v = {
+        const d = await o.json(), b = !!d.offer_human || d.reason === "low_confidence", v = {
           id: `msg_${Date.now()}_assistant`,
           sender: "assistant",
-          text: c.answer,
+          text: d.answer,
           heading: this.t("answerHeading"),
-          citations: c.citations || [],
-          offerHuman: c.offer_human,
+          citations: d.citations || [],
+          offerHuman: d.offer_human,
           isRefusal: b
         };
         this.messages.push(v), this.saveChatState(), this.renderMessages(), a ? setTimeout(() => {
           this.handleListen(v);
         }, 300) : (this.autoReadSpeech || this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_tts) && this.speakResponse(v);
       } else {
-        const c = {
+        const d = {
           id: `msg_${Date.now()}_err`,
           sender: "assistant",
           text: this.t("serverErrorNotice"),
           offerHuman: !0
         };
-        this.messages.push(c), this.renderMessages();
+        this.messages.push(d), this.renderMessages();
       }
     } catch {
       this.isThinking = !1;
       try {
-        const c = JSON.parse(localStorage.getItem("db_assistant_offline_queue") || "[]");
-        c.push({ question: t, language: this.currentLang, timestamp: Date.now() }), localStorage.setItem("db_assistant_offline_queue", JSON.stringify(c));
+        const d = JSON.parse(localStorage.getItem("db_assistant_offline_queue") || "[]");
+        d.push({ question: t, language: this.currentLang, timestamp: Date.now() }), localStorage.setItem("db_assistant_offline_queue", JSON.stringify(d));
       } catch {
       }
       const o = {
@@ -3004,7 +2996,7 @@ ${c}
       ${!this.isOpen && this.showAutoplayBanner ? `
         <div class="voice-activation-banner" role="alert" style="position:fixed; bottom:5.5rem; right:1.5rem; max-width:320px; z-index:99999; box-shadow:0 8px 24px rgba(0,0,0,0.18);">
           <div style="display:flex; align-items:center; gap:0.5rem;">
-            ${d.sound}
+            ${c.sound}
             <span>${this.t("voiceActivationPrompt")}</span>
           </div>
           <div style="display:flex; align-items:center; gap:0.375rem; margin-top:0.375rem;">
@@ -3012,7 +3004,7 @@ ${c}
               ${this.t("voiceActivationBtn")}
             </button>
             <button type="button" class="btn btn-secondary btn-icon-only" id="btn-dismiss-voice-banner-floating" style="min-height:1.75rem; width:1.75rem; padding:0;" aria-label="Dismiss">
-              ${d.close}
+              ${c.close}
             </button>
           </div>
         </div>
@@ -3068,15 +3060,15 @@ ${c}
         <!-- Navigation Tabs on Main Assistant Dialog -->
         <nav class="nav-tabs" role="tablist" aria-label="Assistant sections">
           <button type="button" class="tab-btn" id="tab-chat" role="tab" aria-selected="${this.activeTab === "chat"}" aria-controls="pane-chat">
-            ${d.launcher}
+            ${c.launcher}
             <span>${this.t("chatTab")}</span>
           </button>
           <button type="button" class="tab-btn" id="tab-support" role="tab" aria-selected="${this.activeTab === "support"}" aria-controls="pane-support">
-            ${d.heart}
+            ${c.heart}
             <span>${this.t("supportTab")}</span>
           </button>
           <button type="button" class="tab-btn" id="tab-handoff" role="tab" aria-selected="${this.activeTab === "handoff"}" aria-controls="pane-handoff">
-            ${d.headphones}
+            ${c.headphones}
             <span>${this.t("handoffTab")}</span>
           </button>
         </nav>
@@ -3089,7 +3081,7 @@ ${c}
           ${this.showAutoplayBanner ? `
             <div class="voice-activation-banner" role="alert" style="margin:0.5rem 1rem; padding:0.625rem 0.875rem; background:#eff6ff; border:1px solid #bfdbfe; border-radius:0.5rem; display:flex; align-items:center; justify-content:space-between; gap:0.5rem; font-size:0.8125rem; color:#1e40af;">
               <div style="display:flex; align-items:center; gap:0.5rem;">
-                ${d.sound}
+                ${c.sound}
                 <span>${this.t("voiceActivationPrompt")}</span>
               </div>
               <div style="display:flex; align-items:center; gap:0.375rem;">
@@ -3097,7 +3089,7 @@ ${c}
                   ${this.t("voiceActivationBtn")}
                 </button>
                 <button type="button" class="btn btn-secondary btn-icon-only" id="btn-dismiss-voice-banner" style="min-height:1.75rem; width:1.75rem; padding:0;" aria-label="Dismiss">
-                  ${d.close}
+                  ${c.close}
                 </button>
               </div>
             </div>
@@ -3112,9 +3104,9 @@ ${c}
                 </span>
               </div>
               <div class="reading-btns">
-                ${this.isReadingPaused ? `<button type="button" class="btn btn-secondary btn-icon-only" id="btn-reading-resume" aria-label="${this.t("resumeReading")}" title="${this.t("resumeReading")}">${d.play}</button>` : `<button type="button" class="btn btn-secondary btn-icon-only" id="btn-reading-pause" aria-label="${this.t("pauseReading")}" title="${this.t("pauseReading")}">${d.pause}</button>`}
+                ${this.isReadingPaused ? `<button type="button" class="btn btn-secondary btn-icon-only" id="btn-reading-resume" aria-label="${this.t("resumeReading")}" title="${this.t("resumeReading")}">${c.play}</button>` : `<button type="button" class="btn btn-secondary btn-icon-only" id="btn-reading-pause" aria-label="${this.t("pauseReading")}" title="${this.t("pauseReading")}">${c.pause}</button>`}
                 <button type="button" class="btn btn-danger btn-icon-only" id="btn-reading-stop" aria-label="${this.t("stopReading")}" title="${this.t("stopReading")}" style="background:#fee2e2; color:#991b1b; border:1px solid #fca5a5;">
-                  ${d.stop}
+                  ${c.stop}
                 </button>
               </div>
             </div>
@@ -3136,18 +3128,18 @@ ${c}
                      required autocomplete="off">
               <button type="button" class="btn btn-secondary mic-btn btn-icon-only" id="mic-btn" 
                       aria-label="${this.t("micLabel")}" title="${this.t("micLabel")}">
-                ${d.mic}
+                ${c.mic}
               </button>
               <button type="submit" class="btn btn-primary" id="btn-send" data-id="btn-send" style="display:inline-flex; align-items:center; gap:0.375rem;">
                 <span>${this.t("sendButton")}</span>
-                ${d.send}
+                ${c.send}
               </button>
             </form>
 
             <!-- Bottom Row: Talk to a person & Continue on Telegram -->
             <div class="footer-actions-row">
               <button type="button" class="btn btn-secondary btn-footer btn-talk-person" id="btn-footer-handoff" style="display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-                ${d.user}
+                ${c.user}
                 <span>${this.t("talkToPersonButton")}</span>
               </button>
               <div id="telegram-container" class="telegram-section">
@@ -3164,7 +3156,7 @@ ${c}
         <!-- Pane 2: Support Preferences (Zero Proof Required) -->
         <div id="pane-support" class="tab-panel" role="tabpanel" ${this.activeTab === "support" ? "" : "hidden"} style="${this.activeTab === "support" ? "display:block; overflow-y:auto; padding:1rem;" : "display:none;"}">
           <div class="settings-card">
-            <div class="settings-card-title">${d.heart} <span>${this.t("supportNeedsTitle")}</span></div>
+            <div class="settings-card-title">${c.heart} <span>${this.t("supportNeedsTitle")}</span></div>
             <div class="settings-card-desc">
               ${this.t("supportZeroProof")}
             </div>
@@ -3216,7 +3208,7 @@ ${c}
               </label>
 
               <div id="support-saved-notice" class="support-saved-notice" hidden style="color:#166534; font-size:0.8125rem; font-weight:600; display:inline-flex; align-items:center; gap:0.375rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:0.5rem; padding:0.5rem 0.75rem;">
-                ${d.check} <span>${this.t("supportSavedNotice")}</span>
+                ${c.check} <span>${this.t("supportSavedNotice")}</span>
               </div>
 
               <button type="submit" class="btn btn-primary" style="margin-top:0.25rem;">
@@ -3229,7 +3221,7 @@ ${c}
         <!-- Pane 3: Consented Live Help Handoff -->
         <div id="pane-handoff" class="tab-panel" role="tabpanel" ${this.activeTab === "handoff" ? "" : "hidden"} style="${this.activeTab === "handoff" ? "display:block; overflow-y:auto; padding:1rem;" : "display:none;"}">
           <div class="settings-card">
-            <div class="settings-card-title">${d.headphones} <span>${this.t("handoffTab")}</span></div>
+            <div class="settings-card-title">${c.headphones} <span>${this.t("handoffTab")}</span></div>
             <div class="settings-card-desc">
               ${this.t("appSubtitle")}
             </div>
@@ -3246,7 +3238,7 @@ ${c}
                        placeholder="${this.t("handoffReasonPlaceholder")}">
               </label>
               <button type="submit" class="btn btn-primary" id="btn-submit-handoff" style="display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-                ${d.users} <span>${this.t("requestMentorBtn")}</span>
+                ${c.users} <span>${this.t("requestMentorBtn")}</span>
               </button>
             </form>
             <div id="handoff-room-box" style="margin-top:0.5rem;"></div>
@@ -3266,7 +3258,7 @@ ${c}
           <div id="pane-general" class="settings-pane" style="overflow-y:auto; flex:1; padding:0.5rem 0;">
             <!-- Text Size Card -->
             <div class="settings-card">
-              <div class="settings-card-title">${d.type} <span>${this.t("textSizeLabel")}</span></div>
+              <div class="settings-card-title">${c.type} <span>${this.t("textSizeLabel")}</span></div>
               <div class="size-btn-group">
                 <button type="button" class="size-btn" id="btn-size-smaller" aria-pressed="${this.textSize === "smaller"}" aria-label="A- Smaller text">
                   A- <span>${this.t("textSmaller")}</span>
@@ -3282,7 +3274,7 @@ ${c}
 
             <!-- Accessibility Card -->
             <div class="settings-card">
-              <div class="settings-card-title">${d.contrast} <span>Display & Accessibility</span></div>
+              <div class="settings-card-title">${c.contrast} <span>Display & Accessibility</span></div>
               
               <!-- High Contrast -->
               <label class="toggle-row">
@@ -3316,7 +3308,7 @@ ${c}
 
             <!-- Voice Accessibility & Screen Reader Suite -->
             <div class="settings-card">
-              <div class="settings-card-title">${d.sound} <span>${this.t("voicePrefsTitle")}</span></div>
+              <div class="settings-card-title">${c.sound} <span>${this.t("voicePrefsTitle")}</span></div>
 
               <!-- Master Voice Toggle -->
               <label class="toggle-row">
@@ -3366,14 +3358,14 @@ ${c}
               <div style="display:flex; flex-direction:column; gap:0.375rem; margin-top:0.25rem;">
                 <div style="display:flex; gap:0.375rem; flex-wrap:wrap;">
                   <button type="button" class="btn btn-secondary" id="btn-read-page" style="flex:1; min-height:2.25rem; font-size:0.8125rem; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-                    ${d.sound} <span>${this.t("readPageBtn")}</span>
+                    ${c.sound} <span>${this.t("readPageBtn")}</span>
                   </button>
                   <button type="button" class="btn btn-secondary" id="btn-read-section" style="flex:1; min-height:2.25rem; font-size:0.8125rem; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-                    ${d.sound} <span>${this.t("readSectionBtn")}</span>
+                    ${c.sound} <span>${this.t("readSectionBtn")}</span>
                   </button>
                 </div>
                 <button type="button" class="btn btn-secondary" id="btn-test-voice" style="min-height:2rem; font-size:0.75rem; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-                  ${d.play} <span>${this.t("testVoiceBtn")}</span>
+                  ${c.play} <span>${this.t("testVoiceBtn")}</span>
                 </button>
               </div>
 
@@ -3409,13 +3401,13 @@ ${c}
               <!-- Replay Onboarding Wizard -->
               <div style="border-top:1px solid var(--b-border); margin:0.5rem 0;"></div>
               <button type="button" class="btn btn-secondary" id="btn-replay-onboarding" style="width:100%; min-height:2.25rem; font-size:0.8125rem; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-                ${d.sparkles} <span>${this.t("replayOnboardBtn")}</span>
+                ${c.sparkles} <span>${this.t("replayOnboardBtn")}</span>
               </button>
             </div>
 
             <!-- Account & Telegram Linking Card -->
             <div class="settings-card" id="card-account-linking">
-              <div class="settings-card-title">${d.link} <span>${this.t("linkTab")}</span></div>
+              <div class="settings-card-title">${c.link} <span>${this.t("linkTab")}</span></div>
               <div class="settings-card-desc">
                 ${this.t("supportZeroProof")}
               </div>
@@ -3451,7 +3443,7 @@ ${c}
                 <!-- Generate Code for Telegram -->
                 <div>
                   <button type="button" class="btn btn-secondary" id="btn-generate-code" style="width:100%; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-                    ${d.link} <span>${this.t("generateCodeBtn")}</span>
+                    ${c.link} <span>${this.t("generateCodeBtn")}</span>
                   </button>
                   <div class="code-display" id="code-display" style="display:none; font-size:1.5rem; font-weight:700; letter-spacing:0.25em; text-align:center; padding:0.75rem; background:var(--b-surface-alt, #f8fafc); border:2px dashed var(--b-primary); border-radius:0.5rem; margin-top:0.625rem; color:var(--b-primary);">
                   </div>
@@ -3470,7 +3462,7 @@ ${c}
                   <div style="font-size:0.75rem; color:#7f1d1d;">Reset conversation and erase stored history</div>
                 </div>
                 <button type="button" class="btn btn-danger" id="btn-clear-chat" style="font-size:0.8125rem; min-height:2.25rem; padding:0.375rem 0.75rem;">
-                  ${d.trash} <span>${this.t("clearChatBtn")}</span>
+                  ${c.trash} <span>${this.t("clearChatBtn")}</span>
                 </button>
               </div>
             </div>
@@ -3487,10 +3479,10 @@ ${c}
       <div class="onboarding-card" id="onboarding-card" role="region" aria-label="${this.t("onboardTitle")}" style="margin:0 0 1rem 0; padding:1rem; background:var(--b-surface); border:2px solid var(--b-primary); border-radius:0.75rem;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
           <h3 id="onboard-title" style="margin:0; font-size:1rem; font-weight:700; color:var(--b-text); display:flex; align-items:center; gap:0.5rem;">
-            ${d.sparkles} <span>${this.t("onboardTitle")}</span>
+            ${c.sparkles} <span>${this.t("onboardTitle")}</span>
           </h3>
           <button type="button" class="btn btn-secondary btn-icon-only" id="btn-onboard-close" aria-label="${this.t("onboardSkipBtn")}" title="${this.t("onboardSkipBtn")}" style="min-height:2rem; width:2rem; padding:0;">
-            ${d.close}
+            ${c.close}
           </button>
         </div>
         
@@ -3576,22 +3568,22 @@ ${c}
         ${a}
         <div class="empty-state">
           <div class="page-context-pill">
-            ${d.book} <span>${this.t("pageContextBadge")} <strong>${this.escapeHtml(t)}</strong></span>
+            ${c.book} <span>${this.t("pageContextBadge")} <strong>${this.escapeHtml(t)}</strong></span>
           </div>
           <p style="margin:0 0 0.5rem 0; font-size:1rem; font-weight:600;">${this.t("emptyWelcome")}</p>
           <div class="suggested-questions">
             <span style="font-size:0.8125rem; font-weight:700; color:var(--b-text-muted);">${this.t("suggestedTitle")}</span>
             <button type="button" class="btn btn-suggested btn-quick-explain" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
-              ${d.lightbulb} <span>${this.escapeHtml(this.t("explainLessonBtn"))}</span>
+              ${c.lightbulb} <span>${this.escapeHtml(this.t("explainLessonBtn"))}</span>
             </button>
             <button type="button" class="btn btn-suggested btn-quick-summarize" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
-              ${d.book} <span>${this.escapeHtml(this.t("summarizePageBtn"))}</span>
+              ${c.book} <span>${this.escapeHtml(this.t("summarizePageBtn"))}</span>
             </button>
             <button type="button" class="btn btn-suggested btn-quick-read" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
-              ${d.listen} <span>${this.escapeHtml(this.t("readPageBtn"))}</span>
+              ${c.listen} <span>${this.escapeHtml(this.t("readPageBtn"))}</span>
             </button>
             <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ1"))}" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
-              ${d.arrowRight} <span>${this.escapeHtml(this.t("suggestedQ1"))}</span>
+              ${c.arrowRight} <span>${this.escapeHtml(this.t("suggestedQ1"))}</span>
             </button>
           </div>
         </div>
@@ -3622,15 +3614,15 @@ ${c}
           const m = (g.title || g.heading || "").replace(/\s*\|\s*.*$/, "").replace(/^Concept page:\s*/i, "").trim();
           m && !s.has(m) && (s.add(m), n.push({ ...g, title: m }));
         }
-      const r = n.length > 0, o = !!t.isRefusal, c = t.heading || (t.isHandoff ? this.t("handoffReadyTitle") : this.t("answerHeading")), b = !!(this.currentReading && this.currentReading.msgId === t.id), L = t.text.split(/\n\s*\n/).map((g) => g.trim()).filter(Boolean).map((g, f) => `<div class="answer-para-item ${b && this.currentReading.currentIndex === f ? "active-reading-para" : ""}" data-msg-id="${t.id}" data-idx="${f}" title="Click to read and highlight this paragraph" style="cursor:pointer; margin-bottom:0.625rem; line-height:1.5;">${this.escapeHtml(g)}</div>`).join("");
+      const r = n.length > 0, o = !!t.isRefusal, d = t.heading || (t.isHandoff ? this.t("handoffReadyTitle") : this.t("answerHeading")), b = !!(this.currentReading && this.currentReading.msgId === t.id), T = t.text.split(/\n\s*\n/).map((g) => g.trim()).filter(Boolean).map((g, f) => `<div class="answer-para-item ${b && this.currentReading.currentIndex === f ? "active-reading-para" : ""}" data-msg-id="${t.id}" data-idx="${f}" title="Click to read and highlight this paragraph" style="cursor:pointer; margin-bottom:0.625rem; line-height:1.5;">${this.escapeHtml(g)}</div>`).join("");
       return `
           <div class="msg-row msg-assistant" id="${t.id}">
-            <h4 class="answer-heading">${this.escapeHtml(c)}</h4>
-            <div class="answer-text">${L}</div>
+            <h4 class="answer-heading">${this.escapeHtml(d)}</h4>
+            <div class="answer-text">${T}</div>
 
             ${b ? `
                 <div class="reading-nav-bar" style="display:flex; align-items:center; justify-content:space-between; margin:0.5rem 0; padding:0.375rem 0.625rem; background:#fef9c3; border:1px solid #facc15; border-radius:0.375rem; font-size:0.8125rem;">
-                  <span style="font-weight:600; color:#854d0e;">📖 Reading Paragraph ${this.currentReading.currentIndex + 1} of ${this.currentReading.items.length}</span>
+                  <span style="font-weight:600; color:#854d0e; display:inline-flex; align-items:center; gap:0.375rem;">${c.book} <span>Reading Paragraph ${this.currentReading.currentIndex + 1} of ${this.currentReading.items.length}</span></span>
                   <div style="display:flex; gap:0.25rem;">
                     <button type="button" class="btn btn-secondary btn-prev-para" data-msg-id="${t.id}" style="padding:0.125rem 0.5rem; font-size:0.75rem;" ${this.currentReading.currentIndex === 0 ? "disabled" : ""}>⏮ Prev</button>
                     <button type="button" class="btn btn-secondary btn-next-para" data-msg-id="${t.id}" style="padding:0.125rem 0.5rem; font-size:0.75rem;" ${this.currentReading.currentIndex >= this.currentReading.items.length - 1 ? "disabled" : ""}>Next ⏭</button>
@@ -3643,7 +3635,7 @@ ${c}
                   <div>${this.t("notVerifiedNotice")}</div>
                   <div style="display:flex; gap:0.375rem; flex-wrap:wrap;">
                     <button type="button" class="btn btn-primary btn-talk-person" data-msg-id="${t.id}" style="font-size:0.8125rem; min-height:2.25rem;">
-                      👤 ${this.t("talkToPersonButton")}
+                      ${c.user} <span>${this.t("talkToPersonButton")}</span>
                     </button>
                     <button type="button" class="btn btn-secondary btn-try-another" style="font-size:0.8125rem; min-height:2.25rem;">
                       ${this.t("tryAnotherQuestion")}
@@ -3655,21 +3647,21 @@ ${c}
             <!-- Listen, Stop, Replay & Make Simpler action buttons -->
             <div class="answer-actions">
               <button type="button" class="btn btn-secondary btn-listen" data-msg-id="${t.id}">
-                ${t.isAudioPlaying ? `⏸️ ${this.t("pauseButton")}` : `🔊 ${this.t("listenButton")}`}
+                ${t.isAudioPlaying ? `${c.pause} <span>${this.t("pauseButton")}</span>` : `${c.sound} <span>${this.t("listenButton")}</span>`}
               </button>
               <button type="button" class="btn btn-secondary btn-stop" data-msg-id="${t.id}" style="display:inline-flex; align-items:center; gap:0.375rem;" ${t.isAudioPlaying || t.isAudioPaused ? "" : "hidden"}>
-                ${d.stop}
+                ${c.stop}
                 <span>${this.t("stopButton")}</span>
               </button>
               <button type="button" class="btn btn-secondary btn-replay" data-msg-id="${t.id}" style="display:inline-flex; align-items:center; gap:0.375rem;">
-                ${d.replay}
+                ${c.replay}
                 <span>${this.t("replayButton")}</span>
               </button>
               <button type="button" class="btn btn-secondary btn-simpler" data-msg-id="${t.id}" style="display:inline-flex; align-items:center; gap:0.375rem;">
-                ${d.lightbulb}
+                ${c.lightbulb}
                 <span>${this.t("makeSimplerButton")}</span>
               </button>
-              ${t.isAudioPlaying ? `<span class="speaking-indicator-pill" role="status" aria-live="polite">${d.volume} <span>${this.t("speakingIndicator")}</span></span>` : ""}
+              ${t.isAudioPlaying ? `<span class="speaking-indicator-pill" role="status" aria-live="polite">${c.volume} <span>${this.t("speakingIndicator")}</span></span>` : ""}
             </div>
 
             <!-- Citations / Sources with readable names -->
@@ -3679,7 +3671,7 @@ ${c}
                   ${n.map(
         (g) => `
                     <a href="${this.escapeHtml(g.url)}" target="_blank" rel="noopener noreferrer" class="source-link citation-link" style="display:inline-flex; align-items:center; gap:0.375rem;">
-                      ${d.book} <span>${this.escapeHtml(g.title || g.heading)}</span>
+                      ${c.book} <span>${this.escapeHtml(g.title || g.heading)}</span>
                     </a>
                   `
       ).join("")}
@@ -3713,7 +3705,7 @@ ${c}
         </div>
       `), this.isRecording && (e.innerHTML += `
         <div class="live-status-indicator" style="display:inline-flex; align-items:center; gap:0.375rem;">
-          <span class="listening-indicator-pill">${d.mic} <span>${this.t("listeningIndicator")}</span></span>
+          <span class="listening-indicator-pill">${c.mic} <span>${this.t("listeningIndicator")}</span></span>
         </div>
       `), e.querySelectorAll(".answer-para-item").forEach((t) => {
       t.addEventListener("click", () => {
@@ -3841,9 +3833,9 @@ ${c}
     o && o.addEventListener("change", () => {
       this.highContrast = o.checked, localStorage.setItem("savanna_bridge_contrast", this.highContrast ? "high" : "normal"), this.render();
     });
-    const c = this.shadowRoot.querySelector("#chk-simple-mode");
-    c && c.addEventListener("change", () => {
-      this.simpleMode = c.checked;
+    const d = this.shadowRoot.querySelector("#chk-simple-mode");
+    d && d.addEventListener("change", () => {
+      this.simpleMode = d.checked;
     });
     const b = this.shadowRoot.querySelector("#chk-auto-read");
     b && b.addEventListener("change", () => {
@@ -3861,8 +3853,8 @@ ${c}
         this.wakeWordRecognition = null;
       }
     });
-    const L = this.shadowRoot.querySelector("#settings-code-form");
-    L && L.addEventListener("submit", (h) => {
+    const T = this.shadowRoot.querySelector("#settings-code-form");
+    T && T.addEventListener("submit", (h) => {
       h.preventDefault();
       const u = this.shadowRoot?.querySelector("#settings-input-code"), p = this.shadowRoot?.querySelector("#settings-code-msg");
       u && u.value && this.confirmLinkCode(u.value, p);
@@ -3885,18 +3877,18 @@ ${c}
       const u = new FormData(f), p = u.getAll("need"), y = u.get("other_text") || "", S = u.get("contact_mode") || "text";
       this.saveSupportNeeds(p, y, S);
     });
-    const m = this.shadowRoot.querySelector("#chat-form"), x = this.shadowRoot.querySelector("#chat-input"), T = this.shadowRoot.querySelector("#mic-btn");
+    const m = this.shadowRoot.querySelector("#chat-form"), x = this.shadowRoot.querySelector("#chat-input"), L = this.shadowRoot.querySelector("#mic-btn");
     m && x && m.addEventListener("submit", (h) => {
       h.preventDefault();
       const u = x.value;
       x.value = "", this.askQuestion(u);
-    }), T && x && T.addEventListener("click", () => {
+    }), L && x && L.addEventListener("click", () => {
       this.toggleVoiceInput(x);
     });
-    const q = () => {
+    const E = () => {
       this.showAutoplayBanner = !1, this.accessibilityPrefs.voice_enabled = !0, this.savePreferences(), this.announce(this.t("welcomeSpoken")), this.triggerSpokenWelcome(), this.render();
     };
-    this.shadowRoot.querySelector("#btn-activate-voice-welcome")?.addEventListener("click", q), this.shadowRoot.querySelector("#btn-activate-voice-welcome-floating")?.addEventListener("click", q);
+    this.shadowRoot.querySelector("#btn-activate-voice-welcome")?.addEventListener("click", E), this.shadowRoot.querySelector("#btn-activate-voice-welcome-floating")?.addEventListener("click", E);
     const I = () => {
       this.showAutoplayBanner = !1, this.render();
     };
@@ -3921,9 +3913,9 @@ ${c}
     B && B.addEventListener("change", () => {
       this.accessibilityPrefs.auto_welcome = B.checked, this.savePreferences();
     });
-    const E = this.shadowRoot.querySelector("#chk-auto-tts");
-    E && E.addEventListener("change", () => {
-      this.accessibilityPrefs.auto_tts = E.checked, this.savePreferences();
+    const q = this.shadowRoot.querySelector("#chk-auto-tts");
+    q && q.addEventListener("change", () => {
+      this.accessibilityPrefs.auto_tts = q.checked, this.savePreferences();
     });
     const M = [
       { id: "#btn-rate-075", rate: 0.75 },
@@ -3964,6 +3956,6 @@ customElements.get("bridge-assistant") || customElements.define("bridge-assistan
 customElements.get("db-assistant") || customElements.define("db-assistant", N);
 export {
   N as BridgeAssistant,
-  d as ICONS
+  c as ICONS
 };
 //# sourceMappingURL=widget.js.map

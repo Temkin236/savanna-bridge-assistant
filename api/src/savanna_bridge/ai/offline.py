@@ -22,6 +22,8 @@ class OfflineFaqProvider(AIProvider):
 
     def detect_language(self, text: str) -> Language:
         clean = text.strip()
+        if re.search(r"[\u0600-\u06ff]", clean):
+            return Language.AR
         # Ethiopic script check
         if re.search(r"[\u1200-\u137F]", clean):
             # Check for Tigrinya specific letters / vocabulary
@@ -104,8 +106,13 @@ class OfflineFaqProvider(AIProvider):
                 clean_heading = re.sub(r"[#*`_]+", "", c.heading or "").strip()
                 clean_heading = re.sub(r"\s+", " ", clean_heading).strip()
 
-                lines = [re.sub(r"^[#*•\-_>\s]+", "", line).strip() for line in (c.text or "").split("\n")]
-                clean_text = " ".join([line for line in lines if line and not line.startswith("http")])
+                lines = [
+                    re.sub(r"^[#*•\-_>\s]+", "", line).strip()
+                    for line in (c.text or "").split("\n")
+                ]
+                clean_text = " ".join(
+                    line for line in lines if line and not line.startswith("http")
+                )
                 clean_text = re.sub(r"\s+", " ", clean_text).strip()
 
                 sentences = [

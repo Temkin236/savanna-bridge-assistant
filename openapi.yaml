@@ -69,6 +69,46 @@ paths:
         "429":
           $ref: "#/components/responses/RateLimited"
 
+  /translate:
+    post:
+      tags: [Tutor]
+      operationId: translateText
+      summary: Translate text with explicit provider and fallback status
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TranslateRequest"
+      responses:
+        "200":
+          description: Translation result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TranslateResponse"
+
+  /api/v1/translate:
+    post:
+      tags: [Tutor]
+      operationId: translateTextV1
+      summary: Versioned text translation endpoint
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TranslateRequest"
+      responses:
+        "200":
+          description: Translation result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TranslateResponse"
+
   /link/start:
     post:
       tags: [Linking]
@@ -688,49 +728,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/SynthesisResult"
 
-  /api/v1/translate:
-    post:
-      tags: [Translation]
-      operationId: translateTextV1
-      summary: Translate text using Addis AI for local languages and Gemini for English and Arabic
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [text]
-              properties:
-                text:
-                  type: string
-                  example: "Hello world"
-                source_language:
-                  type: string
-                  example: "en"
-                target_language:
-                  type: string
-                  example: "am"
-      responses:
-        "200":
-          description: Translated text result
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  translated_text:
-                    type: string
-                    example: "ሰላም ዓለም"
-                  source_language:
-                    type: string
-                    example: "en"
-                  target_language:
-                    type: string
-                    example: "am"
-                  provider:
-                    type: string
-                    example: "addis"
-
   /teacher/stats:
     get:
       tags: [Teacher]
@@ -1103,6 +1100,46 @@ components:
         confidence: 0.88
         provider: offline
         mocked: true
+
+    TranslateRequest:
+      type: object
+      required: [text, source_language, target_language]
+      properties:
+        text:
+          type: string
+          minLength: 1
+          maxLength: 5000
+        source_language:
+          $ref: "#/components/schemas/Language"
+        target_language:
+          $ref: "#/components/schemas/Language"
+      example:
+        text: Welcome to Savanna Bridge
+        source_language: en
+        target_language: ar
+
+    TranslateResponse:
+      type: object
+      required: [translated_text, translation, source_language, target_language, provider, mocked]
+      properties:
+        translated_text:
+          type: string
+        translation:
+          type: string
+        source_language:
+          $ref: "#/components/schemas/Language"
+        target_language:
+          $ref: "#/components/schemas/Language"
+        provider:
+          type: string
+        mocked:
+          type: boolean
+      example:
+        translation: مرحباً بكم في سافانا بريدج
+        source_language: en
+        target_language: ar
+        provider: auto/google
+        mocked: false
 
     LinkStartRequest:
       type: object

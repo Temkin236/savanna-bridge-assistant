@@ -219,4 +219,3 @@ def test_accessibility_profile_crud_and_sync() -> None:
     assert synced["large_text"] == "larger"
     assert synced["auto_welcome"] is True
     assert synced["auto_tts"] is True
-

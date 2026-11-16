@@ -346,4 +346,3 @@ class LanguageGuard:
 
         # Return original text when translation is unchanged or provider is idle
         return text
-

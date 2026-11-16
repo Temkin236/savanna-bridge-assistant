@@ -964,19 +964,25 @@ def translate_text(payload: TranslationRequest) -> TranslationResponse:
 
     local_langs = {"am", "om", "ti", "so"}
     if src in local_langs or tgt in local_langs:
-        provider_name = "addis"
-    elif src in ("en", "ar") and tgt in ("en", "ar"):
-        provider_name = "gemini"
-    else:
-        provider_name = "gemini"
+        from savanna_bridge.ai.addis import AddisAiProvider
 
-    translated = LanguageGuard.translate(payload.text, src, tgt)
+        provider_name = "addis"
+        provider = AddisAiProvider()
+    else:
+        from savanna_bridge.ai.cloud import CloudProvider
+
+        provider_name = "gemini"
+        provider = CloudProvider()
+
+    translated = provider.translate(payload.text, src, tgt)
 
     return TranslationResponse(
         translated_text=translated,
+        translation=translated,
         source_language=src,
         target_language=tgt,
         provider=provider_name,
+        mocked=provider.is_mocked,
     )
 
 

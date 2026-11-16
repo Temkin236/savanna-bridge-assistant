@@ -55,6 +55,20 @@ class Answer(BaseModel):
     mocked: bool | None = None
 
 
+class TranslateRequest(BaseModel):
+    text: str = Field(..., min_length=1, max_length=5000)
+    source_language: Language
+    target_language: Language
+
+
+class TranslateResponse(BaseModel):
+    translation: str
+    source_language: Language
+    target_language: Language
+    provider: str
+    mocked: bool
+
+
 class LinkStartRequest(BaseModel):
     session_id: str = "web_session"
     channel: Literal["web", "telegram"] = "telegram"
@@ -349,7 +363,8 @@ class TranslationRequest(BaseModel):
 
 class TranslationResponse(BaseModel):
     translated_text: str
+    translation: str
     source_language: str
     target_language: str
     provider: str
-
+    mocked: bool
