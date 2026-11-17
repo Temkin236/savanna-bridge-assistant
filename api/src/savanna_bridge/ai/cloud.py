@@ -23,19 +23,23 @@ class CloudProvider(AIProvider):
 
     def __init__(self) -> None:
         self._offline_fallback = OfflineFaqProvider()
-        shared_key = os.getenv("GOOGLE_API_KEY", "")
-        self.api_key = (
+        google_key = (
             os.getenv("GOOGLE_AI_API_KEY")
-            or os.getenv("CLOUD_AI_API_KEY")
-            or os.getenv("CLOUD_API_KEY")
+            or os.getenv("GOOGLE_API_KEY")
             or os.getenv("GOOGLE_AI_API")
-            or shared_key
+            or ""
         )
+        cloud_key = os.getenv("CLOUD_AI_API_KEY") or os.getenv("CLOUD_API_KEY") or ""
+        # Avoid treating Addis AI keys (which start with 'AQ.') as Google Gemini keys
+        if cloud_key.startswith("AQ."):
+            cloud_key = ""
+        self.api_key = google_key or cloud_key
+        shared_key = self.api_key
         self.translate_key = os.getenv("GOOGLE_TRANSLATE_API_KEY") or shared_key
         self.speech_key = os.getenv("GOOGLE_SPEECH_API_KEY") or shared_key
         self.model = os.getenv("CLOUD_MODEL", "gemini-2.5-flash")
-        self.tts_model = os.getenv("GOOGLE_TTS_MODEL", "gemini-3.8-flash-tts")
-        self.tts_voice = os.getenv("GOOGLE_TTS_VOICE", "Kore")
+        self.tts_model = os.getenv("GOOGLE_TTS_MODEL", "gemini-2.0-flash")
+        self.tts_voice = os.getenv("GOOGLE_TTS_VOICE", "Aoede")
         self._last_call_mocked = not bool(
             self.api_key or self.translate_key or self.speech_key
         )
@@ -363,7 +367,7 @@ Learner Question:
             headers={"Content-Type": "application/json"},
             method="POST",
         )
-        with urllib.request.urlopen(request, timeout=20) as response:
+        with urllib.request.urlopen(request, timeout=8) as response:
             value = json.loads(response.read().decode("utf-8"))
             return value if isinstance(value, dict) else {}
 

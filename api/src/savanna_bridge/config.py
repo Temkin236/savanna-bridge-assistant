@@ -31,6 +31,10 @@ GROQ_TTS_MODEL_AR: str = os.getenv(
     "GROQ_TTS_MODEL_AR", "canopylabs/orpheus-arabic-saudi"
 )
 
+# Gemini and Google Cloud TTS settings
+GOOGLE_TTS_MODEL: str = os.getenv("GOOGLE_TTS_MODEL", "gemini-2.0-flash")
+GOOGLE_TTS_VOICE: str = os.getenv("GOOGLE_TTS_VOICE", "Aoede")
+
 # Database
 DB_PATH: str = os.getenv("DB_PATH", DEFAULT_DB_PATH)
 

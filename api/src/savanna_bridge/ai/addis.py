@@ -102,7 +102,19 @@ class AddisAiProvider(AIProvider):
         if direct:
             return direct
 
-        # Fallback to Google Gemini if Addis AI is unavailable or fails
+        # Fallback to Groq or Google Gemini if Addis AI is unavailable or fails
+        try:
+            from savanna_bridge.ai.groq import GroqProvider
+
+            groq = GroqProvider()
+            if not groq.is_mocked:
+                groq_trans = groq.translate(text, src, tgt)
+                if groq_trans and not groq.is_mocked:
+                    self._last_call_mocked = False
+                    return groq_trans
+        except Exception as exc:
+            logger.warning("Groq fallback translation error in Addis: %s", exc)
+
         try:
             from savanna_bridge.ai.cloud import CloudProvider
 
@@ -163,7 +175,21 @@ class AddisAiProvider(AIProvider):
                     "AddisAI chat call failed: %s. Falling back to Gemini / offline FAQ.", e
                 )
 
-        # Fallback to Google Gemini if Addis AI is unavailable or fails
+        # Fallback to Groq or Google Gemini if Addis AI is unavailable or fails
+        try:
+            from savanna_bridge.ai.groq import GroqProvider
+
+            groq = GroqProvider()
+            if not groq.is_mocked:
+                groq_ans = groq.generate_answer(
+                    question, context_chunks, language, simple_mode
+                )
+                if groq_ans and not groq.is_mocked:
+                    self._last_call_mocked = False
+                    return groq_ans
+        except Exception as exc:
+            logger.warning("Groq fallback answer error in Addis: %s", exc)
+
         try:
             from savanna_bridge.ai.cloud import CloudProvider
 

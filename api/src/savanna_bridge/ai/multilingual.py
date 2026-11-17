@@ -35,10 +35,10 @@ class MultilingualProvider(AIProvider):
             # Groq STT is multilingual, but its documented TTS voices are EN/AR.
             if capability == "synthesize":
                 return [self.addis, self.google]
-            return [self.addis, self.groq, self.google]
+            return [self.groq, self.addis, self.google]
         if language == Language.AR:
-            return [self.google, self.groq]
-        return [self.google, self.groq]
+            return [self.groq, self.google]
+        return [self.groq, self.google]
 
     def _run_chain(self, providers: list[AIProvider], operation: str, *args: object) -> str:
         """Use the first real result; retain the primary provider's labelled fallback."""
@@ -65,9 +65,9 @@ class MultilingualProvider(AIProvider):
     def translate(self, text: str, source_lang: str, target_lang: str) -> str:
         target = Language(target_lang) if target_lang in {item.value for item in Language} else Language.EN
         if {source_lang, target_lang} & {"am", "om", "ti"}:
-            providers = [self.addis, self.groq, self.google]
+            providers = [self.groq, self.addis, self.google]
         elif "ar" in (source_lang, target_lang):
-            providers = [self.google, self.groq]
+            providers = [self.groq, self.google]
         else:
             providers = self._providers_for_language(target, "translate")
         return self._run_chain(providers, "translate", text, source_lang, target_lang)
