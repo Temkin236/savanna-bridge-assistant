@@ -1262,8 +1262,10 @@ components:
           type: boolean
           example: false
         channel:
-          type: [string, "null"]
-          enum: [telegram, null]
+          anyOf:
+            - type: string
+              enum: [telegram]
+            - type: "null"
           example: null
       example:
         linked: false

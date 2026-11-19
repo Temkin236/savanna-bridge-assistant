@@ -3,12 +3,20 @@
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
+
+from dotenv import load_dotenv
 
 # Paths
 API_DIR = Path(__file__).resolve().parents[2]
 ROOT_DIR = API_DIR.parent
 DEFAULT_DB_PATH = str(API_DIR / "savanna_bridge.db")
+
+# Local development uses the repository-level environment file. Values already
+# provided by the process or deployment platform keep precedence.
+if "pytest" not in sys.modules and not os.getenv("TESTING"):
+    load_dotenv(ROOT_DIR / ".env", override=False)
 
 # Gemini API key (canonical single variable with legacy fallbacks)
 GEMINI_API_KEY: str = (

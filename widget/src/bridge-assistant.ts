@@ -2936,10 +2936,10 @@ export class BridgeAssistant extends HTMLElement {
       const isHost = this.previousFocus === (this as unknown as HTMLElement);
       const targetFocus =
         this.previousFocus &&
-        !isHost &&
-        this.previousFocus !== document.body &&
-        this.previousFocus !== dialog &&
-        !dialog.contains(this.previousFocus)
+          !isHost &&
+          this.previousFocus !== document.body &&
+          this.previousFocus !== dialog &&
+          !dialog.contains(this.previousFocus)
           ? this.previousFocus
           : launcher;
       targetFocus.focus();

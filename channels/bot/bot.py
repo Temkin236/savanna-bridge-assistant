@@ -314,7 +314,6 @@ async def handle_start(message: types.Message) -> None:
                     },
                 )
                 state["notification_prefs"] = prefs
-
                 success_msgs = {
                     "am": (
                         f"✅ **ከ{platform_title} ክፍለ-ጊዜዎ ጋር ተገናኝቷል!**\n\n"
@@ -364,7 +363,7 @@ async def handle_start(message: types.Message) -> None:
                     "om": "Kutaan barnootaa keessan walqabateera. Gaaffii keessan barreeffamaan gaafadhaa ykn 'Nama Waliin Dubbadhu' kan jedhu tuqaa.",
                     "ti": "ናይ ኮርስ ክፍለ-ግዜኹም ተላጊቡ ኣሎ። ዝኾነ ሕቶ ብጽሑፍ ሕተቱ ወይ 'ምስ ሰብ ተራኸብ' ዝብል ጠውቑ።",
                     "ar": "تم ربط جلستك بنجاح. اطرح سؤالك بنص عادي أو اضغط 'التحدث مع شخص'.",
-                    "en": f"Connected to your course session. Ask any question in plain text or tap Talk to a person.",
+                    "en": "Connected to your course session. Ask any question in plain text or tap Talk to a person.",
                 }
                 await send_safe_message(
                     message,
@@ -1265,18 +1264,21 @@ async def handle_settings(message: types.Message) -> None:
 
     res = await call_api(
         "GET",
-        f"/api/v1/notification-settings?learner_ref={state['learner_ref']}",
+        f"/api/v1/notification-settings?learner_ref={learner_ref}",
     )
     if not res:
-        res = await call_api("GET", f"/notification-settings?learner_ref={state['learner_ref']}")
+        res = await call_api("GET", f"/notification-settings?learner_ref={learner_ref}")
     if not res or not isinstance(res, dict):
-        res = {
-            "deadlines": True,
-            "new_lessons": True,
-            "job_alerts": True,
-            "muted": False,
-            "low_bandwidth": True,
-        }
+        res = state.get(
+            "notification_prefs",
+            {
+                "deadlines": True,
+                "new_lessons": True,
+                "job_alerts": True,
+                "muted": False,
+                "low_bandwidth": True,
+            },
+        )
     state["notification_prefs"] = res
 
     muted = res.get("muted", False)

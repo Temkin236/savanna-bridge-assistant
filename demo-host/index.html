@@ -1,16 +1,115 @@
 <!doctype html>
 <html lang="en">
-  <head><meta charset="utf-8" /><title>Savanna Bridge Demo Hosts</title></head>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Savanna Bridge Demo Hosts</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        line-height: 1.6;
+        padding: 2.5rem 1.5rem;
+        background: #f8fafc;
+        color: #0f172a;
+        margin: 0;
+      }
+      main {
+        max-width: 820px;
+        margin: 0 auto;
+        background: #ffffff;
+        padding: 2.5rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+      }
+      h1 {
+        color: #991b1b;
+        margin-top: 0;
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 0.75rem;
+      }
+      ul {
+        padding-left: 1.5rem;
+      }
+      li {
+        margin-bottom: 1rem;
+      }
+      a {
+        color: #b91c1c;
+        font-weight: 600;
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      .test-card {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 8px;
+        padding: 1.25rem;
+        margin-top: 2rem;
+      }
+    </style>
+  </head>
   <body>
     <main>
       <h1>Savanna Bridge Demo Hosts</h1>
+      <p>
+        Welcome to the test deployment environment for the Savanna Bridge Assistant. 
+        Each static page below tests specific content ingestion, multi-language grounding, and accessibility capabilities:
+      </p>
       <ul>
-        <li><a href="/blank.html">Blank page (Proof outside Savanna - No Bootstrap/CSS)</a></li>
-        <li><a href="/savanna/">Savanna-style learning page</a></li>
-        <li><a href="/savanna/pages/jobs.html">Savanna Jobs page (Level 3 schema.org JobPosting)</a></li>
-        <li><a href="/jobboard/">Generic job board page</a></li>
+        <li>
+          <a href="/savanna/">Savanna Learning Hub (Course Dashboard)</a> &mdash; 
+          Index of three realistic learner tracks (Paced, Self-Paced, and Concept Navigation) frozen from the production application.
+        </li>
+        <li>
+          <a href="/savanna/pages/concept-with-navigation.html">Module 2: The Future of the VA Industry (Curriculum Navigation)</a> &mdash; 
+          Complete lesson with authored callouts, quiz assessment deadlines (Dec 18, 2026), recommended tool stack, keyboard shortcuts, and multilingual glossary.
+        </li>
+        <li>
+          <a href="/savanna/pages/homepage-v1-paced.html">WR 100: Fundamentals of Effective Communication (Paced Cohort)</a> &mdash; 
+          Week 10 deliverables, late submission policies, grading thresholds (85% pass), and faculty office hours.
+        </li>
+        <li>
+          <a href="/savanna/pages/homepage-v1-self-paced.html">VA-1: VA Foundations &amp; Professional Identity (Self-Paced Track)</a> &mdash; 
+          Course progression gauge against the 70% threshold, module checkpoints, and mentor office hours.
+        </li>
+        <li>
+          <a href="/savanna/pages/jobs.html">Savanna Career Gateway (Level 3 Schema.org JobPosting)</a> &mdash; 
+          Accessible vacancies with structured metadata for Junior Developers, Support Specialists, and Virtual Assistants.
+        </li>
+        <li>
+          <a href="/jobboard/">Community Jobs Portal (Generic External Integration)</a> &mdash; 
+          Proves universal assistant integration on external third-party hosts with 4 detailed job postings and accommodation options.
+        </li>
+        <li>
+          <a href="/blank.html">Blank HTML Page</a> &mdash; 
+          Demonstrates zero-dependency widget operation on a completely unstyled blank HTML document.
+        </li>
       </ul>
+
+      <div class="test-card">
+        <h3 style="margin-top:0; color:#991b1b;">Try Asking the Assistant:</h3>
+        <p>Click the red accessibility badge in the lower-right corner (or press <kbd>Alt+A</kbd>):</p>
+        <ol>
+          <li><em>"What is the passing score for the Module 2 quiz?"</em></li>
+          <li><em>"What salary is offered for the Bilingual Customer Support job?"</em></li>
+          <li><em>"What is the late policy for WR 100 assignments?"</em></li>
+          <li><em>"በሞጁል 2 ውስጥ የተጠቀሱት የርቀት ረዳት መሣሪያዎች ምንድን ናቸው?"</em></li>
+          <li><em>"Gostiin hojii Oromia Tech Ventures keessatti argamu maali?"</em></li>
+        </ol>
+      </div>
     </main>
+
+    <!-- Mount Assistant Widget -->
+    <bridge-assistant data-api="http://localhost:8000" data-course="course_demo" data-lang="en"></bridge-assistant>
+    <script type="module" src="/widget/widget.js?v=tutor-v4"></script>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const apiParam = params.get("api");
+      if (apiParam) {
+        document.querySelectorAll("bridge-assistant").forEach((el) => el.setAttribute("data-api", apiParam));
+      }
+    </script>
   </body>
 </html>
-
