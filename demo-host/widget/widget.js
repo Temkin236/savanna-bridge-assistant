@@ -1,7 +1,7 @@
-var W = Object.defineProperty;
-var D = (A, S, e) => S in A ? W(A, S, { enumerable: !0, configurable: !0, writable: !0, value: e }) : A[S] = e;
-var l = (A, S, e) => D(A, typeof S != "symbol" ? S + "" : S, e);
-const c = {
+var j = Object.defineProperty;
+var W = (T, S, e) => S in T ? j(T, S, { enumerable: !0, configurable: !0, writable: !0, value: e }) : T[S] = e;
+var l = (T, S, e) => W(T, typeof S != "symbol" ? S + "" : S, e);
+const o = {
   launcher: '<svg class="icon-inline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="7.2" r="1.5" fill="currentColor"></circle><path d="M5.5 10.5h13"></path><path d="M12 10.5v4"></path><path d="M12 14.5l-2.8 5"></path><path d="M12 14.5l2.8 5"></path></svg>',
   accessibility: '<svg class="icon-inline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="7.2" r="1.5" fill="currentColor"></circle><path d="M5.5 10.5h13"></path><path d="M12 10.5v4"></path><path d="M12 14.5l-2.8 5"></path><path d="M12 14.5l2.8 5"></path></svg>',
   chat: '<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>',
@@ -36,6 +36,7 @@ const c = {
   sound: '<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>',
   volumeMute: '<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>',
   play: '<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>',
+  lock: '<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>',
   speed: '<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>',
   sync: '<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>',
   sparkles: '<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>'
@@ -91,7 +92,6 @@ const c = {
     stopButton: "Stop",
     replayButton: "Replay",
     makeSimplerButton: "Make simpler",
-    whyThisAnswer: "Why this answer?",
     sourcesTitle: "Course sources:",
     talkToPersonButton: "Talk to a person",
     continueOnTelegram: "Continue on Telegram",
@@ -238,7 +238,6 @@ const c = {
     stopButton: "አቁም",
     replayButton: "ደግመህ አጫውት",
     makeSimplerButton: "ቀለል አድርግ",
-    whyThisAnswer: "ይህ መልስ ከየት መጣ?",
     sourcesTitle: "የኮርስ ምንጮች፡",
     talkToPersonButton: "ከሰው ጋር ተነጋገር",
     continueOnTelegram: "በቴሌግራም ቀጥል",
@@ -385,7 +384,6 @@ const c = {
     stopButton: "Dhaabi",
     replayButton: "Irra deebi'ii taphachiisi",
     makeSimplerButton: "Salphisi",
-    whyThisAnswer: "Deebiin kun maaliif?",
     sourcesTitle: "Madda barnootaa:",
     talkToPersonButton: "Nama waliin dubbadhu",
     continueOnTelegram: "Telegiraamiin Itti fufi",
@@ -532,7 +530,6 @@ const c = {
     stopButton: "ኣቁም",
     replayButton: "ደጊምካ ኣጻውት",
     makeSimplerButton: "ቀሊል ግበሮ",
-    whyThisAnswer: "እዚ መልሲ ስለምንታይ?",
     sourcesTitle: "ምንጭታት ኮርስ፡",
     talkToPersonButton: "ምስ ሰብ ተዛረብ",
     continueOnTelegram: "ብቴሌግራም ቀጽል",
@@ -679,7 +676,6 @@ const c = {
     stopButton: "إيقاف",
     replayButton: "إعادة التشغيل",
     makeSimplerButton: "تبسيط الشرح",
-    whyThisAnswer: "لماذا هذه الإجابة؟",
     sourcesTitle: "مصادر الدورة:",
     talkToPersonButton: "التحدث مع شخص",
     continueOnTelegram: "المتابعة عبر تيليجرام",
@@ -775,7 +771,7 @@ const c = {
     followupQ2: "ماذا يجب أن أفهم قبل الدرس التالي؟",
     followupQ3: "اختبر فهمي لهذا الموضوع"
   }
-}, H = `
+}, D = `
   :host {
     --b-font: var(--bs-body-font-family, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Ethiopic", "Noto Sans Arabic", "Nyala", sans-serif);
     --b-bg: var(--bs-body-bg, #ffffff);
@@ -976,9 +972,11 @@ const c = {
   /* Open Panel */
   .panel {
     position: fixed;
-    inset: auto 1rem 5rem auto;
-    width: min(30rem, calc(100vw - 1.5rem));
-    height: min(46rem, calc(100vh - 6.5rem));
+    inset: auto 1.25rem 5.5rem auto;
+    width: min(52rem, calc(100vw - 2rem));
+    height: min(52rem, calc(100vh - 7rem));
+    min-width: min(26rem, calc(100vw - 2rem));
+    min-height: min(34rem, calc(100vh - 7rem));
     max-height: calc(100vh - 6.5rem);
     display: flex;
     flex-direction: column;
@@ -989,52 +987,94 @@ const c = {
     box-shadow: var(--b-shadow);
     z-index: 2147483640;
     overflow: hidden;
+    resize: both;
   }
   .panel[hidden] { display: none !important; }
 
   /* Header */
   .header {
-    padding: 0.5rem 0.75rem;
+    padding: 0.625rem 0.75rem 0.5rem;
     border-bottom: 1px solid var(--b-border);
     background: var(--b-surface);
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.375rem;
+    flex-direction: column;
+    gap: 0.5rem;
     flex-shrink: 0;
   }
 
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    width: 100%;
+    min-width: 0;
+  }
+
   .header-titles {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     flex: 1;
     min-width: 0;
+  }
+
+  .header-accessibility-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    min-width: 2rem;
+    min-height: 2rem;
+    border-radius: 50%;
+    background: #fef2f2;
+    color: #b91c1c;
+    flex-shrink: 0;
   }
 
   .title {
     margin: 0;
     font-size: 1rem;
     font-weight: 700;
+    line-height: 1.25;
+    color: var(--b-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
+  .header-window-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    flex-shrink: 0;
+  }
+
   .header-actions {
     display: flex;
     align-items: center;
-    gap: 0.25rem;
-    flex-wrap: wrap;
+    width: 100%;
+    min-width: 0;
   }
 
-  .lang-bar {
+  .lang-group {
     display: flex;
     align-items: center;
-    gap: 0.2rem;
+    width: 100%;
+    gap: 0.25rem;
+    background: var(--b-surface-alt, #f8fafc);
+    padding: 0.1875rem;
+    border-radius: 0.375rem;
+    border: 1px solid var(--b-border, #e2e8f0);
+    box-sizing: border-box;
   }
 
   .lang-toggle-btn {
+    flex: 1;
     font-size: 0.75rem;
-    padding: 0.2rem 0.35rem;
-    min-height: 44px;
+    padding: 0.35rem 0.25rem;
+    min-height: 38px;
     min-width: 44px;
     border: none;
     border-radius: 0.25rem;
@@ -1045,14 +1085,19 @@ const c = {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: background-color 0.15s ease, color 0.15s ease;
+    transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+  }
+
+  .lang-toggle-btn:hover {
+    background: var(--b-border, #e2e8f0);
   }
 
   .lang-toggle-btn[aria-pressed="true"] {
-    background: var(--b-primary);
-    color: var(--b-primary-contrast);
-    border-color: var(--b-primary);
+    background: #b91c1c !important;
+    color: #ffffff !important;
+    border-color: #b91c1c !important;
     font-weight: 700;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
   }
 
   /* Offline Bar */
@@ -1570,6 +1615,9 @@ const c = {
       border-radius: 0 !important;
       border: none !important;
       box-shadow: none !important;
+      min-width: 0 !important;
+      min-height: 0 !important;
+      resize: none !important;
     }
     .panel[hidden] {
       display: none !important;
@@ -1626,7 +1674,7 @@ const c = {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1rem;
+    padding: clamp(0.75rem, 3vw, 2rem);
     box-sizing: border-box;
   }
   .onboarding-card {
@@ -1635,11 +1683,12 @@ const c = {
     border-radius: var(--b-radius);
     border: 2px solid var(--b-primary);
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
-    max-width: 28rem;
+    max-width: 40rem;
     width: 100%;
-    max-height: 90vh;
+    min-height: min(31rem, calc(100% - 1rem));
+    max-height: calc(100% - 1rem);
     overflow-y: auto;
-    padding: 1.25rem;
+    padding: clamp(1rem, 3vw, 1.75rem);
     display: flex;
     flex-direction: column;
     gap: 1rem;
@@ -1666,6 +1715,7 @@ const c = {
     flex-direction: column;
     gap: 0.875rem;
     font-size: 0.875rem;
+    flex: 1;
   }
   .onboarding-actions {
     display: flex;
@@ -1674,6 +1724,38 @@ const c = {
     border-top: 1px solid var(--b-border);
     padding-top: 0.75rem;
     flex-wrap: wrap;
+  }
+  .wizard-progress {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.375rem;
+  }
+  .wizard-progress span {
+    height: 0.375rem;
+    border-radius: 999px;
+    background: var(--b-border);
+  }
+  .wizard-progress span.active { background: var(--b-primary); }
+  .wizard-step-label {
+    color: var(--b-primary);
+    font-size: 0.8125rem;
+    font-weight: 700;
+  }
+  .onboarding-option-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+  .onboarding-option-grid .toggle-row {
+    height: 100%;
+    padding: 0.875rem;
+    border: 1px solid var(--b-border);
+    border-radius: 0.625rem;
+    background: var(--b-surface-alt);
+  }
+  @media (max-width: 540px) {
+    .onboarding-option-grid { grid-template-columns: 1fr; }
+    .onboarding-card { min-height: calc(100% - 0.5rem); }
   }
 
   /* Voice Autoplay Activation Banner */
@@ -1774,7 +1856,7 @@ const c = {
     outline-offset: 3px !important;
   }
 `;
-class j extends HTMLElement {
+class V extends HTMLElement {
   constructor() {
     super(...arguments);
     l(this, "isOpen", !1);
@@ -1793,10 +1875,16 @@ class j extends HTMLElement {
     l(this, "audioChunks", []);
     l(this, "activeRecognition", null);
     l(this, "wakeWordRecognizer", null);
-    l(this, "activeAudio", null);
     l(this, "activeUtterance", null);
     l(this, "readingWatchdogTimer", null);
     l(this, "currentReading", null);
+    l(this, "navCheckTimer", null);
+    l(this, "voiceActivationEnabled", !1);
+    l(this, "wakeWordRecognition", null);
+    l(this, "lastPageUrl", null);
+    l(this, "lastPageTitle", null);
+    l(this, "lastPageSection", null);
+    l(this, "activeAudio", null);
     l(this, "messages", []);
     l(this, "sessionId", `sess_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`);
     // Telegram link state
@@ -1833,6 +1921,7 @@ class j extends HTMLElement {
       onboarded: !1
     });
     l(this, "onboardingDismissed", !1);
+    l(this, "onboardingStep", 0);
     l(this, "isReadingPage", !1);
     l(this, "isReadingPaused", !1);
     l(this, "showAutoplayBanner", !1);
@@ -1845,30 +1934,23 @@ class j extends HTMLElement {
     l(this, "lastSpokenText", "");
     l(this, "voiceRecordingTimeout", null);
     l(this, "previousFocus", null);
-    // Page Context & Voice Activation State
-    l(this, "lastPageUrl", "");
-    l(this, "lastPageTitle", "");
-    l(this, "lastPageSection", "");
-    l(this, "navCheckTimer", null);
-    l(this, "voiceActivationEnabled", !1);
-    l(this, "wakeWordRecognition", null);
   }
   // Attributes: supports both guide plain attributes (lang, api, content) and data-*
   get apiBase() {
     if (typeof window < "u" && window.SAVANNA_API_URL)
       return window.SAVANNA_API_URL;
     if (typeof window < "u" && window.location) {
-      const a = new URLSearchParams(window.location.search).get("api");
-      if (a) return a;
+      const t = new URLSearchParams(window.location.search).get("api");
+      if (t) return t;
     }
     const e = this.getAttribute("api") || this.getAttribute("data-api");
     if (typeof window < "u" && window.location && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1") {
       if (e && !e.includes("localhost") && !e.includes("127.0.0.1"))
         return e;
-      const t = window.location.hostname;
-      if (t.includes("-demo.onrender.com"))
-        return `${window.location.protocol}//${t.replace("-demo.onrender.com", "-api.onrender.com")}`;
-      if (t.includes(".onrender.com"))
+      const i = window.location.hostname;
+      if (i.includes("-demo.onrender.com"))
+        return `${window.location.protocol}//${i.replace("-demo.onrender.com", "-api.onrender.com")}`;
+      if (i.includes(".onrender.com"))
         return window.location.origin;
     }
     return e || "http://localhost:8000";
@@ -1896,20 +1978,20 @@ class j extends HTMLElement {
       "data-platform-name"
     ];
   }
-  attributeChangedCallback(e, t, a) {
-    if (t !== a && (e === "lang" || e === "data-lang") && a in k) {
-      if (this.currentLang === a) {
-        this.setAttribute("dir", a === "ar" ? "rtl" : "ltr");
+  attributeChangedCallback(e, i, t) {
+    if (i !== t && (e === "lang" || e === "data-lang") && t in k) {
+      if (this.currentLang === t) {
+        this.setAttribute("dir", t === "ar" ? "rtl" : "ltr");
         return;
       }
-      this.currentLang = a, this.shadowRoot && this.render();
+      this.currentLang = t, this.shadowRoot && this.render();
     }
   }
   connectedCallback() {
     if (this.shadowRoot) return;
     this.restoreState();
-    const e = this.getAttribute("lang") || this.getAttribute("data-lang"), t = localStorage.getItem("savanna_bridge_preferred_lang"), a = sessionStorage.getItem("savanna_bridge_lang");
-    e && e in k ? this.currentLang = e : this.accessibilityPrefs.language && this.accessibilityPrefs.language in k ? this.currentLang = this.accessibilityPrefs.language : t && t in k ? this.currentLang = t : a && a in k && (this.currentLang = a), this.accessibilityPrefs.keyboard_navigation && this.classList.add("keyboard-focus-enhanced"), this.accessibilityPrefs.screen_reader_mode && this.classList.add("screen-reader-mode"), this.attachShadow({ mode: "open" }), this.render(), this.setupNetworkMonitor(), this.setupPageNavigationMonitor(), this.voiceActivationEnabled && this.setupWakeWordDetector(), this.popstateListener = () => {
+    const e = this.getAttribute("lang") || this.getAttribute("data-lang"), i = localStorage.getItem("savanna_bridge_preferred_lang"), t = sessionStorage.getItem("savanna_bridge_lang");
+    e && e in k ? this.currentLang = e : this.accessibilityPrefs.language && this.accessibilityPrefs.language in k ? this.currentLang = this.accessibilityPrefs.language : i && i in k ? this.currentLang = i : t && t in k && (this.currentLang = t), this.accessibilityPrefs.keyboard_navigation && this.classList.add("keyboard-focus-enhanced"), this.accessibilityPrefs.screen_reader_mode && this.classList.add("screen-reader-mode"), this.attachShadow({ mode: "open" }), this.render(), this.setupNetworkMonitor(), this.setupPageNavigationMonitor(), this.voiceActivationEnabled && this.setupWakeWordDetector(), this.popstateListener = () => {
       this.isReadingPage && this.stopPageReading();
     }, window.addEventListener("popstate", this.popstateListener), this.fetchTelegramStartLink(), this.fetchSupportNeeds(), this.accessibilityPrefs.voice_enabled && this.initWakeWordDetection(), this.initGlobalKeyboardShortcuts(), this.accessibilityPrefs.sync_enabled && this.syncPreferencesFromBackend(), this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_welcome && !this.hasSpokenWelcomeThisSession && setTimeout(() => this.triggerSpokenWelcome(), 500);
   }
@@ -1934,9 +2016,9 @@ class j extends HTMLElement {
     return (k[this.currentLang] || k.en)[e] || k.en[e] || e;
   }
   announce(e) {
-    const t = this.shadowRoot?.querySelector("#live-announcer");
-    t && (t.textContent = "", setTimeout(() => {
-      t.textContent = e;
+    const i = this.shadowRoot?.querySelector("#live-announcer");
+    i && (i.textContent = "", setTimeout(() => {
+      i.textContent = e;
     }, 50));
   }
   getLangDisplayName(e = this.currentLang) {
@@ -1953,22 +2035,20 @@ class j extends HTMLElement {
         return "English";
     }
   }
-  setLanguage(e, t = !0) {
-    this.currentLang = e, sessionStorage.setItem("savanna_bridge_lang", e), this.accessibilityPrefs.language = e, this.savePreferences(), this.setAttribute("lang", e), this.setAttribute("dir", e === "ar" ? "rtl" : "ltr");
-    const a = this.shadowRoot?.querySelector("#assistant-dialog");
-    a && (a.setAttribute("lang", e), a.setAttribute("dir", e === "ar" ? "rtl" : "ltr")), t ? (this.messages = [], sessionStorage.removeItem("savanna_bridge_chat_history"), this.render(), this.announce(this.t("appTitle")), this.accessibilityPrefs.voice_enabled && this.speakText(this.t("voiceWelcomeAnnouncement"))) : (this.updateHeaderLanguageButtons(), this.updateVoiceStatusUI());
+  setLanguage(e, i = !0) {
+    this.currentLang = e, sessionStorage.setItem("savanna_bridge_lang", e), this.accessibilityPrefs.language = e, this.savePreferences(), this.setAttribute("lang", e), this.setAttribute("dir", e === "ar" ? "rtl" : "ltr"), i ? (this.messages = [], sessionStorage.removeItem("savanna_bridge_chat_history"), this.render(), this.announce(this.t("appTitle")), this.accessibilityPrefs.voice_enabled && this.speakText(this.t("voiceWelcomeAnnouncement"))) : (this.updateHeaderLanguageButtons(), this.updateVoiceStatusUI());
   }
   clearChat() {
     this.messages = [], sessionStorage.removeItem("savanna_bridge_chat_history"), this.renderMessages(), this.announce(this.t("emptyWelcome"));
   }
   getPlatformInfo() {
-    const e = this.extractPlatformContext(), t = e.page_title || (typeof document < "u" ? document.title : "Web Session"), a = e.page_url || (typeof window < "u" ? window.location.href : ""), i = `${t} ${a} ${this.courseId}`.toLowerCase();
+    const e = this.extractPlatformContext(), i = e.page_title || (typeof document < "u" ? document.title : "Web Session"), t = e.page_url || (typeof window < "u" ? window.location.href : ""), a = `${i} ${t} ${this.courseId}`.toLowerCase();
     let n = "general";
-    return i.includes("job") || i.includes("career") || i.includes("internship") || i.includes("hire") || i.includes("work") ? n = "jobs" : (i.includes("course") || i.includes("lesson") || i.includes("module") || i.includes("learn") || i.includes("student") || i.includes("class")) && (n = "course"), { title: t, url: a, type: n };
+    return a.includes("job") || a.includes("career") || a.includes("internship") || a.includes("hire") || a.includes("work") ? n = "jobs" : (a.includes("course") || a.includes("lesson") || a.includes("module") || a.includes("learn") || a.includes("student") || a.includes("class")) && (n = "course"), { title: i, url: t, type: n };
   }
   async generateLinkCode() {
     try {
-      const e = this.getPlatformInfo(), t = await fetch(`${this.apiBase}/api/v1/link/start`, {
+      const e = this.getPlatformInfo(), i = await fetch(`${this.apiBase}/api/v1/link/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1983,11 +2063,11 @@ class j extends HTMLElement {
           course_id: this.courseId
         })
       });
-      if (t.ok) {
-        const a = await t.json();
-        this.telegramToken = a.token, this.telegramDeepLink = a.deep_link || this.telegramDeepLink;
-        const i = this.shadowRoot?.querySelector("#code-display");
-        i && (i.textContent = a.code || a.token, i.style.display = "block", this.announce(`${this.t("yourCodeIs")} ${a.code || a.token}`));
+      if (i.ok) {
+        const t = await i.json();
+        this.telegramToken = t.token, this.telegramDeepLink = t.deep_link || this.telegramDeepLink;
+        const a = this.shadowRoot?.querySelector("#code-display");
+        a && (a.textContent = t.code || t.token, a.style.display = "block", this.announce(`${this.t("yourCodeIs")} ${t.code || t.token}`));
         const n = this.shadowRoot?.querySelector("#code-instructions");
         n && (n.style.display = "block"), this.onTelegramLinkClicked();
       }
@@ -1995,29 +2075,29 @@ class j extends HTMLElement {
       console.warn("Failed to generate link code", e);
     }
   }
-  async confirmLinkCode(e, t) {
-    const a = e.trim().replace(/\s+/g, "");
-    if (!a) return !1;
-    t && (t.style.display = "block", t.style.color = "var(--b-text-muted)", t.textContent = "Verifying code...");
+  async confirmLinkCode(e, i) {
+    const t = e.trim().replace(/\s+/g, "");
+    if (!t) return !1;
+    i && (i.style.display = "block", i.style.color = "var(--b-text-muted)", i.textContent = "Verifying code...");
     try {
-      const i = await fetch(`${this.apiBase}/api/v1/link/confirm`, {
+      const a = await fetch(`${this.apiBase}/api/v1/link/confirm`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: a })
+        body: JSON.stringify({ code: t })
       });
-      return i.ok && (await i.json()).linked ? (this.isTelegramLinked = !0, this.isLinkCodeInputVisible = !1, this.telegramPollTimer && (window.clearInterval(this.telegramPollTimer), this.telegramPollTimer = null), t && (t.style.color = "#166534", t.textContent = `✓ ${this.t("codeLinkSuccess")}`), this.announce(this.t("codeLinkSuccess")), setTimeout(() => {
+      return a.ok && (await a.json()).linked ? (this.isTelegramLinked = !0, this.isLinkCodeInputVisible = !1, this.telegramPollTimer && (window.clearInterval(this.telegramPollTimer), this.telegramPollTimer = null), i && (i.style.color = "#166534", i.textContent = `✓ ${this.t("codeLinkSuccess")}`), this.announce(this.t("codeLinkSuccess")), setTimeout(() => {
         this.updateTelegramLinkUI(), this.updateLinkCodeUI(), this.render();
-      }, 600), !0) : (t && (t.style.color = "#dc2626", t.textContent = `⚠️ ${this.t("codeLinkError")}`), !1);
-    } catch (i) {
-      return console.warn("Error confirming link code:", i), t && (t.style.color = "#dc2626", t.textContent = `⚠️ ${this.t("codeLinkError")}`), !1;
+      }, 600), !0) : (i && (i.style.color = "#dc2626", i.textContent = `⚠️ ${this.t("codeLinkError")}`), !1);
+    } catch (a) {
+      return console.warn("Error confirming link code:", a), i && (i.style.color = "#dc2626", i.textContent = `⚠️ ${this.t("codeLinkError")}`), !1;
     }
   }
   updateHeaderLanguageButtons() {
     const e = this.shadowRoot;
     if (!e) return;
-    ["en", "am", "om", "ti", "ar"].forEach((a) => {
-      const i = e.querySelector(`#btn-lang-${a}`);
-      i && i.setAttribute("aria-pressed", a === this.currentLang ? "true" : "false");
+    ["en", "am", "om", "ti", "ar"].forEach((t) => {
+      const a = e.querySelector(`#btn-lang-${t}`);
+      a && a.setAttribute("aria-pressed", t === this.currentLang ? "true" : "false");
     });
   }
   setupNetworkMonitor() {
@@ -2031,10 +2111,10 @@ class j extends HTMLElement {
     try {
       const e = localStorage.getItem("db_assistant_offline_queue");
       if (!e) return;
-      const t = JSON.parse(e);
+      const i = JSON.parse(e);
       localStorage.removeItem("db_assistant_offline_queue");
-      for (const a of t)
-        a && a.question && await this.askQuestion(a.question);
+      for (const t of i)
+        t && t.question && await this.askQuestion(t.question);
     } catch (e) {
       console.warn("Could not flush offline queue", e);
     }
@@ -2043,23 +2123,23 @@ class j extends HTMLElement {
     try {
       const e = sessionStorage.getItem("savanna_bridge_chat_history");
       e && (this.messages = JSON.parse(e));
-      const t = localStorage.getItem("savanna_voice_prefs");
-      if (t)
+      const i = localStorage.getItem("savanna_voice_prefs");
+      if (i)
         try {
-          const h = JSON.parse(t);
-          this.accessibilityPrefs = { ...this.accessibilityPrefs, ...h };
+          const c = JSON.parse(i);
+          this.accessibilityPrefs = { ...this.accessibilityPrefs, ...c };
         } catch {
         }
-      const a = localStorage.getItem("savanna_bridge_preferred_lang");
-      a && a in k && (this.currentLang = a, this.accessibilityPrefs.language = a);
-      const i = localStorage.getItem("savanna_bridge_contrast");
-      i && (this.highContrast = i === "high", this.accessibilityPrefs.high_contrast = this.highContrast);
+      const t = localStorage.getItem("savanna_bridge_preferred_lang");
+      t && t in k && (this.currentLang = t, this.accessibilityPrefs.language = t);
+      const a = localStorage.getItem("savanna_bridge_contrast");
+      a && (this.highContrast = a === "high", this.accessibilityPrefs.high_contrast = this.highContrast);
       const n = localStorage.getItem("savanna_bridge_text_size");
       n && (this.textSize = n, this.accessibilityPrefs.large_text = n);
       const s = localStorage.getItem("savanna_bridge_auto_read");
       s !== null && (this.autoReadSpeech = s === "true");
-      const o = localStorage.getItem("savanna_bridge_simple_mode");
-      o && (this.simpleMode = o === "true", this.accessibilityPrefs.simple_mode = this.simpleMode);
+      const d = localStorage.getItem("savanna_bridge_simple_mode");
+      d && (this.simpleMode = d === "true", this.accessibilityPrefs.simple_mode = this.simpleMode);
       const r = localStorage.getItem("savanna_bridge_wake_word");
       r && (this.voiceActivationEnabled = r === "true");
     } catch {
@@ -2104,28 +2184,28 @@ class j extends HTMLElement {
   }
   async syncPreferencesFromBackend() {
     try {
-      const e = this.getAttribute("learner-id") || `learner_${this.sessionId}`, t = await fetch(`${this.apiBase}/api/v1/accessibility-profile?learner_ref=${encodeURIComponent(e)}`);
-      if (t.ok) {
-        const a = await t.json();
-        a && a.updated_at && (this.accessibilityPrefs.voice_enabled = !!a.voice_enabled, this.accessibilityPrefs.auto_welcome = !!a.auto_welcome, this.accessibilityPrefs.auto_tts = !!a.auto_tts, typeof a.speech_rate == "number" && (this.accessibilityPrefs.speech_rate = a.speech_rate), a.language && a.language in k && (this.currentLang = a.language, this.accessibilityPrefs.language = a.language), a.large_text && (this.textSize = a.large_text), typeof a.high_contrast == "boolean" && (this.highContrast = a.high_contrast), typeof a.simple_mode == "boolean" && (this.simpleMode = a.simple_mode), typeof a.onboarded == "boolean" && (this.accessibilityPrefs.onboarded = a.onboarded), this.savePreferences(), this.render());
+      const e = this.getAttribute("learner-id") || `learner_${this.sessionId}`, i = await fetch(`${this.apiBase}/api/v1/accessibility-profile?learner_ref=${encodeURIComponent(e)}`);
+      if (i.ok) {
+        const t = await i.json();
+        t && t.updated_at && (this.accessibilityPrefs.voice_enabled = !!t.voice_enabled, this.accessibilityPrefs.auto_welcome = !!t.auto_welcome, this.accessibilityPrefs.auto_tts = !!t.auto_tts, typeof t.speech_rate == "number" && (this.accessibilityPrefs.speech_rate = t.speech_rate), t.language && t.language in k && (this.currentLang = t.language, this.accessibilityPrefs.language = t.language), t.large_text && (this.textSize = t.large_text), typeof t.high_contrast == "boolean" && (this.highContrast = t.high_contrast), typeof t.simple_mode == "boolean" && (this.simpleMode = t.simple_mode), typeof t.onboarded == "boolean" && (this.accessibilityPrefs.onboarded = t.onboarded), this.savePreferences(), this.render());
       }
     } catch (e) {
       console.warn("Could not fetch accessibility profile from backend:", e);
     }
   }
   getBestVoice(e) {
-    if (!("speechSynthesis" in window) || typeof window.speechSynthesis?.getVoices != "function") return null;
-    const t = window.speechSynthesis.getVoices();
-    if (!t || t.length === 0) return null;
-    const i = {
+    if (!("speechSynthesis" in window)) return null;
+    const i = window.speechSynthesis.getVoices();
+    if (!i || i.length === 0) return null;
+    const a = {
       en: "en-US",
       am: "am-ET",
       om: "om-ET",
       ti: "ti-ET",
       ar: "ar-SA"
     }[e].toLowerCase(), n = e.toLowerCase();
-    let s = t.find((h) => h.lang.toLowerCase() === i);
-    if (s || (s = t.find((h) => h.lang.toLowerCase().startsWith(n)), s)) return s;
+    let s = i.find((c) => c.lang.toLowerCase() === a);
+    if (s || (s = i.find((c) => c.lang.toLowerCase().startsWith(n)), s)) return s;
     const r = {
       en: "english",
       am: "amharic",
@@ -2133,42 +2213,31 @@ class j extends HTMLElement {
       ti: "tigrinya",
       ar: "arabic"
     }[e];
-    return s = t.find((h) => h.name.toLowerCase().includes(r)), s || null;
+    return s = i.find((c) => c.name.toLowerCase().includes(r)), s || null;
   }
-  speakText(e, t) {
+  speakText(e, i) {
     if (this.lastSpokenText = e, !("speechSynthesis" in window))
-      return t?.onError && t.onError(), !1;
+      return i?.onError && i.onError(), !1;
     try {
       window.speechSynthesis.cancel();
-      const a = window.SpeechSynthesisUtterance || class {
-        constructor(o) {
-          l(this, "text");
-          l(this, "lang", "en-US");
-          l(this, "rate", 1);
-          l(this, "voice", null);
-          l(this, "onstart", null);
-          l(this, "onend", null);
-          l(this, "onerror", null);
-          this.text = o;
-        }
-      }, i = new a(e), n = {
+      const t = new SpeechSynthesisUtterance(e), a = {
         en: "en-US",
         am: "am-ET",
         om: "om-ET",
         ti: "ti-ET",
         ar: "ar-SA"
       };
-      i.lang = n[this.currentLang] || "en-US", i.rate = t?.rate || this.accessibilityPrefs.speech_rate || 1;
-      const s = this.getBestVoice(this.currentLang);
-      return s && (i.voice = s), i.onstart = () => {
-        t?.onStart && t.onStart();
-      }, i.onend = () => {
-        t?.onEnd && t.onEnd();
-      }, i.onerror = (o) => {
-        console.warn("Speech synthesis error or autoplay blocked:", o), t?.onError && t.onError(o);
-      }, window.speechSynthesis.speak(i), !0;
-    } catch (a) {
-      return console.warn("Could not initiate speech synthesis:", a), t?.onError && t.onError(a), !1;
+      t.lang = a[this.currentLang] || "en-US", t.rate = i?.rate || this.accessibilityPrefs.speech_rate || 1;
+      const n = this.getBestVoice(this.currentLang);
+      return n && (t.voice = n), t.onstart = () => {
+        i?.onStart && i.onStart();
+      }, t.onend = () => {
+        i?.onEnd && i.onEnd();
+      }, t.onerror = (s) => {
+        console.warn("Speech synthesis error or autoplay blocked:", s), i?.onError && i.onError(s);
+      }, window.speechSynthesis.speak(t), !0;
+    } catch (t) {
+      return console.warn("Could not initiate speech synthesis:", t), i?.onError && i.onError(t), !1;
     }
   }
   triggerSpokenWelcome() {
@@ -2184,18 +2253,18 @@ class j extends HTMLElement {
   // --- Platform Context Extraction (Reads live page) ---
   extractPlatformContext() {
     const e = typeof window < "u" ? window.location.href : "";
-    let t = typeof document < "u" && document.title || "Savanna Platform", a = "The Future of the VA Industry";
+    let i = typeof document < "u" && document.title || "Savanna Platform", t = "Current Lesson";
     if (typeof document < "u") {
       const n = document.querySelector(
         ".curriculum-switcher-label span, .curriculum-title, .course-header h1, h1.course-name"
       );
-      n && n.textContent?.trim() ? t = n.textContent.trim() : t.includes("|") && (t = t.split("|")[0].replace(/^Concept page:\s*/i, "").trim());
+      n && n.textContent?.trim() ? i = n.textContent.trim() : i.includes("|") && (i = i.split("|")[0].replace(/^Concept page:\s*/i, "").trim());
       const s = document.querySelector(
         ".homepage-card h5, .formatted-content h5, .active-lesson, [aria-current='page'], #curriculum_navigation_content .active, .card-title, h2, h1"
       );
-      s && s.textContent && (a = s.textContent.trim().replace(/^[\s\n\r]+|[\s\n\r]+$/g, ""));
+      s && s.textContent && (t = s.textContent.trim().replace(/^[\s\n\r]+|[\s\n\r]+$/g, ""));
     }
-    let i = "";
+    let a = "";
     if (typeof document < "u") {
       const n = document.querySelector("#curriculum_navigation_content") || document.querySelector("#static-track-host") || document.querySelector(".homepage-card:not(.d-none)") || document.querySelector(".formatted-content") || document.querySelector("article") || document.querySelector("main") || document.querySelector(".card-body") || document.querySelector(".content") || document.body;
       if (n)
@@ -2204,23 +2273,23 @@ class j extends HTMLElement {
           s.querySelectorAll(
             "script, style, db-assistant, bridge-assistant, noscript, nav, footer, header, #sidebar, .sidebar, button, input"
           ).forEach((r) => r.remove());
-          const o = [];
+          const d = [];
           s.querySelectorAll("h1, h2, h3, h4, h5, p, li").forEach((r) => {
-            const h = (r.textContent || "").replace(/\s+/g, " ").trim();
-            if (h) {
+            const c = (r.textContent || "").replace(/\s+/g, " ").trim();
+            if (c) {
               const p = r.tagName.toLowerCase();
-              p.startsWith("h") ? o.push(`
-${h}
-`) : p === "li" ? o.push(`• ${h}`) : o.push(h);
+              p.startsWith("h") ? d.push(`
+${c}
+`) : p === "li" ? d.push(`• ${c}`) : d.push(c);
             }
-          }), o.length > 0 ? i = o.join(`
+          }), d.length > 0 ? a = d.join(`
 
-`).slice(0, 15e3) : i = (s.textContent || "").replace(/\s+/g, " ").trim().slice(0, 15e3);
+`).slice(0, 15e3) : a = (s.textContent || "").replace(/\s+/g, " ").trim().slice(0, 15e3);
         } catch {
-          i = "";
+          a = "";
         }
     }
-    return { page_url: e, page_title: t, page_content: i, section: a };
+    return { page_url: e, page_title: i, page_content: a, section: t };
   }
   readPageAloud() {
     const e = this.extractPlatformContext();
@@ -2229,8 +2298,8 @@ ${h}
       return;
     }
     this.isReadingPage = !0, this.isReadingPaused = !1, this.render();
-    const t = e.page_title ? `${e.page_title}. ` : "", a = e.section ? `${e.section}. ` : "", i = `${t}${a}${e.page_content}`.slice(0, 1e4);
-    this.announce(this.t("readingPageAnnouncement")), this.speakText(i, {
+    const i = e.page_title ? `${e.page_title}. ` : "", t = e.section ? `${e.section}. ` : "", a = `${i}${t}${e.page_content}`.slice(0, 1e4);
+    this.announce(this.t("readingPageAnnouncement")), this.speakText(a, {
       onEnd: () => {
         this.isReadingPage = !1, this.isReadingPaused = !1, this.render();
       },
@@ -2240,12 +2309,12 @@ ${h}
     });
   }
   readSectionAloud() {
-    const e = this.extractPlatformContext(), t = e.section || e.page_title;
-    if (!t) {
+    const e = this.extractPlatformContext(), i = e.section || e.page_title;
+    if (!i) {
       this.announce("No active section found.");
       return;
     }
-    this.isReadingPage = !0, this.isReadingPaused = !1, this.render(), this.announce(this.t("readingSectionAnnouncement")), this.speakText(`${t}. ${e.page_content.slice(0, 2e3)}`, {
+    this.isReadingPage = !0, this.isReadingPaused = !1, this.render(), this.announce(this.t("readingSectionAnnouncement")), this.speakText(`${i}. ${e.page_content.slice(0, 2e3)}`, {
       onEnd: () => {
         this.isReadingPage = !1, this.isReadingPaused = !1, this.render();
       },
@@ -2272,12 +2341,12 @@ ${h}
   // --- Accessibility Earcons (Web Audio API) ---
   playEarcon(e) {
     try {
-      const t = window.AudioContext || window.webkitAudioContext;
-      if (!t) return;
-      const a = new t(), i = a.createOscillator(), n = a.createGain();
-      i.connect(n), n.connect(a.destination);
-      const s = a.currentTime;
-      e === "wake" || e === "start" ? (i.type = "sine", i.frequency.setValueAtTime(440, s), i.frequency.exponentialRampToValueAtTime(880, s + 0.15), n.gain.setValueAtTime(0.12, s), n.gain.exponentialRampToValueAtTime(1e-3, s + 0.22), i.start(s), i.stop(s + 0.22)) : e === "stop" ? (i.type = "sine", i.frequency.setValueAtTime(880, s), i.frequency.exponentialRampToValueAtTime(440, s + 0.15), n.gain.setValueAtTime(0.12, s), n.gain.exponentialRampToValueAtTime(1e-3, s + 0.22), i.start(s), i.stop(s + 0.22)) : e === "transcribed" && (i.type = "triangle", i.frequency.setValueAtTime(587.33, s), i.frequency.setValueAtTime(880, s + 0.08), n.gain.setValueAtTime(0.12, s), n.gain.exponentialRampToValueAtTime(1e-3, s + 0.2), i.start(s), i.stop(s + 0.2));
+      const i = window.AudioContext || window.webkitAudioContext;
+      if (!i) return;
+      const t = new i(), a = t.createOscillator(), n = t.createGain();
+      a.connect(n), n.connect(t.destination);
+      const s = t.currentTime;
+      e === "wake" || e === "start" ? (a.type = "sine", a.frequency.setValueAtTime(440, s), a.frequency.exponentialRampToValueAtTime(880, s + 0.15), n.gain.setValueAtTime(0.12, s), n.gain.exponentialRampToValueAtTime(1e-3, s + 0.22), a.start(s), a.stop(s + 0.22)) : e === "stop" ? (a.type = "sine", a.frequency.setValueAtTime(880, s), a.frequency.exponentialRampToValueAtTime(440, s + 0.15), n.gain.setValueAtTime(0.12, s), n.gain.exponentialRampToValueAtTime(1e-3, s + 0.22), a.start(s), a.stop(s + 0.22)) : e === "transcribed" && (a.type = "triangle", a.frequency.setValueAtTime(587.33, s), a.frequency.setValueAtTime(880, s + 0.08), n.gain.setValueAtTime(0.12, s), n.gain.exponentialRampToValueAtTime(1e-3, s + 0.2), a.start(s), a.stop(s + 0.2));
     } catch {
     }
   }
@@ -2287,42 +2356,46 @@ ${h}
     const e = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (e)
       try {
-        const t = new e();
-        t.continuous = !0, t.interimResults = !0, t.lang = "en-US", t.onresult = (a) => {
+        const i = new e();
+        i.continuous = !0, i.interimResults = !0, i.lang = "en-US", i.onresult = (t) => {
           if (!this.isRecording)
-            for (let i = a.resultIndex; i < a.results.length; i++) {
-              const n = (a.results[i][0]?.transcript || "").toLowerCase();
+            for (let a = t.resultIndex; a < t.results.length; a++) {
+              const n = (t.results[a][0]?.transcript || "").toLowerCase();
               if (n.includes("help") || n.includes("እርዳታ") || n.includes("እርዳኝ") || n.includes("gargaarsa") || n.includes("مساعدة") || n.includes("ساعدني")) {
                 this.onWakeWordTriggered();
                 break;
               }
             }
-        }, t.onerror = () => {
-        }, t.onend = () => {
+        }, i.onerror = () => {
+        }, i.onend = () => {
           if (!this.isRecording && !this.isSpeaking && this.wakeWordRecognizer)
             try {
-              t.start();
+              i.start();
             } catch {
             }
-        }, t.start(), this.wakeWordRecognizer = t;
-      } catch (t) {
-        console.warn("Wake word background recognition notice:", t);
+        }, i.start(), this.wakeWordRecognizer = i;
+      } catch (i) {
+        console.warn("Wake word background recognition notice:", i);
       }
   }
   onWakeWordTriggered() {
     this.openAssistant(), this.playEarcon("wake"), this.announce(this.t("voiceListening"));
-    const e = this.shadowRoot?.querySelector("#chat-text-input, #chat-input");
+    const e = this.shadowRoot?.querySelector("#chat-input");
     e && this.startVoiceRecording(e);
   }
   initGlobalKeyboardShortcuts() {
     window.addEventListener("keydown", (e) => {
       if (e.altKey && e.shiftKey && (e.key === "A" || e.key === "a")) {
-        e.preventDefault(), this.isOpen ? this.closeAssistant() : (this.previousFocus = document.activeElement, this.openAssistant());
+        e.preventDefault();
+        const i = this.shadowRoot?.querySelector("#launcher-btn");
+        this.isOpen ? this.closeAssistant() : (this.previousFocus = i ?? null, this.openAssistant());
         return;
       }
       if (e.altKey && e.shiftKey && (e.key === "V" || e.key === "v")) {
-        e.preventDefault(), this.isOpen || (this.previousFocus = document.activeElement, this.openAssistant());
-        const t = this.shadowRoot?.querySelector("#chat-text-input, #chat-input");
+        e.preventDefault();
+        const i = this.shadowRoot?.querySelector("#launcher-btn");
+        this.isOpen || (this.previousFocus = i ?? null, this.openAssistant());
+        const t = this.shadowRoot?.querySelector("#chat-input");
         t && this.toggleVoiceInput(t);
         return;
       }
@@ -2331,13 +2404,14 @@ ${h}
   openAssistant() {
     if (this.isOpen) return;
     this.isOpen = !0;
-    const e = this.shadowRoot?.querySelector("#assistant-dialog"), t = this.shadowRoot?.querySelector("#launcher-btn");
-    if (e && t) {
-      e.hidden = !1, e.removeAttribute("hidden"), e.style.display = "flex", t.setAttribute("aria-expanded", "true"), this.announce("Savanna Bridge Assistant opened. Use Tab to navigate or Escape to close.");
-      const a = this.shadowRoot?.querySelector("#chat-text-input, #chat-input"), i = this.shadowRoot?.querySelector("#dialog-title"), n = this.accessibilityPrefs.screen_reader_mode ? i : a;
-      n ? n.focus() : e.focus(), setTimeout(
+    const e = this.shadowRoot?.querySelector("#assistant-dialog"), i = this.shadowRoot?.querySelector("#launcher-btn");
+    if (e && i) {
+      e.hidden = !1, e.removeAttribute("hidden"), e.style.display = "flex", i.setAttribute("aria-expanded", "true"), this.announce("Savanna Bridge Assistant opened. Use Tab to navigate or Escape to close.");
+      const t = this.shadowRoot?.querySelector("#chat-input"), a = this.shadowRoot?.querySelector("#dialog-title"), n = this.shadowRoot?.querySelector("#onboard-title");
+      setTimeout(
         () => {
-          n ? n.focus() : e.focus();
+          const s = n ?? (this.accessibilityPrefs.screen_reader_mode ? a : t);
+          s ? s.focus() : e.focus();
         },
         60
       );
@@ -2345,18 +2419,18 @@ ${h}
   }
   closeAssistant() {
     this.isOpen = !1;
-    const e = this.shadowRoot?.querySelector("#assistant-dialog"), t = this.shadowRoot?.querySelector("#launcher-btn");
-    if (e && t) {
-      e.setAttribute("hidden", "true"), e.style.display = "none", t.setAttribute("aria-expanded", "false");
-      const a = this.previousFocus === this;
-      (this.previousFocus && !a && this.previousFocus !== document.body && this.previousFocus !== e && !e.contains(this.previousFocus) ? this.previousFocus : t).focus();
+    const e = this.shadowRoot?.querySelector("#assistant-dialog"), i = this.shadowRoot?.querySelector("#launcher-btn");
+    if (e && i) {
+      e.setAttribute("hidden", "true"), e.style.display = "none", i.setAttribute("aria-expanded", "false");
+      const t = this.previousFocus === this;
+      (this.previousFocus && !t && this.previousFocus !== document.body && this.previousFocus !== e && !e.contains(this.previousFocus) ? this.previousFocus : i).focus();
     }
     this.stopSpeaking(), this.isRecording && this.stopVoiceRecording();
   }
   // --- Telegram Link Methods ---
   async fetchTelegramStartLink() {
     try {
-      const e = this.getPlatformInfo(), t = await fetch(`${this.apiBase}/api/v1/link/start`, {
+      const e = this.getPlatformInfo(), i = await fetch(`${this.apiBase}/api/v1/link/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -2371,9 +2445,9 @@ ${h}
           course_id: this.courseId
         })
       });
-      if (t.ok) {
-        const a = await t.json();
-        this.telegramToken = a.token, this.telegramDeepLink = a.deep_link, this.updateTelegramLinkUI();
+      if (i.ok) {
+        const t = await i.json();
+        this.telegramToken = t.token, this.telegramDeepLink = t.deep_link, this.updateTelegramLinkUI();
       }
     } catch (e) {
       console.warn("Could not fetch telegram link start:", e);
@@ -2383,17 +2457,17 @@ ${h}
     if (this.isTelegramLinked || !this.telegramToken) return;
     this.telegramPollTimer && window.clearInterval(this.telegramPollTimer);
     let e = 0;
-    const t = 300;
+    const i = 300;
     this.telegramPollTimer = window.setInterval(async () => {
-      if (e++, e > t) {
+      if (e++, e > i) {
         this.telegramPollTimer && window.clearInterval(this.telegramPollTimer), this.telegramPollTimer = null;
         return;
       }
       try {
-        const a = await fetch(`${this.apiBase}/api/v1/link/status?token=${encodeURIComponent(this.telegramToken)}`);
-        a.ok && (await a.json()).linked && (this.telegramPollTimer && window.clearInterval(this.telegramPollTimer), this.telegramPollTimer = null, this.isTelegramLinked = !0, this.announce(this.t("telegramConnected")), this.updateTelegramLinkUI());
-      } catch (a) {
-        console.warn("Telegram status polling error:", a);
+        const t = await fetch(`${this.apiBase}/api/v1/link/status?token=${encodeURIComponent(this.telegramToken)}`);
+        t.ok && (await t.json()).linked && (this.telegramPollTimer && window.clearInterval(this.telegramPollTimer), this.telegramPollTimer = null, this.isTelegramLinked = !0, this.announce(this.t("telegramConnected")), this.updateTelegramLinkUI());
+      } catch (t) {
+        console.warn("Telegram status polling error:", t);
       }
     }, 2e3);
   }
@@ -2421,7 +2495,7 @@ ${h}
     e.innerHTML = `
       <div style="display:flex; justify-content:center; margin-top:0.25rem;">
         <button type="button" class="btn-toggle-link-code" id="btn-toggle-link-code" style="background:none; border:none; color:var(--b-primary); font-size:0.75rem; text-decoration:underline; cursor:pointer; padding:0.125rem 0;">
-          ${this.isLinkCodeInputVisible ? this.t("hideCodePrompt") : `${c.link} <span>${this.t("haveCodePrompt")}</span>`}
+          ${this.isLinkCodeInputVisible ? this.t("hideCodePrompt") : `${o.link} <span>${this.t("haveCodePrompt")}</span>`}
         </button>
       </div>
       ${this.isLinkCodeInputVisible ? `
@@ -2439,11 +2513,11 @@ ${h}
     `, e.querySelector("#btn-toggle-link-code")?.addEventListener("click", () => {
       this.isLinkCodeInputVisible = !this.isLinkCodeInputVisible, this.updateLinkCodeUI();
     });
-    const t = e.querySelector("#footer-code-form");
-    t && t.addEventListener("submit", (a) => {
-      a.preventDefault();
-      const i = e.querySelector("#footer-input-code"), n = e.querySelector("#footer-code-msg");
-      i && i.value && this.confirmLinkCode(i.value, n);
+    const i = e.querySelector("#footer-code-form");
+    i && i.addEventListener("submit", (t) => {
+      t.preventDefault();
+      const a = e.querySelector("#footer-input-code"), n = e.querySelector("#footer-code-msg");
+      a && a.value && this.confirmLinkCode(a.value, n);
     });
   }
   updateTelegramLinkUI() {
@@ -2472,31 +2546,31 @@ ${h}
     try {
       const e = await fetch(`${this.apiBase}/api/v1/support-needs`);
       if (e.ok) {
-        const t = await e.json();
+        const i = await e.json();
         this.supportNeeds = {
-          needs: t.needs || [],
-          other_text: t.other_text || "",
-          preferred_contact_mode: t.preferred_contact_mode || "text"
+          needs: i.needs || [],
+          other_text: i.other_text || "",
+          preferred_contact_mode: i.preferred_contact_mode || "text"
         };
       }
     } catch {
     }
   }
-  async saveSupportNeeds(e, t, a) {
+  async saveSupportNeeds(e, i, t) {
     this.supportNeeds = {
       needs: e,
-      other_text: t,
-      preferred_contact_mode: a
+      other_text: i,
+      preferred_contact_mode: t
     };
     try {
-      const i = await fetch(`${this.apiBase}/api/v1/support-needs`, {
+      const a = await fetch(`${this.apiBase}/api/v1/support-needs`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(this.supportNeeds)
       }), n = this.shadowRoot?.querySelector("#support-saved-notice");
-      n && (n.removeAttribute("hidden"), setTimeout(() => n.setAttribute("hidden", "true"), 3500)), i.ok || console.warn("PUT /support-needs failed", i.status);
-    } catch (i) {
-      console.warn("Save support needs error:", i);
+      n && (n.removeAttribute("hidden"), setTimeout(() => n.setAttribute("hidden", "true"), 3500)), a.ok || console.warn("PUT /support-needs failed", a.status);
+    } catch (a) {
+      console.warn("Save support needs error:", a);
     }
   }
   // --- Language Script Detection ---
@@ -2504,33 +2578,33 @@ ${h}
     return /[\u1200-\u137F]/.test(e) ? "am" : /[\u0600-\u06FF]/.test(e) ? "ar" : /\b(waa'ee|moojulii|akkam|maal|hojii|barnoota|gaaffii|deebii|galatoomi|akkamitti|eessa|barataa|barumsa)\b/i.test(e) || /\b[A-Za-z]+'[A-Za-z]+\b/.test(e) ? "om" : "en";
   }
   detectLanguageWithConfidence(e) {
-    const t = e.trim();
-    if (/[؀-ۿ]/.test(t)) return { language: "ar", confidence: 0.99 };
-    if (/[ሀ-፿]/.test(t)) {
-      const n = /\b(ናይ|እንታይ|እቲ|እዚ|ከመይ|ትምህርቲ)\b/.test(t);
+    const i = e.trim();
+    if (/[؀-ۿ]/.test(i)) return { language: "ar", confidence: 0.99 };
+    if (/[ሀ-፿]/.test(i)) {
+      const n = /\b(ናይ|እንታይ|እቲ|እዚ|ከመይ|ትምህርቲ)\b/.test(i);
       return { language: n ? "ti" : "am", confidence: n ? 0.94 : 0.92 };
     }
-    const a = t.match(/\b(waa'ee|moojulii|akkam|maal|hojii|barnoota|gaaffii|deebii|galatoomi|akkamitti|eessa|barataa|barumsa)\b/gi);
-    return a?.length ? { language: "om", confidence: Math.min(0.98, 0.8 + a.length * 0.06) } : (t.match(/[A-Za-z]+/g) || []).length >= 3 ? { language: "en", confidence: 0.9 } : { language: this.currentLang, confidence: 0.45 };
+    const t = i.match(/\b(waa'ee|moojulii|akkam|maal|hojii|barnoota|gaaffii|deebii|galatoomi|akkamitti|eessa|barataa|barumsa)\b/gi);
+    return t?.length ? { language: "om", confidence: Math.min(0.98, 0.8 + t.length * 0.06) } : (i.match(/[A-Za-z]+/g) || []).length >= 3 ? { language: "en", confidence: 0.9 } : { language: this.currentLang, confidence: 0.45 };
   }
   collectPageControls() {
     return Array.from(
       document.querySelectorAll(
         "button, a[href], input, select, textarea, [role='button'], [role='link'], [tabindex]"
       )
-    ).filter((t) => !this.contains(t) && !t.hasAttribute("disabled")).slice(0, 100).map((t, a) => {
-      let i = t.getAttribute("data-savanna-action-id");
-      i || (i = `page-control-${a}-${Math.random().toString(36).slice(2, 7)}`, t.setAttribute("data-savanna-action-id", i));
-      const n = t, s = (t.getAttribute("aria-label") || t.getAttribute("title") || n.labels?.[0]?.textContent || t.textContent || n.placeholder || n.value || t.getAttribute("name") || t.tagName.toLowerCase()).replace(/\s+/g, " ").trim().slice(0, 120);
+    ).filter((i) => !this.contains(i) && !i.hasAttribute("disabled")).slice(0, 100).map((i, t) => {
+      let a = i.getAttribute("data-savanna-action-id");
+      a || (a = `page-control-${t}-${Math.random().toString(36).slice(2, 7)}`, i.setAttribute("data-savanna-action-id", a));
+      const n = i, s = (i.getAttribute("aria-label") || i.getAttribute("title") || n.labels?.[0]?.textContent || i.textContent || n.placeholder || n.value || i.getAttribute("name") || i.tagName.toLowerCase()).replace(/\s+/g, " ").trim().slice(0, 120);
       return {
-        id: i,
+        id: a,
         label: s,
-        role: t.getAttribute("role") || t.tagName.toLowerCase()
+        role: i.getAttribute("role") || i.tagName.toLowerCase()
       };
     });
   }
   findPageControl(e) {
-    return e && Array.from(document.querySelectorAll("[data-savanna-action-id]")).find((t) => t.getAttribute("data-savanna-action-id") === e) || null;
+    return e && Array.from(document.querySelectorAll("[data-savanna-action-id]")).find((i) => i.getAttribute("data-savanna-action-id") === e) || null;
   }
   isAffirmative(e) {
     return /^(yes|yeah|yep|confirm|okay|ok|አዎ|እሺ|eeyyee|እወ|نعم|أجل)\b/i.test(e.trim());
@@ -2539,7 +2613,7 @@ ${h}
     return /^(no|nope|cancel|stop|አይ|አይደለም|lakki|ኣይፋል|لا|إلغاء)\b/i.test(e.trim());
   }
   async planVoiceAction(e) {
-    const t = {
+    const i = {
       action: "none",
       spoken_confirmation: "I did not recognize a page command.",
       requires_confirmation: !1,
@@ -2547,7 +2621,7 @@ ${h}
       language: this.currentLang
     };
     try {
-      const a = await fetch(`${this.apiBase}/api/v1/agent/plan`, {
+      const t = await fetch(`${this.apiBase}/api/v1/agent/plan`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -2557,14 +2631,14 @@ ${h}
           available_controls: this.collectPageControls()
         })
       });
-      if (a.ok) return await a.json();
-    } catch (a) {
-      console.warn("Voice command planner unavailable; keeping editable transcript.", a);
+      if (t.ok) return await t.json();
+    } catch (t) {
+      console.warn("Voice command planner unavailable; keeping editable transcript.", t);
     }
-    return t;
+    return i;
   }
   async executeVoiceAction(e) {
-    const t = this.findPageControl(e.target);
+    const i = this.findPageControl(e.target);
     switch (e.action) {
       case "read_page":
         this.readPageAloud();
@@ -2573,27 +2647,27 @@ ${h}
         this.readSectionAloud();
         return;
       case "list_controls": {
-        const a = this.collectPageControls().map((n) => n.label).filter(Boolean).slice(0, 20), i = a.length ? `Available controls: ${a.join(", ")}.` : "No labelled page controls were found.";
-        this.announce(i), this.speakText(i);
+        const t = this.collectPageControls().map((n) => n.label).filter(Boolean).slice(0, 20), a = t.length ? `Available controls: ${t.join(", ")}.` : "No labelled page controls were found.";
+        this.announce(a), this.speakText(a);
         return;
       }
       case "focus_control":
-        t && (t.focus(), t.scrollIntoView({ block: "center", behavior: "smooth" }), this.announce(e.spoken_confirmation));
+        i && (i.focus(), i.scrollIntoView({ block: "center", behavior: "smooth" }), this.announce(e.spoken_confirmation));
         return;
       case "activate_control":
-        t?.click(), this.announce(e.spoken_confirmation);
+        i?.click(), this.announce(e.spoken_confirmation);
         return;
       case "fill_control":
-        (t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement) && (t.value = e.value || "", t.dispatchEvent(new Event("input", { bubbles: !0 })), t.dispatchEvent(new Event("change", { bubbles: !0 })), t.focus());
+        (i instanceof HTMLInputElement || i instanceof HTMLTextAreaElement) && (i.value = e.value || "", i.dispatchEvent(new Event("input", { bubbles: !0 })), i.dispatchEvent(new Event("change", { bubbles: !0 })), i.focus());
         return;
       case "submit": {
-        const a = this.shadowRoot?.querySelector("#chat-text-input");
-        if (!t && a?.value.trim()) {
-          const i = a.value;
-          a.value = "", this.pendingVoiceTranscript = "", await this.askQuestion(i);
+        const t = this.shadowRoot?.querySelector("#chat-input");
+        if (!i && t?.value.trim()) {
+          const a = t.value;
+          t.value = "", this.pendingVoiceTranscript = "", await this.askQuestion(a);
           return;
         }
-        t instanceof HTMLButtonElement || t instanceof HTMLInputElement ? t.click() : t instanceof HTMLFormElement && t.requestSubmit();
+        i instanceof HTMLButtonElement || i instanceof HTMLInputElement ? i.click() : i instanceof HTMLFormElement && i.requestSubmit();
         return;
       }
       case "stop_reading":
@@ -2606,86 +2680,102 @@ ${h}
         return;
     }
   }
-  async handleVoiceTranscript(e, t) {
-    const a = e.trim();
-    if (!a) return;
+  async handleVoiceTranscript(e, i) {
+    const t = e.trim();
+    if (!t) return;
     if (this.spokenOnboardingActive) {
-      this.handleSpokenOnboardingAnswer(a);
+      this.handleSpokenOnboardingAnswer(t);
+      return;
+    }
+    if (this.shadowRoot?.querySelector("#onboarding-overlay") && (this.isAffirmative(t) || this.isNegative(t))) {
+      this.speakText("Choose Start spoken setup before answering yes or no.");
       return;
     }
     if (this.pendingVoiceAction) {
-      if (this.isAffirmative(a)) {
-        const o = this.pendingVoiceAction;
-        this.pendingVoiceAction = null, await this.executeVoiceAction(o);
-      } else this.isNegative(a) ? (this.pendingVoiceAction = null, this.announce("Action cancelled."), this.speakText("Action cancelled.")) : this.speakText("Please say yes to confirm or no to cancel.");
+      if (this.isAffirmative(t)) {
+        const d = this.pendingVoiceAction;
+        this.pendingVoiceAction = null, await this.executeVoiceAction(d);
+      } else this.isNegative(t) ? (this.pendingVoiceAction = null, this.announce("Action cancelled."), this.speakText("Action cancelled.")) : this.speakText("Please say yes to confirm or no to cancel.");
       return;
     }
-    const i = this.detectLanguageWithConfidence(a);
-    i.confidence >= 0.82 && i.language !== this.currentLang && this.setLanguage(i.language, !1);
-    const n = await this.planVoiceAction(a);
+    const a = this.detectLanguageWithConfidence(t);
+    a.confidence >= 0.82 && a.language !== this.currentLang && this.setLanguage(a.language, !1);
+    const n = await this.planVoiceAction(t);
     if (n.language && n.confidence >= 0.82 && n.language !== this.currentLang && this.setLanguage(n.language, !1), n.action !== "none") {
       n.requires_confirmation ? (this.pendingVoiceAction = n, this.announce(n.spoken_confirmation), this.speakText(n.spoken_confirmation)) : await this.executeVoiceAction(n);
       return;
     }
-    t.value = a, t.focus(), this.pendingVoiceTranscript = a;
-    const s = `I heard: ${a}. You can edit it, or say send.`;
+    i.value = t, i.focus(), this.pendingVoiceTranscript = t;
+    const s = `I heard: ${t}. You can edit it, or say send.`;
     this.announce(s), this.speakText(s);
   }
   spokenOnboardingQuestions() {
+    const e = {
+      en: "English is selected. Continue in English? Say yes or no.",
+      am: "አማርኛ ተመርጧል። በአማርኛ እንቀጥል? አዎ ወይም አይ ይበሉ።",
+      om: "Afaan Oromoo filatameera. Afaan Oromootiin itti fufnaa? Eeyyee ykn lakki jedhaa.",
+      ti: "ትግርኛ ተመሪጹ። ብትግርኛ ንቐጽል? እወ ወይ ኣይፋል በሉ።",
+      ar: "تم اختيار العربية. هل نتابع بالعربية؟ قل نعم أو لا."
+    };
     return {
       en: [
-        "Would you like voice assistance? Say yes or no.",
+        e.en,
         "Are you using a screen reader such as NVDA, TalkBack, or VoiceOver?",
         "Would you like enhanced keyboard focus?",
         "Would you like high contrast colors?",
         "Would you like larger text?",
+        "Would you like voice assistance? Say yes or no.",
         "Should I read new answers aloud automatically?"
       ],
       am: [
-        "የድምጽ እርዳታ ይፈልጋሉ? አዎ ወይም አይ ይበሉ።",
+        e.am,
         "NVDA፣ TalkBack ወይም VoiceOver የሚባል የማያ አንባቢ ይጠቀማሉ?",
         "ግልጽ የቁልፍ ሰሌዳ ትኩረት ይፈልጋሉ?",
         "ከፍተኛ ንፅፅር ቀለም ይፈልጋሉ?",
         "ትልቅ ጽሑፍ ይፈልጋሉ?",
+        "የድምጽ እርዳታ ይፈልጋሉ? አዎ ወይም አይ ይበሉ።",
         "አዲስ መልሶችን በራስ-ሰር እንዳነብልዎት ይፈልጋሉ?"
       ],
       om: [
-        "Gargaarsa sagalee barbaadduu? Eeyyee ykn lakki jedhaa.",
+        e.om,
         "Dubbisaa iskiriinii akka NVDA, TalkBack ykn VoiceOver fayyadamtu?",
         "Xiyyeeffannoo kiiboodii ifaa barbaadduu?",
         "Halluu walbira qabuu olaanaa barbaadduu?",
         "Barreeffama guddaa barbaadduu?",
+        "Gargaarsa sagalee barbaadduu? Eeyyee ykn lakki jedhaa.",
         "Deebii haaraa ofumaan sagaleedhaan dubbisuu qabaa?"
       ],
       ti: [
-        "ናይ ድምጺ ሓገዝ ትደልዩ ዶ? እወ ወይ ኣይፋል በሉ።",
+        e.ti,
         "ከም NVDA፣ TalkBack ወይ VoiceOver ዝኣመሰለ ኣንባቢ ስክሪን ትጥቀሙ ዶ?",
         "ንጹር ናይ ኪቦርድ ትኹረት ትደልዩ ዶ?",
         "ልዑል ንጽጽር ሕብሪ ትደልዩ ዶ?",
         "ዓቢ ጽሑፍ ትደልዩ ዶ?",
+        "ናይ ድምጺ ሓገዝ ትደልዩ ዶ? እወ ወይ ኣይፋል በሉ።",
         "ሓደስቲ መልስታት ብኣውቶማቲክ ከንብበልኩም ዶ?"
       ],
       ar: [
-        "هل تريد المساعدة الصوتية؟ قل نعم أو لا.",
+        e.ar,
         "هل تستخدم قارئ شاشة مثل NVDA أو TalkBack أو VoiceOver؟",
         "هل تريد مؤشراً أوضح للتركيز عند استخدام لوحة المفاتيح؟",
         "هل تريد ألواناً عالية التباين؟",
         "هل تريد نصاً أكبر؟",
+        "هل تريد المساعدة الصوتية؟ قل نعم أو لا.",
         "هل تريد قراءة الإجابات الجديدة بصوت عال تلقائياً؟"
       ]
     }[this.currentLang];
   }
   startSpokenOnboarding() {
-    this.spokenOnboardingActive = !0, this.spokenOnboardingIndex = 0, this.accessibilityPrefs.voice_enabled = !0, this.speakSpokenOnboardingQuestion();
+    this.stopPageReading(), this.pendingVoiceAction = null, this.spokenOnboardingActive = !0, this.spokenOnboardingIndex = [0, 1, 3, 5][this.onboardingStep] ?? 0, this.speakSpokenOnboardingQuestion();
   }
   speakSpokenOnboardingQuestion(e = "") {
-    const t = this.spokenOnboardingQuestions()[this.spokenOnboardingIndex];
-    if (!t) return;
-    const a = e ? `${e} ${t}` : t;
-    this.announce(a), this.speakText(a, {
+    const i = this.spokenOnboardingQuestions()[this.spokenOnboardingIndex];
+    if (!i) return;
+    const t = e ? `${e} ${i}` : i;
+    this.announce(t), this.speakText(t, {
       onEnd: () => {
-        const i = this.shadowRoot?.querySelector("#chat-text-input");
-        i && this.spokenOnboardingActive && this.startVoiceRecording(i);
+        const a = this.shadowRoot?.querySelector("#chat-input");
+        a && this.spokenOnboardingActive && this.startVoiceRecording(a);
       }
     });
   }
@@ -2694,46 +2784,63 @@ ${h}
       this.speakText("Please answer yes or no.", { onEnd: () => this.speakSpokenOnboardingQuestion() });
       return;
     }
-    const t = this.isAffirmative(e), a = {
+    const i = this.isAffirmative(e), t = {
       en: ["Selected yes.", "Selected no."],
       am: ["አዎ ተመርጧል።", "አይ ተመርጧል።"],
       om: ["Eeyyee filatameera.", "Lakki filatameera."],
       ti: ["እወ ተመሪጹ።", "ኣይፋል ተመሪጹ።"],
       ar: ["تم اختيار نعم.", "تم اختيار لا."]
     };
+    if (this.spokenOnboardingIndex === 0 && !i) {
+      this.spokenOnboardingActive = !1;
+      const n = {
+        en: "Choose another language, then select Start spoken setup again.",
+        am: "ሌላ ቋንቋ ይምረጡ፣ ከዚያ የድምጽ ቅንብርን እንደገና ይጀምሩ።",
+        om: "Afaan biraa filadhaa, sana booda qindaa'ina sagalee irra deebi'aa jalqabaa.",
+        ti: "ካልእ ቋንቋ ምረጹ፣ ድሕሪኡ ናይ ድምጺ ቅጥዒ እንደገና ጀምሩ።",
+        ar: "اختر لغة أخرى، ثم ابدأ الإعداد الصوتي مرة أخرى."
+      };
+      this.speakText(n[this.currentLang]);
+      return;
+    }
     switch (this.spokenOnboardingIndex) {
       case 0:
-        this.accessibilityPrefs.voice_enabled = t;
         break;
       case 1:
-        this.accessibilityPrefs.screen_reader_mode = t, t && (this.accessibilityPrefs.auto_tts = !1);
+        this.accessibilityPrefs.screen_reader_mode = i;
         break;
       case 2:
-        this.accessibilityPrefs.keyboard_navigation = t;
+        this.accessibilityPrefs.keyboard_navigation = i;
         break;
       case 3:
-        this.highContrast = t;
+        this.highContrast = i, this.accessibilityPrefs.high_contrast = i;
         break;
       case 4:
-        this.textSize = t ? "larger" : "normal", this.accessibilityPrefs.large_text = this.textSize;
+        this.textSize = i ? "larger" : "normal", this.accessibilityPrefs.large_text = this.textSize;
         break;
       case 5:
-        this.accessibilityPrefs.auto_tts = t;
+        this.accessibilityPrefs.voice_enabled = i;
+        break;
+      case 6:
+        this.accessibilityPrefs.auto_tts = i;
         break;
     }
     if (this.spokenOnboardingIndex += 1, this.spokenOnboardingIndex < this.spokenOnboardingQuestions().length) {
-      this.speakSpokenOnboardingQuestion(a[this.currentLang][t ? 0 : 1]);
+      this.onboardingStep = this.spokenOnboardingIndex < 1 ? 0 : this.spokenOnboardingIndex < 3 ? 1 : this.spokenOnboardingIndex < 5 ? 2 : 3, this.savePreferences(), this.render(), setTimeout(
+        () => this.speakSpokenOnboardingQuestion(t[this.currentLang][i ? 0 : 1]),
+        0
+      );
       return;
     }
     this.spokenOnboardingActive = !1, this.accessibilityPrefs.onboarded = !0, this.onboardingDismissed = !0, this.savePreferences(), this.render();
-    const i = {
+    const a = {
       en: "Setup complete. You can change these choices in accessibility settings.",
       am: "ቅንብሩ ተጠናቋል። እነዚህን ምርጫዎች በተደራሽነት ቅንብሮች ውስጥ መቀየር ይችላሉ።",
       om: "Qindaa'inni xumurameera. Filannoowwan kana qindaa'ina qaqqabummaa keessatti jijjiiruu dandeessu.",
       ti: "ቅጥዒ ተዛዚሙ። ነዞም ምርጫታት ኣብ ቅጥዒ ተበጻሕነት ክትቅይሩ ትኽእሉ።",
       ar: "اكتمل الإعداد. يمكنك تغيير هذه الخيارات من إعدادات إمكانية الوصول."
     };
-    this.speakText(i[this.currentLang]), this.accessibilityPrefs.voice_enabled && this.initWakeWordDetection();
+    this.speakText(a[this.currentLang]), this.accessibilityPrefs.voice_enabled && this.initWakeWordDetection();
   }
   // --- Voice-to-Text (Speech Recognition) ---
   async toggleVoiceInput(e) {
@@ -2746,49 +2853,49 @@ ${h}
       } catch {
       }
     this.isRecording = !0, this.isProcessingSpeech = !1, this.playEarcon("start"), this.announce(this.t("voiceListening")), this.updateVoiceStatusUI(), this.updateMicButtonUI();
-    let t = !1;
-    const a = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (a)
+    let i = !1;
+    const t = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (t)
       try {
-        this.activeRecognition = new a(), this.activeRecognition.continuous = !1, this.activeRecognition.interimResults = !0;
-        const i = {
+        this.activeRecognition = new t(), this.activeRecognition.continuous = !1, this.activeRecognition.interimResults = !0;
+        const a = {
           en: "en-US",
           am: "am-ET",
           om: "om-ET",
           ar: "ar-SA",
           ti: "ti-ET"
         };
-        this.activeRecognition.lang = i[this.currentLang] || "en-US", this.activeRecognition.onresult = (n) => {
+        this.activeRecognition.lang = a[this.currentLang] || "en-US", this.activeRecognition.onresult = (n) => {
           let s = "";
           for (let r = 0; r < n.results.length; r++)
             s += n.results[r][0]?.transcript || "";
-          const o = s.trim();
-          o && (e.value = o, n.results[n.results.length - 1]?.isFinal && (t = !0, this.handleVoiceTranscript(o, e)));
+          const d = s.trim();
+          d && (e.value = d, n.results[n.results.length - 1]?.isFinal && (i = !0, this.handleVoiceTranscript(d, e)));
         }, this.activeRecognition.onend = () => {
-          this.isRecording && this.stopVoiceRecording(t);
+          this.isRecording && this.stopVoiceRecording(i);
         }, this.activeRecognition.onerror = (n) => {
           console.warn("Active speech recognition error:", n.error);
         }, this.activeRecognition.start();
-      } catch (i) {
-        console.warn("Active recognition init error, falling back to MediaRecorder", i);
+      } catch (a) {
+        console.warn("Active recognition init error, falling back to MediaRecorder", a);
       }
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia)
       try {
-        const i = await navigator.mediaDevices.getUserMedia({ audio: !0 });
+        const a = await navigator.mediaDevices.getUserMedia({ audio: !0 });
         this.audioChunks = [];
         const n = MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : MediaRecorder.isTypeSupported("audio/ogg") ? "audio/ogg" : "audio/wav";
-        this.mediaRecorder = new MediaRecorder(i), this.mediaRecorder.ondataavailable = (s) => {
+        this.mediaRecorder = new MediaRecorder(a), this.mediaRecorder.ondataavailable = (s) => {
           s.data.size > 0 && this.audioChunks.push(s.data);
         }, this.mediaRecorder.onstop = async () => {
-          if (i.getTracks().forEach((s) => s.stop()), !t && this.audioChunks.length > 0) {
+          if (a.getTracks().forEach((s) => s.stop()), !i && this.audioChunks.length > 0) {
             const s = new Blob(this.audioChunks, { type: n });
             await this.sendAudioForTranscription(s, n, e);
           }
         }, this.mediaRecorder.start(), this.voiceRecordingTimeout = window.setTimeout(() => {
-          this.isRecording && this.stopVoiceRecording(t);
+          this.isRecording && this.stopVoiceRecording(i);
         }, 1e4);
-      } catch (i) {
-        console.warn("MediaRecorder permission/init notice:", i), a || (alert(this.t("micError")), this.isRecording = !1, this.updateMicButtonUI(), this.updateVoiceStatusUI());
+      } catch (a) {
+        console.warn("MediaRecorder permission/init notice:", a), t || (alert(this.t("micError")), this.isRecording = !1, this.updateMicButtonUI(), this.updateVoiceStatusUI());
       }
   }
   stopVoiceRecording(e = !1) {
@@ -2801,8 +2908,8 @@ ${h}
     }
     if (this.mediaRecorder && this.mediaRecorder.state !== "inactive" ? (e || (this.isProcessingSpeech = !0, this.announce(this.t("voiceProcessing")), this.updateVoiceStatusUI()), this.mediaRecorder.stop()) : (this.isProcessingSpeech = !1, this.updateVoiceStatusUI()), this.updateMicButtonUI(), e) {
       this.playEarcon("transcribed"), this.announce(this.t("voicePreviewNotice"));
-      const t = this.shadowRoot?.querySelector("#chat-text-input, #chat-input");
-      t && t.focus();
+      const i = this.shadowRoot?.querySelector("#chat-input");
+      i && i.focus();
     }
     setTimeout(() => {
       if (!this.isRecording && !this.isSpeaking && this.wakeWordRecognizer)
@@ -2812,35 +2919,41 @@ ${h}
         }
     }, 1200);
   }
-  async sendAudioForTranscription(e, t, a) {
+  async sendAudioForTranscription(e, i, t) {
     this.isProcessingSpeech = !0, this.updateVoiceStatusUI(), this.announce(this.t("voiceProcessing"));
     try {
-      const i = new FileReader(), n = new Promise((r, h) => {
-        i.onloadend = () => {
-          const p = i.result;
+      const a = new FileReader(), n = new Promise((r, c) => {
+        a.onloadend = () => {
+          const p = a.result;
           r(p.split(",")[1] || "");
-        }, i.onerror = h;
+        }, a.onerror = c;
       });
-      i.readAsDataURL(e);
-      const s = await n, o = await fetch(`${this.apiBase}/api/v1/speech/transcribe`, {
+      a.readAsDataURL(e);
+      const s = await n, d = await fetch(`${this.apiBase}/api/v1/speech/transcribe`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           audio_base64: s,
-          media_type: t,
+          media_type: i,
           language: "auto",
           retain: !1
         })
       });
-      if (o.ok) {
-        const r = await o.json();
+      if (d.ok) {
+        const r = await d.json();
         if (r.transcript) {
-          const h = r.detected_language, p = Number(r.language_confidence || 0);
-          h && h in k && p >= 0.82 && h !== this.currentLang && this.setLanguage(h, !1), await this.handleVoiceTranscript(r.transcript, a), this.playEarcon("transcribed"), this.announce(this.t("voicePreviewNotice")), await this.askQuestion(r.transcript, !1, !0);
+          const c = r.detected_language, p = Number(r.language_confidence || 0);
+          if (c && c in k && p >= 0.82 && c !== this.currentLang)
+            this.setLanguage(c, !1);
+          else {
+            const v = this.detectLanguage(r.transcript);
+            v !== this.currentLang && this.setLanguage(v, !1);
+          }
+          await this.handleVoiceTranscript(r.transcript, t), this.playEarcon("transcribed"), this.announce(this.t("voicePreviewNotice")), await this.askQuestion(r.transcript, !1, !0);
         }
       }
-    } catch (i) {
-      console.warn("Transcription fallback notice:", i);
+    } catch (a) {
+      console.warn("Transcription fallback notice:", a);
     } finally {
       this.isProcessingSpeech = !1, this.updateVoiceStatusUI();
     }
@@ -2886,43 +2999,46 @@ ${h}
   }
   async speakResponse(e) {
     this.stopSpeaking();
-    const t = this.cleanTextForSpeech(e.text);
-    if (t) {
+    const i = this.cleanTextForSpeech(e.text);
+    if (i) {
       this.isSpeaking = !0, e.isAudioPlaying = !0, this.renderMessages(), this.updateVoiceStatusUI();
       try {
-        const a = await fetch(`${this.apiBase}/api/v1/speech/synthesize`, {
+        const t = await fetch(`${this.apiBase}/api/v1/speech/synthesize`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            text: t,
+            text: i,
             language: this.currentLang,
             speed: 1
           })
         });
-        if (a.ok) {
-          const i = await a.json(), n = !i.audio_url || String(i.audio_url).includes("demo.ogg");
-          if (!i.mocked && !n && i.audio_url) {
-            const s = String(i.audio_url), o = /^(https?:|data:|blob:)/.test(s) ? s : `${this.apiBase}${s}`;
-            this.activeAudio = new Audio(o);
-            const r = this.accessibilityPrefs?.speech_rate || 1;
-            this.activeAudio.playbackRate = r, this.activeAudio.preservesPitch = !0, this.activeAudio.mozPreservesPitch = !0, this.activeAudio.webkitPreservesPitch = !0, this.activeAudio.onended = () => this.finishSpeaking(e), this.activeAudio.onerror = () => this.fallbackTTS(t, e), await this.activeAudio.play();
+        if (t.ok) {
+          const a = await t.json();
+          if (!a.mocked && a.audio_url) {
+            const n = String(a.audio_url), s = /^(https?:|data:|blob:)/.test(n) ? n : `${this.apiBase}${n}`;
+            this.activeAudio = new Audio(s), this.activeAudio.onended = () => this.finishSpeaking(e), this.activeAudio.onerror = () => this.fallbackTTS(i, e), await this.activeAudio.play();
             return;
           }
         }
-      } catch (a) {
-        console.warn("Server TTS unavailable; using browser speech fallback.", a);
+      } catch (t) {
+        console.warn("Server TTS unavailable; using browser speech fallback.", t);
       }
-      this.fallbackTTS(t, e);
+      this.fallbackTTS(i, e);
     }
   }
-  fallbackTTS(e, t) {
-    this.speakText(e, {
-      onStart: () => {
-        this.isSpeaking = !0, t.isAudioPlaying = !0, this.renderMessages(), this.updateVoiceStatusUI();
-      },
-      onEnd: () => this.finishSpeaking(t),
-      onError: () => this.finishSpeaking(t)
-    }) || this.finishSpeaking(t);
+  fallbackTTS(e, i) {
+    if (!("speechSynthesis" in window)) {
+      this.finishSpeaking(i);
+      return;
+    }
+    const t = new SpeechSynthesisUtterance(e), a = {
+      en: "en-US",
+      am: "am-ET",
+      om: "om-ET",
+      ti: "ti-ET",
+      ar: "ar-SA"
+    };
+    t.lang = a[this.currentLang] || "en-US", t.onend = () => this.finishSpeaking(i), t.onerror = () => this.finishSpeaking(i), window.speechSynthesis.speak(t);
   }
   finishSpeaking(e) {
     this.isSpeaking = !1, e.isAudioPlaying = !1, this.activeAudio = null, this.renderMessages(), this.updateVoiceStatusUI();
@@ -2962,10 +3078,10 @@ ${h}
   highlightElement(e) {
     if (this.ensureHighlightStyles(), this.stopPageReadingHighlight(), e) {
       e.classList.add("sb-reading-highlight");
-      let t = e.parentElement;
-      for (; t && t !== document.body; ) {
-        const a = window.getComputedStyle(t);
-        (a.overflowY === "hidden" || a.overflow === "hidden" || t.classList.contains("overflow-y-hidden") || t.style.height === "400px" || t.getAttribute("style")?.includes("400px")) && (t.style.overflowY = "visible", t.style.height = "auto", t.style.maxHeight = "none", t.classList.remove("overflow-y-hidden", "pe-none")), t = t.parentElement;
+      let i = e.parentElement;
+      for (; i && i !== document.body; ) {
+        const t = window.getComputedStyle(i);
+        (t.overflowY === "hidden" || t.overflow === "hidden" || i.classList.contains("overflow-y-hidden") || i.style.height === "400px" || i.getAttribute("style")?.includes("400px")) && (i.style.overflowY = "visible", i.style.height = "auto", i.style.maxHeight = "none", i.classList.remove("overflow-y-hidden", "pe-none")), i = i.parentElement;
       }
       try {
         e.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -3000,52 +3116,52 @@ ${h}
       ".content",
       "body"
     ];
-    let t = [];
-    for (const a of e) {
-      const i = document.querySelector(a);
-      if (!i) continue;
+    let i = [];
+    for (const t of e) {
+      const a = document.querySelector(t);
+      if (!a) continue;
       const n = Array.from(
-        i.querySelectorAll("p, h1, h2, h3, h4, h5, li, blockquote, pre")
+        a.querySelectorAll("p, h1, h2, h3, h4, h5, li, blockquote, pre")
       ).filter((s) => s.closest("bridge-assistant, db-assistant, nav, footer, header, #sidebar, .sidebar, script, style, noscript, dialog, .modal, template") || s.offsetParent === null && s.offsetWidth === 0 && s.offsetHeight === 0 ? !1 : (s.textContent?.trim() || "").length > 15);
       if (n.length > 0) {
-        t = n;
+        i = n;
         break;
       }
     }
-    return t.length === 0 && document.body && (t = Array.from(
+    return i.length === 0 && document.body && (i = Array.from(
       document.body.querySelectorAll("p, h2, h3, h4, h5")
-    ).filter((a) => a.closest("bridge-assistant, db-assistant, nav, footer, header, #sidebar, .sidebar, script, style, template") ? !1 : (a.textContent?.trim() || "").length > 15)), t;
+    ).filter((t) => t.closest("bridge-assistant, db-assistant, nav, footer, header, #sidebar, .sidebar, script, style, template") ? !1 : (t.textContent?.trim() || "").length > 15)), i;
   }
-  startSequentialReading(e, t = 0) {
+  startSequentialReading(e, i = 0) {
     this.readingWatchdogTimer && (clearTimeout(this.readingWatchdogTimer), this.readingWatchdogTimer = null), this.activeUtterance = null, window.__activeUtterance = null, this.activeAudio && (this.activeAudio.pause(), this.activeAudio = null), "speechSynthesis" in window && window.speechSynthesis.cancel();
-    const a = this.getReadablePageElements(), i = e.text.split(/\n\s*\n|\n/).map((r) => r.trim()).filter((r) => !(!r || r.length < 5 || /^(Would you like|የሚከተሉትን|Maal gochuu|هل ترغب|•\s*Explain|•\s*Quiz|•\s*What|•\s*ይህንን|•\s*ወደ|•\s*ግንዛቤ|•\s*Yaada|•\s*Barnoota|•\s*Hubannoo|•\s*أشرح|•\s*أوضح|•\s*أطرح)/i.test(
+    const t = this.getReadablePageElements(), a = e.text.split(/\n\s*\n|\n/).map((r) => r.trim()).filter((r) => !(!r || r.length < 5 || /^(Would you like|የሚከተሉትን|Maal gochuu|هل ترغب|•\s*Explain|•\s*Quiz|•\s*What|•\s*ይህንን|•\s*ወደ|•\s*ግንዛቤ|•\s*Yaada|•\s*Barnoota|•\s*Hubannoo|•\s*أشرح|•\s*أوضح|•\s*أطرح)/i.test(
       r
-    ))), n = i.length > 0 ? i : [e.text];
+    ))), n = a.length > 0 ? a : [e.text];
     let s = -1;
-    const o = n.map((r, h) => {
-      const p = r.replace(/[#*•_`]/g, " ").replace(/\s+/g, " ").trim().toLowerCase(), T = /^(this course|this lesson|summary of|የዚህ|ይህ ትምህርት|barnoonni|يشرح|ملخص)/i.test(p), w = p.slice(0, 35);
-      let b = null, y = -1;
-      for (let f = 0; f < a.length; f++) {
-        const x = a[f], R = (x.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
-        if ((w.length > 10 && R.includes(w) || p.length > 20 && R.includes(p.slice(10, 45)) || R.length > 15 && p.includes(R.slice(0, 35))) && (f > s || y === -1) && (b = x, y = f, f > s))
+    const d = n.map((r, c) => {
+      const p = r.replace(/[#*•_`]/g, " ").replace(/\s+/g, " ").trim().toLowerCase(), v = /^(this course|this lesson|summary of|የዚህ|ይህ ትምህርት|barnoonni|يشرح|ملخص)/i.test(p), g = p.slice(0, 35);
+      let m = null, b = -1;
+      for (let y = 0; y < t.length; y++) {
+        const R = t[y], L = (R.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+        if ((g.length > 10 && L.includes(g) || p.length > 20 && L.includes(p.slice(10, 45)) || L.length > 15 && p.includes(L.slice(0, 35))) && (y > s || b === -1) && (m = R, b = y, y > s))
           break;
       }
-      if (!b)
-        if (T && a.length > 0)
-          b = a[0], y = 0;
+      if (!m)
+        if (v && t.length > 0)
+          m = t[0], b = 0;
         else {
-          const f = s + 1;
-          f < a.length ? (b = a[f], y = f) : h < a.length && (b = a[h], y = h);
+          const y = s + 1;
+          y < t.length ? (m = t[y], b = y) : c < t.length && (m = t[c], b = c);
         }
-      return y !== -1 && (s = y), {
+      return b !== -1 && (s = b), {
         text: r,
-        element: b || null
+        element: m || null
       };
     });
     this.currentReading = {
       msgId: e.id,
-      items: o,
-      currentIndex: t,
+      items: d,
+      currentIndex: i,
       isPaused: !1
     }, e.isAudioPlaying = !0, e.isAudioPaused = !1, this.renderMessages(), this.playNextReadingItem(e);
   }
@@ -3056,10 +3172,10 @@ ${h}
       this.stopPageReadingHighlight(), e.isAudioPlaying = !1, e.isAudioPaused = !1, this.currentReading = null, this.activeUtterance = null, window.__activeUtterance = null, this.renderMessages();
       return;
     }
-    const t = this.currentReading.items[this.currentReading.currentIndex];
-    t.element ? this.highlightElement(t.element) : this.stopPageReadingHighlight(), this.renderMessages();
-    const a = t.text.replace(/[#*•_`]/g, " ").replace(/\s+/g, " ").trim();
-    if (!a) {
+    const i = this.currentReading.items[this.currentReading.currentIndex];
+    i.element ? this.highlightElement(i.element) : this.stopPageReadingHighlight(), this.renderMessages();
+    const t = i.text.replace(/[#*•_`]/g, " ").replace(/\s+/g, " ").trim();
+    if (!t) {
       this.currentReading.currentIndex++, this.playNextReadingItem(e);
       return;
     }
@@ -3069,9 +3185,9 @@ ${h}
         window.speechSynthesis.resume();
       } catch {
       }
-      const i = () => {
+      const a = () => {
         this.readingWatchdogTimer && (clearTimeout(this.readingWatchdogTimer), this.readingWatchdogTimer = null), this.activeUtterance = null, window.__activeUtterance = null, !(!this.currentReading || this.currentReading.msgId !== e.id || this.currentReading.isPaused) && (this.currentReading.currentIndex++, this.playNextReadingItem(e));
-      }, n = new SpeechSynthesisUtterance(a);
+      }, n = new SpeechSynthesisUtterance(t);
       this.activeUtterance = n, window.__activeUtterance = n;
       const s = {
         en: "en-US",
@@ -3083,18 +3199,18 @@ ${h}
       n.lang = s[this.currentLang] || "en-US", n.rate = 1, n.onstart = () => {
         e.isAudioPlaying = !0, e.isAudioPaused = !1;
       }, n.onend = () => {
-        i();
-      }, n.onerror = (h) => {
-        console.warn("TTS segment error:", h), i();
+        a();
+      }, n.onerror = (c) => {
+        console.warn("TTS segment error:", c), a();
       };
-      const o = a.split(/\s+/).filter(Boolean).length, r = Math.min(14e3, Math.max(3e3, Math.ceil(o / 2 * 1e3) + 1200));
+      const d = t.split(/\s+/).filter(Boolean).length, r = Math.min(14e3, Math.max(3e3, Math.ceil(d / 2 * 1e3) + 1200));
       this.readingWatchdogTimer = setTimeout(() => {
-        i();
+        a();
       }, r), setTimeout(() => {
         try {
           window.speechSynthesis.speak(n);
         } catch {
-          i();
+          a();
         }
       }, 40);
     } else
@@ -3129,18 +3245,18 @@ ${h}
   setupPageNavigationMonitor() {
     if (typeof window > "u") return;
     const e = () => {
-      const i = window.location.href, n = document.title || "", s = this.extractPlatformContext();
-      (this.lastPageUrl && this.lastPageUrl !== i || this.lastPageSection && this.lastPageSection !== s.section) && (this.stopPageReadingHighlight(), this.activeAudio && (this.activeAudio.pause(), this.activeAudio = null), "speechSynthesis" in window && window.speechSynthesis.cancel(), this.announce(`${this.t("navigatedToNotice")} ${s.section}`), this.messages.length === 0 && this.renderMessages()), this.lastPageUrl = i, this.lastPageTitle = n, this.lastPageSection = s.section;
+      const a = window.location.href, n = document.title || "", s = this.extractPlatformContext();
+      (this.lastPageUrl && this.lastPageUrl !== a || this.lastPageSection && this.lastPageSection !== s.section) && (this.stopPageReadingHighlight(), this.activeAudio && (this.activeAudio.pause(), this.activeAudio = null), "speechSynthesis" in window && window.speechSynthesis.cancel(), this.announce(`${this.t("navigatedToNotice")} ${s.section}`), this.messages.length === 0 && this.renderMessages()), this.lastPageUrl = a, this.lastPageTitle = n, this.lastPageSection = s.section;
     };
     window.addEventListener("popstate", e), window.addEventListener("hashchange", e);
-    const t = history.pushState;
-    t && (history.pushState = function(...i) {
-      const n = t.apply(this, i);
+    const i = history.pushState;
+    i && (history.pushState = function(...a) {
+      const n = i.apply(this, a);
       return setTimeout(e, 50), n;
     });
-    const a = history.replaceState;
-    a && (history.replaceState = function(...i) {
-      const n = a.apply(this, i);
+    const t = history.replaceState;
+    t && (history.replaceState = function(...a) {
+      const n = t.apply(this, a);
       return setTimeout(e, 50), n;
     }), this.navCheckTimer = window.setInterval(e, 1500), e();
   }
@@ -3150,11 +3266,11 @@ ${h}
     const e = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (e)
       try {
-        this.wakeWordRecognition = new e(), this.wakeWordRecognition.continuous = !0, this.wakeWordRecognition.interimResults = !1, this.wakeWordRecognition.lang = this.currentLang === "ar" ? "ar-SA" : this.currentLang === "am" ? "am-ET" : this.currentLang === "om" ? "om-ET" : "en-US", this.wakeWordRecognition.onresult = (t) => {
-          const a = t.results[t.results.length - 1];
-          if (!a || !a[0]) return;
-          const i = (a[0].transcript || "").trim().toLowerCase();
-          (i.includes("help") || i.includes("እርዳታ") || i.includes("gargaarsa") || i.includes("مساعدة")) && this.triggerVoiceActivation();
+        this.wakeWordRecognition = new e(), this.wakeWordRecognition.continuous = !0, this.wakeWordRecognition.interimResults = !1, this.wakeWordRecognition.lang = this.currentLang === "ar" ? "ar-SA" : this.currentLang === "am" ? "am-ET" : this.currentLang === "om" ? "om-ET" : "en-US", this.wakeWordRecognition.onresult = (i) => {
+          const t = i.results[i.results.length - 1];
+          if (!t || !t[0]) return;
+          const a = (t[0].transcript || "").trim().toLowerCase();
+          (a.includes("help") || a.includes("እርዳታ") || a.includes("gargaarsa") || a.includes("مساعدة")) && this.triggerVoiceActivation();
         }, this.wakeWordRecognition.onerror = () => {
           this.voiceActivationEnabled && !this.isRecording && setTimeout(() => {
             try {
@@ -3170,22 +3286,22 @@ ${h}
             }
           }, 500);
         }, this.wakeWordRecognition.start();
-      } catch (t) {
-        console.warn("Wake word detector error:", t);
+      } catch (i) {
+        console.warn("Wake word detector error:", i);
       }
   }
   triggerVoiceActivation() {
     this.openAssistant();
-    const e = this.shadowRoot?.querySelector("#chat-text-input");
+    const e = this.shadowRoot?.querySelector("#chat-input");
     e && setTimeout(() => {
       this.toggleVoiceInput(e);
     }, 250);
   }
   // --- Q&A / Ask ---
-  async askQuestion(e, t = !1, a = !1) {
-    const i = e.trim();
-    if (!i || this.isThinking) return;
-    const n = i.match(/^(?:\/confirm|\/link)?\s*([0-9]{6})$/i);
+  async askQuestion(e, i = !1, t = !1) {
+    const a = e.trim();
+    if (!a || this.isThinking) return;
+    const n = a.match(/^(?:\/confirm|\/link)?\s*([0-9]{6})$/i);
     if (n) {
       const r = n[1];
       if (await this.confirmLinkCode(r)) {
@@ -3201,73 +3317,73 @@ ${h}
       new CustomEvent("db-assistant:question", {
         bubbles: !0,
         composed: !0,
-        detail: { text: i, language: this.currentLang }
+        detail: { text: a, language: this.currentLang }
       })
     );
     const s = {
       id: `msg_${Date.now()}_learner`,
       sender: "learner",
-      text: i
+      text: a
     };
     this.messages.push(s), this.isThinking = !0, this.announce(this.t("lookingInCourse")), this.renderMessages();
-    const o = this.extractPlatformContext();
+    const d = this.extractPlatformContext();
     try {
       let r = await fetch(`${this.apiBase}/api/v1/ask`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          question: i,
+          question: a,
           language: this.currentLang,
           course_id: this.courseId,
-          simple_mode: t || this.simpleMode,
+          simple_mode: i || this.simpleMode,
           channel: "web",
           learner_ref: this.getAttribute("learner-id") || `learner_${this.sessionId}`,
           platform_id: this.platformId,
-          ...o
+          ...d
         })
       });
       if (!r.ok && r.status === 404 && (r = await fetch(`${this.apiBase}/ask`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          question: i,
+          question: a,
           language: this.currentLang,
           course_id: this.courseId,
-          simple_mode: t || this.simpleMode,
+          simple_mode: i || this.simpleMode,
           channel: "web",
           learner_ref: this.getAttribute("learner-id") || `learner_${this.sessionId}`,
           platform_id: this.platformId,
-          ...o
+          ...d
         })
       })), this.isThinking = !1, r.ok) {
-        const h = await r.json(), p = h.language;
-        h.language_changed && p && p in k && p !== this.currentLang && this.setLanguage(p, !1);
-        const T = !!h.offer_human || h.reason === "low_confidence", w = {
+        const c = await r.json(), p = c.language;
+        c.language_changed && p && p in k && p !== this.currentLang && this.setLanguage(p, !1);
+        const v = !!c.offer_human || c.reason === "low_confidence", g = {
           id: `msg_${Date.now()}_assistant`,
           sender: "assistant",
-          text: h.answer,
+          text: c.answer,
           heading: this.t("answerHeading"),
-          citations: h.citations || [],
-          offerHuman: h.offer_human,
-          isRefusal: T
+          citations: c.citations || [],
+          offerHuman: c.offer_human,
+          isRefusal: v
         };
-        this.messages.push(w), this.saveChatState(), this.renderMessages(), a ? setTimeout(() => {
-          this.handleListen(w);
-        }, 300) : (this.autoReadSpeech || this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_tts) && this.speakResponse(w);
+        this.messages.push(g), this.saveChatState(), this.renderMessages(), t ? setTimeout(() => {
+          this.handleListen(g);
+        }, 300) : (this.autoReadSpeech || this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_tts) && this.speakResponse(g);
       } else {
-        const h = {
+        const c = {
           id: `msg_${Date.now()}_err`,
           sender: "assistant",
           text: this.t("serverErrorNotice"),
           offerHuman: !0
         };
-        this.messages.push(h), this.renderMessages();
+        this.messages.push(c), this.renderMessages();
       }
     } catch {
       this.isThinking = !1;
       try {
-        const h = JSON.parse(localStorage.getItem("db_assistant_offline_queue") || "[]");
-        h.push({ question: i, language: this.currentLang, timestamp: Date.now() }), localStorage.setItem("db_assistant_offline_queue", JSON.stringify(h));
+        const c = JSON.parse(localStorage.getItem("db_assistant_offline_queue") || "[]");
+        c.push({ question: a, language: this.currentLang, timestamp: Date.now() }), localStorage.setItem("db_assistant_offline_queue", JSON.stringify(c));
       } catch {
       }
       const r = {
@@ -3288,7 +3404,7 @@ ${h}
     if (window.confirm(this.t("handoffConsentCheck"))) {
       this.announce(this.t("lookingInCourse"));
       try {
-        const t = await fetch(`${this.apiBase}/api/v1/escalations`, {
+        const i = await fetch(`${this.apiBase}/api/v1/escalations`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -3303,16 +3419,16 @@ ${h}
             channel: "web"
           })
         });
-        if (t.ok) {
-          const a = await t.json(), i = a.ticketId || a.id || "ticket_01", n = a.room_url || a.roomUrl || "https://meet.jit.si/savanna-bridge-demo";
+        if (i.ok) {
+          const t = await i.json(), a = t.ticketId || t.id || "ticket_01", n = t.room_url || t.roomUrl || "https://meet.jit.si/savanna-bridge-demo";
           this.activeHandoff = {
-            id: i,
+            id: a,
             room_url: n
           }, this.dispatchEvent(
             new CustomEvent("db-assistant:escalated", {
               bubbles: !0,
               composed: !0,
-              detail: { ticketId: i, roomUrl: n }
+              detail: { ticketId: a, roomUrl: n }
             })
           ), this.messages.push({
             id: `msg_${Date.now()}_handoff`,
@@ -3327,14 +3443,14 @@ ${h}
           s && (s.innerHTML = `
             <div style="padding:0.75rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:0.5rem; margin-top:0.75rem;">
               <p style="margin:0 0 0.5rem 0; font-size:0.875rem; font-weight:600; color:#166534; display:flex; align-items:center; gap:0.375rem;">
-                ${c.celebrate} <span>${this.t("handoffReadyTitle")}</span>
+                ${o.celebrate} <span>${this.t("handoffReadyTitle")}</span>
               </p>
               <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
                 <a href="${n}" target="_blank" rel="noopener noreferrer" class="btn btn-primary room-link" style="text-decoration:none; display:inline-flex; align-items:center; gap:0.375rem;">
-                  ${c.video} <span>${this.t("joinRoomButton")}</span>
+                  ${o.video} <span>${this.t("joinRoomButton")}</span>
                 </a>
                 <button type="button" class="btn btn-secondary btn-copy-room" data-url="${this.escapeHtml(n)}" style="font-size:0.8125rem; min-height:44px; display:inline-flex; align-items:center; gap:0.375rem;">
-                  ${c.copy} <span>${this.t("copyRoomBtn")}</span>
+                  ${o.copy} <span>${this.t("copyRoomBtn")}</span>
                 </button>
               </div>
             </div>
@@ -3346,10 +3462,103 @@ ${h}
       }
     }
   }
+  renderOnboardingWizard() {
+    if (this.accessibilityPrefs.onboarded || this.onboardingDismissed) return "";
+    const e = {
+      en: { step: "Step", of: "of", back: "Back", next: "Next", finish: "Finish setup", skip: "Skip for now" },
+      am: { step: "ደረጃ", of: "ከ", back: "ተመለስ", next: "ቀጣይ", finish: "ቅንብሩን ጨርስ", skip: "ለጊዜው ዝለል" },
+      om: { step: "Tarkaanfii", of: "kan", back: "Duubatti", next: "Itti aanu", finish: "Qindaa'ina xumuri", skip: "Ammaaf darbi" },
+      ti: { step: "ስጉምቲ", of: "ካብ", back: "ተመለስ", next: "ቀጻሊ", finish: "ቅጥዒ ዛዝም", skip: "ንሕጂ ሕለፎ" },
+      ar: { step: "الخطوة", of: "من", back: "رجوع", next: "التالي", finish: "إنهاء الإعداد", skip: "تخطي الآن" }
+    }[this.currentLang], i = [
+      `
+        <p class="onboarding-subtitle">${this.t("onboardingSubtitle")}</p>
+        <label class="settings-label">${this.t("onboardingLangPrompt")}</label>
+        <div class="lang-group onboarding-languages" role="group" aria-label="${this.t("onboardingLangPrompt")}" style="display:grid; grid-template-columns:repeat(5, minmax(44px,1fr)); gap:0.375rem; padding:0.375rem;">
+          <button type="button" class="lang-toggle-btn" id="onboard-lang-en" aria-pressed="${this.currentLang === "en"}" aria-label="EN, English">EN</button>
+          <button type="button" class="lang-toggle-btn" id="onboard-lang-am" aria-pressed="${this.currentLang === "am"}" aria-label="አማ, አማርኛ">አማ</button>
+          <button type="button" class="lang-toggle-btn" id="onboard-lang-om" aria-pressed="${this.currentLang === "om"}" aria-label="OM, Afaan Oromoo">OM</button>
+          <button type="button" class="lang-toggle-btn" id="onboard-lang-ti" aria-pressed="${this.currentLang === "ti"}" aria-label="ትግ, ትግርኛ">ትግ</button>
+          <button type="button" class="lang-toggle-btn" id="onboard-lang-ar" aria-pressed="${this.currentLang === "ar"}" aria-label="عربي, العربية">عربي</button>
+        </div>
+        <button type="button" class="btn btn-secondary" id="btn-spoken-onboarding" style="align-self:flex-start;">
+          ${o.sound} <span>${this.t("spokenSetup")}</span>
+        </button>
+      `,
+      `
+        <p class="onboarding-subtitle">Choose how the assistant should work with your assistive technology.</p>
+        <div class="onboarding-option-grid">
+          <label class="toggle-row">
+            <div class="toggle-info"><span class="toggle-title">${this.t("screenReaderModeLabel")}</span><span class="toggle-desc">${this.t("screenReaderModeDesc")}</span></div>
+            <input type="checkbox" id="onboard-chk-screen-reader" class="toggle-switch" ${this.accessibilityPrefs.screen_reader_mode ? "checked" : ""}>
+          </label>
+          <label class="toggle-row">
+            <div class="toggle-info"><span class="toggle-title">${this.t("keyboardNavLabel")}</span><span class="toggle-desc">${this.t("keyboardNavDesc")}</span></div>
+            <input type="checkbox" id="onboard-chk-keyboard-nav" class="toggle-switch" ${this.accessibilityPrefs.keyboard_navigation ? "checked" : ""}>
+          </label>
+        </div>
+      `,
+      `
+        <p class="onboarding-subtitle">Adjust the visual presentation. You can change these choices later in Settings.</p>
+        <div class="onboarding-option-grid">
+          <label class="toggle-row">
+            <div class="toggle-info"><span class="toggle-title">${this.t("highContrastLabel")}</span><span class="toggle-desc">Increase separation between text, controls, and backgrounds.</span></div>
+            <input type="checkbox" id="onboard-chk-contrast" class="toggle-switch" ${this.accessibilityPrefs.high_contrast ? "checked" : ""}>
+          </label>
+          <label class="toggle-row">
+            <div class="toggle-info"><span class="toggle-title">${this.t("textLarger")}</span><span class="toggle-desc">${this.t("textSizeLabel")}</span></div>
+            <input type="checkbox" id="onboard-chk-large-text" class="toggle-switch" ${this.accessibilityPrefs.large_text === "larger" ? "checked" : ""}>
+          </label>
+        </div>
+      `,
+      `
+        <p class="onboarding-subtitle">Choose voice assistance. Written content always remains available.</p>
+        <div class="onboarding-option-grid">
+          <label class="toggle-row">
+            <div class="toggle-info"><span class="toggle-title">${this.t("onboardingVoiceEnable")}</span><span class="toggle-desc">${this.t("onboardingVoiceDesc")}</span></div>
+            <input type="checkbox" id="onboard-chk-voice" class="toggle-switch" ${this.accessibilityPrefs.voice_enabled ? "checked" : ""}>
+          </label>
+          <label class="toggle-row">
+            <div class="toggle-info"><span class="toggle-title">${this.t("autoTtsLabel")}</span><span class="toggle-desc">${this.t("autoTtsDesc")}</span></div>
+            <input type="checkbox" id="onboard-chk-auto-tts" class="toggle-switch" ${this.accessibilityPrefs.auto_tts ? "checked" : ""}>
+          </label>
+        </div>
+        <div class="privacy-note">${o.lock} <span>${this.t("onboardingMicExplain")}</span></div>
+      `
+    ], t = [0, 1, 2, 3].map((a) => `<span class="${a <= this.onboardingStep ? "active" : ""}"></span>`).join("");
+    return `
+      <div class="onboarding-overlay" id="onboarding-overlay">
+        <section class="onboarding-card" role="dialog" aria-modal="true" aria-labelledby="onboard-title">
+          <div class="onboarding-header">
+            <h3 class="onboarding-title" id="onboard-title" tabindex="-1">${o.accessibility}<span>${this.t("onboardingTitle")}</span></h3>
+            <button type="button" class="btn btn-secondary btn-icon-only" id="btn-onboard-close" aria-label="${e.skip}">${o.close}</button>
+          </div>
+          <div class="wizard-progress" role="progressbar" aria-label="${e.step} ${this.onboardingStep + 1} ${e.of} 4" aria-valuemin="1" aria-valuemax="4" aria-valuenow="${this.onboardingStep + 1}">${t}</div>
+          <div class="wizard-step-label">${e.step} ${this.onboardingStep + 1} ${e.of} 4</div>
+          <div class="onboarding-body">${i[this.onboardingStep]}</div>
+          <div class="onboarding-actions">
+            <button type="button" class="btn btn-secondary" id="btn-onboard-skip">${e.skip}</button>
+            <span style="flex:1;"></span>
+            ${this.onboardingStep > 0 ? `<button type="button" class="btn btn-secondary" id="btn-onboard-back">${e.back}</button>` : ""}
+            ${this.onboardingStep < 3 ? `<button type="button" class="btn btn-primary" id="btn-onboard-next">${e.next} ${o.arrowRight}</button>` : `<button type="button" class="btn btn-primary" id="btn-onboard-save">${e.finish}</button>`}
+          </div>
+        </section>
+      </div>`;
+  }
+  captureOnboardingStep() {
+    const e = (r) => {
+      const c = this.shadowRoot?.querySelector(`#${r}`);
+      return c ? c.checked : null;
+    }, i = e("onboard-chk-screen-reader"), t = e("onboard-chk-keyboard-nav"), a = e("onboard-chk-contrast"), n = e("onboard-chk-large-text"), s = e("onboard-chk-voice"), d = e("onboard-chk-auto-tts");
+    i !== null && (this.accessibilityPrefs.screen_reader_mode = i), t !== null && (this.accessibilityPrefs.keyboard_navigation = t), a !== null && (this.accessibilityPrefs.high_contrast = a), n !== null && (this.accessibilityPrefs.large_text = n ? "larger" : "normal"), s !== null && (this.accessibilityPrefs.voice_enabled = s), d !== null && (this.accessibilityPrefs.auto_tts = d), this.highContrast = this.accessibilityPrefs.high_contrast, this.textSize = this.accessibilityPrefs.large_text;
+  }
+  completeOnboarding(e) {
+    e && this.captureOnboardingStep(), this.accessibilityPrefs.onboarded = !0, this.onboardingDismissed = !0, this.onboardingStep = 0, this.savePreferences(), this.render(), e && this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_welcome && this.triggerSpokenWelcome(), e && this.accessibilityPrefs.voice_enabled && this.initWakeWordDetection();
+  }
   // --- Rendering ---
   render() {
     this.shadowRoot && (this.setAttribute("data-contrast", this.highContrast ? "high" : "normal"), this.setAttribute("data-size", this.textSize), this.setAttribute("dir", this.currentLang === "ar" ? "rtl" : "ltr"), this.accessibilityPrefs?.keyboard_navigation ? this.classList.add("keyboard-focus-enhanced") : this.classList.remove("keyboard-focus-enhanced"), this.accessibilityPrefs?.screen_reader_mode ? this.classList.add("screen-reader-mode") : this.classList.remove("screen-reader-mode"), this.shadowRoot.innerHTML = `
-      <style>${H}</style>
+      <style>${D}</style>
 
       <!-- Live Announcer -->
       <div id="live-announcer" class="sr-only" aria-live="polite" aria-atomic="true" style="position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); border:0;"></div>
@@ -3359,7 +3568,7 @@ ${h}
               aria-expanded="${this.isOpen}" aria-controls="assistant-dialog" aria-haspopup="dialog"
               aria-label="${this.t("launcherLabel")}. ${this.t("wakeHint")}">
         <span class="launcher-icon-badge" aria-hidden="true" style="display:inline-flex; align-items:center; justify-content:center; width:2rem; height:2rem; border-radius:50%; background:rgba(255,255,255,0.22); color:#ffffff; flex-shrink:0;">
-          ${c.launcher}
+          ${o.launcher}
         </span>
         <div style="display:flex; flex-direction:column; align-items:flex-start; text-align:left; line-height:1.2;">
           <span style="color:#ffffff; font-weight:700;">${this.t("launcherLabel")}</span>
@@ -3371,7 +3580,7 @@ ${h}
       ${!this.isOpen && this.showAutoplayBanner ? `
         <div class="voice-activation-banner" role="alert" style="position:fixed; bottom:5.5rem; right:1.5rem; max-width:320px; z-index:99999; box-shadow:0 8px 24px rgba(0,0,0,0.18);">
           <div style="display:flex; align-items:center; gap:0.5rem;">
-            ${c.sound}
+            ${o.sound}
             <span>${this.t("oneTapVoiceActivation")}</span>
           </div>
           <div style="display:flex; align-items:center; gap:0.375rem; margin-top:0.375rem;">
@@ -3379,7 +3588,7 @@ ${h}
               ${this.t("voiceAccessibilityLabel")}
             </button>
             <button type="button" class="btn btn-secondary btn-icon-only" id="btn-dismiss-voice-banner-floating" aria-label="Dismiss">
-              ${c.close}
+              ${o.close}
             </button>
           </div>
         </div>
@@ -3392,19 +3601,25 @@ ${h}
 
         <!-- Header -->
         <header class="header">
-          <div class="header-titles">
-            <span class="header-accessibility-icon" aria-hidden="true" style="display:inline-flex; align-items:center; justify-content:center; width:1.875rem; height:1.875rem; border-radius:50%; background:#fef2f2; color:#b91c1c; flex-shrink:0;">
-              ${c.accessibility}
-            </span>
-            <h2 id="dialog-title" class="title" tabindex="-1">${this.t("appTitle")}</h2>
+          <div class="header-top">
+            <div class="header-titles">
+              <span class="header-accessibility-icon" aria-hidden="true">
+                ${o.accessibility}
+              </span>
+              <h2 id="dialog-title" class="title" tabindex="-1">${this.t("appTitle")}</h2>
+            </div>
+            <div class="header-window-controls">
+              <!-- Settings Button -->
+              <button type="button" class="btn btn-secondary" id="btn-open-settings" aria-label="${this.t("settingsLabel")}" title="${this.t("settingsLabel")}" style="min-height:38px; min-width:38px; width:38px; height:38px; padding:0; display:inline-flex; align-items:center; justify-content:center;">
+                ${o.settings}
+              </button>
+              <!-- Close Button -->
+              <button type="button" class="btn btn-secondary" id="btn-close-dialog" aria-label="${this.t("closeLabel")}" style="min-height:38px; min-width:38px; width:38px; height:38px; padding:0; display:inline-flex; align-items:center; justify-content:center;">
+                ${o.close}
+              </button>
+            </div>
           </div>
           <div class="header-actions">
-            <!-- Quick EN/AM Toggle for backward compatibility with integration tests -->
-            <button class="lang-btn" type="button" id="btn-lang-toggle" 
-                    aria-label="${this.currentLang === "am" ? "English - Switch Language" : "አማርኛ - ቋንቋ ቀይር"}" 
-                    style="font-size:0.6875rem; font-weight:700; padding:0.25rem 0.5rem; min-height:1.75rem; border-radius:0.375rem; background:var(--b-surface-alt); border:1px solid var(--b-border); color:var(--b-text); cursor:pointer;">
-              ${this.currentLang === "am" ? "English" : "አማርኛ"}
-            </button>
             <!-- 5-Language Segmented Selector in Native Scripts with WCAG 2.5.3 Compliant Labels -->
             <div class="lang-group" role="group" aria-label="Language selection">
               <button type="button" class="lang-toggle-btn lang-btn" id="btn-lang-en" 
@@ -3423,31 +3638,21 @@ ${h}
                       aria-pressed="${this.currentLang === "ar"}" 
                       aria-label="عربي - العربية (Arabic)">عربي</button>
             </div>
-
-            <!-- Settings Button -->
-            <button type="button" class="btn btn-secondary" id="btn-open-settings" aria-label="${this.t("settingsLabel")}" title="${this.t("settingsLabel")}" style="min-height:44px; min-width:44px; width:44px; padding:0;">
-              ${c.settings}
-            </button>
-            <!-- Close Button -->
-            <button type="button" class="btn btn-secondary" id="btn-close-dialog" aria-label="${this.t("closeLabel")}" style="min-height:44px; min-width:44px; width:44px; padding:0;">
-              ${c.close}
-            </button>
-            </button>
           </div>
         </header>
 
         <!-- Navigation Tabs on Main Assistant Dialog -->
         <nav class="nav-tabs" role="tablist" aria-label="Assistant sections">
           <button type="button" class="tab-btn" id="tab-chat" role="tab" aria-selected="${this.activeTab === "chat"}" aria-controls="pane-chat">
-            ${c.launcher}
+            ${o.launcher}
             <span>${this.t("chatTab")}</span>
           </button>
           <button type="button" class="tab-btn" id="tab-support" role="tab" aria-selected="${this.activeTab === "support"}" aria-controls="pane-support">
-            ${c.heart}
+            ${o.heart}
             <span>${this.t("supportTab")}</span>
           </button>
           <button type="button" class="tab-btn" id="tab-handoff" role="tab" aria-selected="${this.activeTab === "handoff"}" aria-controls="pane-handoff">
-            ${c.headphones}
+            ${o.headphones}
             <span>${this.t("handoffTab")}</span>
           </button>
         </nav>
@@ -3460,7 +3665,7 @@ ${h}
           ${this.showAutoplayBanner ? `
             <div class="voice-activation-banner" role="alert" style="margin:0.5rem 1rem; padding:0.625rem 0.875rem; background:#eff6ff; border:1px solid #bfdbfe; border-radius:0.5rem; display:flex; align-items:center; justify-content:space-between; gap:0.5rem; font-size:0.8125rem; color:#1e40af;">
               <div style="display:flex; align-items:center; gap:0.5rem;">
-                ${c.sound}
+                ${o.sound}
                 <span>${this.t("oneTapVoiceActivation")}</span>
               </div>
               <div style="display:flex; align-items:center; gap:0.375rem;">
@@ -3468,7 +3673,7 @@ ${h}
                   ${this.t("voiceAccessibilityLabel")}
                 </button>
                 <button type="button" class="btn btn-secondary btn-icon-only" id="btn-dismiss-voice-banner" aria-label="Dismiss">
-                  ${c.close}
+                  ${o.close}
                 </button>
               </div>
             </div>
@@ -3483,9 +3688,9 @@ ${h}
                 </span>
               </div>
               <div class="reading-btns">
-                ${this.isReadingPaused ? `<button type="button" class="btn btn-secondary btn-icon-only" id="btn-reading-resume" aria-label="${this.t("resumeReading")}" title="${this.t("resumeReading")}">${c.play}</button>` : `<button type="button" class="btn btn-secondary btn-icon-only" id="btn-reading-pause" aria-label="${this.t("pauseReading")}" title="${this.t("pauseReading")}">${c.pause}</button>`}
+                ${this.isReadingPaused ? `<button type="button" class="btn btn-secondary btn-icon-only" id="btn-reading-resume" aria-label="${this.t("resumeReading")}" title="${this.t("resumeReading")}">${o.play}</button>` : `<button type="button" class="btn btn-secondary btn-icon-only" id="btn-reading-pause" aria-label="${this.t("pauseReading")}" title="${this.t("pauseReading")}">${o.pause}</button>`}
                 <button type="button" class="btn btn-danger btn-icon-only" id="btn-reading-stop" aria-label="${this.t("stopReading")}" title="${this.t("stopReading")}" style="background:#fee2e2; color:#991b1b; border:1px solid #fca5a5;">
-                  ${c.stop}
+                  ${o.stop}
                 </button>
               </div>
             </div>
@@ -3500,25 +3705,25 @@ ${h}
           <footer class="footer">
             <!-- Top Row: Input, Mic, Send -->
             <form class="input-row" id="chat-form">
-              <input type="text" class="text-input" id="chat-text-input" data-id="chat-text-input"
+              <input type="text" class="text-input" id="chat-input" data-id="chat-input"
                      placeholder="${this.t("inputPlaceholder")}" 
                      aria-label="${this.t("inputPlaceholder")}" 
                      dir="${this.currentLang === "ar" ? "rtl" : "ltr"}"
                      required autocomplete="off">
-              <button type="button" class="btn btn-secondary mic-btn btn-icon-only" id="mic-btn" style="min-height:44px; min-width:44px;"
+              <button type="button" class="btn btn-secondary mic-btn btn-icon-only" id="mic-btn"
                       aria-label="${this.t("micLabel")}" title="${this.t("micLabel")}" aria-keyshortcuts="Alt+Shift+V">
-                ${c.mic}
+                ${o.mic}
               </button>
-              <button type="submit" class="btn btn-primary" id="send-btn" data-id="send-btn" style="display:inline-flex; align-items:center; justify-content:center; gap:0.375rem; min-height:44px; min-width:44px;">
+              <button type="submit" class="btn btn-primary" id="btn-send" data-id="btn-send" style="display:inline-flex; align-items:center; gap:0.375rem;">
                 <span>${this.t("sendButton")}</span>
-                ${c.send}
+                ${o.send}
               </button>
             </form>
 
             <!-- Bottom Row: Talk to a person & Continue on Telegram -->
             <div class="footer-actions-row">
               <button type="button" class="btn btn-secondary btn-footer btn-talk-person" id="btn-footer-handoff" style="display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-                ${c.user}
+                ${o.user}
                 <span>${this.t("talkToPersonButton")}</span>
               </button>
               <div id="telegram-container" class="telegram-section">
@@ -3535,7 +3740,7 @@ ${h}
         <!-- Pane 2: Support Preferences (Zero Proof Required) -->
         <div id="pane-support" class="tab-panel" role="tabpanel" ${this.activeTab === "support" ? "" : "hidden"} style="${this.activeTab === "support" ? "display:block; overflow-y:auto; padding:1rem;" : "display:none;"}">
           <div class="settings-card">
-            <div class="settings-card-title">${c.heart} <span>${this.t("supportNeedsTitle")}</span></div>
+            <div class="settings-card-title">${o.heart} <span>${this.t("supportNeedsTitle")}</span></div>
             <div class="settings-card-desc">
               ${this.t("supportZeroProof")}
             </div>
@@ -3587,7 +3792,7 @@ ${h}
               </label>
 
               <div id="support-saved-notice" class="support-saved-notice" hidden style="color:#166534; font-size:0.8125rem; font-weight:600; display:inline-flex; align-items:center; gap:0.375rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:0.5rem; padding:0.5rem 0.75rem;">
-                ${c.check} <span>${this.t("supportSavedNotice")}</span>
+                ${o.check} <span>${this.t("supportSavedNotice")}</span>
               </div>
 
               <button type="submit" class="btn btn-primary" style="margin-top:0.25rem;">
@@ -3600,7 +3805,7 @@ ${h}
         <!-- Pane 3: Consented Live Help Handoff -->
         <div id="pane-handoff" class="tab-panel" role="tabpanel" ${this.activeTab === "handoff" ? "" : "hidden"} style="${this.activeTab === "handoff" ? "display:block; overflow-y:auto; padding:1rem;" : "display:none;"}">
           <div class="settings-card">
-            <div class="settings-card-title">${c.headphones} <span>${this.t("handoffTab")}</span></div>
+            <div class="settings-card-title">${o.headphones} <span>${this.t("handoffTab")}</span></div>
             <div class="settings-card-desc">
               ${this.t("appSubtitle")}
             </div>
@@ -3617,7 +3822,7 @@ ${h}
                        placeholder="${this.t("handoffReasonPlaceholder")}">
               </label>
               <button type="submit" class="btn btn-primary" id="btn-submit-handoff" style="display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-                ${c.users} <span>${this.t("requestMentorBtn")}</span>
+                ${o.users} <span>${this.t("requestMentorBtn")}</span>
               </button>
             </form>
             <div id="handoff-room-box" style="margin-top:0.5rem;"></div>
@@ -3637,7 +3842,7 @@ ${h}
           <div id="pane-general" class="settings-pane" style="overflow-y:auto; flex:1; padding:0.5rem 0;">
             <!-- Text Size Card -->
             <div class="settings-card">
-              <div class="settings-card-title">${c.type} <span>${this.t("textSizeLabel")}</span></div>
+              <div class="settings-card-title">${o.type} <span>${this.t("textSizeLabel")}</span></div>
               <div class="size-btn-group">
                 <button type="button" class="size-btn" id="btn-size-smaller" aria-pressed="${this.textSize === "smaller"}" aria-label="A- Smaller text">
                   A- <span>${this.t("textSmaller")}</span>
@@ -3653,7 +3858,7 @@ ${h}
 
             <!-- Accessibility Card -->
             <div class="settings-card">
-              <div class="settings-card-title">${c.contrast} <span>Display & Accessibility</span></div>
+              <div class="settings-card-title">${o.contrast} <span>Display & Accessibility</span></div>
               
               <!-- High Contrast -->
               <label class="toggle-row">
@@ -3687,7 +3892,7 @@ ${h}
 
             <!-- Voice Accessibility & Screen Reader Suite -->
             <div class="settings-card">
-              <div class="settings-card-title">${c.sound} <span>${this.t("voiceTab")}</span></div>
+              <div class="settings-card-title">${o.sound} <span>${this.t("voiceTab")}</span></div>
 
               <!-- Master Voice Toggle -->
               <label class="toggle-row">
@@ -3737,14 +3942,14 @@ ${h}
               <div style="display:flex; flex-direction:column; gap:0.375rem; margin-top:0.25rem;">
                 <div style="display:flex; gap:0.375rem; flex-wrap:wrap;">
                   <button type="button" class="btn btn-secondary" id="btn-read-page" style="flex:1; min-height:44px; font-size:0.8125rem; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-                    ${c.sound} <span>${this.t("readPageBtn")}</span>
+                    ${o.sound} <span>${this.t("readPageBtn")}</span>
                   </button>
                   <button type="button" class="btn btn-secondary" id="btn-read-section" style="flex:1; min-height:44px; font-size:0.8125rem; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-                    ${c.sound} <span>${this.t("readSectionBtn")}</span>
+                    ${o.sound} <span>${this.t("readSectionBtn")}</span>
                   </button>
                 </div>
                 <button type="button" class="btn btn-secondary" id="btn-test-voice" style="min-height:2rem; font-size:0.75rem; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-                  ${c.play} <span>${this.t("testVoiceBtn")}</span>
+                  ${o.play} <span>${this.t("testVoiceBtn")}</span>
                 </button>
               </div>
 
@@ -3780,13 +3985,13 @@ ${h}
               <!-- Replay Onboarding Wizard -->
               <div style="border-top:1px solid var(--b-border); margin:0.5rem 0;"></div>
               <button type="button" class="btn btn-secondary" id="btn-replay-onboarding" style="width:100%; min-height:44px; font-size:0.8125rem; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-                ${c.accessibility} <span>${this.t("onboardingReplay")}</span>
+                ${o.accessibility} <span>${this.t("onboardingReplay")}</span>
               </button>
             </div>
 
             <!-- Account & Telegram Linking Card -->
             <div class="settings-card" id="card-account-linking">
-              <div class="settings-card-title">${c.link} <span>${this.t("linkTab")}</span></div>
+              <div class="settings-card-title">${o.link} <span>${this.t("linkTab")}</span></div>
               <div class="settings-card-desc">
                 ${this.t("supportZeroProof")}
               </div>
@@ -3822,12 +4027,12 @@ ${h}
                 <!-- Generate Code for Telegram -->
                 <div>
                   <button type="button" class="btn btn-secondary" id="btn-generate-code" style="width:100%; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-                    ${c.link} <span>${this.t("generateCodeBtn")}</span>
+                    ${o.link} <span>${this.t("generateCodeBtn")}</span>
                   </button>
                   <div class="code-display" id="code-display" style="display:none; font-size:1.5rem; font-weight:700; letter-spacing:0.25em; text-align:center; padding:0.75rem; background:var(--b-surface-alt, #f8fafc); border:2px dashed var(--b-primary); border-radius:0.5rem; margin-top:0.625rem; color:var(--b-primary);">
                   </div>
                   <div id="code-instructions" style="display:none; font-size:0.75rem; color:var(--b-text-muted); text-align:center; margin-top:0.375rem;">
-                    ${this.t("codeInstructions")}
+                    ${this.escapeHtml(this.t("codeInstructions"))}
                   </div>
                 </div>
               `}
@@ -3841,12 +4046,14 @@ ${h}
                   <div style="font-size:0.75rem; color:#7f1d1d;">Reset conversation and erase stored history</div>
                 </div>
                 <button type="button" class="btn btn-danger" id="btn-clear-chat" style="font-size:0.8125rem; min-height:44px; padding:0.375rem 0.75rem;">
-                  ${c.trash} <span>${this.t("clearChatBtn")}</span>
+                  ${o.trash} <span>${this.t("clearChatBtn")}</span>
                 </button>
               </div>
             </div>
           </div>
         </div>
+
+        ${this.renderOnboardingWizard()}
 
       </section>
     `, this.renderMessages(), this.updateTelegramLinkUI(), this.updateLinkCodeUI(), this.updateVoiceStatusUI(), this.bindEvents());
@@ -3854,118 +4061,35 @@ ${h}
   renderMessages() {
     const e = this.shadowRoot?.querySelector("#chat-log");
     if (!e) return;
-    const a = !this.accessibilityPrefs.onboarded && !this.onboardingDismissed ? `
-      <div class="onboarding-card" id="onboarding-card" role="region" aria-labelledby="onboard-title" style="margin:0 0 1rem 0; padding:1rem; background:var(--b-surface); border:2px solid var(--b-primary); border-radius:0.75rem;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
-          <h3 id="onboard-title" style="margin:0; font-size:1rem; font-weight:700; color:var(--b-text); display:flex; align-items:center; gap:0.5rem;">
-            ${c.accessibility} <span>${this.t("onboardingTitle")}</span>
-          </h3>
-          <button type="button" class="btn btn-secondary btn-icon-only" id="btn-onboard-close" aria-label="${this.t("onboardingSkip")}" title="${this.t("onboardingSkip")}">
-            ${c.close}
-          </button>
-        </div>
-        
-        <p style="font-size:0.8125rem; color:var(--b-text-muted); margin:0 0 0.875rem 0; line-height:1.4;">
-          ${this.t("onboardingSubtitle")}
-        </p>
-
-        <!-- Language Selection in Onboarding -->
-        <div style="margin-bottom:0.875rem;">
-          <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--b-text); margin-bottom:0.375rem;">
-            ${this.t("onboardingLangPrompt")}
-          </label>
-          <div class="lang-group" role="group" aria-label="Language selection" style="width:100%; display:flex; justify-content:stretch;">
-            <button type="button" class="lang-toggle-btn" id="onboard-lang-en" style="flex:1;" aria-pressed="${this.currentLang === "en"}" aria-label="EN - English">EN</button>
-            <button type="button" class="lang-toggle-btn" id="onboard-lang-am" style="flex:1;" aria-pressed="${this.currentLang === "am"}" aria-label="አማ - አማርኛ (Amharic)">አማ</button>
-            <button type="button" class="lang-toggle-btn" id="onboard-lang-om" style="flex:1;" aria-pressed="${this.currentLang === "om"}" aria-label="OM - Afaan Oromoo">OM</button>
-            <button type="button" class="lang-toggle-btn" id="onboard-lang-ti" style="flex:1;" aria-pressed="${this.currentLang === "ti"}" aria-label="ትግ - ትግርኛ (Tigrinya)">ትግ</button>
-            <button type="button" class="lang-toggle-btn" id="onboard-lang-ar" style="flex:1;" aria-pressed="${this.currentLang === "ar"}" aria-label="عربي - العربية (Arabic)">عربي</button>
-          </div>
-        </div>
-
-        <!-- Options -->
-        <div style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:0.875rem;">
-          <label class="toggle-row" style="padding:0.375rem 0.5rem; background:var(--b-bg-subtle, #f8fafc); border-radius:0.375rem; border:1px solid var(--b-border);">
-            <div class="toggle-info">
-              <span class="toggle-title">${this.t("onboardingVoiceEnable")}</span>
-              <span class="toggle-desc">${this.t("onboardingVoiceDesc")}</span>
-            </div>
-            <input type="checkbox" id="onboard-chk-voice" class="toggle-switch" aria-label="${this.t("onboardingVoiceEnable")}" ${this.accessibilityPrefs.voice_enabled ? "checked" : ""}>
-          </label>
-
-          <label class="toggle-row" style="padding:0.375rem 0.5rem; background:var(--b-bg-subtle, #f8fafc); border-radius:0.375rem; border:1px solid var(--b-border);">
-            <div class="toggle-info">
-              <span class="toggle-title">${this.t("screenReaderModeLabel")}</span>
-              <span class="toggle-desc">${this.t("screenReaderModeDesc")}</span>
-            </div>
-            <input type="checkbox" id="onboard-chk-screen-reader" class="toggle-switch" aria-label="${this.t("screenReaderModeLabel")}" ${this.accessibilityPrefs.screen_reader_mode ? "checked" : ""}>
-          </label>
-
-          <label class="toggle-row" style="padding:0.375rem 0.5rem; background:var(--b-bg-subtle, #f8fafc); border-radius:0.375rem; border:1px solid var(--b-border);">
-            <div class="toggle-info">
-              <span class="toggle-title">${this.t("keyboardNavLabel")}</span>
-              <span class="toggle-desc">${this.t("keyboardNavDesc")}</span>
-            </div>
-            <input type="checkbox" id="onboard-chk-keyboard-nav" class="toggle-switch" aria-label="${this.t("keyboardNavLabel")}" ${this.accessibilityPrefs.keyboard_navigation ? "checked" : ""}>
-          </label>
-
-          <label class="toggle-row" style="padding:0.375rem 0.5rem; background:var(--b-bg-subtle, #f8fafc); border-radius:0.375rem; border:1px solid var(--b-border);">
-            <div class="toggle-info">
-              <span class="toggle-title">${this.t("highContrastLabel")}</span>
-              <span class="toggle-desc">${this.t("highContrastLabel")}</span>
-            </div>
-            <input type="checkbox" id="onboard-chk-contrast" class="toggle-switch" aria-label="${this.t("highContrastLabel")}" ${this.accessibilityPrefs.high_contrast ? "checked" : ""}>
-          </label>
-
-          <label class="toggle-row" style="padding:0.375rem 0.5rem; background:var(--b-bg-subtle, #f8fafc); border-radius:0.375rem; border:1px solid var(--b-border);">
-            <div class="toggle-info">
-              <span class="toggle-title">${this.t("textLarger")}</span>
-              <span class="toggle-desc">${this.t("textSizeLabel")}</span>
-            </div>
-            <input type="checkbox" id="onboard-chk-large-text" class="toggle-switch" aria-label="${this.t("textLarger")}" ${this.accessibilityPrefs.large_text === "larger" ? "checked" : ""}>
-          </label>
-        </div>
-
-        <div style="font-size:0.6875rem; color:var(--b-text-muted); margin-bottom:0.875rem; padding:0.375rem 0.5rem; background:#f1f5f9; border-radius:0.375rem; line-height:1.35;">
-          ${this.t("onboardingMicExplain")}
-        </div>
-
-        <!-- Buttons -->
-        <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:0.5rem;">
-          <button type="button" class="btn btn-secondary" id="btn-spoken-onboarding" style="min-height:44px; min-width:44px;">
-            ${c.sound} ${this.t("spokenSetup")}
-          </button>
-          <button type="button" class="btn btn-secondary" id="btn-onboard-skip" style="min-height:44px; min-width:44px;">
-            ${this.t("onboardingSkip")}
-          </button>
-          <button type="button" class="btn btn-primary" id="btn-onboard-save" style="min-height:44px; min-width:44px;">
-            ${this.t("onboardingSave")}
-          </button>
-        </div>
-      </div>
-    ` : "";
+    const i = "";
     if (this.messages.length === 0) {
-      const i = this.lastPageSection || "The Future of the VA Industry";
+      const t = this.lastPageSection || "The Future of the VA Industry";
       e.innerHTML = `
-        ${a}
+        ${i}
         <div class="empty-state">
           <div class="page-context-pill">
-            ${c.book} <span>${this.t("pageContextBadge")} <strong>${this.escapeHtml(i)}</strong></span>
+            ${o.book} <span>${this.t("pageContextBadge")} <strong>${this.escapeHtml(t)}</strong></span>
           </div>
           <p style="margin:0 0 0.5rem 0; font-size:1rem; font-weight:600;">${this.t("emptyWelcome")}</p>
           <div class="suggested-questions">
             <span style="font-size:0.8125rem; font-weight:700; color:var(--b-text-muted);">${this.t("suggestedTitle")}</span>
             <button type="button" class="btn btn-suggested btn-quick-explain" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
-              ${c.lightbulb} <span>${this.escapeHtml(this.t("explainLessonBtn"))}</span>
+              ${o.lightbulb} <span>${this.escapeHtml(this.t("explainLessonBtn"))}</span>
             </button>
             <button type="button" class="btn btn-suggested btn-quick-summarize" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
-              ${c.book} <span>${this.escapeHtml(this.t("summarizePageBtn"))}</span>
+              ${o.book} <span>${this.escapeHtml(this.t("summarizePageBtn"))}</span>
             </button>
             <button type="button" class="btn btn-suggested btn-quick-read" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
-              ${c.listen} <span>${this.escapeHtml(this.t("readPageBtn"))}</span>
+              ${o.listen} <span>${this.escapeHtml(this.t("readPageBtn"))}</span>
             </button>
             <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ1"))}" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
-              ${c.arrowRight} <span>${this.escapeHtml(this.t("suggestedQ1"))}</span>
+              ${o.arrowRight} <span>${this.escapeHtml(this.t("suggestedQ1"))}</span>
+            </button>
+            <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ2"))}" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
+              ${o.arrowRight} <span>${this.escapeHtml(this.t("suggestedQ2"))}</span>
+            </button>
+            <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ3"))}" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
+              ${o.arrowRight} <span>${this.escapeHtml(this.t("suggestedQ3"))}</span>
             </button>
           </div>
         </div>
@@ -3975,65 +4099,55 @@ ${h}
         this.askQuestion(this.t("summarizePageBtn"));
       }), e.querySelector(".btn-quick-read")?.addEventListener("click", () => {
         this.askQuestion(this.t("readPageBtn"));
-      }), e.querySelectorAll(".btn-suggested[data-q]").forEach((n) => {
-        n.addEventListener("click", () => {
-          const s = n.getAttribute("data-q");
-          s && this.askQuestion(s);
+      }), e.querySelectorAll(".btn-suggested[data-q]").forEach((a) => {
+        a.addEventListener("click", () => {
+          const n = a.getAttribute("data-q");
+          n && this.askQuestion(n);
         });
       });
       return;
     }
-    e.innerHTML = a + this.messages.map((i) => {
-      if (i.sender === "learner")
+    e.innerHTML = i + this.messages.map((t) => {
+      if (t.sender === "learner")
         return `
             <div class="msg-row msg-learner">
-              <p class="answer-text" style="margin:0;">${this.escapeHtml(i.text)}</p>
+              <p class="answer-text" style="margin:0;">${this.escapeHtml(t.text)}</p>
             </div>
           `;
-      const n = [], s = /* @__PURE__ */ new Set();
-      if (i.citations)
-        for (const b of i.citations) {
-          const f = (b.title || b.heading || "").replace(/\s*\|\s*.*$/, "").replace(/^Concept page:\s*/i, "").trim();
-          f && !s.has(f) && (s.add(f), n.push({ ...b, title: f }));
+      const a = [], n = /* @__PURE__ */ new Set();
+      if (t.citations)
+        for (const g of t.citations) {
+          const b = (g.title || g.heading || "").replace(/\s*\|\s*.*$/, "").replace(/^Concept page:\s*/i, "").trim();
+          b && !n.has(b) && (n.add(b), a.push({ ...g, title: b }));
         }
-      const o = n.length > 0, r = !!i.isRefusal, h = i.heading || (i.isHandoff ? this.t("handoffReadyTitle") : this.t("answerHeading")), p = !!(this.currentReading && this.currentReading.msgId === i.id), w = i.text.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean).map((b, y) => `<div class="answer-para-item ${p && this.currentReading.currentIndex === y ? "active-reading-para" : ""}" data-msg-id="${i.id}" data-idx="${y}" title="Click to read and highlight this paragraph" style="cursor:pointer; margin-bottom:0.625rem; line-height:1.5;">${this.escapeHtml(b)}</div>`).join("");
+      const s = a.length > 0, d = !!t.isRefusal, r = t.heading || (t.isHandoff ? this.t("handoffReadyTitle") : this.t("answerHeading")), c = !!(this.currentReading && this.currentReading.msgId === t.id), v = t.text.split(/\n\s*\n/).map((g) => g.trim()).filter(Boolean).map((g, m) => `<div class="answer-para-item ${c && this.currentReading.currentIndex === m ? "active-reading-para" : ""}" data-msg-id="${t.id}" data-idx="${m}" title="Click to read and highlight this paragraph" style="cursor:pointer; margin-bottom:0.625rem; line-height:1.5;">${this.escapeHtml(g)}</div>`).join("");
       return `
-          <div class="msg-row msg-assistant" id="${i.id}">
-            <h4 class="answer-heading">${this.escapeHtml(h)}</h4>
-            <div class="answer-text">${w}</div>
+          <div class="msg-row msg-assistant" id="${t.id}">
+            <h4 class="answer-heading">${this.escapeHtml(r)}</h4>
+            <div class="answer-text">${v}</div>
 
-            ${p ? `
-                <div class="reading-nav-bar" style="display:flex; align-items:center; justify-content:space-between; margin:0.5rem 0; padding:0.375rem 0.625rem; background:#fef9c3; border:1px solid #facc15; border-radius:0.375rem; font-size:0.8125rem;">
-                  <span style="font-weight:600; color:#854d0e; display:inline-flex; align-items:center; gap:0.375rem;">${c.book} <span>Reading Paragraph ${this.currentReading.currentIndex + 1} of ${this.currentReading.items.length}</span></span>
-                  <div style="display:flex; gap:0.25rem;">
-                    <button type="button" class="btn btn-secondary btn-prev-para" data-msg-id="${i.id}" style="padding:0.125rem 0.5rem; font-size:0.75rem;" ${this.currentReading.currentIndex === 0 ? "disabled" : ""}>⏮ Prev</button>
-                    <button type="button" class="btn btn-secondary btn-next-para" data-msg-id="${i.id}" style="padding:0.125rem 0.5rem; font-size:0.75rem;" ${this.currentReading.currentIndex >= this.currentReading.items.length - 1 ? "disabled" : ""}>Next ⏭</button>
-                  </div>
-                </div>
-              ` : ""}
-
-            ${i.isHandoff ? `
+            ${t.isHandoff ? `
                 <div class="handoff-card" style="margin-top:0.75rem; padding:0.75rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:0.5rem;">
                   <p style="margin:0 0 0.5rem 0; font-size:0.875rem; font-weight:600; color:#166534; display:flex; align-items:center; gap:0.375rem;">
-                    ${c.celebrate} <span>${this.t("handoffReadyTitle")}</span>
+                    ${o.celebrate} <span>${this.t("handoffReadyTitle")}</span>
                   </p>
                   <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-                    <a href="${this.escapeHtml(i.roomUrl || this.activeHandoff?.room_url || "https://meet.jit.si/savanna-bridge-demo")}" target="_blank" rel="noopener noreferrer" class="btn btn-primary room-link" id="btn-join-room-card" style="text-decoration:none; display:inline-flex; align-items:center; gap:0.375rem;">
-                      ${c.video} <span>${this.t("joinRoomButton")}</span>
+                    <a href="${this.escapeHtml(t.roomUrl || this.activeHandoff?.room_url || "https://meet.jit.si/savanna-bridge-demo")}" target="_blank" rel="noopener noreferrer" class="btn btn-primary room-link" id="btn-join-room-card" style="text-decoration:none; display:inline-flex; align-items:center; gap:0.375rem;">
+                      ${o.video} <span>${this.t("joinRoomButton")}</span>
                     </a>
-                    <button type="button" class="btn btn-secondary btn-copy-room" data-url="${this.escapeHtml(i.roomUrl || this.activeHandoff?.room_url || "https://meet.jit.si/savanna-bridge-demo")}" style="font-size:0.8125rem; min-height:44px; display:inline-flex; align-items:center; gap:0.375rem;">
-                      ${c.copy} <span>${this.t("copyRoomBtn")}</span>
+                    <button type="button" class="btn btn-secondary btn-copy-room" data-url="${this.escapeHtml(t.roomUrl || this.activeHandoff?.room_url || "https://meet.jit.si/savanna-bridge-demo")}" style="font-size:0.8125rem; min-height:44px; display:inline-flex; align-items:center; gap:0.375rem;">
+                      ${o.copy} <span>${this.t("copyRoomBtn")}</span>
                     </button>
                   </div>
                 </div>
               ` : ""}
 
-            ${r ? `
+            ${d ? `
                 <div class="not-verified-box" role="alert">
                   <div>${this.t("notVerifiedNotice")}</div>
                   <div style="display:flex; gap:0.375rem; flex-wrap:wrap;">
-                    <button type="button" class="btn btn-primary btn-talk-person" data-msg-id="${i.id}" style="font-size:0.8125rem; min-height:44px; display:inline-flex; align-items:center; gap:0.375rem;">
-                      ${c.user} <span>${this.t("talkToPersonButton")}</span>
+                    <button type="button" class="btn btn-primary btn-talk-person" data-msg-id="${t.id}" style="font-size:0.8125rem; min-height:44px; display:inline-flex; align-items:center; gap:0.375rem;">
+                      ${o.user} <span>${this.t("talkToPersonButton")}</span>
                     </button>
                     <button type="button" class="btn btn-secondary btn-try-another" style="font-size:0.8125rem; min-height:44px;">
                       ${this.t("tryAnotherQuestion")}
@@ -4044,49 +4158,40 @@ ${h}
 
             <!-- Listen, Stop, Replay & Make Simpler action buttons -->
             <div class="answer-actions">
-              <button type="button" class="btn btn-secondary btn-listen" data-msg-id="${i.id}">
-                ${i.isAudioPlaying ? `${c.pause} <span>${this.t("pauseButton")}</span>` : `${c.sound} <span>${this.t("listenButton")}</span>`}
+              <button type="button" class="btn btn-secondary btn-listen" data-msg-id="${t.id}">
+                ${t.isAudioPlaying ? `${o.pause} <span>${this.t("pauseButton")}</span>` : `${o.sound} <span>${this.t("listenButton")}</span>`}
               </button>
-              <button type="button" class="btn btn-secondary btn-stop" data-msg-id="${i.id}" style="display:inline-flex; align-items:center; gap:0.375rem;" ${i.isAudioPlaying || i.isAudioPaused ? "" : "hidden"}>
-                ${c.stop}
+              <button type="button" class="btn btn-secondary btn-stop" data-msg-id="${t.id}" style="display:inline-flex; align-items:center; gap:0.375rem;" ${t.isAudioPlaying || t.isAudioPaused ? "" : "hidden"}>
+                ${o.stop}
                 <span>${this.t("stopButton")}</span>
               </button>
-              <button type="button" class="btn btn-secondary btn-replay" data-msg-id="${i.id}" style="display:inline-flex; align-items:center; gap:0.375rem;">
-                ${c.replay}
+              <button type="button" class="btn btn-secondary btn-replay" data-msg-id="${t.id}" style="display:inline-flex; align-items:center; gap:0.375rem;">
+                ${o.replay}
                 <span>${this.t("replayButton")}</span>
               </button>
-              <button type="button" class="btn btn-secondary btn-simpler" data-msg-id="${i.id}" style="display:inline-flex; align-items:center; gap:0.375rem;">
-                ${c.lightbulb}
+              <button type="button" class="btn btn-secondary btn-simpler" data-msg-id="${t.id}" style="display:inline-flex; align-items:center; gap:0.375rem;">
+                ${o.lightbulb}
                 <span>${this.t("makeSimplerButton")}</span>
               </button>
-              ${i.isAudioPlaying ? `<span class="speaking-indicator-pill" role="status" aria-live="polite">${c.volume} <span>${this.t("speakingIndicator")}</span></span>` : ""}
+              ${t.isAudioPlaying ? `<span class="speaking-indicator-pill" role="status" aria-live="polite">${o.volume} <span>${this.t("speakingIndicator")}</span></span>` : ""}
             </div>
 
-            <!-- Citations / Sources with readable names & Why this answer drawer -->
-            ${o ? `
+            <!-- Citations / Sources with readable names -->
+            ${s ? `
                 <div class="sources-box">
-                  <div class="sources-title" style="display:flex; align-items:center; justify-content:space-between;">
-                    <span>${this.t("sourcesTitle")}</span>
-                    <button type="button" class="btn-why-answer" data-msg-id="${i.id}" aria-expanded="false" style="font-size:0.75rem; color:#2563eb; background:transparent; border:none; cursor:pointer; text-decoration:underline; font-weight:600;">
-                      🔍 ${this.t("whyThisAnswer")}
-                    </button>
-                  </div>
-                  ${n.map(
-        (b) => `
-                    <a href="${this.escapeHtml(b.url)}" class="source-link citation-link" style="display:inline-flex; align-items:center; gap:0.375rem;">
-                      ${c.book} <span>${this.escapeHtml(b.title || b.heading)}</span>
+                  <div class="sources-title">${this.t("sourcesTitle")}</div>
+                  ${(t.citations || []).filter((g, m, b) => b.findIndex((y) => y.url === g.url) === m).map(
+        (g) => `
+                    <a href="${this.escapeHtml(g.url)}" target="_blank" rel="noopener noreferrer" class="source-link citation-link" style="display:inline-flex; align-items:center; gap:0.375rem;">
+                      ${o.book} <span>${this.escapeHtml(g.title || g.heading)}</span>
                     </a>
                   `
       ).join("")}
-                  <div id="why-box-${i.id}" class="why-answer-drawer" style="display:none; margin-top:0.5rem; padding:0.5rem; background:#f0fdf4; border-left:3px solid #16a34a; font-size:0.75rem; border-radius:0.25rem;">
-                    <div style="font-weight:700; color:#166534; margin-bottom:0.25rem;">✓ Grounded Lesson Retrieval:</div>
-                    <div style="color:#1e293b;">Verified against lesson anchor: <strong>${this.escapeHtml(n[0]?.heading || "Lesson Section")}</strong></div>
-                  </div>
                 </div>
               ` : ""}
 
             <!-- Suggested Follow-up Questions -->
-            ${!r && !i.isHandoff ? `
+            ${!d && !t.isHandoff ? `
                 <div class="followup-box">
                   <div class="followup-title">
                     <span>${this.t("followupTitle")}</span>
@@ -4112,73 +4217,57 @@ ${h}
         </div>
       `), this.isRecording && (e.innerHTML += `
         <div class="live-status-indicator" style="display:inline-flex; align-items:center; gap:0.375rem;">
-          <span class="listening-indicator-pill">${c.mic} <span>${this.t("listeningIndicator")}</span></span>
+          <span class="listening-indicator-pill">${o.mic} <span>${this.t("listeningIndicator")}</span></span>
         </div>
-      `), e.querySelectorAll(".answer-para-item").forEach((i) => {
-      i.addEventListener("click", () => {
-        const n = i.getAttribute("data-msg-id"), s = parseInt(i.getAttribute("data-idx") || "0", 10), o = this.messages.find((r) => r.id === n);
-        o && this.startSequentialReading(o, s);
+      `), e.querySelectorAll(".answer-para-item").forEach((t) => {
+      t.addEventListener("click", () => {
+        const a = t.getAttribute("data-msg-id"), n = parseInt(t.getAttribute("data-idx") || "0", 10), s = this.messages.find((d) => d.id === a);
+        s && this.startSequentialReading(s, n);
       });
-    }), e.querySelectorAll(".btn-prev-para").forEach((i) => {
-      i.addEventListener("click", () => {
-        const n = i.getAttribute("data-msg-id"), s = this.messages.find((o) => o.id === n);
-        s && this.currentReading && this.currentReading.currentIndex > 0 && (this.currentReading.currentIndex--, this.playNextReadingItem(s));
+    }), e.querySelectorAll(".btn-prev-para").forEach((t) => {
+      t.addEventListener("click", () => {
+        const a = t.getAttribute("data-msg-id"), n = this.messages.find((s) => s.id === a);
+        n && this.currentReading && this.currentReading.currentIndex > 0 && (this.currentReading.currentIndex--, this.playNextReadingItem(n));
       });
-    }), e.querySelectorAll(".btn-next-para").forEach((i) => {
-      i.addEventListener("click", () => {
-        const n = i.getAttribute("data-msg-id"), s = this.messages.find((o) => o.id === n);
-        s && this.currentReading && this.currentReading.currentIndex < this.currentReading.items.length - 1 && (this.currentReading.currentIndex++, this.playNextReadingItem(s));
+    }), e.querySelectorAll(".btn-next-para").forEach((t) => {
+      t.addEventListener("click", () => {
+        const a = t.getAttribute("data-msg-id"), n = this.messages.find((s) => s.id === a);
+        n && this.currentReading && this.currentReading.currentIndex < this.currentReading.items.length - 1 && (this.currentReading.currentIndex++, this.playNextReadingItem(n));
       });
-    }), e.querySelectorAll(".btn-listen").forEach((i) => {
-      i.addEventListener("click", () => {
-        const n = i.getAttribute("data-msg-id"), s = this.messages.find((o) => o.id === n);
-        s && (s.isAudioPlaying ? this.stopSpeaking() : this.speakResponse(s));
+    }), e.querySelectorAll(".btn-listen").forEach((t) => {
+      t.addEventListener("click", () => {
+        const a = t.getAttribute("data-msg-id"), n = this.messages.find((s) => s.id === a);
+        n && (n.isAudioPlaying ? this.stopSpeaking() : this.speakResponse(n));
       });
-    }), e.querySelectorAll(".btn-stop").forEach((i) => {
-      i.addEventListener("click", () => {
-        const n = i.getAttribute("data-msg-id"), s = this.messages.find((o) => o.id === n);
-        s && this.handleStop(s);
+    }), e.querySelectorAll(".btn-stop").forEach((t) => {
+      t.addEventListener("click", () => {
+        const a = t.getAttribute("data-msg-id"), n = this.messages.find((s) => s.id === a);
+        n && this.handleStop(n);
       });
-    }), e.querySelectorAll(".btn-replay").forEach((i) => {
-      i.addEventListener("click", () => {
-        const n = i.getAttribute("data-msg-id"), s = this.messages.find((o) => o.id === n);
-        s && this.handleReplay(s);
+    }), e.querySelectorAll(".btn-replay").forEach((t) => {
+      t.addEventListener("click", () => {
+        const a = t.getAttribute("data-msg-id"), n = this.messages.find((s) => s.id === a);
+        n && this.handleReplay(n);
       });
-    }), e.querySelectorAll(".btn-simpler").forEach((i) => {
-      i.addEventListener("click", () => {
-        const n = i.getAttribute("data-msg-id"), s = this.messages.find((o) => o.id === n);
-        s && this.askQuestion(`Explain simpler: ${s.text}`, !0);
+    }), e.querySelectorAll(".btn-simpler").forEach((t) => {
+      t.addEventListener("click", () => {
+        const a = t.getAttribute("data-msg-id"), n = this.messages.find((s) => s.id === a);
+        n && this.askQuestion(`Explain simpler: ${n.text}`, !0);
       });
-    }), e.querySelectorAll(".btn-why-answer").forEach((i) => {
-      i.addEventListener("click", () => {
-        const n = i.getAttribute("data-msg-id"), s = e.querySelector(`#why-box-${n}`);
-        if (s) {
-          const o = s.style.display === "none";
-          s.style.display = o ? "block" : "none", i.setAttribute("aria-expanded", o ? "true" : "false");
-        }
+    }), e.querySelectorAll(".btn-followup").forEach((t) => {
+      t.addEventListener("click", () => {
+        const a = t.getAttribute("data-query");
+        a && this.askQuestion(a);
       });
-    }), e.querySelectorAll(".citation-link").forEach((i) => {
-      i.addEventListener("click", (n) => {
-        const s = i.getAttribute("href") || "";
-        if (s.includes("#")) {
-          const o = s.substring(s.indexOf("#")), r = document.querySelector(o);
-          r && (n.preventDefault(), r.scrollIntoView({ behavior: "smooth", block: "start" }), r.setAttribute("tabindex", "-1"), r.focus());
-        }
+    }), e.querySelectorAll(".btn-talk-person").forEach((t) => {
+      t.addEventListener("click", () => {
+        const a = t.getAttribute("data-msg-id"), n = this.messages.find((s) => s.id === a);
+        this.requestHandoff(n ? `Refusal regarding question: ${n.text}` : void 0);
       });
-    }), e.querySelectorAll(".btn-followup").forEach((i) => {
-      i.addEventListener("click", () => {
-        const n = i.getAttribute("data-query");
-        n && this.askQuestion(n);
-      });
-    }), e.querySelectorAll(".btn-talk-person").forEach((i) => {
-      i.addEventListener("click", () => {
-        const n = i.getAttribute("data-msg-id"), s = this.messages.find((o) => o.id === n);
-        this.requestHandoff(s ? `Refusal regarding question: ${s.text}` : void 0);
-      });
-    }), e.querySelectorAll(".btn-try-another").forEach((i) => {
-      i.addEventListener("click", () => {
-        const n = this.shadowRoot?.querySelector("#chat-text-input, #chat-input");
-        n && (n.value = "", n.focus());
+    }), e.querySelectorAll(".btn-try-another").forEach((t) => {
+      t.addEventListener("click", () => {
+        const a = this.shadowRoot?.querySelector("#chat-input");
+        a && (a.value = "", a.focus());
       });
     }), e.scrollTop = e.scrollHeight, setTimeout(() => {
       e.scrollTop = e.scrollHeight;
@@ -4186,78 +4275,70 @@ ${h}
   }
   bindEvents() {
     if (!this.shadowRoot) return;
-    const e = this.shadowRoot.querySelector("#launcher-btn"), t = this.shadowRoot.querySelector("#assistant-dialog"), a = this.shadowRoot.querySelector("#btn-close-dialog"), i = this.shadowRoot.querySelector("#btn-open-settings"), n = this.shadowRoot.querySelector("#btn-close-settings");
+    const e = this.shadowRoot.querySelector("#launcher-btn"), i = this.shadowRoot.querySelector("#assistant-dialog"), t = this.shadowRoot.querySelector("#btn-close-dialog"), a = this.shadowRoot.querySelector("#btn-open-settings"), n = this.shadowRoot.querySelector("#btn-close-settings");
     e.addEventListener("click", () => {
-      this.isOpen ? this.closeAssistant() : (this.previousFocus = document.activeElement, this.openAssistant());
-    }), a.addEventListener("click", () => this.closeAssistant()), t.addEventListener("focusin", (d) => {
-      d.target?.scrollIntoView({ block: "nearest", inline: "nearest" });
-    }), t.addEventListener("keydown", (d) => {
-      if (d.key === "Escape") {
+      this.isOpen ? this.closeAssistant() : (this.previousFocus = e, this.openAssistant());
+    }), t.addEventListener("click", () => this.closeAssistant()), i.addEventListener("focusin", (h) => {
+      h.target?.scrollIntoView({ block: "nearest", inline: "nearest" });
+    }), i.addEventListener("keydown", (h) => {
+      if (h.key === "Escape")
         if (this.isSettingsOpen) {
           this.isSettingsOpen = !1;
           const u = this.shadowRoot?.querySelector("#settings-dialog");
           u && u.setAttribute("hidden", "true");
         } else
           this.closeAssistant();
-        return;
-      }
-      if (d.key === "Tab") {
-        const u = Array.from(
-          t.querySelectorAll(
-            "button:not([disabled]):not([hidden]), a[href]:not([hidden]), input:not([disabled]):not([hidden]), select:not([disabled]):not([hidden]), textarea:not([disabled]):not([hidden])"
+      if (h.key === "Tab") {
+        const u = this.shadowRoot?.querySelector("#onboarding-overlay"), f = this.shadowRoot?.querySelector("#settings-dialog:not([hidden])"), x = Array.from(
+          (u || f || i).querySelectorAll(
+            'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
           )
-        ).filter((L) => L.closest("[hidden]") ? !1 : typeof L.checkVisibility == "function" ? L.checkVisibility({ checkOpacity: !0, checkVisibilityCSS: !0 }) : L.offsetParent !== null || L.getClientRects().length > 0);
-        if (u.length === 0) return;
-        const g = u[0], m = u[u.length - 1], v = this.shadowRoot?.activeElement || document.activeElement;
-        d.shiftKey ? (v === g || g.contains(v)) && (d.preventDefault(), m.focus()) : (v === m || m.contains(v)) && (d.preventDefault(), g.focus());
-      }
-    }), this.shadowRoot.querySelectorAll(".lang-toggle-btn").forEach((d) => {
-      d.addEventListener("click", () => {
-        if (d.classList.contains("lang-btn") && d.id === "btn-lang-en") {
-          const g = this.currentLang === "en" ? "am" : "en";
-          this.setLanguage(g);
-          return;
+        ).filter((C) => C.getClientRects().length > 0);
+        if (x.length > 0) {
+          const C = x[0], z = x[x.length - 1], N = this.shadowRoot?.activeElement;
+          h.shiftKey && N === C ? (h.preventDefault(), z.focus()) : !h.shiftKey && N === z && (h.preventDefault(), C.focus());
         }
-        const u = d.id.replace("btn-lang-", "");
-        u && this.setLanguage(u);
+      }
+    }), this.shadowRoot.querySelectorAll(".lang-toggle-btn").forEach((h) => {
+      h.addEventListener("click", () => {
+        const u = h.id.replace(/^btn-lang-|^onboard-lang-/, "");
+        u && ["en", "am", "om", "ti", "ar"].includes(u) && this.setLanguage(u);
       });
-    }), this.shadowRoot.querySelector("#btn-lang-toggle")?.addEventListener("click", () => {
-      this.setLanguage(this.currentLang === "en" ? "am" : "en");
-    }), i.addEventListener("click", () => {
+    }), a.addEventListener("click", () => {
       this.isSettingsOpen = !0;
-      const d = this.shadowRoot?.querySelector("#settings-dialog");
-      if (d) {
-        d.removeAttribute("hidden");
-        const u = d.querySelector("button, input");
+      const h = this.shadowRoot?.querySelector("#settings-dialog");
+      if (h) {
+        h.removeAttribute("hidden");
+        const u = h.querySelector("button, input");
         u && u.focus();
       }
     }), n.addEventListener("click", () => {
       this.isSettingsOpen = !1;
-      const d = this.shadowRoot?.querySelector("#settings-dialog");
-      d && d.setAttribute("hidden", "true"), i.focus();
+      const h = this.shadowRoot?.querySelector("#settings-dialog");
+      h && h.setAttribute("hidden", "true"), a.focus();
     });
     const s = [
       { id: "chat", btn: this.shadowRoot.querySelector("#tab-chat"), pane: this.shadowRoot.querySelector("#pane-chat") },
       { id: "support", btn: this.shadowRoot.querySelector("#tab-support"), pane: this.shadowRoot.querySelector("#pane-support") },
       { id: "handoff", btn: this.shadowRoot.querySelector("#tab-handoff"), pane: this.shadowRoot.querySelector("#pane-handoff") }
-    ], o = (d) => {
-      this.activeTab = s[d].id, s.forEach((g, m) => {
-        const v = m === d;
-        g.btn?.setAttribute("aria-selected", v ? "true" : "false"), g.pane && (g.pane.hidden = !v, g.pane.style.display = v ? g.id === "chat" ? "flex" : "block" : "none");
+    ], d = (h) => {
+      this.activeTab = s[h].id, s.forEach((f, w) => {
+        const x = w === h;
+        f.btn?.setAttribute("aria-selected", x ? "true" : "false"), f.pane && (f.pane.hidden = !x, f.pane.style.display = x ? f.id === "chat" ? "flex" : "block" : "none");
       });
-      const u = s[d].btn;
+      const u = s[h].btn;
       u && (u.focus(), this.announce(u.textContent?.trim() + " tab selected"));
     };
-    s.forEach(({ btn: d }, u) => {
-      d?.addEventListener("click", () => o(u)), d?.addEventListener("keydown", (g) => {
-        const m = g;
-        m.key === "ArrowRight" ? (m.preventDefault(), o((u + 1) % s.length)) : m.key === "ArrowLeft" && (m.preventDefault(), o((u - 1 + s.length) % s.length));
+    s.forEach(({ btn: h }, u) => {
+      h?.addEventListener("click", () => d(u)), h?.addEventListener("keydown", (f) => {
+        const w = f;
+        w.key === "ArrowRight" ? (w.preventDefault(), d((u + 1) % s.length)) : w.key === "ArrowLeft" && (w.preventDefault(), d((u - 1 + s.length) % s.length));
       });
-    }), this.shadowRoot.querySelectorAll(".btn-talk-person, #btn-footer-handoff").forEach((d) => {
-      d.addEventListener("click", (u) => {
+    }), this.shadowRoot.querySelectorAll(".btn-talk-person, #btn-footer-handoff").forEach((h) => {
+      h.addEventListener("click", (u) => {
         u.preventDefault();
-        const g = s.findIndex((m) => m.id === "handoff");
-        g >= 0 && o(g);
+        const f = s.findIndex((w) => w.id === "handoff");
+        f >= 0 && d(f);
       });
     }), this.shadowRoot.querySelector("#btn-size-smaller")?.addEventListener("click", () => {
       this.textSize = "smaller", localStorage.setItem("savanna_bridge_text_size", "smaller"), this.render();
@@ -4270,17 +4351,17 @@ ${h}
     r && r.addEventListener("change", () => {
       this.highContrast = r.checked, localStorage.setItem("savanna_bridge_contrast", this.highContrast ? "high" : "normal"), this.render();
     });
-    const h = this.shadowRoot.querySelector("#chk-simple-mode");
-    h && h.addEventListener("change", () => {
-      this.simpleMode = h.checked;
+    const c = this.shadowRoot.querySelector("#chk-simple-mode");
+    c && c.addEventListener("change", () => {
+      this.simpleMode = c.checked;
     });
     const p = this.shadowRoot.querySelector("#chk-auto-read");
     p && p.addEventListener("change", () => {
       this.autoReadSpeech = p.checked, localStorage.setItem("savanna_bridge_auto_read", this.autoReadSpeech ? "true" : "false"), !this.autoReadSpeech && this.isSpeaking && this.stopSpeaking();
     });
-    const T = this.shadowRoot.querySelector("#chk-wake-word");
-    T && T.addEventListener("change", () => {
-      if (this.voiceActivationEnabled = T.checked, localStorage.setItem("savanna_bridge_wake_word", this.voiceActivationEnabled ? "true" : "false"), this.voiceActivationEnabled)
+    const v = this.shadowRoot.querySelector("#chk-wake-word");
+    v && v.addEventListener("change", () => {
+      if (this.voiceActivationEnabled = v.checked, localStorage.setItem("savanna_bridge_wake_word", this.voiceActivationEnabled ? "true" : "false"), this.voiceActivationEnabled)
         this.setupWakeWordDetector();
       else if (this.wakeWordRecognition) {
         try {
@@ -4290,11 +4371,11 @@ ${h}
         this.wakeWordRecognition = null;
       }
     });
-    const w = this.shadowRoot.querySelector("#settings-code-form");
-    w && w.addEventListener("submit", (d) => {
-      d.preventDefault();
-      const u = this.shadowRoot?.querySelector("#settings-input-code"), g = this.shadowRoot?.querySelector("#settings-code-msg");
-      u && u.value && this.confirmLinkCode(u.value, g);
+    const g = this.shadowRoot.querySelector("#settings-code-form");
+    g && g.addEventListener("submit", (h) => {
+      h.preventDefault();
+      const u = this.shadowRoot?.querySelector("#settings-input-code"), f = this.shadowRoot?.querySelector("#settings-code-msg");
+      u && u.value && this.confirmLinkCode(u.value, f);
     }), this.shadowRoot.querySelector("#btn-settings-disconnect-tg")?.addEventListener("click", () => {
       this.disconnectTelegram();
     }), this.shadowRoot.querySelector("#btn-clear-chat")?.addEventListener("click", () => {
@@ -4302,53 +4383,47 @@ ${h}
     }), this.shadowRoot.querySelector("#btn-generate-code")?.addEventListener("click", () => {
       this.generateLinkCode();
     });
-    const b = this.shadowRoot.querySelector("#handoff-request-form");
-    b && b.addEventListener("submit", (d) => {
-      d.preventDefault();
+    const m = this.shadowRoot.querySelector("#handoff-request-form");
+    m && m.addEventListener("submit", (h) => {
+      h.preventDefault();
       const u = this.shadowRoot?.querySelector("#handoff-reason");
       this.requestHandoff(u?.value || void 0);
     });
-    const y = this.shadowRoot.querySelector("#support-form");
-    y && y.addEventListener("submit", (d) => {
-      d.preventDefault();
-      const u = new FormData(y), g = u.getAll("need"), m = u.get("other_text") || "", v = u.get("contact_mode") || "text";
-      this.saveSupportNeeds(g, m, v);
+    const b = this.shadowRoot.querySelector("#support-form");
+    b && b.addEventListener("submit", (h) => {
+      h.preventDefault();
+      const u = new FormData(b), f = u.getAll("need"), w = u.get("other_text") || "", x = u.get("contact_mode") || "text";
+      this.saveSupportNeeds(f, w, x);
     });
-    const f = this.shadowRoot.querySelector("#chat-form"), x = this.shadowRoot.querySelector("#chat-text-input, #chat-input"), R = this.shadowRoot.querySelector("#send-btn, #btn-send"), M = this.shadowRoot.querySelector("#mic-btn"), B = (d) => {
-      if (d && (d.preventDefault(), d.stopPropagation()), !x) return;
-      const u = x.value;
-      u.trim() && (x.value = "", this.askQuestion(u));
-    };
-    f && f.addEventListener("submit", B), R && R.addEventListener("click", B), x && x.addEventListener("keydown", (d) => {
-      d.key === "Enter" && !d.shiftKey && B(d);
-    }), M && x && M.addEventListener("click", () => {
-      this.toggleVoiceInput(x);
+    const y = this.shadowRoot.querySelector("#chat-form"), R = this.shadowRoot.querySelector("#chat-input"), L = this.shadowRoot.querySelector("#mic-btn");
+    y && R && y.addEventListener("submit", (h) => {
+      h.preventDefault();
+      const u = R.value;
+      R.value = "", this.askQuestion(u);
+    }), L && R && L.addEventListener("click", () => {
+      this.toggleVoiceInput(R);
     });
-    const z = () => {
+    const E = () => {
       this.showAutoplayBanner = !1, this.accessibilityPrefs.voice_enabled = !0, this.savePreferences(), this.announce(this.t("voiceWelcomeAnnouncement")), this.triggerSpokenWelcome(), this.render();
     };
-    this.shadowRoot.querySelector("#btn-activate-voice-welcome")?.addEventListener("click", z), this.shadowRoot.querySelector("#btn-activate-voice-welcome-floating")?.addEventListener("click", z);
-    const N = () => {
+    this.shadowRoot.querySelector("#btn-activate-voice-welcome")?.addEventListener("click", E), this.shadowRoot.querySelector("#btn-activate-voice-welcome-floating")?.addEventListener("click", E);
+    const I = () => {
       this.showAutoplayBanner = !1, this.render();
     };
-    this.shadowRoot.querySelector("#btn-dismiss-voice-banner")?.addEventListener("click", N), this.shadowRoot.querySelector("#btn-dismiss-voice-banner-floating")?.addEventListener("click", N), this.shadowRoot.querySelector("#btn-reading-pause")?.addEventListener("click", () => this.pausePageReading()), this.shadowRoot.querySelector("#btn-reading-resume")?.addEventListener("click", () => this.resumePageReading()), this.shadowRoot.querySelector("#btn-reading-stop")?.addEventListener("click", () => this.stopPageReading()), ["en", "am", "om", "ti", "ar"].forEach((d) => {
-      this.shadowRoot?.querySelector(`#onboard-lang-${d}`)?.addEventListener("click", () => {
-        this.setLanguage(d);
+    this.shadowRoot.querySelector("#btn-dismiss-voice-banner")?.addEventListener("click", I), this.shadowRoot.querySelector("#btn-dismiss-voice-banner-floating")?.addEventListener("click", I), this.shadowRoot.querySelector("#btn-reading-pause")?.addEventListener("click", () => this.pausePageReading()), this.shadowRoot.querySelector("#btn-reading-resume")?.addEventListener("click", () => this.resumePageReading()), this.shadowRoot.querySelector("#btn-reading-stop")?.addEventListener("click", () => this.stopPageReading()), ["en", "am", "om", "ti", "ar"].forEach((h) => {
+      this.shadowRoot?.querySelector(`#onboard-lang-${h}`)?.addEventListener("click", () => {
+        this.setLanguage(h);
       });
     }), this.shadowRoot.querySelector("#btn-spoken-onboarding")?.addEventListener("click", () => {
       this.startSpokenOnboarding();
-    });
-    const q = (d) => {
-      if (d) {
-        const u = this.shadowRoot?.querySelector("#onboard-chk-voice")?.checked ?? !0, g = this.shadowRoot?.querySelector("#onboard-chk-screen-reader")?.checked ?? !1, m = this.shadowRoot?.querySelector("#onboard-chk-keyboard-nav")?.checked ?? !1, v = this.shadowRoot?.querySelector("#onboard-chk-contrast")?.checked ?? !1, L = this.shadowRoot?.querySelector("#onboard-chk-large-text")?.checked ?? !1;
-        this.accessibilityPrefs.voice_enabled = u, this.accessibilityPrefs.screen_reader_mode = g, this.accessibilityPrefs.keyboard_navigation = m, this.accessibilityPrefs.high_contrast = v, this.accessibilityPrefs.large_text = L ? "larger" : "normal", this.highContrast = v, L && (this.textSize = "larger", localStorage.setItem("savanna_bridge_text_size", "larger"));
-      }
-      this.accessibilityPrefs.onboarded = !0, this.onboardingDismissed = !0, this.savePreferences(), this.render(), this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_welcome && this.triggerSpokenWelcome(), this.accessibilityPrefs.voice_enabled && this.initWakeWordDetection();
-    };
-    this.shadowRoot.querySelector("#btn-onboard-save")?.addEventListener("click", () => q(!0)), this.shadowRoot.querySelector("#btn-onboard-skip")?.addEventListener("click", () => q(!1)), this.shadowRoot.querySelector("#btn-onboard-close")?.addEventListener("click", () => q(!1));
-    const P = this.shadowRoot.querySelector("#chk-voice-master");
-    P && P.addEventListener("change", () => {
-      if (this.accessibilityPrefs.voice_enabled = P.checked, this.savePreferences(), P.checked)
+    }), this.shadowRoot.querySelector("#btn-onboard-next")?.addEventListener("click", () => {
+      this.captureOnboardingStep(), this.onboardingStep = Math.min(3, this.onboardingStep + 1), this.render(), setTimeout(() => this.shadowRoot?.querySelector("#onboard-title")?.focus(), 0);
+    }), this.shadowRoot.querySelector("#btn-onboard-back")?.addEventListener("click", () => {
+      this.captureOnboardingStep(), this.onboardingStep = Math.max(0, this.onboardingStep - 1), this.render();
+    }), this.shadowRoot.querySelector("#btn-onboard-save")?.addEventListener("click", () => this.completeOnboarding(!0)), this.shadowRoot.querySelector("#btn-onboard-skip")?.addEventListener("click", () => this.completeOnboarding(!1)), this.shadowRoot.querySelector("#btn-onboard-close")?.addEventListener("click", () => this.completeOnboarding(!1));
+    const A = this.shadowRoot.querySelector("#chk-voice-master");
+    A && A.addEventListener("change", () => {
+      if (this.accessibilityPrefs.voice_enabled = A.checked, this.savePreferences(), A.checked)
         this.initWakeWordDetection();
       else if (this.wakeWordRecognizer) {
         try {
@@ -4357,55 +4432,59 @@ ${h}
         }
         this.wakeWordRecognizer = null;
       }
-      this.announce(P.checked ? "Voice accessibility enabled" : "Voice accessibility disabled");
+      this.announce(A.checked ? "Voice accessibility enabled" : "Voice accessibility disabled");
     });
-    const E = this.shadowRoot.querySelector("#chk-auto-welcome");
-    E && E.addEventListener("change", () => {
-      this.accessibilityPrefs.auto_welcome = E.checked, this.savePreferences();
+    const B = this.shadowRoot.querySelector("#chk-auto-welcome");
+    B && B.addEventListener("change", () => {
+      this.accessibilityPrefs.auto_welcome = B.checked, this.savePreferences();
     });
-    const I = this.shadowRoot.querySelector("#chk-auto-tts");
-    I && I.addEventListener("change", () => {
-      this.accessibilityPrefs.auto_tts = I.checked, this.savePreferences();
+    const q = this.shadowRoot.querySelector("#chk-auto-tts");
+    q && q.addEventListener("change", () => {
+      this.accessibilityPrefs.auto_tts = q.checked, this.savePreferences();
     });
-    const V = [
+    const M = [
       { id: "#btn-rate-075", rate: 0.75 },
       { id: "#btn-rate-100", rate: 1 },
       { id: "#btn-rate-125", rate: 1.25 },
       { id: "#btn-rate-150", rate: 1.5 }
     ];
-    V.forEach(({ id: d, rate: u }) => {
-      this.shadowRoot?.querySelector(d)?.addEventListener("click", () => {
-        this.accessibilityPrefs.speech_rate = u, this.activeAudio && (this.activeAudio.playbackRate = u, this.activeAudio.preservesPitch = !0, this.activeAudio.mozPreservesPitch = !0, this.activeAudio.webkitPreservesPitch = !0), this.savePreferences(), V.forEach((g) => {
-          this.shadowRoot?.querySelector(g.id)?.setAttribute("aria-pressed", g.rate === u ? "true" : "false");
+    M.forEach(({ id: h, rate: u }) => {
+      this.shadowRoot?.querySelector(h)?.addEventListener("click", () => {
+        this.accessibilityPrefs.speech_rate = u, this.activeAudio && (this.activeAudio.playbackRate = u, this.activeAudio.preservesPitch = !0, this.activeAudio.mozPreservesPitch = !0, this.activeAudio.webkitPreservesPitch = !0), this.savePreferences(), M.forEach((f) => {
+          this.shadowRoot?.querySelector(f.id)?.setAttribute("aria-pressed", f.rate === u ? "true" : "false");
         }), this.announce(`Speech rate set to ${u}x`);
       });
     }), this.shadowRoot.querySelector("#btn-read-page")?.addEventListener("click", () => this.readPageAloud()), this.shadowRoot.querySelector("#btn-read-section")?.addEventListener("click", () => this.readSectionAloud()), this.shadowRoot.querySelector("#btn-test-voice")?.addEventListener("click", () => {
       this.speakText(this.t("voiceWelcomeAnnouncement"));
     });
-    const $ = this.shadowRoot.querySelector("#chk-screen-reader");
+    const P = this.shadowRoot.querySelector("#chk-screen-reader");
+    P && P.addEventListener("change", () => {
+      this.accessibilityPrefs.screen_reader_mode = P.checked, P.checked && (this.accessibilityPrefs.auto_tts = !1, this.autoReadSpeech = !1, localStorage.setItem("savanna_bridge_auto_read", "false"), this.stopSpeaking()), this.savePreferences(), this.announce(P.checked ? "Screen reader mode enabled" : "Screen reader mode disabled");
+    });
+    const $ = this.shadowRoot.querySelector("#chk-keyboard-nav");
     $ && $.addEventListener("change", () => {
-      this.accessibilityPrefs.screen_reader_mode = $.checked, $.checked && (this.accessibilityPrefs.auto_tts = !1, this.autoReadSpeech = !1, localStorage.setItem("savanna_bridge_auto_read", "false"), this.stopSpeaking()), this.savePreferences(), this.announce($.checked ? "Screen reader mode enabled" : "Screen reader mode disabled");
+      this.accessibilityPrefs.keyboard_navigation = $.checked, this.savePreferences(), $.checked ? this.classList.add("keyboard-focus-enhanced") : this.classList.remove("keyboard-focus-enhanced"), this.announce($.checked ? "Enhanced keyboard navigation enabled" : "Enhanced keyboard navigation disabled");
     });
-    const _ = this.shadowRoot.querySelector("#chk-keyboard-nav");
+    const _ = this.shadowRoot.querySelector("#chk-sync-prefs");
     _ && _.addEventListener("change", () => {
-      this.accessibilityPrefs.keyboard_navigation = _.checked, this.savePreferences(), _.checked ? this.classList.add("keyboard-focus-enhanced") : this.classList.remove("keyboard-focus-enhanced"), this.announce(_.checked ? "Enhanced keyboard navigation enabled" : "Enhanced keyboard navigation disabled");
-    });
-    const C = this.shadowRoot.querySelector("#chk-sync-prefs");
-    C && C.addEventListener("change", () => {
-      this.accessibilityPrefs.sync_enabled = C.checked, this.savePreferences(), C.checked ? (this.syncPreferencesToBackend(), this.announce("Cross-website synchronization enabled")) : this.announce("Cross-website synchronization disabled");
+      this.accessibilityPrefs.sync_enabled = _.checked, this.savePreferences(), _.checked ? (this.syncPreferencesToBackend(), this.announce("Cross-website synchronization enabled")) : this.announce("Cross-website synchronization disabled");
     }), this.shadowRoot.querySelector("#btn-replay-onboarding")?.addEventListener("click", () => {
-      this.accessibilityPrefs.onboarded = !1, this.onboardingDismissed = !1, this.isSettingsOpen = !1, this.render();
+      this.accessibilityPrefs.onboarded = !1, this.onboardingDismissed = !1, this.onboardingStep = 0, this.isSettingsOpen = !1, this.render();
     });
   }
   escapeHtml(e) {
-    const t = document.createElement("div");
-    return t.textContent = e, t.innerHTML;
+    const i = document.createElement("div");
+    return i.textContent = e, i.innerHTML;
   }
 }
-customElements.get("bridge-assistant") || customElements.define("bridge-assistant", j);
-customElements.get("db-assistant") || customElements.define("db-assistant", j);
+customElements.get("bridge-assistant") || customElements.define("bridge-assistant", V);
+if (!customElements.get("db-assistant")) {
+  class T extends V {
+  }
+  customElements.define("db-assistant", T);
+}
 export {
-  j as BridgeAssistant,
-  c as ICONS
+  V as BridgeAssistant,
+  o as ICONS
 };
 //# sourceMappingURL=widget.js.map
