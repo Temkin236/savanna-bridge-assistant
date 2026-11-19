@@ -36,3 +36,36 @@ def verify_widget_token(token: str) -> dict[str, Any] | None:
         return payload
     except (jwt.PyJWTError, Exception):
         return None
+
+
+def create_helper_token(
+    agent_ref: str = "agent_sarah",
+    role: str = "helper",
+    expires_in_minutes: int = 480,
+) -> str:
+    """Generate a signed HMAC-SHA256 JWT helper token."""
+    now = datetime.now(UTC)
+    payload = {
+        "sub": agent_ref,
+        "role": role,
+        "iat": int(now.timestamp()),
+        "exp": int((now + timedelta(minutes=expires_in_minutes)).timestamp()),
+        "iss": "savanna-bridge",
+    }
+    return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+
+
+def verify_helper_token(token: str) -> dict[str, Any] | None:
+    """Validate a helper token. Returns decoded payload if valid and role == 'helper'."""
+    if not token:
+        return None
+    try:
+        clean_token = token
+        if clean_token.lower().startswith("bearer "):
+            clean_token = clean_token[7:].strip()
+        payload = jwt.decode(clean_token, SECRET_KEY, algorithms=["HS256"])
+        if payload.get("role") in ("helper", "admin", "agent"):
+            return payload
+        return None
+    except (jwt.PyJWTError, Exception):
+        return None

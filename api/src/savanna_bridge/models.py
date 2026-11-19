@@ -388,7 +388,7 @@ class ContentChunkInput(BaseModel):
     title: str = "Course Material"
     heading: str
     text: str
-    url: str = "https://learning.example.org"
+    url: str = "http://localhost:4173/savanna/pages/concept-with-navigation.html"
     page: int = 1
     language: str = "en"
 
@@ -417,3 +417,15 @@ class TranslationResponse(BaseModel):
     target_language: str
     provider: str
     mocked: bool
+
+
+class HelperLoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+class HelperLoginResponse(BaseModel):
+    token: str
+    agent_ref: str
+    role: str = "helper"
+    expires_in_minutes: int = 480

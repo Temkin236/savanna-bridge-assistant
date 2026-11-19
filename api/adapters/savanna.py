@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import os
 import re
 from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
 
 from adapters.base import ContentChunk, ContentSource
+
+SAVANNA_HOST = os.getenv("SAVANNA_BASE_URL", "http://localhost:4173").rstrip("/")
 
 
 class SimpleHtmlChunker(HTMLParser):
@@ -18,6 +21,7 @@ class SimpleHtmlChunker(HTMLParser):
         self.base_url = base_url
         self.title = default_title
         self.current_heading = "General Overview"
+        self.current_anchor = ""
         self.current_text: list[str] = []
         self.chunks: list[dict[str, Any]] = []
         self._in_title = False
@@ -26,6 +30,15 @@ class SimpleHtmlChunker(HTMLParser):
         self._page_counter = 1
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        attr_dict = dict(attrs)
+        tag_id = attr_dict.get("id")
+        if (
+            tag_id
+            and tag.lower() in ("a", "h1", "h2", "h3", "h4", "h5", "section", "div", "span")
+            and tag_id not in ("content", "layout-bars", "sidebar", "student-switch-curriculum")
+        ):
+            self.current_anchor = tag_id
+
         if tag.lower() == "title":
             self._in_title = True
         elif tag.lower() in ("h1", "h2", "h3", "h4", "h5"):
@@ -60,11 +73,17 @@ class SimpleHtmlChunker(HTMLParser):
     def _flush_chunk(self) -> None:
         text = " ".join(self.current_text).strip()
         if text:
+            chunk_url = self.base_url
+            if self.current_anchor:
+                base_clean = self.base_url.split("#")[0]
+                chunk_url = f"{base_clean}#{self.current_anchor}"
             self.chunks.append(
                 {
                     "heading": self.current_heading,
                     "text": text,
                     "page": self._page_counter,
+                    "url": chunk_url,
+                    "anchor": self.current_anchor,
                 }
             )
             self.current_text = []
@@ -97,7 +116,7 @@ class SavannaStaticSource(ContentSource):
                     "Rule 2 is active listening: hear what the customer is asking before answering. "
                     "Course assessments consist of knowledge checks at the end of each module."
                 ),
-                url="https://learning.example.org/courses/course_demo/module-1",
+                url=f"{SAVANNA_HOST}/savanna/pages/concept-with-navigation.html#module-1",
                 page=1,
                 language="en",
             ),
@@ -112,7 +131,7 @@ class SavannaStaticSource(ContentSource):
                     "understanding. Provide concise, step-by-step instructions. Never use jargon. "
                     "For accessibility, always offer written instructions if audio is unclear."
                 ),
-                url="https://learning.example.org/courses/course_demo/module-2",
+                url=f"{SAVANNA_HOST}/savanna/pages/concept-with-navigation.html#module-2",
                 page=2,
                 language="en",
             ),
@@ -127,7 +146,7 @@ class SavannaStaticSource(ContentSource):
                     "Always summarize the customer's issue so they do not have to repeat themselves. "
                     "Maintain a calm, supportive tone and follow up until the ticket is resolved."
                 ),
-                url="https://learning.example.org/courses/course_demo/module-3",
+                url=f"{SAVANNA_HOST}/savanna/pages/concept-with-navigation.html#module-3",
                 page=3,
                 language="en",
             ),
@@ -147,7 +166,7 @@ class SavannaStaticSource(ContentSource):
                     "In other contexts, it refers to human remote professionals who provide business support online. "
                     "The future of the industry includes both, and increasingly, they will work together."
                 ),
-                url="https://learning.example.org/courses/course_demo/concept-va-future",
+                url=f"{SAVANNA_HOST}/savanna/pages/concept-with-navigation.html#what-is-shaping-the-future-of-va-work",
                 page=1,
                 language="en",
             ),
@@ -165,22 +184,66 @@ class SavannaStaticSource(ContentSource):
                     "3. Rise of AI and Digital Productivity Tools: Virtual assistants use AI tools to draft communications, "
                     "organize schedules, analyze information, and deliver high-value strategic assistance."
                 ),
-                url="https://learning.example.org/courses/course_demo/concept-va-future",
+                url=f"{SAVANNA_HOST}/savanna/pages/concept-with-navigation.html#what-is-shaping-the-future-of-va-work",
                 page=2,
                 language="en",
             ),
             ContentChunk(
                 chunk_id="va_en_03",
                 course_id="course_demo",
-                title="VA Foundations & Professional Identity",
-                heading="Learning Objectives and Core Competencies",
+                title="The Future of the VA Industry",
+                heading="Artificial Intelligence and the Future of VA Work",
                 text=(
-                    "The learning objectives for this lesson are: understanding how remote business models drive virtual assistance demand, "
-                    "differentiating between AI agents and human remote professionals, and mastering essential digital productivity tools. "
-                    "Key competencies include professional email communication, active listening, workflow management, and ethics."
+                    "Artificial Intelligence is an accelerator for virtual assistants, not a replacement for human judgment. "
+                    "Practical ways virtual assistants use AI include drafting customer emails, organizing complex calendars, "
+                    "summarizing meeting transcripts, and automating routine administrative workflows. "
+                    "AI handles speed and repetition, while the human assistant provides context, relationship management, and critical oversight."
                 ),
-                url="https://learning.example.org/courses/course_demo/va-foundations",
+                url=f"{SAVANNA_HOST}/savanna/pages/concept-with-navigation.html#artificial-intelligence-and-the-future-of-va-work",
                 page=3,
+                language="en",
+            ),
+            ContentChunk(
+                chunk_id="va_en_04",
+                course_id="course_demo",
+                title="The Future of the VA Industry",
+                heading="What Clients Are Likely to Value More and More",
+                text=(
+                    "As the profession evolves, the most valuable virtual assistants will combine tool fluency with human strength. "
+                    "What clients are likely to value more and more in virtual assistants: "
+                    "1. AI fluency: Clients will increasingly value VAs who can use AI tools responsibly to save time, improve output quality, and streamline repetitive work. "
+                    "2. Specialized expertise: The future will likely reward VAs who go beyond general support and develop deeper skills in one or two service areas. "
+                    "3. Excellent human service: Responsiveness, dependability, emotional intelligence, professionalism, and clear communication will remain major differentiators."
+                ),
+                url=f"{SAVANNA_HOST}/savanna/pages/concept-with-navigation.html#what-clients-are-likely-to-value-more-and-more",
+                page=4,
+                language="en",
+            ),
+            ContentChunk(
+                chunk_id="va_en_05",
+                course_id="course_demo",
+                title="The Future of the VA Industry",
+                heading="What This Means for Aspiring Virtual Assistants",
+                text=(
+                    "What this means for aspiring virtual assistants: Success requires adaptability, continuous learning, and a focus on high-value human skills. "
+                    "Don't fear AI—master the tools. Build specialized capabilities, maintain high standards of reliability and ethics, and communicate proactively with clients."
+                ),
+                url=f"{SAVANNA_HOST}/savanna/pages/concept-with-navigation.html#what-this-means-for-aspiring-virtual-assistants",
+                page=5,
+                language="en",
+            ),
+            ContentChunk(
+                chunk_id="va_en_06",
+                course_id="course_demo",
+                title="The Future of the VA Industry",
+                heading="So, Is the Future of VA Promising?",
+                text=(
+                    "So, is the future of virtual assistance promising? Yes, the future of the VA industry is highly promising. "
+                    "Remote-first business models and global digital commerce are expanding the overall market. "
+                    "Virtual assistants who embrace digital tools and provide empathetic, dependable service will find growing opportunities."
+                ),
+                url=f"{SAVANNA_HOST}/savanna/pages/concept-with-navigation.html#so-is-the-future-of-va-promising",
+                page=6,
                 language="en",
             ),
             # Amharic chunks - Customer Service Foundations
@@ -194,7 +257,7 @@ class SavannaStaticSource(ContentSource):
                     "ዋነኛው መመሪያ አክብሮት ነው፡ እያንዳንዱን ተማሪና ደንበኛ በአክብሮትና በርህራሄ ማስተናገድ። "
                     "ሁለተኛው መመሪያ በትኩረት ማዳመጥ ነው፡ መልስ ከመስጠትዎ በፊት የደንበኛውን ጥያቄ በጥሞና ያዳምጡ።"
                 ),
-                url="https://learning.example.org/courses/course_demo/module-1",
+                url=f"{SAVANNA_HOST}/savanna/pages/concept-with-navigation.html#module-1",
                 page=1,
                 language="am",
             ),
@@ -209,7 +272,7 @@ class SavannaStaticSource(ContentSource):
                     "አጭርና ግልጽ የሆኑ ደረጃ በደረጃ መመሪያዎችን ይስጡ። ውስብስብ ቃላትን አይጠቀሙ። "
                     "ተደራሽነትን ለማረጋገጥ የድምጽ መልዕክቱ ግልጽ ካልሆነ ሁልጊዜ የጽሑፍ መመሪያ ያቅርቡ።"
                 ),
-                url="https://learning.example.org/courses/course_demo/module-2",
+                url=f"{SAVANNA_HOST}/savanna/pages/concept-with-navigation.html#module-2",
                 page=2,
                 language="am",
             ),
@@ -223,7 +286,7 @@ class SavannaStaticSource(ContentSource):
                     "አንድ ችግር በአምስት ደቂቃ ውስጥ መፍታት ካልተቻለ ለተቆጣጣሪ ያስተላልፉ። "
                     "ደንበኛው ችግሩን ደጋግሞ እንዳይናገር ሁልጊዜ የችግሩን ማጠቃለያ ለሚቀጥለው ባለሙያ ያስረክቡ።"
                 ),
-                url="https://learning.example.org/courses/course_demo/module-3",
+                url=f"{SAVANNA_HOST}/savanna/pages/concept-with-navigation.html#module-3",
                 page=3,
                 language="am",
             ),
@@ -240,7 +303,7 @@ class SavannaStaticSource(ContentSource):
                     "አስፈላጊ ልዩነት፡ ቨርቹዋል ረዳት ሁለት ነገሮችን ሊያመለክት ይችላል። አንደኛው የ AI ሶፍትዌር ረዳቶች (ቻትቦቶች፣ ዲጂታል ወኪሎች) ሲሆኑ፣ "
                     "ሁለተኛው ደግሞ በበይነመረብ በኩል የንግድ ድጋፍ የሚሰጡ የሰው ባለሙያዎች ናቸው። የወደፊቱ ኢንዱስትሪ ሁለቱንም ያካተተ ሲሆን ተቀናጅተው ይሰራሉ።"
                 ),
-                url="https://learning.example.org/courses/course_demo/concept-va-future",
+                url=f"{SAVANNA_HOST}/savanna/pages/concept-with-navigation.html#what-is-shaping-the-future-of-va-work",
                 page=1,
                 language="am",
             ),
@@ -255,8 +318,36 @@ class SavannaStaticSource(ContentSource):
                     "2. ለተለዋዋጭነት ያለው ፍላጎት ማደግ፡ ድርጅቶች ቋሚ የቢሮ ሰራተኛ ከመቅጠር ይልቅ ተለዋዋጭና ቀልጣፋ ድጋፍን ይመርጣሉ። "
                     "3. የ AI እና ዲጂታል መሳሪያዎች መስፋፋት፡ ቨርቹዋል ረዳቶች AIን በመጠቀም መደበኛ ስራዎችን በማከናወን ጥራት ያለው ስራ ይሰራሉ።"
                 ),
-                url="https://learning.example.org/courses/course_demo/concept-va-future",
+                url=f"{SAVANNA_HOST}/savanna/pages/concept-with-navigation.html#what-is-shaping-the-future-of-va-work",
                 page=2,
+                language="am",
+            ),
+            ContentChunk(
+                chunk_id="va_am_03",
+                course_id="course_demo",
+                title="የቨርቹዋል ረዳት (VA) ኢንዱስትሪ የወደፊት እጣ ፈንታ",
+                heading="ደንበኞች ከጊዜ ወደ ጊዜ የበለጠ ዋጋ የሚሰጡባቸው ነገሮች (What Clients Value More and More)",
+                text=(
+                    "የቨርቹዋል ረዳት ሙያ እያደገ ሲሄድ ደንበኞች ከጊዜ ወደ ጊዜ የበለጠ ዋጋ የሚሰጡባቸው 3 ዋና ዋና ነገሮች አሉ፡ "
+                    "1. የ AI ቅልጥፍና እና እውቀት (AI fluency)፡ ጊዜን ለመቆጠብ፣ የስራ ጥራትን ለማሻሻል እና ተደጋጋሚ ስራዎችን ለማቀላጠፍ የ AI መሳሪያዎችን በኃላፊነት መጠቀም የሚችሉ ረዳቶች በደንበኞች ዘንድ ከፍተኛ ዋጋ ይሰጣቸዋል። "
+                    "2. ልዩ ሙያዊ ብቃት (Specialized expertise)፡ ከአጠቃላይ ድጋፍ ባለፈ በአንድ ወይም በሁለት የስራ መስኮች ጥልቅ ክህሎት ማዳበር የወደፊቱ የስራ ገበያ ሽልማት ነው። "
+                    "3. የላቀ የሰው አገልግሎት (Excellent human service)፡ ፈጣን ምላሽ፣ ታማኝነት፣ ስሜታዊ ብልህነት፣ ሙያዊ ብቃት እና ግልጽ ግንኙነት ዋና መለያ ሆነው ይቀጥላሉ።"
+                ),
+                url=f"{SAVANNA_HOST}/savanna/pages/concept-with-navigation.html#what-clients-are-likely-to-value-more-and-more",
+                page=3,
+                language="am",
+            ),
+            ContentChunk(
+                chunk_id="va_am_04",
+                course_id="course_demo",
+                title="የቨርቹዋል ረዳት (VA) ኢንዱስትሪ የወደፊት እጣ ፈንታ",
+                heading="ይህ ለአዳዲስ ቨርቹዋል ረዳቶች ምን ማለት ነው? እና የወደፊቱ ተስፋ",
+                text=(
+                    "የቨርቹዋል ረዳት ስራ የወደፊት እጣ ፈንታ እጅግ ተስፋ ሰጪ ነው። አዳዲስ ረዳቶች የ AI መሳሪያዎችን መፍራት ሳይሆን በብቃት መልመድ አለባቸው። "
+                    "አስተማማኝነትን፣ ስነ-ምግባርን እና ግልጽ ተግባቦትን በማጣመር በገበያው ውስጥ ተፈላጊ መሆን ይችላሉ።"
+                ),
+                url=f"{SAVANNA_HOST}/savanna/pages/concept-with-navigation.html#what-this-means-for-aspiring-virtual-assistants",
+                page=4,
                 language="am",
             ),
             # Afaan Oromo chunks - Customer Service & Virtual Assistant
@@ -271,7 +362,7 @@ class SavannaStaticSource(ContentSource):
                     "Qajeeltoon 2ffaa sirriitti dhaggeeffachuu: deebii kennuu keessan dura maamilri maal akka gaafatu hubachuu. "
                     "Madaalliin barnootaa qormaata hubannoo xumura kutaa irratti kennamu of keessaa qaba."
                 ),
-                url="https://learning.example.org/courses/course_demo/module-1",
+                url=f"{SAVANNA_HOST}/savanna/pages/concept-with-navigation.html#module-1",
                 page=1,
                 language="om",
             ),
@@ -286,7 +377,7 @@ class SavannaStaticSource(ContentSource):
                     "Qajeelfama gabaabaa fi sadarkaa sadarkaan kennamu dhiyeessaa. Jechoota teeknikaa rakkisoo hin fayyadaminaa. "
                     "Qajeelfama barruudhaan dhiheessaa yoo sagaleen ifa hin taane."
                 ),
-                url="https://learning.example.org/courses/course_demo/module-2",
+                url=f"{SAVANNA_HOST}/savanna/pages/concept-with-navigation.html#module-2",
                 page=2,
                 language="om",
             ),
@@ -300,7 +391,7 @@ class SavannaStaticSource(ContentSource):
                     "Rakkina tokko daqiiqaa shan keessatti furuu yoo hin dandeenye, to'ataaf dabarsaa. "
                     "Maamilichi rakkina isaa irra deebiee akka hin dubbanneef gabaabaa rakkichaa dabarsaa."
                 ),
-                url="https://learning.example.org/courses/course_demo/module-3",
+                url=f"{SAVANNA_HOST}/savanna/pages/concept-with-navigation.html#module-3",
                 page=3,
                 language="om",
             ),
@@ -316,7 +407,7 @@ class SavannaStaticSource(ContentSource):
                     "Tokkoffaa, gargaartota software AI (chatbots, voice assistants). Lammaffaa, ogeeyyii namaa fageenyarraa tajaajila kennan. "
                     "Gara fuulduraatti lameen isaaniiyyuu walta'anii hojjetu."
                 ),
-                url="https://learning.example.org/courses/course_demo/concept-va-future",
+                url=f"{SAVANNA_HOST}/savanna/pages/concept-with-navigation.html#what-is-shaping-the-future-of-va-work",
                 page=1,
                 language="om",
             ),
@@ -331,8 +422,23 @@ class SavannaStaticSource(ContentSource):
                     "2. Fedhii socho'iinsa fi mijatoo ta'uu dabaluu: Hojjettoota waajjiraa dhaabbataa qacaruu mannaa gargaarsa mijataa barbaadu. "
                     "3. Babal'ina meeshaalee AI fi dijitaalaa: Ogeeyyiin VA meeshaalee AI fayyadamuun hojii qulqullina olaanaa qabu hojjetu."
                 ),
-                url="https://learning.example.org/courses/course_demo/concept-va-future",
+                url=f"{SAVANNA_HOST}/savanna/pages/concept-with-navigation.html#what-is-shaping-the-future-of-va-work",
                 page=2,
+                language="om",
+            ),
+            ContentChunk(
+                chunk_id="va_om_03",
+                course_id="course_demo",
+                title="Gara Fuulduraa Indastirii Gargaaraa Wiirtuu (VA)",
+                heading="Wanta Maamiltoonni Yeroo Gara Yerootti Caalaatti Bakka Guddaa Kennaniif",
+                text=(
+                    "Ogummaan gargaaraa wiirtuu (VA) yeroo babal'atu, maamiltoonni wantoota 3 gurguddoo kanaaf caalaatti bakka guddaa kennu: "
+                    "1. Dandeettii fi Ogummaa AI (AI fluency): Meeshaalee AI sirnaan fayyadamuun yeroo qusachuu fi qulqullina hojii dabaluu. "
+                    "2. Ogummaa Addaa (Specialized expertise): Deeggarsa waliigalaa irra darbee damee tajaajilaa tokko ykn lama irratti dandeettii gad-fagoo qabaachuu. "
+                    "3. Tajaajila Namaa Ol'aanaa (Excellent human service): Deebii ariifachiisaa, amanamummaa, hubannoo miiraa fi qunnamtii ifaa qabaachuu."
+                ),
+                url=f"{SAVANNA_HOST}/savanna/pages/concept-with-navigation.html#what-clients-are-likely-to-value-more-and-more",
+                page=3,
                 language="om",
             ),
             # Arabic chunks - Customer Service & Virtual Assistant
@@ -347,7 +453,7 @@ class SavannaStaticSource(ContentSource):
                     "القاعدة الثانية هي الاستماع الفعّال: استمع جيداً لما يطلبه العميل قبل الإجابة. "
                     "تتضمن تقييمات الدورة اختبارات تحقق من المعرفة في نهاية كل وحدة تعليمية."
                 ),
-                url="https://learning.example.org/courses/course_demo/module-1",
+                url=f"{SAVANNA_HOST}/savanna/pages/concept-with-navigation.html#module-1",
                 page=1,
                 language="ar",
             ),
@@ -362,7 +468,7 @@ class SavannaStaticSource(ContentSource):
                     "قدم تعليمات موجزة خطوة بخطوة وتجنب المصطلحات المعقدة. "
                     "لأغراض سهولة الوصول، قدم دائماً تعليمات مكتوبة إذا كان الصوت غير واضح."
                 ),
-                url="https://learning.example.org/courses/course_demo/module-2",
+                url=f"{SAVANNA_HOST}/savanna/pages/concept-with-navigation.html#module-2",
                 page=2,
                 language="ar",
             ),
@@ -376,7 +482,7 @@ class SavannaStaticSource(ContentSource):
                     "إذا تعذر حل مشكلة ما في غضون خمس دقائق، فقم بتصعيدها إلى المشرف المسؤول. "
                     "لخص مشكلة العميل بدقة حتى لا يضطر العميل إلى تكرار شرحها مرة أخرى."
                 ),
-                url="https://learning.example.org/courses/course_demo/module-3",
+                url=f"{SAVANNA_HOST}/savanna/pages/concept-with-navigation.html#module-3",
                 page=3,
                 language="ar",
             ),
@@ -392,7 +498,7 @@ class SavannaStaticSource(ContentSource):
                     "تمييز مهم: يمكن للمساعد الافتراضي أن يعني برمجيات الذكاء الاصطناعي كالمساعدات الرقمية الآلية، "
                     "أو المحترفين البشريين الذين يقدمون الدعم الإداري والتقني عن بُعد. المستقبل يجمع بينهما بتكامل فعال."
                 ),
-                url="https://learning.example.org/courses/course_demo/concept-va-future",
+                url=f"{SAVANNA_HOST}/savanna/pages/concept-with-navigation.html#what-is-shaping-the-future-of-va-work",
                 page=1,
                 language="ar",
             ),
@@ -407,8 +513,23 @@ class SavannaStaticSource(ContentSource):
                     "2. الطلب المتزايد على المرونة: تفضيل الدعم السريع القابل للتوسع بدلاً من التوظيف المكتبي التقليدي. "
                     "3. تطور أدوات الذكاء الاصطناعي والإنتاجية الرقمية: استثمار أدوات الذكاء الاصطناعي لرفع كفاءة المهام اليومية وتقديم قيمة استراتيجية للعملاء."
                 ),
-                url="https://learning.example.org/courses/course_demo/concept-va-future",
+                url=f"{SAVANNA_HOST}/savanna/pages/concept-with-navigation.html#what-is-shaping-the-future-of-va-work",
                 page=2,
+                language="ar",
+            ),
+            ContentChunk(
+                chunk_id="va_ar_03",
+                course_id="course_demo",
+                title="مستقبل قطاع المساعد الافتراضي (VA)",
+                heading="ما يقدره العملاء أكثر فأكثر مع تطور المهنة",
+                text=(
+                    "مع تطور مهنة المساعد الافتراضي، يقدر العملاء أكثر فأكثر المساعدين الذين يجمعون بين إتقان الأدوات التقنية والقيم الإنسانية: "
+                    "1. إتقان الذكاء الاصطناعي (AI fluency): يقدر العملاء بشكل متزايد المساعدين القادرين على استخدام أدوات الذكاء الاصطناعي بمسؤولية لتوفير الوقت وتحسين جودة المخرجات. "
+                    "2. الخبرة المتخصصة (Specialized expertise): يكافئ المستقبل المساعدين الذين يتجاوزون الدعم العام ويطورون مهارات متقدمة في مجال أو مجالين من مجالات الخدمة. "
+                    "3. الخدمة الإنسانية المتميزة (Excellent human service): تظل سرعة الاستجابة، والموثوقية، والذكاء العاطفي، والاحترافية، والتواصل الواضح من أهم نقاط التمايز."
+                ),
+                url=f"{SAVANNA_HOST}/savanna/pages/concept-with-navigation.html#what-clients-are-likely-to-value-more-and-more",
+                page=3,
                 language="ar",
             ),
         ]
@@ -422,8 +543,9 @@ class SavannaStaticSource(ContentSource):
         except Exception:
             return []
 
+        url_path = f"{SAVANNA_HOST}/savanna/pages/{file_path.name}"
         parser = SimpleHtmlChunker(
-            base_url=f"https://learning.example.org/courses/{course_id}",
+            base_url=url_path,
             default_title=file_path.stem.replace("-", " ").title(),
         )
         parser.feed(content)
@@ -443,7 +565,7 @@ class SavannaStaticSource(ContentSource):
                     title=chunk_title,
                     heading=item["heading"],
                     text=item["text"],
-                    url=f"https://learning.example.org/courses/{course_id}/{file_path.stem}",
+                    url=item.get("url") or url_path,
                     page=item.get("page", 1),
                     language="am" if is_amharic else "en",
                 )
@@ -529,7 +651,7 @@ class SavannaStaticSource(ContentSource):
 class GenericHtmlSource(ContentSource):
     """Generic crawler / parser adapter for arbitrary external web pages."""
 
-    def __init__(self, html_content: str | None = None, url: str = "https://example.org") -> None:
+    def __init__(self, html_content: str | None = None, url: str = f"{SAVANNA_HOST}/savanna/pages/concept-with-navigation.html") -> None:
         self.html_content = html_content or ""
         self.url = url
 

@@ -4,7 +4,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg && rm -r
 
 WORKDIR /app
 
-RUN pip install --no-cache-dir aiogram httpx
+RUN pip install --no-cache-dir aiogram httpx pytest
 
 COPY audio_helper.py ./audio_helper.py
 COPY notification_channels.py ./notification_channels.py

@@ -151,7 +151,7 @@ services:
     working_dir: /work
     volumes:
       - ./channels:/work:ro
-    command: /bin/sh -lc "pip install --no-cache-dir pytest && pytest -q"
+    command: python -m pytest -q
 
 volumes:
   app-data:

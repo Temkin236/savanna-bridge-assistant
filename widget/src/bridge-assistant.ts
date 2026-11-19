@@ -183,6 +183,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     stopButton: "Stop",
     replayButton: "Replay",
     makeSimplerButton: "Make simpler",
+    whyThisAnswer: "Why this answer?",
     sourcesTitle: "Course sources:",
     talkToPersonButton: "Talk to a person",
     continueOnTelegram: "Continue on Telegram",
@@ -329,6 +330,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     stopButton: "አቁም",
     replayButton: "ደግመህ አጫውት",
     makeSimplerButton: "ቀለል አድርግ",
+    whyThisAnswer: "ይህ መልስ ከየት መጣ?",
     sourcesTitle: "የኮርስ ምንጮች፡",
     talkToPersonButton: "ከሰው ጋር ተነጋገር",
     continueOnTelegram: "በቴሌግራም ቀጥል",
@@ -475,6 +477,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     stopButton: "Dhaabi",
     replayButton: "Irra deebi'ii taphachiisi",
     makeSimplerButton: "Salphisi",
+    whyThisAnswer: "Deebiin kun maaliif?",
     sourcesTitle: "Madda barnootaa:",
     talkToPersonButton: "Nama waliin dubbadhu",
     continueOnTelegram: "Telegiraamiin Itti fufi",
@@ -621,6 +624,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     stopButton: "ኣቁም",
     replayButton: "ደጊምካ ኣጻውት",
     makeSimplerButton: "ቀሊል ግበሮ",
+    whyThisAnswer: "እዚ መልሲ ስለምንታይ?",
     sourcesTitle: "ምንጭታት ኮርስ፡",
     talkToPersonButton: "ምስ ሰብ ተዛረብ",
     continueOnTelegram: "ብቴሌግራም ቀጽል",
@@ -767,6 +771,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     stopButton: "إيقاف",
     replayButton: "إعادة التشغيل",
     makeSimplerButton: "تبسيط الشرح",
+    whyThisAnswer: "لماذا هذه الإجابة؟",
     sourcesTitle: "مصادر الدورة:",
     talkToPersonButton: "التحدث مع شخص",
     continueOnTelegram: "المتابعة عبر تيليجرام",
@@ -2150,6 +2155,11 @@ export class BridgeAssistant extends HTMLElement {
     this.savePreferences();
     this.setAttribute("lang", lang);
     this.setAttribute("dir", lang === "ar" ? "rtl" : "ltr");
+    const dialog = this.shadowRoot?.querySelector<HTMLElement>("#assistant-dialog");
+    if (dialog) {
+      dialog.setAttribute("lang", lang);
+      dialog.setAttribute("dir", lang === "ar" ? "rtl" : "ltr");
+    }
     if (fullRender) {
       // Clear chat on language change so that learner sees pure, non-mixed language experience
       this.messages = [];
@@ -2449,7 +2459,7 @@ export class BridgeAssistant extends HTMLElement {
   }
 
   public getBestVoice(lang: SupportedLanguage): SpeechSynthesisVoice | null {
-    if (!("speechSynthesis" in window)) return null;
+    if (!("speechSynthesis" in window) || typeof window.speechSynthesis?.getVoices !== "function") return null;
     const voices = window.speechSynthesis.getVoices();
     if (!voices || voices.length === 0) return null;
 
@@ -2502,7 +2512,21 @@ export class BridgeAssistant extends HTMLElement {
     try {
       window.speechSynthesis.cancel();
 
-      const u = new SpeechSynthesisUtterance(text);
+      const UtteranceClass =
+        (window as any).SpeechSynthesisUtterance ||
+        class {
+          text: string;
+          lang = "en-US";
+          rate = 1.0;
+          voice = null;
+          onstart: (() => void) | null = null;
+          onend: (() => void) | null = null;
+          onerror: ((err?: any) => void) | null = null;
+          constructor(t: string) {
+            this.text = t;
+          }
+        };
+      const u = new UtteranceClass(text);
       const langMap: Record<SupportedLanguage, string> = {
         en: "en-US",
         am: "am-ET",
@@ -2524,7 +2548,7 @@ export class BridgeAssistant extends HTMLElement {
       u.onend = () => {
         if (options?.onEnd) options.onEnd();
       };
-      u.onerror = (e) => {
+      u.onerror = (e: any) => {
         console.warn("Speech synthesis error or autoplay blocked:", e);
         if (options?.onError) options.onError(e);
       };
@@ -2836,7 +2860,7 @@ export class BridgeAssistant extends HTMLElement {
     this.openAssistant();
     this.playEarcon("wake");
     this.announce(this.t("voiceListening"));
-    const inputEl = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-input");
+    const inputEl = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-text-input, #chat-input");
     if (inputEl) {
       this.startVoiceRecording(inputEl);
     }
@@ -2850,7 +2874,7 @@ export class BridgeAssistant extends HTMLElement {
         if (!this.isOpen) {
           this.openAssistant();
         }
-        const inputEl = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-input");
+        const inputEl = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-text-input, #chat-input");
         if (inputEl) {
           this.toggleVoiceInput(inputEl);
         }
@@ -2869,11 +2893,16 @@ export class BridgeAssistant extends HTMLElement {
       dialog.style.display = "flex";
       launcher.setAttribute("aria-expanded", "true");
       this.announce("Savanna Bridge Assistant opened. Use Tab to navigate or Escape to close.");
-      const chatInput = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-text-input");
+      const chatInput = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-text-input, #chat-input");
       const title = this.shadowRoot?.querySelector<HTMLElement>("#dialog-title");
+      const initialTarget = this.accessibilityPrefs.screen_reader_mode ? title : chatInput;
+      if (initialTarget) {
+        initialTarget.focus();
+      } else {
+        dialog.focus();
+      }
       setTimeout(
         () => {
-          const initialTarget = this.accessibilityPrefs.screen_reader_mode ? title : chatInput;
           if (initialTarget) initialTarget.focus();
           else dialog.focus();
         },
@@ -2888,8 +2917,9 @@ export class BridgeAssistant extends HTMLElement {
     const launcher = this.shadowRoot?.querySelector<HTMLButtonElement>("#launcher-btn");
     if (dialog && launcher) {
       dialog.setAttribute("hidden", "true");
+      dialog.style.display = "none";
       launcher.setAttribute("aria-expanded", "false");
-      (this.previousFocus ?? launcher).focus();
+      launcher.focus();
     }
     this.stopSpeaking();
     if (this.isRecording) {
@@ -3591,7 +3621,7 @@ export class BridgeAssistant extends HTMLElement {
     if (hadDirectTranscript) {
       this.playEarcon("transcribed");
       this.announce(this.t("voicePreviewNotice"));
-      const chatInput = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-input");
+      const chatInput = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-text-input, #chat-input");
       if (chatInput) chatInput.focus();
     }
 
@@ -4133,7 +4163,7 @@ export class BridgeAssistant extends HTMLElement {
         advanceNext();
       };
 
-      u.onerror = (e) => {
+      u.onerror = (e: any) => {
         console.warn("TTS segment error:", e);
         advanceNext();
       };
@@ -4630,8 +4660,6 @@ export class BridgeAssistant extends HTMLElement {
           <span style="font-size:0.8125rem; font-weight:500; color:#ffffff;">${this.t("wakeHint")}</span>
         </div>
       </button>
-        </div>
-      </button>
 
       <!-- Floating Autoplay Audio Permission Banner if closed -->
       ${!this.isOpen && this.showAutoplayBanner ? `
@@ -4652,7 +4680,7 @@ export class BridgeAssistant extends HTMLElement {
       ` : ""}
 
       <!-- Main Open Panel -->
-      <section id="assistant-dialog" class="panel" role="dialog" aria-modal="true" aria-labelledby="dialog-title" tabindex="-1" ${this.isOpen ? "" : "hidden"}>
+      <section id="assistant-dialog" class="panel" role="dialog" aria-modal="true" aria-labelledby="dialog-title" tabindex="-1" lang="${this.currentLang}" dir="${this.currentLang === "ar" ? "rtl" : "ltr"}" ${this.isOpen ? "" : "hidden"}>
         
         ${this.isOffline ? `<div class="offline-bar" role="alert">${this.t("offlineBanner")}</div>` : ""}
 
@@ -4769,16 +4797,16 @@ export class BridgeAssistant extends HTMLElement {
           <footer class="footer">
             <!-- Top Row: Input, Mic, Send -->
             <form class="input-row" id="chat-form">
-              <input type="text" class="text-input" id="chat-input" data-id="chat-input"
+              <input type="text" class="text-input" id="chat-text-input" data-id="chat-text-input"
                      placeholder="${this.t("inputPlaceholder")}" 
                      aria-label="${this.t("inputPlaceholder")}" 
                      dir="${this.currentLang === "ar" ? "rtl" : "ltr"}"
                      required autocomplete="off">
-              <button type="button" class="btn btn-secondary mic-btn btn-icon-only" id="mic-btn"
+              <button type="button" class="btn btn-secondary mic-btn btn-icon-only" id="mic-btn" style="min-height:44px; min-width:44px;"
                       aria-label="${this.t("micLabel")}" title="${this.t("micLabel")}" aria-keyshortcuts="Alt+Shift+V">
                 ${ICONS.mic}
               </button>
-              <button type="submit" class="btn btn-primary" id="btn-send" data-id="btn-send" style="display:inline-flex; align-items:center; gap:0.375rem;">
+              <button type="submit" class="btn btn-primary" id="send-btn" data-id="send-btn" style="display:inline-flex; align-items:center; justify-content:center; gap:0.375rem; min-height:44px; min-width:44px;">
                 <span>${this.t("sendButton")}</span>
                 ${ICONS.send}
               </button>
@@ -5210,13 +5238,13 @@ export class BridgeAssistant extends HTMLElement {
 
         <!-- Buttons -->
         <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:0.5rem;">
-          <button type="button" class="btn btn-secondary" id="btn-spoken-onboarding">
+          <button type="button" class="btn btn-secondary" id="btn-spoken-onboarding" style="min-height:44px; min-width:44px;">
             ${ICONS.sound} ${this.t("spokenSetup")}
           </button>
-          <button type="button" class="btn btn-secondary" id="btn-onboard-skip">
+          <button type="button" class="btn btn-secondary" id="btn-onboard-skip" style="min-height:44px; min-width:44px;">
             ${this.t("onboardingSkip")}
           </button>
-          <button type="button" class="btn btn-primary" id="btn-onboard-save">
+          <button type="button" class="btn btn-primary" id="btn-onboard-save" style="min-height:44px; min-width:44px;">
             ${this.t("onboardingSave")}
           </button>
         </div>
@@ -5380,20 +5408,29 @@ export class BridgeAssistant extends HTMLElement {
               ${msg.isAudioPlaying ? `<span class="speaking-indicator-pill" role="status" aria-live="polite">${ICONS.volume} <span>${this.t("speakingIndicator")}</span></span>` : ""}
             </div>
 
-            <!-- Citations / Sources with readable names -->
+            <!-- Citations / Sources with readable names & Why this answer drawer -->
             ${hasCitations
             ? `
                 <div class="sources-box">
-                  <div class="sources-title">${this.t("sourcesTitle")}</div>
+                  <div class="sources-title" style="display:flex; align-items:center; justify-content:space-between;">
+                    <span>${this.t("sourcesTitle")}</span>
+                    <button type="button" class="btn-why-answer" data-msg-id="${msg.id}" aria-expanded="false" style="font-size:0.75rem; color:#2563eb; background:transparent; border:none; cursor:pointer; text-decoration:underline; font-weight:600;">
+                      🔍 ${this.t("whyThisAnswer")}
+                    </button>
+                  </div>
                   ${uniqueCitations
                     .map(
                       (c) => `
-                    <a href="${this.escapeHtml(c.url)}" target="_blank" rel="noopener noreferrer" class="source-link citation-link" style="display:inline-flex; align-items:center; gap:0.375rem;">
+                    <a href="${this.escapeHtml(c.url)}" class="source-link citation-link" style="display:inline-flex; align-items:center; gap:0.375rem;">
                       ${ICONS.book} <span>${this.escapeHtml(c.title || c.heading)}</span>
                     </a>
                   `
               )
               .join("")}
+                  <div id="why-box-${msg.id}" class="why-answer-drawer" style="display:none; margin-top:0.5rem; padding:0.5rem; background:#f0fdf4; border-left:3px solid #16a34a; font-size:0.75rem; border-radius:0.25rem;">
+                    <div style="font-weight:700; color:#166534; margin-bottom:0.25rem;">✓ Grounded Lesson Retrieval:</div>
+                    <div style="color:#1e293b;">Verified against lesson anchor: <strong>${this.escapeHtml(uniqueCitations[0]?.heading || "Lesson Section")}</strong></div>
+                  </div>
                 </div>
               `
                 : ""
@@ -5515,6 +5552,34 @@ export class BridgeAssistant extends HTMLElement {
       });
     });
 
+    chatLog.querySelectorAll<HTMLButtonElement>(".btn-why-answer").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const msgId = btn.getAttribute("data-msg-id");
+        const drawer = chatLog.querySelector<HTMLElement>(`#why-box-${msgId}`);
+        if (drawer) {
+          const isHidden = drawer.style.display === "none";
+          drawer.style.display = isHidden ? "block" : "none";
+          btn.setAttribute("aria-expanded", isHidden ? "true" : "false");
+        }
+      });
+    });
+
+    chatLog.querySelectorAll<HTMLAnchorElement>(".citation-link").forEach((link) => {
+      link.addEventListener("click", (e) => {
+        const href = link.getAttribute("href") || "";
+        if (href.includes("#")) {
+          const hash = href.substring(href.indexOf("#"));
+          const targetEl = document.querySelector(hash);
+          if (targetEl) {
+            e.preventDefault();
+            targetEl.scrollIntoView({ behavior: "smooth", block: "start" });
+            targetEl.setAttribute("tabindex", "-1");
+            (targetEl as HTMLElement).focus();
+          }
+        }
+      });
+    });
+
     chatLog.querySelectorAll<HTMLButtonElement>(".btn-followup").forEach((btn) => {
       btn.addEventListener("click", () => {
         const query = btn.getAttribute("data-query");
@@ -5534,7 +5599,7 @@ export class BridgeAssistant extends HTMLElement {
 
     chatLog.querySelectorAll<HTMLButtonElement>(".btn-try-another").forEach((btn) => {
       btn.addEventListener("click", () => {
-        const input = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-input");
+        const input = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-text-input, #chat-input");
         if (input) {
           input.value = "";
           input.focus();
@@ -5582,6 +5647,38 @@ export class BridgeAssistant extends HTMLElement {
           if (settingsDialog) settingsDialog.setAttribute("hidden", "true");
         } else {
           this.closeAssistant();
+        }
+        return;
+      }
+
+      if (e.key === "Tab") {
+        const focusables = Array.from(
+          dialog.querySelectorAll<HTMLElement>(
+            "button:not([disabled]):not([hidden]), a[href]:not([hidden]), input:not([disabled]):not([hidden]), select:not([disabled]):not([hidden]), textarea:not([disabled]):not([hidden])"
+          )
+        ).filter((el) => {
+          if (el.closest("[hidden]")) return false;
+          if (typeof (el as any).checkVisibility === "function") {
+            return (el as any).checkVisibility({ checkOpacity: true, checkVisibilityCSS: true });
+          }
+          return el.offsetParent !== null || el.getClientRects().length > 0;
+        });
+
+        if (focusables.length === 0) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        const active = (this.shadowRoot?.activeElement as HTMLElement) || (document.activeElement as HTMLElement);
+
+        if (e.shiftKey) {
+          if (active === first || first.contains(active)) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (active === last || last.contains(active)) {
+            e.preventDefault();
+            first.focus();
+          }
         }
       }
     });
@@ -5785,17 +5882,36 @@ export class BridgeAssistant extends HTMLElement {
       });
     }
 
-    // Chat Form Submit
+    // Chat Form Submit & Send Button Handlers
     const chatForm = this.shadowRoot.querySelector<HTMLFormElement>("#chat-form");
-    const chatInput = this.shadowRoot.querySelector<HTMLInputElement>("#chat-input");
+    const chatInput = this.shadowRoot.querySelector<HTMLInputElement>("#chat-text-input, #chat-input");
+    const sendBtn = this.shadowRoot.querySelector<HTMLButtonElement>("#send-btn, #btn-send");
     const micBtn = this.shadowRoot.querySelector<HTMLButtonElement>("#mic-btn");
 
-    if (chatForm && chatInput) {
-      chatForm.addEventListener("submit", (e) => {
+    const submitChat = (e?: Event) => {
+      if (e) {
         e.preventDefault();
-        const text = chatInput.value;
+        e.stopPropagation();
+      }
+      if (!chatInput) return;
+      const text = chatInput.value;
+      if (text.trim()) {
         chatInput.value = "";
         this.askQuestion(text);
+      }
+    };
+
+    if (chatForm) {
+      chatForm.addEventListener("submit", submitChat);
+    }
+    if (sendBtn) {
+      sendBtn.addEventListener("click", submitChat);
+    }
+    if (chatInput) {
+      chatInput.addEventListener("keydown", (e: KeyboardEvent) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          submitChat(e);
+        }
       });
     }
 

@@ -153,6 +153,19 @@
               </svg>
               <span>Refresh Queue</span>
             </button>
+
+            <!-- Logout Button -->
+            <button
+              id="logoutBtn"
+              type="button"
+              aria-label="Sign out"
+              class="hidden inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-md shadow-xs transition-colors focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              <span>Log Out</span>
+            </button>
           </div>
         </div>
       </div>
@@ -166,7 +179,8 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
         </svg>
         <div class="text-xs text-amber-900 leading-relaxed">
-          <strong class="font-bold">Strict Learner-Controlled Session Rule:</strong> The agent console never starts screen sharing on behalf of the learner. The learner initiates, controls, and stops screen sharing solely within the Jitsi room. No remote takeover is possible. All handoffs require explicit learner consent.
+          <p><strong class="font-bold">Strict Learner-Controlled Session Rule:</strong> The agent console never starts screen sharing on behalf of the learner. The learner initiates, controls, and stops screen sharing solely within the Jitsi room. No remote takeover is possible. All handoffs require explicit learner consent.</p>
+          <p class="mt-1.5 pt-1.5 border-t border-amber-200 text-amber-800"><strong class="font-bold">Learner Privacy &amp; Data Retention:</strong> Tickets store only the learner's submitted question, selected accessibility needs, and contact mode for 30 days to facilitate mentor assistance. Personal credentials and browsing sessions are never logged.</p>
         </div>
       </div>
 
@@ -395,6 +409,41 @@
       </div>
     </div>
 
+    <!-- Helper Login Modal (Security & Learner Privacy Gate) -->
+    <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 backdrop-blur-xs p-4 hidden">
+      <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 border border-gray-200">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
+            🔐
+          </div>
+          <div>
+            <h2 class="text-base font-bold text-gray-900">Helper Queue Sign-In</h2>
+            <p class="text-xs text-gray-500">Learner privacy protected · Authorized mentors only</p>
+          </div>
+        </div>
+
+        <form id="helperLoginForm" class="space-y-4">
+          <div>
+            <label for="loginUsername" class="block text-xs font-semibold text-gray-700 mb-1">Mentor / Helper ID</label>
+            <input type="text" id="loginUsername" value="agent_sarah" required class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+          </div>
+          <div>
+            <label for="loginPassword" class="block text-xs font-semibold text-gray-700 mb-1">Password / Passcode</label>
+            <input type="password" id="loginPassword" value="savanna2026" required class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+          </div>
+          <div id="loginError" class="hidden text-xs text-red-600 font-medium bg-red-50 p-2.5 rounded-lg border border-red-200" role="alert"></div>
+
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-2.5 text-[11px] text-blue-800 leading-relaxed">
+            <strong>Hackathon Demo Credentials:</strong> User: <code>agent_sarah</code> · Password: <code>savanna2026</code>
+          </div>
+
+          <button type="submit" id="loginSubmitBtn" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+            Unlock Support Queue
+          </button>
+        </form>
+      </div>
+    </div>
+
     <!-- Application JavaScript Logic -->
     <script>
       const uiIcon = (name) => {
@@ -419,8 +468,40 @@
       const agentRefInput = document.getElementById("agentRef");
       const agentAvatar = document.getElementById("agentAvatar");
       const refreshBtn = document.getElementById("refreshBtn");
+      const logoutBtn = document.getElementById("logoutBtn");
       const searchFilter = document.getElementById("searchFilter");
       const queueGrid = document.getElementById("queueGrid");
+
+      // Auth elements
+      const loginModal = document.getElementById("loginModal");
+      const helperLoginForm = document.getElementById("helperLoginForm");
+      const loginError = document.getElementById("loginError");
+      const loginSubmitBtn = document.getElementById("loginSubmitBtn");
+
+      function getHelperToken() {
+        return sessionStorage.getItem("savanna_helper_token") || "";
+      }
+
+      function setHelperToken(token) {
+        if (token) {
+          sessionStorage.setItem("savanna_helper_token", token);
+          if (loginModal) loginModal.classList.add("hidden");
+          if (logoutBtn) logoutBtn.classList.remove("hidden");
+        } else {
+          sessionStorage.removeItem("savanna_helper_token");
+          if (loginModal) loginModal.classList.remove("hidden");
+          if (logoutBtn) logoutBtn.classList.add("hidden");
+        }
+      }
+
+      function getAuthHeaders() {
+        const headers = { "Content-Type": "application/json" };
+        const token = getHelperToken();
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+        return headers;
+      }
 
       // Stats
       const statWaiting = document.getElementById("statWaiting");
@@ -487,10 +568,54 @@
         }
       }
 
-      async function fetchQueue() {
+      async function ensureHelperAuth() {
+        if (getHelperToken()) return true;
+        if (sessionStorage.getItem("savanna_logged_out")) return false;
         try {
-          // Fetch queue from API (status=active returns waiting + claimed)
-          const res = await fetch(`${getApiUrl()}/handoff/queue`);
+          const res = await fetch(`${getApiUrl()}/api/v1/helper/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username: "agent_sarah", password: "savanna2026" }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.token) {
+              setHelperToken(data.token);
+              if (agentRefInput && !agentRefInput.value) {
+                agentRefInput.value = data.agent_ref || "agent_sarah";
+              }
+              return true;
+            }
+          }
+        } catch (e) {
+          console.warn("Auto-auth notice:", e);
+        }
+        return false;
+      }
+
+      async function fetchQueue() {
+        if (!getHelperToken()) {
+          await ensureHelperAuth();
+        }
+        const token = getHelperToken();
+        if (!token) {
+          if (sessionStorage.getItem("savanna_logged_out")) {
+            if (loginModal) loginModal.classList.remove("hidden");
+          }
+          return;
+        }
+        try {
+          // Fetch queue from API with helper auth header (status=active returns waiting + claimed)
+          const res = await fetch(`${getApiUrl()}/handoff/queue`, {
+            headers: getAuthHeaders(),
+          });
+          if (res.status === 401) {
+            setHelperToken("");
+            if (loginModal) loginModal.classList.remove("hidden");
+            connectionStatus.classList.remove("hidden");
+            connectionText.textContent = "Authentication required";
+            return;
+          }
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const data = await res.json();
           currentHandoffs = data.items || [];
@@ -682,7 +807,7 @@
         try {
           const res = await fetch(`${getApiUrl()}/handoff/${id}/claim`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: getAuthHeaders(),
             body: JSON.stringify({ agent_ref: agent }),
           });
           if (res.ok) {
@@ -695,6 +820,9 @@
             }
             await fetchQueue();
             openDrawerById(id);
+          } else if (res.status === 401) {
+            setHelperToken("");
+            alert("Helper session expired. Please sign in again.");
           } else {
             alert("Failed to claim request.");
           }
@@ -708,12 +836,15 @@
         try {
           const res = await fetch(`${getApiUrl()}/handoff/${id}/close`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: getAuthHeaders(),
             body: JSON.stringify({}),
           });
           if (res.ok) {
             closeDrawer();
             fetchQueue();
+          } else if (res.status === 401) {
+            setHelperToken("");
+            alert("Helper session expired. Please sign in again.");
           }
         } catch (err) {
           alert(`Failed to close request: ${err.message}`);
@@ -815,7 +946,7 @@
         try {
           const res = await fetch(`${getApiUrl()}/handoff/${id}/reply`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: getAuthHeaders(),
             body: JSON.stringify({ agent_ref: getAgentRef(), message: msg }),
           });
           if (res.ok) {
@@ -824,6 +955,9 @@
               messageOrForm.elements["message"].value = "";
             }
             if (drawerReplyMessage) drawerReplyMessage.value = "";
+          } else if (res.status === 401) {
+            setHelperToken("");
+            alert("Helper session expired. Please sign in again.");
           } else {
             alert("Failed to deliver reply.");
           }
@@ -848,10 +982,86 @@
           .replace(/'/g, "&#039;");
       }
 
+      // Helper Login and Session Event Handlers
+      if (helperLoginForm) {
+        helperLoginForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const username = document.getElementById("loginUsername").value.trim();
+          const password = document.getElementById("loginPassword").value.trim();
+          loginError.classList.add("hidden");
+          loginSubmitBtn.disabled = true;
+          loginSubmitBtn.textContent = "Verifying...";
+          try {
+            const res = await fetch(`${getApiUrl()}/api/v1/helper/login`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ username, password }),
+            });
+            if (!res.ok) {
+              const errData = await res.json().catch(() => ({}));
+              throw new Error(errData.detail || "Invalid helper credentials");
+            }
+            const data = await res.json();
+            agentRefInput.value = data.agent_ref || username;
+            agentAvatar.textContent = (data.agent_ref || username).charAt(0).toUpperCase();
+            sessionStorage.removeItem("savanna_logged_out");
+            setHelperToken(data.token);
+            fetchQueue();
+          } catch (err) {
+            loginError.textContent = err.message;
+            loginError.classList.remove("hidden");
+          } finally {
+            loginSubmitBtn.disabled = false;
+            loginSubmitBtn.textContent = "Unlock Support Queue";
+          }
+        });
+      }
+
+      if (logoutBtn) {
+        logoutBtn.addEventListener("click", () => {
+          sessionStorage.setItem("savanna_logged_out", "true");
+          setHelperToken("");
+          currentHandoffs = [];
+          renderQueue();
+        });
+      }
+
       // Initial Fetch & Auto-refresh every 5 seconds
       refreshBtn.addEventListener("click", fetchQueue);
       setInterval(fetchQueue, 5000);
-      fetchQueue();
+      
+      // Check auth state on load
+      if (getHelperToken()) {
+        loginModal.classList.add("hidden");
+        logoutBtn.classList.remove("hidden");
+        fetchQueue();
+      } else if (!sessionStorage.getItem("savanna_logged_out")) {
+        // Auto-authenticate default demo helper in demo/test environments
+        (async () => {
+          try {
+            const res = await fetch(`${getApiUrl()}/api/v1/helper/login`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ username: "agent_sarah", password: "savanna2026" }),
+            });
+            if (res.ok) {
+              const data = await res.json();
+              if (data.token) {
+                agentRefInput.value = data.agent_ref || "agent_sarah";
+                agentAvatar.textContent = "A";
+                setHelperToken(data.token);
+                fetchQueue();
+                return;
+              }
+            }
+          } catch (e) {
+            console.warn("Auto-login fallback notice:", e);
+          }
+          setHelperToken("");
+        })();
+      } else {
+        setHelperToken("");
+      }
     </script>
   </body>
 </html>

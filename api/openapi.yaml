@@ -41,6 +41,32 @@ paths:
               schema:
                 $ref: "#/components/schemas/Health"
 
+  /api/v1/privacy:
+    get:
+      tags: [System]
+      operationId: getPrivacyPolicy
+      summary: Return learner data retention policy and privacy commitments
+      security: []
+      responses:
+        "200":
+          description: Privacy and data retention policy
+          content:
+            application/json:
+              example:
+                status: active
+                retention_days: 30
+                purpose: Facilitate learner support and human mentor escalation
+                data_stored:
+                  - Learner question text
+                  - Selected support and accessibility needs
+                  - Contact preference
+                  - Ticket resolution status and mentor replies
+                data_excluded:
+                  - Account passwords and credentials
+                  - Personal browser history or session cookies
+                  - Ephemeral WebRTC audio/video streams
+                learner_rights: Full consent control and deletion upon ticket closure.
+
   /ask:
     post:
       tags: [Tutor]
@@ -353,6 +379,27 @@ paths:
                 $ref: "#/components/schemas/SupportNeeds"
         "400":
           $ref: "#/components/responses/BadRequest"
+
+  /api/v1/helper/login:
+    post:
+      tags: [Handoff]
+      operationId: helperLogin
+      summary: Authenticate a human helper or mentor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HelperLoginRequest"
+      responses:
+        "200":
+          description: Helper authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HelperLoginResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
 
   /handoff:
     post:
@@ -1215,9 +1262,8 @@ components:
           type: boolean
           example: false
         channel:
-          type: string
-          enum: [telegram]
-          nullable: true
+          type: [string, "null"]
+          enum: [telegram, null]
           example: null
       example:
         linked: false
@@ -1432,6 +1478,42 @@ components:
         delivered: true
         message: I can help. Which part of the instructions is unclear?
         sent_at: "2026-11-14T10:32:00+03:00"
+
+    HelperLoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          example: agent_sarah
+        password:
+          type: string
+          example: savanna2026
+      example:
+        username: agent_sarah
+        password: savanna2026
+
+    HelperLoginResponse:
+      type: object
+      required: [token, agent_ref, role, expires_in_minutes]
+      properties:
+        token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        agent_ref:
+          type: string
+          example: agent_sarah
+        role:
+          type: string
+          example: helper
+        expires_in_minutes:
+          type: integer
+          example: 480
+      example:
+        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.demo"
+        agent_ref: agent_sarah
+        role: helper
+        expires_in_minutes: 480
 
     Job:
       type: object
