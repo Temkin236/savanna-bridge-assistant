@@ -85,7 +85,14 @@ test.describe("Savanna Bridge integration", () => {
       );
     expect(handoff).toBeTruthy();
 
-    await page.goto(consoleBase);
+    await page.goto(`${consoleBase}?api=${encodeURIComponent(apiBase)}`);
+    const loginModal = page.locator("#loginModal");
+    if (await loginModal.isVisible()) {
+      await page.locator("#loginUsername").fill("agent_sarah");
+      await page.locator("#loginPassword").fill("savanna2026");
+      await page.locator("#loginSubmitBtn").click();
+      await expect(loginModal).toBeHidden({ timeout: 5000 });
+    }
     await page.locator("#apiEndpoint").fill(apiBase);
     await page.getByRole("button", { name: "Refresh Queue" }).click();
     const card = page.locator("article", { hasText: handoff.id });

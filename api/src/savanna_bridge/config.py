@@ -10,12 +10,24 @@ API_DIR = Path(__file__).resolve().parents[2]
 ROOT_DIR = API_DIR.parent
 DEFAULT_DB_PATH = str(API_DIR / "savanna_bridge.db")
 
-# Provider settings: "auto", "offline", "addis", "cloud"
-AI_PROVIDER: str = os.getenv("AI_PROVIDER", "auto").lower()
+# Gemini API key (canonical single variable with legacy fallbacks)
+GEMINI_API_KEY: str = (
+    os.getenv("GEMINI_API_KEY")
+    or os.getenv("GOOGLE_AI_API_KEY")
+    or os.getenv("CLOUD_AI_API_KEY")
+    or os.getenv("GOOGLE_API_KEY")
+    or ""
+)
+GOOGLE_AI_API_KEY: str = GEMINI_API_KEY
 
-# Addis AI configuration
-ADDIS_API_KEY: str = os.getenv("ADDIS_API_KEY", "")
-ADDIS_BASE_URL: str = os.getenv("ADDIS_BASE_URL", "https://api.addisassistant.com")
+# Provider settings: "gemini", "offline", "groq", "auto"
+# Defaults: "gemini" when GEMINI_API_KEY is present, otherwise "offline"
+AI_PROVIDER: str = os.getenv("AI_PROVIDER", "gemini" if GEMINI_API_KEY else "offline").lower()
+TTS_PROVIDER: str = os.getenv("TTS_PROVIDER", "gemini").lower()
+GEMINI_TTS_MODEL: str = os.getenv("GEMINI_TTS_MODEL", "gemini-3.8-flash-lite-tts")
+GEMINI_TTS_VOICE: str = os.getenv("GEMINI_TTS_VOICE", "Aoede")
+GOOGLE_TTS_MODEL: str = os.getenv("GOOGLE_TTS_MODEL", GEMINI_TTS_MODEL)
+GOOGLE_TTS_VOICE: str = os.getenv("GOOGLE_TTS_VOICE", GEMINI_TTS_VOICE)
 
 # Groq is a supporting provider. Multiple keys are accepted so a rate-limited
 # or unavailable key can be rotated without exposing credentials to the widget.
@@ -32,8 +44,8 @@ GROQ_TTS_MODEL_AR: str = os.getenv(
 )
 
 # Gemini and Google Cloud TTS settings
-GOOGLE_TTS_MODEL: str = os.getenv("GOOGLE_TTS_MODEL", "gemini-2.0-flash")
-GOOGLE_TTS_VOICE: str = os.getenv("GOOGLE_TTS_VOICE", "Aoede")
+GOOGLE_TTS_MODEL: str = os.getenv("GOOGLE_TTS_MODEL", GEMINI_TTS_MODEL)
+GOOGLE_TTS_VOICE: str = os.getenv("GOOGLE_TTS_VOICE", GEMINI_TTS_VOICE)
 
 # Database
 DB_PATH: str = os.getenv("DB_PATH", DEFAULT_DB_PATH)

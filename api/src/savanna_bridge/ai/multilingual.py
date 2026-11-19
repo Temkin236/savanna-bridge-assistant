@@ -1,9 +1,8 @@
-"""Language-aware resilient routing across Addis AI, Google, Groq, and offline."""
+"""Language-aware resilient routing across Google Gemini, Groq, and offline."""
 
 from __future__ import annotations
 
 from adapters.base import ContentChunk
-from savanna_bridge.ai.addis import AddisAiProvider
 from savanna_bridge.ai.base import AIProvider
 from savanna_bridge.ai.cloud import CloudProvider
 from savanna_bridge.ai.groq import GroqProvider
@@ -12,10 +11,9 @@ from savanna_bridge.models import Language
 
 
 class MultilingualProvider(AIProvider):
-    """Route Ethiopian languages to Addis AI and Arabic to Google."""
+    """Route Ethiopian languages and Arabic across Gemini, Groq, and offline."""
 
     def __init__(self) -> None:
-        self.addis = AddisAiProvider()
         self.google = CloudProvider()
         self.groq = GroqProvider()
         self.offline = OfflineFaqProvider()
@@ -32,10 +30,9 @@ class MultilingualProvider(AIProvider):
     def _providers_for_language(self, language: Language, capability: str) -> list[AIProvider]:
         """Return ordered providers; every method still falls back deterministically."""
         if language in (Language.AM, Language.OM, Language.TI):
-            # Groq STT is multilingual, but its documented TTS voices are EN/AR.
             if capability == "synthesize":
-                return [self.addis, self.google]
-            return [self.addis, self.groq, self.google]
+                return [self.google]
+            return [self.google, self.groq]
         if language == Language.AR:
             return [self.google, self.groq]
         return [self.google, self.groq]
@@ -64,8 +61,8 @@ class MultilingualProvider(AIProvider):
 
     def translate(self, text: str, source_lang: str, target_lang: str) -> str:
         target = Language(target_lang) if target_lang in {item.value for item in Language} else Language.EN
-        if {source_lang, target_lang} & {"am", "om", "ti"}:
-            providers = [self.addis, self.groq, self.google]
+        if {source_lang, target_lang} & {"am", "om", "ti", "so"}:
+            providers = [self.google, self.groq]
         elif "ar" in (source_lang, target_lang):
             providers = [self.google, self.groq]
         else:

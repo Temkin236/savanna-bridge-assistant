@@ -10,7 +10,7 @@
 
 ## 1. Executive Summary
 
-This engineering effort upgraded and hardened the existing **Savanna Bridge Assistant** into an accessibility-ready, multilingual learning and support platform for Ethiopian and pan-African learners. The existing FastAPI, web-component, retrieval, channel, and console architecture remains in place; the unused Ollama option was deliberately removed from this deployment in favor of Addis AI, Google AI, and a labelled offline fallback.
+This engineering effort upgraded and hardened the existing **Savanna Bridge Assistant** into an accessibility-ready, multilingual learning and support platform for Ethiopian and pan-African learners. The existing FastAPI, web-component, retrieval, channel, and console architecture remains in place; the unused Ollama option was deliberately removed from this deployment in favor of Google Gemini, Groq, and a labelled offline fallback.
 
 The current build has 0 critical/serious axe-core findings and passes automated sound-off, text-equivalence, keyboard, focus, RTL, and browser-speech fallback checks. Formal WCAG 2.2 AA conformance and real assistive-technology equivalence are not claimed until the pending NVDA, TalkBack, and co-designer sessions are recorded. The build also provides single-script independent host embedding (`<db-assistant>`), offline BM25 fallback, SMS inbound routing $\le 160$ characters, and hardened BridgePass account linking.
 
@@ -20,7 +20,7 @@ The current build has 0 critical/serious axe-core findings and passes automated 
 
 The following existing components were verified and preserved without regression:
 1. **FastAPI Backend**: Preserved router hierarchy, SQLite database schema, and existing endpoints.
-2. **Pluggable AI Architecture**: Uses `auto`, `offline`, `addis`, and Google cloud providers; Ollama is intentionally not part of this deployment.
+2. **Pluggable AI Architecture**: Uses `auto`, `offline`, `gemini`, and Groq cloud providers; Ollama is intentionally not part of this deployment.
 3. **Course-Grounded BM25 Engine**: Preserved offline chunk indexing and similarity ranking.
 4. **Low-Confidence Answer Refusal**: Preserved strict threshold-based refusal with human mentor referral.
 5. **Human Handoff Lifecycle**: Preserved ticket creation, agent console queue, claiming, replying, and closing.

@@ -1186,23 +1186,17 @@ def draft_accommodation(payload: AccommodationDraftRequest) -> AccommodationDraf
 @app.post("/speech/transcribe", response_model=Transcription, tags=["Speech"])
 @app.post("/api/v1/speech/transcribe", response_model=Transcription, tags=["Speech"])
 def transcribe_speech(payload: TranscriptionRequest) -> Transcription:
-    from savanna_bridge.config import ADDIS_API_KEY
-
     requested_language = payload.language
     language_hint = Language.EN if requested_language == "auto" else requested_language
 
-    # Auto mode starts with multilingual Groq STT, then the normal resilient chain.
+    # Speech-to-text: use Gemini with audio input when the Gemini provider is on;
+    # auto mode starts with multilingual Groq STT, then the normal resilient chain.
     ai = get_ai_provider()
     if requested_language == "auto":
         from savanna_bridge.ai.groq import GroqProvider
 
         groq = GroqProvider()
         ai = groq if groq.keys.count else ai
-    elif language_hint in (Language.AM, Language.OM, Language.TI) and ADDIS_API_KEY:
-        from savanna_bridge.ai.addis import AddisAiProvider
-        addis = AddisAiProvider(api_key=ADDIS_API_KEY)
-        if not addis.is_mocked:
-            ai = addis
 
     audio_bytes = b""
     with contextlib.suppress(Exception):
@@ -1214,9 +1208,6 @@ def transcribe_speech(payload: TranscriptionRequest) -> Transcription:
         language=language_hint,
         retain=payload.retain,
     )
-    # Auto mode prefers Groq's multilingual Whisper endpoint. If both Groq
-    # credentials are unavailable, continue through the normal provider chain
-    # instead of returning Groq's deterministic offline transcript.
     if requested_language == "auto" and ai.name == "groq" and ai.is_mocked:
         ai = get_ai_provider()
         text = ai.transcribe(
@@ -1248,17 +1239,16 @@ def transcribe_speech(payload: TranscriptionRequest) -> Transcription:
 @app.post("/speech/synthesize", response_model=SynthesisResult, tags=["Speech"])
 @app.post("/api/v1/speech/synthesize", response_model=SynthesisResult, tags=["Speech"])
 def synthesize_speech(payload: SynthesisRequest) -> SynthesisResult:
-    from savanna_bridge.config import ADDIS_API_KEY
-
-    # Use Addis AI as preferred voice synthesis for Amharic and Afaan Oromo
-    ai = get_ai_provider()
-    if payload.language in (Language.AM, Language.OM) and ADDIS_API_KEY:
-        from savanna_bridge.ai.addis import AddisAiProvider
-        addis = AddisAiProvider(api_key=ADDIS_API_KEY)
-        if not addis.is_mocked:
-            ai = addis
+    tts_provider_name = os.getenv("TTS_PROVIDER") or os.getenv("AI_PROVIDER")
+    ai = get_ai_provider(tts_provider_name)
 
     audio_url = ai.synthesize(text=payload.text, language=payload.language, speed=payload.speed)
+    is_mocked = (
+        ai.is_mocked
+        or ai.name == "offline"
+        or not audio_url
+        or "demo.ogg" in audio_url
+    )
     expires_at = (datetime.now(UTC) + timedelta(minutes=20)).isoformat()
     return SynthesisResult(
         audio_url=audio_url,
@@ -1266,7 +1256,7 @@ def synthesize_speech(payload: SynthesisRequest) -> SynthesisResult:
         language=payload.language,
         expires_at=expires_at,
         provider=ai.name,
-        mocked=ai.is_mocked,
+        mocked=is_mocked,
     )
 
 
@@ -1277,7 +1267,7 @@ def translate_text(payload: TranslationRequest) -> TranslationResponse:
     tgt = (payload.target_language or "am").lower().split("-")[0].strip()
 
     # The multilingual router applies language-specific order and continues
-    # through Addis AI, Google, both rotating Groq keys, and offline fallback.
+    # through Gemini, rotating Groq keys, and offline fallback.
     provider = get_ai_provider("multilingual")
     translated = provider.translate(payload.text, src, tgt)
 
@@ -1292,15 +1282,11 @@ def translate_text(payload: TranslationRequest) -> TranslationResponse:
 
 
 def _generate_demo_audio() -> bytes:
-    import math
+    # 0.25-second silent placeholder so fallbacks never emit an abrupt sine beep
     sample_rate = 16000
-    duration = 0.5
+    duration = 0.25
     num_samples = int(sample_rate * duration)
-    data = bytearray()
-    for i in range(num_samples):
-        t = float(i) / sample_rate
-        sample = int(16000.0 * math.exp(-4.0 * t) * math.sin(2.0 * math.pi * 520.0 * t))
-        data.extend(struct.pack("<h", max(-32768, min(32767, sample))))
+    data = bytearray(num_samples * 2)  # 16-bit silence
     header = struct.pack(
         "<4sI4s4sIHHIIHH4sI",
         b"RIFF",

@@ -81,7 +81,7 @@ def wav_to_ogg_opus(wav_bytes: bytes) -> bytes:
         input_bytes=wav_bytes,
         input_format="wav",
         output_format="ogg",
-        extra_args=["-c:a", "libopus", "-b:a", "32k"],
+        extra_args=["-c:a", "libopus", "-ac", "1", "-b:a", "32k"],
     )
 
 
@@ -91,5 +91,5 @@ def mp3_to_ogg_opus(mp3_bytes: bytes) -> bytes:
         input_bytes=mp3_bytes,
         input_format="mp3",
         output_format="ogg",
-        extra_args=["-c:a", "libopus", "-b:a", "32k"],
+        extra_args=["-c:a", "libopus", "-ac", "1", "-b:a", "32k"],
     )

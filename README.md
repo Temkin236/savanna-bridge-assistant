@@ -41,12 +41,14 @@ docker compose up --build -d
 | Variable | Default / Example | Purpose |
 |---|---|---|
 | `API_PORT` | `8000` | Port for the core FastAPI backend. |
-| `AI_PROVIDER` | `auto` | `auto` uses language-aware Addis AI/Google/Groq routing with labelled offline fallback. Direct modes: `offline`, `cloud`, `addis`, `groq`. |
-| `ADDIS_API_KEY` | `""` | Server-side Addis AI credential for Amharic, Afaan Oromo, and Tigrinya. |
+| `AI_PROVIDER` | `offline` | `offline` (or `gemini` when a key exists). Direct modes: `offline`, `gemini`, `groq`, `auto`. |
+| `TTS_PROVIDER` | `gemini` | Speech synthesis provider (default: `gemini`). |
+| `GEMINI_API_KEY` | `""` | Single server-side Gemini API key used for generation, audio multimodal STT, and TTS. (`GOOGLE_AI_API_KEY` accepted as alias). |
+| `GEMINI_TTS_MODEL` | `gemini-3.8-flash-lite-tts` | Model code used for Gemini TTS synthesis. |
+| `GEMINI_TTS_VOICE` | `Aoede` | Voice identifier for Gemini TTS synthesis (e.g. `Aoede`). |
 | `TELEGRAM_BOT_TOKEN` | `""` | Telegram Bot token issued by BotFather. |
 | `TELEGRAM_BOT_USERNAME` | `savannah_assistant3_bot` | Bot username used to construct seamless one-button deep links. |
 | `BOT_API_SECRET` | `change-me-bot-secret` | Shared secret header (`X-Bot-Secret`) required to confirm link tokens. |
-| `GOOGLE_AI_API_KEY` | `""` | Optional Google Gemini key used when `AI_PROVIDER=cloud`. |
 | `GROQ_API_KEY`, `GROQ_API_KEY_2` | `""` | Server-side supporting-provider keys. The API rotates to the next key on auth, rate-limit, timeout, or service failures. |
 | `CORS_ORIGINS` | local hosts | Comma-separated host-platform origins allowed to call the browser API. |
 
@@ -317,6 +319,25 @@ curl -s -X POST http://localhost:8000/speech/synthesize \
   -d '{"text":"Welcome to Module 2.","language":"en","speed":1.0}'
 ```
 
+### Gemini Text-to-Speech (TTS) & Audio Pipeline
+
+The assistant uses Google Gemini for natural text-to-speech synthesis across supported languages with zero intermediate transcoding artifacts:
+
+- **Audio Architecture & Sample Rate**:
+  - Gemini AUDIO modality outputs raw linear PCM at **24,000 Hz, 16-bit, mono**.
+  - The API wraps the PCM stream with an exact 44-byte standard RIFF/WAV header (no double-wrapping, no lossy resampling).
+  - Sentence chunks are joined at the raw PCM level before applying container headers to eliminate audio clicks and pops.
+- **Ethiopic Text Normalization**:
+  - The backend normalizer (`clean_text_for_speech`) strips markdown, emojis, URLs, and citation markers (`[1]`).
+  - Numbers in Amharic text are automatically spelled out in Ge'ez/Amharic words (e.g. `3` -> `ሦስት`).
+  - Style instructions and speed prompts are never prepended to the spoken text.
+- **Telegram Audio Conversion**:
+  - Telegram voice notes are transcoded directly from WAV using `libopus` mono at 32 kbps (`-c:a libopus -ac 1 -b:a 32k`).
+- **Widget Playback**:
+  - The web chat widget plays the 24 kHz WAV stream directly at `playbackRate = 1.0` with `preservesPitch = true` enabled.
+- **Diagnostic Tool**:
+  - Run `python3 scripts/tts_diagnose.py` to inspect audio at all 5 pipeline stages and generate the interactive player at `out/tts_debug/index.html`.
+
 #### 22. Anonymous Teacher Question Analytics
 ```sh
 curl -s http://localhost:8000/teacher/stats
@@ -373,8 +394,8 @@ Jobs are marked up with structured JSON-LD directly within the host page at [dem
 
 The system currently supports:
 - **English (`en`)**: Complete offline BM25 and cloud generation.
-- **Amharic (`am`, አማርኛ)**: Complete offline BM25 extraction with Ge'ez punctuation normalizer and Addis AI/Gemini generation.
-- **Afaan Oromo (`om`) & Tigrinya (`ti`)**: Grounded course chunks and Addis AI SDK translations; UI strings translated.
+- **Amharic (`am`, አማርኛ)**: Complete offline BM25 extraction with Ge'ez punctuation normalizer and clean Gemini TTS generation.
+- **Afaan Oromo (`om`) & Tigrinya (`ti`)**: Grounded course chunks with experimental Gemini translation; UI strings translated.
 - **Arabic (`ar`)**: Right-to-left (`dir="rtl"`) CSS logical property layout and Gemini translations.
 
 ### Adding a New Language (e.g., Somali `so`)
@@ -419,7 +440,7 @@ The system currently supports:
   - The system **never** asks for kebele ID, national identification, medical history, or diagnosis proof.
 - **Third-Party AI Consent Disclosure**:
   - In default `offline` mode, **zero** data leaves the host container.
-  - In `auto` or direct cloud modes, question or voice content may be sent to the configured Addis AI, Google, or Groq provider without learner identifiers. Voice retention remains off by default.
+  - In `auto` or direct cloud modes, question or voice content may be sent to the configured Gemini or Groq provider without learner identifiers. Voice retention remains off by default.
 - **Data Export & Deletion**:
   - Learners can view and export all data held about them via `GET /api/v1/me/export`.
   - Learners can permanently erase all their data with `DELETE /api/v1/me`.

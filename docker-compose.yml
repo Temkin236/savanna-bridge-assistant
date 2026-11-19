@@ -6,19 +6,18 @@ services:
       context: ./api
     command: uvicorn savanna_bridge.main:app --host 0.0.0.0 --port 8000 --reload
     environment:
-      AI_PROVIDER: ${AI_PROVIDER:-auto}
-      ADDIS_API_KEY: ${ADDIS_API_KEY:-}
-      ADDIS_BASE_URL: ${ADDIS_BASE_URL:-https://api.addisassistant.com}
-      CLOUD_AI_API_KEY: ${CLOUD_AI_API_KEY:-}
-      CLOUD_API_KEY: ${CLOUD_API_KEY:-}
-      GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY:-}
-      GOOGLE_AI_API: ${GOOGLE_AI_API:-}
+      AI_PROVIDER: ${AI_PROVIDER:-offline}
+      TTS_PROVIDER: ${TTS_PROVIDER:-gemini}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-${GOOGLE_AI_API_KEY:-}}
+      GEMINI_API_KEYS: ${GEMINI_API_KEYS:-}
+      GEMINI_TTS_MODEL: ${GEMINI_TTS_MODEL:-gemini-3.8-flash-lite-tts}
+      GEMINI_TTS_VOICE: ${GEMINI_TTS_VOICE:-Aoede}
+      GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY:-${GEMINI_API_KEY:-}}
       GOOGLE_TRANSLATE_API_KEY: ${GOOGLE_TRANSLATE_API_KEY:-}
       GOOGLE_SPEECH_API_KEY: ${GOOGLE_SPEECH_API_KEY:-}
-      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
       CLOUD_MODEL: ${CLOUD_MODEL:-gemini-2.5-flash}
-      GOOGLE_TTS_MODEL: ${GOOGLE_TTS_MODEL:-gemini-2.0-flash}
-      GOOGLE_TTS_VOICE: ${GOOGLE_TTS_VOICE:-Aoede}
+      GOOGLE_TTS_MODEL: ${GEMINI_TTS_MODEL:-gemini-3.8-flash-lite-tts}
+      GOOGLE_TTS_VOICE: ${GEMINI_TTS_VOICE:-Aoede}
       GROQ_API_KEY: ${GROQ_API_KEY:-}
       GROQ_API_KEY_2: ${GROQ_API_KEY_2:-}
       GROQ_API_KEYS: ${GROQ_API_KEYS:-}
@@ -34,6 +33,9 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       BOT_API_SECRET: ${BOT_API_SECRET:-change-me-bot-secret}
       TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME:-savannah_assistant3_bot}
+      HELPER_USERNAME: ${HELPER_USERNAME:-agent_sarah}
+      HELPER_PASSWORD: ${HELPER_PASSWORD:-savanna2026}
+      HELPER_AGENT_KEY: ${HELPER_AGENT_KEY:-helper-secret-key-2026}
     ports:
       - "${API_PORT:-8000}:8000"
     volumes:
@@ -86,7 +88,7 @@ services:
       api:
         condition: service_healthy
     volumes:
-      - ./tests:/tests:ro
+      - ./channels:/channels:ro
       - ./channels/bot:/app
     healthcheck:
       test:

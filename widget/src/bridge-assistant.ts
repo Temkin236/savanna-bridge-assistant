@@ -82,7 +82,7 @@ interface PageControlDescriptor {
 
 interface PageActionPlan {
   action: "read_page" | "read_section" | "list_controls" | "focus_control" |
-    "activate_control" | "fill_control" | "submit" | "stop_reading" | "repeat" | "none";
+  "activate_control" | "fill_control" | "submit" | "stop_reading" | "repeat" | "none";
   target?: string | null;
   value?: string | null;
   spoken_confirmation: string;
@@ -2101,11 +2101,11 @@ export class BridgeAssistant extends HTMLElement {
       this.voiceRecordingTimeout = null;
     }
     if (this.wakeWordRecognizer) {
-      try { this.wakeWordRecognizer.stop(); } catch {}
+      try { this.wakeWordRecognizer.stop(); } catch { }
       this.wakeWordRecognizer = null;
     }
     if (this.wakeWordRecognition) {
-      try { this.wakeWordRecognition.stop(); } catch {}
+      try { this.wakeWordRecognition.stop(); } catch { }
       this.wakeWordRecognition = null;
     }
     this.stopSpeaking();
@@ -2341,7 +2341,7 @@ export class BridgeAssistant extends HTMLElement {
         try {
           const parsed = JSON.parse(savedPrefsRaw);
           this.accessibilityPrefs = { ...this.accessibilityPrefs, ...parsed };
-        } catch {}
+        } catch { }
       }
 
       const persistentLang = localStorage.getItem("savanna_bridge_preferred_lang") as SupportedLanguage | null;
@@ -2868,16 +2868,30 @@ export class BridgeAssistant extends HTMLElement {
 
   private initGlobalKeyboardShortcuts(): void {
     window.addEventListener("keydown", (e: KeyboardEvent) => {
-      // Alt + Shift + V or Alt + Shift + A toggles voice assistant listening
-      if (e.altKey && e.shiftKey && (e.key === "V" || e.key === "v" || e.key === "A" || e.key === "a")) {
+      // Alt + Shift + A: Toggle Assistant Dialog (Open / Close) for keyboard-only users
+      if (e.altKey && e.shiftKey && (e.key === "A" || e.key === "a")) {
+        e.preventDefault();
+        if (this.isOpen) {
+          this.closeAssistant();
+        } else {
+          this.previousFocus = document.activeElement as HTMLElement | null;
+          this.openAssistant();
+        }
+        return;
+      }
+
+      // Alt + Shift + V: Toggle Voice Assistant / Microphone listening
+      if (e.altKey && e.shiftKey && (e.key === "V" || e.key === "v")) {
         e.preventDefault();
         if (!this.isOpen) {
+          this.previousFocus = document.activeElement as HTMLElement | null;
           this.openAssistant();
         }
         const inputEl = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-text-input, #chat-input");
         if (inputEl) {
           this.toggleVoiceInput(inputEl);
         }
+        return;
       }
     });
   }
@@ -2919,7 +2933,16 @@ export class BridgeAssistant extends HTMLElement {
       dialog.setAttribute("hidden", "true");
       dialog.style.display = "none";
       launcher.setAttribute("aria-expanded", "false");
-      launcher.focus();
+      const isHost = this.previousFocus === (this as unknown as HTMLElement);
+      const targetFocus =
+        this.previousFocus &&
+        !isHost &&
+        this.previousFocus !== document.body &&
+        this.previousFocus !== dialog &&
+        !dialog.contains(this.previousFocus)
+          ? this.previousFocus
+          : launcher;
+      targetFocus.focus();
     }
     this.stopSpeaking();
     if (this.isRecording) {
@@ -3029,9 +3052,8 @@ export class BridgeAssistant extends HTMLElement {
           ${this.isLinkCodeInputVisible ? this.t("hideCodePrompt") : `${ICONS.link} <span>${this.t("haveCodePrompt")}</span>`}
         </button>
       </div>
-      ${
-        this.isLinkCodeInputVisible
-          ? `
+      ${this.isLinkCodeInputVisible
+        ? `
         <div class="link-code-box" style="margin-top:0.375rem;">
           <div style="font-size:0.75rem; font-weight:600; margin-bottom:0.25rem; color:var(--b-text);">${this.t("enterCodeLabel")}</div>
           <form id="footer-code-form" style="display:flex; gap:0.25rem;">
@@ -3043,7 +3065,7 @@ export class BridgeAssistant extends HTMLElement {
           <div id="footer-code-msg" style="font-size:0.6875rem; font-weight:600; margin-top:0.25rem; text-align:center; display:none;"></div>
         </div>
       `
-          : ""
+        : ""
       }
     `;
 
@@ -3493,7 +3515,7 @@ export class BridgeAssistant extends HTMLElement {
     }
 
     if (this.wakeWordRecognizer) {
-      try { this.wakeWordRecognizer.stop(); } catch {}
+      try { this.wakeWordRecognizer.stop(); } catch { }
     }
 
     this.isRecording = true;
@@ -3600,7 +3622,7 @@ export class BridgeAssistant extends HTMLElement {
     this.playEarcon("stop");
 
     if (this.activeRecognition) {
-      try { this.activeRecognition.stop(); } catch {}
+      try { this.activeRecognition.stop(); } catch { }
       this.activeRecognition = null;
     }
 
@@ -3627,7 +3649,7 @@ export class BridgeAssistant extends HTMLElement {
 
     setTimeout(() => {
       if (!this.isRecording && !this.isSpeaking && this.wakeWordRecognizer) {
-        try { this.wakeWordRecognizer.start(); } catch {}
+        try { this.wakeWordRecognizer.start(); } catch { }
       }
     }, 1200);
   }
@@ -3776,12 +3798,18 @@ export class BridgeAssistant extends HTMLElement {
 
       if (res.ok) {
         const data = await res.json();
-        if (!data.mocked && data.audio_url) {
+        const isPlaceholder = !data.audio_url || String(data.audio_url).includes("demo.ogg");
+        if (!data.mocked && !isPlaceholder && data.audio_url) {
           const rawAudioUrl = String(data.audio_url);
           const audioUrl = /^(https?:|data:|blob:)/.test(rawAudioUrl)
             ? rawAudioUrl
             : `${this.apiBase}${rawAudioUrl}`;
           this.activeAudio = new Audio(audioUrl);
+          const currentRate = this.accessibilityPrefs?.speech_rate || 1.0;
+          this.activeAudio.playbackRate = currentRate;
+          (this.activeAudio as any).preservesPitch = true;
+          (this.activeAudio as any).mozPreservesPitch = true;
+          (this.activeAudio as any).webkitPreservesPitch = true;
           this.activeAudio.onended = () => this.finishSpeaking(msg);
           this.activeAudio.onerror = () => this.fallbackTTS(cleanText, msg);
           await this.activeAudio.play();
@@ -3893,7 +3921,7 @@ export class BridgeAssistant extends HTMLElement {
 
       try {
         el.scrollIntoView({ behavior: "smooth", block: "center" });
-      } catch {}
+      } catch { }
     }
   }
 
@@ -3907,7 +3935,7 @@ export class BridgeAssistant extends HTMLElement {
 
   private getReadablePageElements(): HTMLElement[] {
     if (typeof document === "undefined") return [];
-    
+
     // Selectors covering all major LMS and educational platforms:
     // Canvas LMS: #content, .user_content, .show-content, #wiki_page_show
     // Moodle: #region-main, .course-content, .activity-information, .format-topics, .format-weeks
@@ -4015,7 +4043,7 @@ export class BridgeAssistant extends HTMLElement {
       const cleanPara = para.replace(/[#*•_`]/g, " ").replace(/\s+/g, " ").trim().toLowerCase();
       const isIntro = /^(this course|this lesson|summary of|የዚህ|ይህ ትምህርት|barnoonni|يشرح|ملخص)/i.test(cleanPara);
       const searchSnippet = cleanPara.slice(0, 35);
-      
+
       let matchedEl: HTMLElement | null = null;
       let matchedIdx = -1;
 
@@ -4121,7 +4149,7 @@ export class BridgeAssistant extends HTMLElement {
       window.speechSynthesis.cancel();
       try {
         window.speechSynthesis.resume();
-      } catch {}
+      } catch { }
 
       const advanceNext = () => {
         if (this.readingWatchdogTimer) {
@@ -4372,7 +4400,7 @@ export class BridgeAssistant extends HTMLElement {
           setTimeout(() => {
             try {
               this.wakeWordRecognition?.start();
-            } catch {}
+            } catch { }
           }, 1000);
         }
       };
@@ -4382,7 +4410,7 @@ export class BridgeAssistant extends HTMLElement {
           setTimeout(() => {
             try {
               this.wakeWordRecognition?.start();
-            } catch {}
+            } catch { }
           }, 500);
         }
       };
@@ -4778,9 +4806,9 @@ export class BridgeAssistant extends HTMLElement {
               </div>
               <div class="reading-btns">
                 ${this.isReadingPaused
-                  ? `<button type="button" class="btn btn-secondary btn-icon-only" id="btn-reading-resume" aria-label="${this.t("resumeReading")}" title="${this.t("resumeReading")}">${ICONS.play}</button>`
-                  : `<button type="button" class="btn btn-secondary btn-icon-only" id="btn-reading-pause" aria-label="${this.t("pauseReading")}" title="${this.t("pauseReading")}">${ICONS.pause}</button>`
-                }
+          ? `<button type="button" class="btn btn-secondary btn-icon-only" id="btn-reading-resume" aria-label="${this.t("resumeReading")}" title="${this.t("resumeReading")}">${ICONS.play}</button>`
+          : `<button type="button" class="btn btn-secondary btn-icon-only" id="btn-reading-pause" aria-label="${this.t("pauseReading")}" title="${this.t("pauseReading")}">${ICONS.pause}</button>`
+        }
                 <button type="button" class="btn btn-danger btn-icon-only" id="btn-reading-stop" aria-label="${this.t("stopReading")}" title="${this.t("stopReading")}" style="background:#fee2e2; color:#991b1b; border:1px solid #fca5a5;">
                   ${ICONS.stop}
                 </button>
@@ -5337,9 +5365,8 @@ export class BridgeAssistant extends HTMLElement {
             <h4 class="answer-heading">${this.escapeHtml(headingText)}</h4>
             <div class="answer-text">${renderedTextHtml}</div>
 
-            ${
-              isThisReading
-                ? `
+            ${isThisReading
+            ? `
                 <div class="reading-nav-bar" style="display:flex; align-items:center; justify-content:space-between; margin:0.5rem 0; padding:0.375rem 0.625rem; background:#fef9c3; border:1px solid #facc15; border-radius:0.375rem; font-size:0.8125rem;">
                   <span style="font-weight:600; color:#854d0e; display:inline-flex; align-items:center; gap:0.375rem;">${ICONS.book} <span>Reading Paragraph ${this.currentReading!.currentIndex + 1} of ${this.currentReading!.items.length}</span></span>
                   <div style="display:flex; gap:0.25rem;">
@@ -5348,12 +5375,11 @@ export class BridgeAssistant extends HTMLElement {
                   </div>
                 </div>
               `
-                : ""
-            }
+            : ""
+          }
 
-            ${
-              msg.isHandoff
-                ? `
+            ${msg.isHandoff
+            ? `
                 <div class="handoff-card" style="margin-top:0.75rem; padding:0.75rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:0.5rem;">
                   <p style="margin:0 0 0.5rem 0; font-size:0.875rem; font-weight:600; color:#166534; display:flex; align-items:center; gap:0.375rem;">
                     ${ICONS.celebrate} <span>${this.t("handoffReadyTitle")}</span>
@@ -5368,8 +5394,8 @@ export class BridgeAssistant extends HTMLElement {
                   </div>
                 </div>
               `
-                : ""
-            }
+            : ""
+          }
 
             ${isRefusal
             ? `
@@ -5419,8 +5445,8 @@ export class BridgeAssistant extends HTMLElement {
                     </button>
                   </div>
                   ${uniqueCitations
-                    .map(
-                      (c) => `
+              .map(
+                (c) => `
                     <a href="${this.escapeHtml(c.url)}" class="source-link citation-link" style="display:inline-flex; align-items:center; gap:0.375rem;">
                       ${ICONS.book} <span>${this.escapeHtml(c.title || c.heading)}</span>
                     </a>
@@ -5433,13 +5459,12 @@ export class BridgeAssistant extends HTMLElement {
                   </div>
                 </div>
               `
-                : ""
-            }
+            : ""
+          }
 
             <!-- Suggested Follow-up Questions -->
-            ${
-              !isRefusal && !msg.isHandoff
-                ? `
+            ${!isRefusal && !msg.isHandoff
+            ? `
                 <div class="followup-box">
                   <div class="followup-title">
                     <span>${this.t("followupTitle")}</span>
@@ -5457,8 +5482,8 @@ export class BridgeAssistant extends HTMLElement {
                   </div>
                 </div>
               `
-                : ""
-            }
+            : ""
+          }
           </div>
         `;
       })
@@ -5825,7 +5850,7 @@ export class BridgeAssistant extends HTMLElement {
         } else if (this.wakeWordRecognition) {
           try {
             this.wakeWordRecognition.stop();
-          } catch {}
+          } catch { }
           this.wakeWordRecognition = null;
         }
       });
@@ -6001,7 +6026,7 @@ export class BridgeAssistant extends HTMLElement {
         if (chkVoiceMaster.checked) {
           this.initWakeWordDetection();
         } else if (this.wakeWordRecognizer) {
-          try { this.wakeWordRecognizer.stop(); } catch {}
+          try { this.wakeWordRecognizer.stop(); } catch { }
           this.wakeWordRecognizer = null;
         }
         this.announce(chkVoiceMaster.checked ? "Voice accessibility enabled" : "Voice accessibility disabled");
@@ -6033,6 +6058,12 @@ export class BridgeAssistant extends HTMLElement {
     rateList.forEach(({ id, rate }) => {
       this.shadowRoot?.querySelector(id)?.addEventListener("click", () => {
         this.accessibilityPrefs.speech_rate = rate;
+        if (this.activeAudio) {
+          this.activeAudio.playbackRate = rate;
+          (this.activeAudio as any).preservesPitch = true;
+          (this.activeAudio as any).mozPreservesPitch = true;
+          (this.activeAudio as any).webkitPreservesPitch = true;
+        }
         this.savePreferences();
         rateList.forEach((r) => {
           this.shadowRoot?.querySelector(r.id)?.setAttribute("aria-pressed", r.rate === rate ? "true" : "false");

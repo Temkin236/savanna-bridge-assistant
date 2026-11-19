@@ -165,4 +165,39 @@ test.describe("screen-reader and non-visual interaction contract", () => {
       expect(box!.width, `${selector} target width`).toBeGreaterThanOrEqual(44);
     }
   });
+
+  test("keyboard shortcuts: Alt+Shift+A opens dialog without activating mic, Alt+Shift+V triggers mic", async ({ page }) => {
+    await page.goto(`${demoBase}/savanna/`);
+    await page.evaluate(() => customElements.whenDefined("bridge-assistant"));
+
+    const dialog = page.locator("bridge-assistant #assistant-dialog");
+    const launcher = page.locator("bridge-assistant #launcher-btn");
+    await expect(dialog).toBeHidden();
+
+    // 1. Press Alt+Shift+A: dialog opens, mic is NOT recording
+    await page.keyboard.press("Alt+Shift+KeyA");
+    await expect(dialog).toBeVisible();
+    const stateAfterOpen = await page.evaluate(() => {
+      const host = document.querySelector("bridge-assistant") as any;
+      return {
+        isOpen: host?.isOpen,
+        isRecording: host?.isRecording,
+      };
+    });
+    expect(stateAfterOpen.isOpen).toBe(true);
+    expect(stateAfterOpen.isRecording).toBe(false);
+
+    // 2. Press Alt+Shift+A again: dialog closes
+    await page.keyboard.press("Alt+Shift+KeyA");
+    await expect(dialog).toBeHidden();
+    const stateAfterClose = await page.evaluate(() => {
+      const host = document.querySelector("bridge-assistant") as any;
+      return {
+        isOpen: host?.isOpen,
+        isRecording: host?.isRecording,
+      };
+    });
+    expect(stateAfterClose.isOpen).toBe(false);
+    expect(stateAfterClose.isRecording).toBe(false);
+  });
 });

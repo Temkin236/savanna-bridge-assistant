@@ -148,25 +148,25 @@ def test_language_guard_detection_and_normalization() -> None:
 
 
 def test_translation_routes_and_endpoint() -> None:
-    # 1. Local language routes to Addis AI
+    # 1. Local language routes across Gemini/Groq
     am_res = client.post(
         "/api/v1/translate",
         json={"text": "Hello world", "source_language": "en", "target_language": "am"},
     )
     assert am_res.status_code == 200
     am_data = am_res.json()
-    assert am_data["provider"] == "auto/addis"
+    assert am_data["provider"] in ("auto/google", "auto/gemini", "auto/groq")
     assert am_data["target_language"] == "am"
     assert "translated_text" in am_data
 
-    # 2. English & Arabic routes to Gemini
+    # 2. English & Arabic routes across Gemini/Groq
     ar_res = client.post(
         "/api/v1/translate",
         json={"text": "Hello world", "source_language": "en", "target_language": "ar"},
     )
     assert ar_res.status_code == 200
     ar_data = ar_res.json()
-    assert ar_data["provider"] == "auto/google"
+    assert ar_data["provider"] in ("auto/google", "auto/gemini", "auto/groq")
     assert ar_data["target_language"] == "ar"
     assert "translated_text" in ar_data
 

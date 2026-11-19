@@ -18,12 +18,10 @@ def test_auto_provider_routes_languages() -> None:
     assert isinstance(provider, MultilingualProvider)
 
     provider.translate("hello", "en", "am")
-    assert provider.name == "auto/addis"
-    assert provider.is_mocked is True
+    assert provider.name in ("auto/google", "auto/gemini", "auto/groq")
 
     provider.translate("hello", "en", "ar")
-    assert provider.name == "auto/google"
-    assert provider.is_mocked is True
+    assert provider.name in ("auto/google", "auto/gemini", "auto/groq")
 
 
 def test_google_translation_uses_dedicated_api(monkeypatch) -> None:
@@ -45,6 +43,10 @@ def test_google_translation_uses_dedicated_api(monkeypatch) -> None:
 
 def test_google_speech_returns_playable_data_url(monkeypatch) -> None:
     monkeypatch.setenv("GOOGLE_SPEECH_API_KEY", "test-key")
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.delenv("GEMINI_API_KEYS", raising=False)
+    monkeypatch.delenv("GOOGLE_AI_API_KEY", raising=False)
+    monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
     provider = CloudProvider()
     monkeypatch.setattr(
         provider,
@@ -60,6 +62,8 @@ def test_google_speech_returns_playable_data_url(monkeypatch) -> None:
 
 def test_google_ai_key_can_generate_gemini_speech(monkeypatch) -> None:
     monkeypatch.setenv("GOOGLE_AI_API_KEY", "test-key")
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.delenv("GEMINI_API_KEYS", raising=False)
     monkeypatch.delenv("GOOGLE_SPEECH_API_KEY", raising=False)
     monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
     provider = CloudProvider()
@@ -90,7 +94,14 @@ def test_google_ai_key_can_generate_gemini_speech(monkeypatch) -> None:
     assert provider.is_mocked is False
 
 
-def test_translate_endpoint_labels_offline_fallback() -> None:
+def test_translate_endpoint_labels_offline_fallback(monkeypatch) -> None:
+    from savanna_bridge.ai.groq import GroqProvider
+
+    monkeypatch.setattr(GroqProvider, "translate", lambda self, text, src, tgt: "")
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.delenv("GEMINI_API_KEYS", raising=False)
+    monkeypatch.delenv("GOOGLE_AI_API_KEY", raising=False)
+    monkeypatch.delenv("GOOGLE_TRANSLATE_API_KEY", raising=False)
     response = client.post(
         "/api/v1/translate",
         json={
@@ -102,6 +113,6 @@ def test_translate_endpoint_labels_offline_fallback() -> None:
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload["provider"] == "auto/google"
+    assert payload["provider"] in ("auto/google", "auto/gemini", "auto/offline")
     assert payload["mocked"] is True
     assert payload["target_language"] == "ar"

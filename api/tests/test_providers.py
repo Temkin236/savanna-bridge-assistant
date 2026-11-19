@@ -2,7 +2,7 @@
 
 from fastapi.testclient import TestClient
 
-from savanna_bridge.ai.addis import AddisAiProvider
+from savanna_bridge.ai.cloud import CloudProvider
 from savanna_bridge.ai.factory import get_ai_provider
 from savanna_bridge.ai.offline import OfflineFaqProvider
 from savanna_bridge.main import app
@@ -15,9 +15,9 @@ def test_provider_factory_switches_properly() -> None:
     assert isinstance(offline, OfflineFaqProvider)
     assert offline.name == "offline"
 
-    addis = get_ai_provider("addis")
-    assert isinstance(addis, AddisAiProvider)
-    assert addis.name == "addis"
+    gemini = get_ai_provider("gemini")
+    assert isinstance(gemini, CloudProvider)
+    assert gemini.name in ("gemini", "google")
 
 def test_transcribe_endpoint() -> None:
     res = client.post(
@@ -49,7 +49,7 @@ def test_synthesize_endpoint() -> None:
     assert res.status_code == 200
     data = res.json()
     assert data["language"] == "am"
-    assert data["audio_url"].startswith("http")
+    assert data["audio_url"].startswith("http") or data["audio_url"].startswith("data:audio/")
     assert data["expires_at"]
 
 

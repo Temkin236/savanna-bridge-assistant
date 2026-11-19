@@ -15,7 +15,7 @@ Complete this before M1 begins. Person D records evidence and blockers.
 
 ## Person A
 
-- [ ] Add an Addis AI key only to local `.env` and test one Amharic STT and TTS call.
+- [ ] Add a Gemini API key only to local `.env` and test one Amharic STT and TTS call.
 - [ ] Replace stubs behind the frozen contract; never remove or rename contract fields.
 - [ ] Start with the offline retrieval and refusal tests.
 

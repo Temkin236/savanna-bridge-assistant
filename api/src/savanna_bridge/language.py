@@ -344,7 +344,7 @@ class LanguageGuard:
 
     @classmethod
     def translate(cls, text: str, source_lang: str, target_lang: str) -> str:
-        """Translate text using Addis AI for local languages and Gemini for English and Arabic."""
+        """Translate text using Gemini for supported languages (om/ti translation labelled experimental)."""
         if not text or not text.strip():
             return text
         src = (source_lang or "en").lower().split("-")[0].strip()
@@ -352,33 +352,15 @@ class LanguageGuard:
         if src == tgt:
             return text
 
-        local_langs = {"am", "om", "ti", "so"}
+        try:
+            from savanna_bridge.ai.cloud import CloudProvider
 
-        # 1. Local languages: Route to Addis AI
-        if src in local_langs or tgt in local_langs:
-            try:
-                from savanna_bridge.ai.addis import AddisAiProvider
-
-                addis = AddisAiProvider()
-                res = addis.translate_direct(text, src, tgt)
-                if res and res.strip() and res.strip() != text.strip():
-                    return res.strip()
-            except Exception:
-                pass
-
-        # 2. English and Arabic: Route to Gemini
-        if (src in ("en", "ar") and tgt in ("en", "ar")) or (
-            src not in local_langs and tgt not in local_langs
-        ):
-            try:
-                from savanna_bridge.ai.cloud import CloudProvider
-
-                cloud = CloudProvider()
-                res = cloud.translate_direct(text, src, tgt)
-                if res and res.strip() and res.strip() != text.strip():
-                    return res.strip()
-            except Exception:
-                pass
+            cloud = CloudProvider()
+            res = cloud.translate_direct(text, src, tgt)
+            if res and res.strip() and res.strip() != text.strip():
+                return res.strip()
+        except Exception:
+            pass
 
         # Return original text when translation is unchanged or provider is idle
         return text

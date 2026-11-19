@@ -27,8 +27,7 @@ def main() -> None:
 
     example = (ROOT / ".env.example").read_text(encoding="utf-8")
     for name in (
-        "ADDIS_API_KEY",
-        "CLOUD_AI_API_KEY",
+        "GEMINI_API_KEY",
         "TELEGRAM_BOT_TOKEN",
         "AT_API_KEY",
     ):

@@ -28,7 +28,7 @@ flowchart TD
         BM25["Offline BM25 Index\nCourse-Grounded Engine"]
         ADAPT["Pluggable AI Adapters"]
         OFFLINE["Offline Static Adapter\n(Zero Cost / Default)"]
-        CLOUD["Addis AI / Google AI\nMultilingual Cloud Services"]
+        CLOUD["Google Gemini / Cloud AI\nMultilingual Cloud Services"]
     end
 
     subgraph Live Handoff
