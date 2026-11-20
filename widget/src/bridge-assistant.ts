@@ -39,6 +39,7 @@ export interface ChatMessage {
   id: string;
   sender: "learner" | "assistant";
   text: string;
+  spoken?: string;
   heading?: string;
   citations?: Citation[];
   offerHuman?: boolean;
@@ -180,6 +181,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     lookingInCourse: "Looking in the course...",
     answerHeading: "Answer",
     listenButton: "Listen",
+    readFullAnswer: "Read the full answer",
     pauseButton: "Pause",
     stopButton: "Stop",
     replayButton: "Replay",
@@ -326,6 +328,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     lookingInCourse: "በኮርሱ ውስጥ በመፈለግ ላይ...",
     answerHeading: "መልስ",
     listenButton: "አዳምጥ",
+    readFullAnswer: "ሙሉውን መልስ አዳምጥ",
     pauseButton: "አቁም",
     stopButton: "አቁም",
     replayButton: "ደግመህ አጫውት",
@@ -472,6 +475,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     lookingInCourse: "Barnoota keessaa barbaadaa jira...",
     answerHeading: "Deebii",
     listenButton: "Dhaggeeffadhu",
+    readFullAnswer: "Deebii guutuu dhaggeeffadhu",
     pauseButton: "Dhaabi",
     stopButton: "Dhaabi",
     replayButton: "Irra deebi'ii taphachiisi",
@@ -618,6 +622,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     lookingInCourse: "ኣብ ኮርስ ይድለ ኣሎ...",
     answerHeading: "መልሲ",
     listenButton: "ስማዕ",
+    readFullAnswer: "ሙሉእ መልሲ ስማዕ",
     pauseButton: "ኣዕርፍ",
     stopButton: "ኣቁም",
     replayButton: "ደጊምካ ኣጻውት",
@@ -764,6 +769,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     lookingInCourse: "جاري البحث في محتوى الدورة...",
     answerHeading: "الإجابة",
     listenButton: "استماع",
+    readFullAnswer: "قراءة الإجابة كاملة",
     pauseButton: "إيقاف مؤقت",
     stopButton: "إيقاف",
     replayButton: "إعادة التشغيل",
@@ -1988,6 +1994,7 @@ export class BridgeAssistant extends HTMLElement {
   private lastPageTitle: string | null = null;
   private lastPageSection: string | null = null;
   private activeAudio: HTMLAudioElement | null = null;
+  private audioCache: Map<string, string> = new Map();
 
   private messages: ChatMessage[] = [];
   private sessionId = `sess_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
@@ -2343,7 +2350,7 @@ export class BridgeAssistant extends HTMLElement {
           }
           if (feedbackEl) {
             feedbackEl.style.color = "#166534";
-            feedbackEl.textContent = `✓ ${this.t("codeLinkSuccess")}`;
+            feedbackEl.textContent = this.t("codeLinkSuccess");
           }
           this.announce(this.t("codeLinkSuccess"));
           setTimeout(() => {
@@ -2357,14 +2364,14 @@ export class BridgeAssistant extends HTMLElement {
 
       if (feedbackEl) {
         feedbackEl.style.color = "#dc2626";
-        feedbackEl.textContent = `⚠️ ${this.t("codeLinkError")}`;
+        feedbackEl.textContent = this.t("codeLinkError");
       }
       return false;
     } catch (err) {
       console.warn("Error confirming link code:", err);
       if (feedbackEl) {
         feedbackEl.style.color = "#dc2626";
-        feedbackEl.textContent = `⚠️ ${this.t("codeLinkError")}`;
+        feedbackEl.textContent = this.t("codeLinkError");
       }
       return false;
     }
@@ -3156,7 +3163,7 @@ export class BridgeAssistant extends HTMLElement {
       container.innerHTML = `
         <div style="display:flex; align-items:center; gap:0.375rem; width:100%;">
           <span style="font-size:0.8125rem; font-weight:600; color:#166534; flex:1;">
-            ✓ ${this.t("connectedToTelegram")}
+            ${this.t("connectedToTelegram")}
           </span>
           <button type="button" class="btn btn-secondary" id="btn-disconnect-tg">
             ${this.t("disconnectTelegram")}
@@ -3885,14 +3892,16 @@ export class BridgeAssistant extends HTMLElement {
       .replace(/\[\d+\]/g, "") // strip [1], [2] citations
       .replace(/\bhttps?:\/\/\S+/gi, "") // strip URLs
       .replace(/[#*_`~>]/g, "") // strip markdown
+      .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE00}-\u{FE0F}\u{1F900}-\u{1F9FF}\u{200D}]/gu, "") // strip emojis
       .replace(/\s+/g, " ")
       .trim();
   }
 
-  public async speakResponse(msg: ChatMessage): Promise<void> {
+  public async speakResponse(msg: ChatMessage, readFull: boolean = false): Promise<void> {
     this.stopSpeaking();
 
-    const cleanText = this.cleanTextForSpeech(msg.text);
+    const rawText = readFull ? msg.text : (msg.spoken || msg.text);
+    const cleanText = this.cleanTextForSpeech(rawText);
     if (!cleanText) return;
 
     this.isSpeaking = true;
@@ -3900,7 +3909,23 @@ export class BridgeAssistant extends HTMLElement {
     this.renderMessages();
     this.updateVoiceStatusUI();
 
-    // Prefer language-aware server TTS (Addis AI / Google), then use browser speech.
+    const style = "warm, calm tutor, moderate pace, clear, unhurried";
+    const cacheKey = `${cleanText}_${this.currentLang}_${style}`;
+
+    if (this.audioCache.has(cacheKey)) {
+      const cachedUrl = this.audioCache.get(cacheKey)!;
+      this.activeAudio = new Audio(cachedUrl);
+      this.activeAudio.onended = () => this.finishSpeaking(msg);
+      this.activeAudio.onerror = () => this.fallbackTTS(cleanText, msg);
+      try {
+        await this.activeAudio.play();
+        return;
+      } catch (err) {
+        console.warn("Cached audio playback failed, refetching...", err);
+      }
+    }
+
+    // Prefer language-aware server TTS, then use browser speech.
     try {
       const res = await fetch(`${this.apiBase}/api/v1/speech/synthesize`, {
         method: "POST",
@@ -3909,6 +3934,7 @@ export class BridgeAssistant extends HTMLElement {
           text: cleanText,
           language: this.currentLang,
           speed: 1.0,
+          style: style,
         }),
       });
 
@@ -3919,6 +3945,7 @@ export class BridgeAssistant extends HTMLElement {
           const audioUrl = /^(https?:|data:|blob:)/.test(rawAudioUrl)
             ? rawAudioUrl
             : `${this.apiBase}${rawAudioUrl}`;
+          this.audioCache.set(cacheKey, audioUrl);
           this.activeAudio = new Audio(audioUrl);
           this.activeAudio.onended = () => this.finishSpeaking(msg);
           this.activeAudio.onerror = () => this.fallbackTTS(cleanText, msg);
@@ -4588,7 +4615,7 @@ export class BridgeAssistant extends HTMLElement {
         this.messages.push({
           id: `msg_link_${Date.now()}`,
           sender: "assistant",
-          text: `✅ ${this.t("codeLinkSuccess")}`,
+          text: this.t("codeLinkSuccess"),
         });
         this.renderMessages();
         return;
@@ -4665,6 +4692,7 @@ export class BridgeAssistant extends HTMLElement {
           id: `msg_${Date.now()}_assistant`,
           sender: "assistant",
           text: data.answer,
+          spoken: data.spoken || data.answer,
           heading: this.t("answerHeading"),
           citations: data.citations || [],
           offerHuman: data.offer_human,
@@ -4676,7 +4704,7 @@ export class BridgeAssistant extends HTMLElement {
 
         if (fromVoice) {
           setTimeout(() => {
-            this.handleListen(assistantMsg);
+            this.speakResponse(assistantMsg);
           }, 300);
         } else if (this.autoReadSpeech || (this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_tts)) {
           this.speakResponse(assistantMsg);
@@ -4727,7 +4755,7 @@ export class BridgeAssistant extends HTMLElement {
     if (consentBox && !consentBox.checked) {
       const errBox = this.shadowRoot?.querySelector<HTMLElement>("#handoff-consent-error");
       if (errBox) {
-        errBox.textContent = `⚠️ ${this.t("handoffConsentCheck")}`;
+        errBox.textContent = this.t("handoffConsentCheck");
         errBox.style.display = "block";
       }
       consentBox.focus();
@@ -4749,7 +4777,7 @@ export class BridgeAssistant extends HTMLElement {
     const submitBtn = this.shadowRoot?.querySelector<HTMLButtonElement>("#btn-submit-handoff");
     if (submitBtn) {
       submitBtn.disabled = true;
-      submitBtn.innerHTML = `⏳ <span>${this.t("lookingInCourse")}...</span>`;
+      submitBtn.innerHTML = `<span>${this.t("lookingInCourse")}...</span>`;
     }
 
     this.announce(this.t("lookingInCourse"));
@@ -4866,7 +4894,7 @@ export class BridgeAssistant extends HTMLElement {
       } else {
         const errNotice = this.shadowRoot?.querySelector<HTMLElement>("#handoff-consent-error");
         if (errNotice) {
-          errNotice.textContent = `⚠️ ${this.t("serverErrorNotice")}`;
+          errNotice.textContent = this.t("serverErrorNotice");
           errNotice.style.display = "block";
         } else {
           alert(this.t("serverErrorNotice"));
@@ -4875,7 +4903,7 @@ export class BridgeAssistant extends HTMLElement {
     } catch {
       const errNotice = this.shadowRoot?.querySelector<HTMLElement>("#handoff-consent-error");
       if (errNotice) {
-        errNotice.textContent = `⚠️ ${this.t("serverErrorNotice")}`;
+        errNotice.textContent = this.t("serverErrorNotice");
         errNotice.style.display = "block";
       } else {
         alert(this.t("serverErrorNotice"));
@@ -5481,7 +5509,7 @@ export class BridgeAssistant extends HTMLElement {
 
               ${this.isTelegramLinked ? `
                 <div style="display:flex; align-items:center; justify-content:space-between; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:0.5rem; padding:0.625rem 0.75rem; margin-bottom:0.75rem;">
-                  <span style="font-size:0.875rem; font-weight:600; color:#166534;">✓ ${this.t("connectedToTelegram")}</span>
+                  <span style="font-size:0.875rem; font-weight:600; color:#166534;">${this.t("connectedToTelegram")}</span>
                   <button type="button" class="btn btn-secondary btn-sm" id="btn-settings-disconnect-tg" style="font-size:0.75rem;">
                     ${this.t("disconnectTelegram")}
                   </button>
@@ -5779,6 +5807,15 @@ export class BridgeAssistant extends HTMLElement {
               <button type="button" class="btn btn-secondary btn-listen" data-msg-id="${msg.id}">
                 ${msg.isAudioPlaying ? `${ICONS.pause} <span>${this.t("pauseButton")}</span>` : `${ICONS.sound} <span>${this.t("listenButton")}</span>`}
               </button>
+              ${
+                msg.spoken && msg.text && msg.spoken.trim() !== msg.text.trim()
+                  ? `
+                <button type="button" class="btn btn-secondary btn-read-full" data-msg-id="${msg.id}" style="display:inline-flex; align-items:center; gap:0.375rem;">
+                  ${ICONS.sound} <span>${this.t("readFullAnswer")}</span>
+                </button>
+              `
+                  : ""
+              }
               <button type="button" class="btn btn-secondary btn-stop" data-msg-id="${msg.id}" style="display:inline-flex; align-items:center; gap:0.375rem;" ${msg.isAudioPlaying || msg.isAudioPaused ? "" : "hidden"}>
                 ${ICONS.stop}
                 <span>${this.t("stopButton")}</span>
@@ -5845,7 +5882,7 @@ export class BridgeAssistant extends HTMLElement {
     if (this.isThinking) {
       chatLog.innerHTML += `
         <div class="live-status-indicator">
-          ⏳ ${this.t("lookingInCourse")}
+          <span>${this.t("lookingInCourse")}</span>
         </div>
       `;
     }
@@ -5901,6 +5938,20 @@ export class BridgeAssistant extends HTMLElement {
             this.stopSpeaking();
           } else {
             this.speakResponse(msg);
+          }
+        }
+      });
+    });
+
+    chatLog.querySelectorAll<HTMLButtonElement>(".btn-read-full").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const msgId = btn.getAttribute("data-msg-id");
+        const msg = this.messages.find((m) => m.id === msgId);
+        if (msg) {
+          if (msg.isAudioPlaying) {
+            this.stopSpeaking();
+          } else {
+            this.speakResponse(msg, true);
           }
         }
       });
