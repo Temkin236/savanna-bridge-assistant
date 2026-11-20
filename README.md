@@ -46,6 +46,7 @@ docker compose up --build -d
 | `GEMINI_API_KEY` | `""` | Single server-side Gemini API key used for generation, audio multimodal STT, and TTS. (`GOOGLE_AI_API_KEY` accepted as alias). |
 | `GEMINI_TTS_MODEL` | `gemini-3.8-flash-lite-tts` | Model code used for Gemini TTS synthesis. |
 | `GEMINI_TTS_VOICE` | `Aoede` | Voice identifier for Gemini TTS synthesis (e.g. `Aoede`). |
+| `TTS_STYLE` | `warm, calm tutor, moderate pace, clear, unhurried` | Natural tutor style instruction passed to Gemini TTS system instruction. |
 | `TELEGRAM_BOT_TOKEN` | `""` | Telegram Bot token issued by BotFather. |
 | `TELEGRAM_BOT_USERNAME` | `savannah_assistant3_bot` | Bot username used to construct seamless one-button deep links. |
 | `BOT_API_SECRET` | `change-me-bot-secret` | Shared secret header (`X-Bot-Secret`) required to confirm link tokens. |
@@ -321,18 +322,32 @@ curl -s -X POST http://localhost:8000/speech/synthesize \
 
 ### Gemini Text-to-Speech (TTS) & Audio Pipeline
 
-The assistant uses Google Gemini for natural text-to-speech synthesis across supported languages with zero intermediate transcoding artifacts:
+The assistant uses Google Gemini for natural text-to-speech synthesis across supported languages with zero intermediate transcoding artifacts, calibrated to sound like a warm, natural tutor rather than a robot reading a page:
 
+- **On-Screen Text (`answer`) vs Spoken Text (`spoken`)**:
+  - `POST /api/v1/ask` returns both `answer` (formatted for reading: clean typography, citations in metadata, links preserved as sources) and `spoken` (formatted for hearing: 2–4 short conversational sentences, lists spoken with spoken ordinals, numbers and abbreviations written out as words, no URLs, citations, headings, or markdown).
+  - The chat widget and Telegram bot read `spoken` by default for a warm listening experience while preserving the complete `answer` on-screen.
+  - The widget provides a "Read the full answer" button to synthesize the complete text on demand.
+- **Rule-Based Cleaner (`make_spoken`)**:
+  - Used for offline generation and as a safe fallback when parsing AI outputs:
+    1. **Emoji & Pictograph Stripping**: Removes all Unicode emojis, pictographs, symbols, variation selectors, and zero-width joiners.
+    2. **Markdown Cleanup**: Strips headings (`#`), emphasis (`*`, `_`), inline code/backticks, blockquotes, and Markdown tables.
+    3. **Citations & URLs**: Removes `[1]`, `[2]` citation markers, URLs, and trailing `Source:` lines.
+    4. **Ordinal Expansion**: Converts bullet points and numbered lists to natural spoken markers ("First", "Second", "Finally" / "አንደኛ", "ሁለተኛ", "በመጨረሻም").
+    5. **Number Spell-Out**: Automatically spells out digits into words in the target language (e.g. `12` -> `twelve` / `አሥራ ሁለት`).
+    6. **Passage Truncation**: Truncates long passages to the first 3 key sentences and appends an i18n-localized offer to read more.
+    7. **Punctuation Normalization**: Normalizes pauses and Ethiopic punctuation (`።`, `፣`, `፤`).
+    8. **Zero Hardcoded Strings**: All ordinals, offers, and language-specific words are loaded from i18n JSON files (`api/src/savanna_bridge/i18n/*.json`).
+- **TTS Style & Speech Configuration**:
+  - Controlled by `TTS_STYLE` (default: `warm, calm tutor, moderate pace, clear, unhurried`) and `GEMINI_TTS_VOICE` (default: `Aoede`).
+  - Style instructions are passed via API system instructions (`systemInstruction`), never injected into the spoken text itself.
+  - Multi-sentence texts are synthesized in 2–3 sentence groups and joined at the raw linear PCM level with 200ms natural pauses before single-pass WAV encoding.
 - **Audio Architecture & Sample Rate**:
   - Gemini AUDIO modality outputs raw linear PCM at **24,000 Hz, 16-bit, mono**.
   - The API wraps the PCM stream with an exact 44-byte standard RIFF/WAV header (no double-wrapping, no lossy resampling).
-  - Sentence chunks are joined at the raw PCM level before applying container headers to eliminate audio clicks and pops.
-- **Ethiopic Text Normalization**:
-  - The backend normalizer (`clean_text_for_speech`) strips markdown, emojis, URLs, and citation markers (`[1]`).
-  - Numbers in Amharic text are automatically spelled out in Ge'ez/Amharic words (e.g. `3` -> `ሦስት`).
-  - Style instructions and speed prompts are never prepended to the spoken text.
+  - Audio clips are cached in-memory by the SHA-256 hash of `(spoken, language, voice, style)` on both backend and widget to eliminate duplicate synthesis requests.
 - **Telegram Audio Conversion**:
-  - Telegram voice notes are transcoded directly from WAV using `libopus` mono at 32 kbps (`-c:a libopus -ac 1 -b:a 32k`).
+  - Telegram voice notes use `spoken` audio transcoded directly from WAV using `libopus` mono at 32 kbps (`-c:a libopus -ac 1 -b:a 32k`).
 - **Widget Playback**:
   - The web chat widget plays the 24 kHz WAV stream directly at `playbackRate = 1.0` with `preservesPitch = true` enabled.
 - **Diagnostic Tool**:
