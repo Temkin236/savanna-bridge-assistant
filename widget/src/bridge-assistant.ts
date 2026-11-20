@@ -26,6 +26,13 @@
  *    - Offline queue with auto-sync.
  */
 
+import {
+  defaultNotificationPreferences,
+  loadNotificationPreferences,
+  persistNotificationPreferences,
+  type NotificationPreferences,
+} from "./notifications";
+
 export type SupportedLanguage = "am" | "en" | "om" | "ti" | "ar";
 
 export interface Citation {
@@ -118,6 +125,7 @@ export const ICONS = {
   spinner: `<svg class="icon-inline spin-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>`,
   celebrate: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#166534" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`,
   telegram: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>`,
+  bell: `<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>`,
   sliders: `<svg class="icon-inline" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>`,
   heart: `<svg class="icon-inline" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`,
   link: `<svg class="icon-inline" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>`,
@@ -191,6 +199,20 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     continueOnTelegram: "Continue on Telegram",
     continueOnTelegramAria: "Continue on Telegram (opens Telegram)",
     telegramPrivacyNotice: "The bot will ask before enabling deadline, lesson, or job notifications.",
+    notificationsTitle: "Notifications",
+    notificationsDesc: "Choose what you want to receive and where. You can change this at any time.",
+    widgetNotifications: "Show notifications in this widget",
+    telegramNotifications: "Send notifications to Telegram",
+    deadlineNotifications: "Course deadline reminders",
+    jobNotifications: "Job opportunity alerts",
+    liveHelpNotifications: "Live-help and Jitsi updates",
+    lessonNotifications: "New lesson updates",
+    notificationFrequency: "Telegram delivery",
+    immediateFrequency: "Immediately",
+    dailyFrequency: "Daily summary",
+    notificationSaved: "Notification preferences saved.",
+    helperClaimedNotice: "A helper has claimed your request. Your Jitsi room is ready.",
+    helpClosedNotice: "Your live-help request has been closed.",
     telegramConnected: "Telegram connected",
     connectedToTelegram: "Connected to Telegram",
     disconnectTelegram: "Disconnect",
@@ -2011,11 +2033,14 @@ export class BridgeAssistant extends HTMLElement {
   private isLinkCodeInputVisible = false;
   private telegramPollTimer: number | null = null;
 
+  private notificationPreferences: NotificationPreferences = defaultNotificationPreferences();
+
   // Settings dialog visibility
   private isSettingsOpen = false;
 
   // Active Handoff state
-  private activeHandoff: { id: string; room_url: string } | null = null;
+  private activeHandoff: { id: string; room_url: string; ticket_secret: string; status: string } | null = null;
+  private handoffPollTimer: number | null = null;
 
   // Support needs
   private supportNeeds: SupportNeedsData = {
@@ -2056,6 +2081,10 @@ export class BridgeAssistant extends HTMLElement {
   private pendingVoiceTranscript = "";
   private lastSpokenText = "";
   private voiceRecordingTimeout: number | null = null;
+  private voiceVadTimer: number | null = null;
+  private voiceAudioContext: AudioContext | null = null;
+  private voiceDetectedSound = false;
+  private lastVoiceActivityAt = 0;
 
   private previousFocus: HTMLElement | null = null;
 
@@ -2168,6 +2197,7 @@ export class BridgeAssistant extends HTMLElement {
     // Fetch initial Telegram start link and support needs
     this.fetchTelegramStartLink();
     this.fetchSupportNeeds();
+    this.fetchNotificationPreferences();
 
     // Initialize wake-word listener and global keyboard shortcuts
     if (this.accessibilityPrefs.voice_enabled) {
@@ -2193,6 +2223,10 @@ export class BridgeAssistant extends HTMLElement {
     if (this.telegramPollTimer) {
       window.clearInterval(this.telegramPollTimer);
       this.telegramPollTimer = null;
+    }
+    if (this.handoffPollTimer) {
+      window.clearInterval(this.handoffPollTimer);
+      this.handoffPollTimer = null;
     }
     if (this.voiceRecordingTimeout) {
       window.clearTimeout(this.voiceRecordingTimeout);
@@ -2597,17 +2631,27 @@ export class BridgeAssistant extends HTMLElement {
     }
   ): boolean {
     this.lastSpokenText = text;
-    this.playServerAudioText(text, options).then((started) => {
-      if (!started && this.currentLang === "en" && "speechSynthesis" in window) {
-        this.browserSpeechText(text, options);
+    let fallbackStarted = false;
+    const startBrowserFallback = (error?: unknown) => {
+      if (fallbackStarted) return;
+      fallbackStarted = true;
+      if ("speechSynthesis" in window) {
+        const started = this.browserSpeechText(text, options);
+        if (started) return;
       }
+      // Voice workflows use this callback to resume listening even when the
+      // current browser has no matching TTS voice.
+      if (options?.onError) options.onError(error);
+    };
+    const serverOptions = {
+      ...options,
+      onError: (error?: unknown) => startBrowserFallback(error),
+    };
+    this.playServerAudioText(text, serverOptions).then((started) => {
+      if (!started) startBrowserFallback();
     }).catch((err) => {
       console.warn("playServerAudioText failed:", err);
-      if (this.currentLang === "en" && "speechSynthesis" in window) {
-        this.browserSpeechText(text, options);
-      } else if (options?.onError) {
-        options.onError(err);
-      }
+      startBrowserFallback(err);
     });
     return true;
   }
@@ -2628,7 +2672,16 @@ export class BridgeAssistant extends HTMLElement {
     try {
       window.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);
-      u.lang = "en-US";
+      const languageTags: Record<SupportedLanguage, string> = {
+        en: "en-US",
+        am: "am-ET",
+        om: "om-ET",
+        ti: "ti-ET",
+        ar: "ar-SA",
+      };
+      u.lang = languageTags[this.currentLang];
+      const matchingVoice = this.getBestVoice(this.currentLang);
+      if (matchingVoice) u.voice = matchingVoice;
       u.rate = options?.rate || this.accessibilityPrefs?.speech_rate || 1.0;
       u.onstart = () => {
         if (options?.onStart) options.onStart();
@@ -2953,6 +3006,93 @@ export class BridgeAssistant extends HTMLElement {
     }
   }
 
+  private getLearnerRef(): string {
+    return this.getAttribute("learner-id") || `learner_${this.sessionId}`;
+  }
+
+  private async fetchNotificationPreferences(): Promise<void> {
+    try {
+      this.notificationPreferences = await loadNotificationPreferences(this.apiBase, this.getLearnerRef());
+      if (this.isSettingsOpen) this.render();
+    } catch {
+      // Keep local defaults when the API is unavailable.
+    }
+  }
+
+  private async saveNotificationPreferences(update: Partial<NotificationPreferences>): Promise<void> {
+    const next = { ...this.notificationPreferences, ...update };
+    if (next.telegram_enabled && !this.isTelegramLinked) next.telegram_enabled = false;
+    next.consent_granted = next.widget_enabled || next.telegram_enabled;
+    this.notificationPreferences = next;
+    try {
+      this.notificationPreferences = await persistNotificationPreferences(
+        this.apiBase,
+        this.getLearnerRef(),
+        next
+      );
+      this.announce(this.t("notificationSaved"));
+    } catch {
+      this.announce(this.t("serverErrorNotice"));
+    }
+  }
+
+  private startHandoffPolling(): void {
+    if (!this.activeHandoff?.ticket_secret) return;
+    if (this.handoffPollTimer) window.clearInterval(this.handoffPollTimer);
+    const poll = () => this.pollHandoffStatus();
+    this.handoffPollTimer = window.setInterval(poll, 4000);
+    window.setTimeout(poll, 300);
+  }
+
+  private async pollHandoffStatus(): Promise<void> {
+    const handoff = this.activeHandoff;
+    if (!handoff?.ticket_secret) return;
+    try {
+      const res = await fetch(`${this.apiBase}/api/v1/tickets/${encodeURIComponent(handoff.id)}`, {
+        headers: { "X-Ticket-Secret": handoff.ticket_secret },
+      });
+      if (!res.ok) return;
+      const detail = await res.json();
+      const nextStatus = String(detail.status || "waiting");
+      if (nextStatus === handoff.status) return;
+      handoff.status = nextStatus;
+
+      if (nextStatus === "claimed" && this.notificationPreferences.widget_enabled && this.notificationPreferences.live_help) {
+        const notice = this.t("helperClaimedNotice");
+        this.messages.push({
+          id: `msg_${Date.now()}_claimed`,
+          sender: "assistant",
+          text: notice,
+          heading: this.t("handoffReadyTitle"),
+          isHandoff: true,
+          roomUrl: detail.room_url || handoff.room_url,
+          offerHuman: false,
+        });
+        this.saveChatState();
+        this.renderMessages();
+        this.announce(notice);
+        if (this.autoReadSpeech || this.accessibilityPrefs.auto_tts) this.speakText(notice);
+        this.dispatchEvent(new CustomEvent("db-assistant:handoff-claimed", {
+          bubbles: true,
+          composed: true,
+          detail: { ticketId: handoff.id, roomUrl: detail.room_url || handoff.room_url },
+        }));
+      } else if (nextStatus === "closed") {
+        const notice = this.t("helpClosedNotice");
+        if (this.notificationPreferences.widget_enabled && this.notificationPreferences.live_help) {
+          this.messages.push({ id: `msg_${Date.now()}_closed`, sender: "assistant", text: notice });
+          this.saveChatState();
+          this.renderMessages();
+          this.announce(notice);
+        }
+        if (this.handoffPollTimer) window.clearInterval(this.handoffPollTimer);
+        this.handoffPollTimer = null;
+      }
+    } catch {
+      // A later polling interval retries transient network failures.
+    }
+  }
+
   // --- Accessibility Earcons (Web Audio API) ---
 
   private playEarcon(type: "start" | "stop" | "transcribed" | "wake"): void {
@@ -3204,6 +3344,7 @@ export class BridgeAssistant extends HTMLElement {
             this.isTelegramLinked = true;
             this.announce(this.t("telegramConnected"));
             this.updateTelegramLinkUI();
+            if (this.isSettingsOpen) this.render();
           }
         }
       } catch (err) {
@@ -3219,7 +3360,7 @@ export class BridgeAssistant extends HTMLElement {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           token: this.telegramToken,
-          learner_ref: this.getAttribute("learner-id") || `learner_${this.sessionId}`,
+          learner_ref: this.getLearnerRef(),
         }),
       });
     } catch {
@@ -3439,6 +3580,69 @@ export class BridgeAssistant extends HTMLElement {
     return /^(no|nope|cancel|stop|አይ|አይደለም|lakki|ኣይፋል|لا|إلغاء)\b/i.test(text.trim());
   }
 
+  private isSendCommand(text: string): boolean {
+    const normalized = text
+      .trim()
+      .toLocaleLowerCase()
+      .replace(/[.!?،።፧]+/gu, "")
+      .replace(/\s+/g, " ");
+    const exactCommands = new Set([
+      "send",
+      "send it",
+      "send this",
+      "send now",
+      "send it now",
+      "please send",
+      "please send it",
+      "yes send it",
+      "submit",
+      "submit it",
+      "go ahead",
+      "ላክ",
+      "ላኩ",
+      "ላኪ",
+      "እሺ ላክ",
+      "ergo",
+      "erga",
+      "ergaa",
+      "maaloo ergo",
+      "ስደድ",
+      "ስደዱ",
+      "أرسل",
+      "ارسل",
+      "إرسال",
+      "أرسله",
+      "ارسلها",
+    ]);
+    return exactCommands.has(normalized);
+  }
+
+  private voicePreviewPrompt(transcript: string): string {
+    const prompts: Record<SupportedLanguage, string> = {
+      en: `I heard: ${transcript}. You can edit it, or say send.`,
+      am: `የሰማሁት፦ ${transcript}። ማስተካከል ይችላሉ፣ ትክክል ከሆነ ላክ ይበሉ።`,
+      om: `Waan ani dhaga'e: ${transcript}. Sirreessuu dandeessa; sirrii yoo ta'e ergo jedhi.`,
+      ti: `ዝሰማዕክዎ፦ ${transcript}። ከተድልዩ ኣስተኻኽሉ፣ ቅኑዕ እንተኾይኑ ስደድ በሉ።`,
+      ar: `سمعت: ${transcript}. يمكنك تعديله، أو قل أرسل إذا كان صحيحاً.`,
+    };
+    return prompts[this.currentLang];
+  }
+
+  private speakThenListen(prompt: string, inputEl: HTMLInputElement): void {
+    let restarted = false;
+    const restart = () => {
+      if (restarted) return;
+      restarted = true;
+      window.setTimeout(() => {
+        if (!this.isRecording && !this.isProcessingSpeech && !this.isThinking) {
+          void this.startVoiceRecording(inputEl);
+        }
+      }, 180);
+    };
+    this.announce(prompt);
+    this.speakText(prompt, { onEnd: restart, onError: restart });
+  }
+
   private async planVoiceAction(utterance: string): Promise<PageActionPlan> {
     const fallback: PageActionPlan = {
       action: "none",
@@ -3538,6 +3742,20 @@ export class BridgeAssistant extends HTMLElement {
       return;
     }
 
+    // A confirmation command belongs to the saved preview, not to the chat
+    // input's latest interim recognition result. Send the original transcript
+    // immediately; do not ask for a second confirmation.
+    if (this.pendingVoiceTranscript && this.isSendCommand(transcript)) {
+      // Recognition does not write the command word into the input while a
+      // preview is pending, so a learner's manual edit remains authoritative.
+      const approvedTranscript = inputEl.value.trim() || this.pendingVoiceTranscript;
+      this.pendingVoiceTranscript = "";
+      this.pendingVoiceAction = null;
+      inputEl.value = "";
+      await this.askQuestion(approvedTranscript, false, true);
+      return;
+    }
+
     // A bare yes/no while the onboarding dialog is visible must never be sent
     // to the page-action planner. Only spoken setup owns onboarding answers.
     if (
@@ -3558,7 +3776,7 @@ export class BridgeAssistant extends HTMLElement {
         this.announce("Action cancelled.");
         this.speakText("Action cancelled.");
       } else {
-        this.speakText("Please say yes to confirm or no to cancel.");
+        this.speakThenListen("Please say yes to confirm or no to cancel.", inputEl);
       }
       return;
     }
@@ -3575,8 +3793,7 @@ export class BridgeAssistant extends HTMLElement {
     if (plan.action !== "none") {
       if (plan.requires_confirmation) {
         this.pendingVoiceAction = plan;
-        this.announce(plan.spoken_confirmation);
-        this.speakText(plan.spoken_confirmation);
+        this.speakThenListen(plan.spoken_confirmation, inputEl);
       } else {
         await this.executeVoiceAction(plan);
       }
@@ -3586,9 +3803,7 @@ export class BridgeAssistant extends HTMLElement {
     inputEl.value = transcript;
     inputEl.focus();
     this.pendingVoiceTranscript = transcript;
-    const preview = `I heard: ${transcript}. You can edit it, or say send.`;
-    this.announce(preview);
-    this.speakText(preview);
+    this.speakThenListen(this.voicePreviewPrompt(transcript), inputEl);
   }
 
   private spokenOnboardingQuestions(): string[] {
@@ -3796,7 +4011,11 @@ export class BridgeAssistant extends HTMLElement {
           }
           const text = fullTranscript.trim();
           if (text) {
-            inputEl.value = text;
+            // Do not replace a confirmed preview with the command word
+            // (for example, replacing the question with "send").
+            if (!this.pendingVoiceTranscript && !this.pendingVoiceAction) {
+              inputEl.value = text;
+            }
             const lastResult = event.results[event.results.length - 1];
             if (lastResult?.isFinal) {
               speechRecDeliveredText = true;
@@ -3806,13 +4025,24 @@ export class BridgeAssistant extends HTMLElement {
         };
 
         this.activeRecognition.onend = () => {
-          if (this.isRecording) {
-            this.stopVoiceRecording(speechRecDeliveredText);
+          this.activeRecognition = null;
+          if (!this.isRecording) return;
+          if (speechRecDeliveredText) {
+            this.stopVoiceRecording(true);
+          } else if (!this.mediaRecorder || this.mediaRecorder.state === "inactive") {
+            this.isRecording = false;
+            this.updateMicButtonUI();
+            this.updateVoiceStatusUI();
           }
+          // When browser recognition reports no speech or lacks the selected
+          // language, keep MediaRecorder running for server STT and VAD.
         };
 
         this.activeRecognition.onerror = (e: any) => {
           console.warn("Active speech recognition error:", e.error);
+          if (e.error === "language-not-supported" || e.error === "no-speech" || e.error === "network") {
+            this.activeRecognition = null;
+          }
         };
 
         this.activeRecognition.start();
@@ -3844,9 +4074,10 @@ export class BridgeAssistant extends HTMLElement {
         };
 
         this.mediaRecorder.start();
+        this.startVoiceActivityDetection(stream);
         this.voiceRecordingTimeout = window.setTimeout(() => {
           if (this.isRecording) this.stopVoiceRecording(speechRecDeliveredText);
-        }, 10000);
+        }, 15000);
       } catch (err) {
         console.warn("MediaRecorder permission/init notice:", err);
         if (!SpeechRec) {
@@ -3865,6 +4096,7 @@ export class BridgeAssistant extends HTMLElement {
       window.clearTimeout(this.voiceRecordingTimeout);
       this.voiceRecordingTimeout = null;
     }
+    this.stopVoiceActivityDetection();
     this.playEarcon("stop");
 
     if (this.activeRecognition) {
@@ -3900,6 +4132,55 @@ export class BridgeAssistant extends HTMLElement {
     }, 1200);
   }
 
+  private startVoiceActivityDetection(stream: MediaStream): void {
+    this.stopVoiceActivityDetection();
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContextClass) return;
+    try {
+      this.voiceAudioContext = new AudioContextClass();
+      const source = this.voiceAudioContext.createMediaStreamSource(stream);
+      const analyser = this.voiceAudioContext.createAnalyser();
+      analyser.fftSize = 512;
+      analyser.smoothingTimeConstant = 0.25;
+      source.connect(analyser);
+      const samples = new Uint8Array(analyser.fftSize);
+      this.voiceDetectedSound = false;
+      this.lastVoiceActivityAt = performance.now();
+      this.voiceVadTimer = window.setInterval(() => {
+        if (!this.isRecording) return;
+        analyser.getByteTimeDomainData(samples);
+        let energy = 0;
+        for (const sample of samples) {
+          const normalized = (sample - 128) / 128;
+          energy += normalized * normalized;
+        }
+        const rms = Math.sqrt(energy / samples.length);
+        const now = performance.now();
+        if (rms >= 0.025) {
+          this.voiceDetectedSound = true;
+          this.lastVoiceActivityAt = now;
+        } else if (this.voiceDetectedSound && now - this.lastVoiceActivityAt >= 1100) {
+          this.stopVoiceRecording(false);
+        }
+      }, 100);
+    } catch (error) {
+      console.warn("Voice activity detection unavailable:", error);
+      this.stopVoiceActivityDetection();
+    }
+  }
+
+  private stopVoiceActivityDetection(): void {
+    if (this.voiceVadTimer) {
+      window.clearInterval(this.voiceVadTimer);
+      this.voiceVadTimer = null;
+    }
+    if (this.voiceAudioContext) {
+      void this.voiceAudioContext.close().catch(() => {});
+      this.voiceAudioContext = null;
+    }
+    this.voiceDetectedSound = false;
+  }
+
   private async sendAudioForTranscription(blob: Blob, mediaType: string, inputEl: HTMLInputElement): Promise<void> {
     this.isProcessingSpeech = true;
     this.updateVoiceStatusUI();
@@ -3923,7 +4204,9 @@ export class BridgeAssistant extends HTMLElement {
         body: JSON.stringify({
           audio_base64: audioBase64,
           media_type: mediaType,
-          language: "auto",
+          // The selected language is a strong STT hint. The API still returns
+          // detected_language and the widget may switch when confidence is high.
+          language: this.currentLang,
           retain: false,
         }),
       });
@@ -3944,7 +4227,6 @@ export class BridgeAssistant extends HTMLElement {
           await this.handleVoiceTranscript(data.transcript, inputEl);
           this.playEarcon("transcribed");
           this.announce(this.t("voicePreviewNotice"));
-          await this.askQuestion(data.transcript, false, true);
         }
       }
     } catch (err) {
@@ -4931,7 +5213,7 @@ export class BridgeAssistant extends HTMLElement {
 
       const payload = {
         consent: true,
-        learner_ref: this.getAttribute("learner-id") || `learner_${this.sessionId}`,
+        learner_ref: this.getLearnerRef(),
         card: {
           language: this.currentLang,
           context: contextReason || this.shadowRoot?.querySelector<HTMLInputElement>("#handoff-reason")?.value || "Learner requested a human mentor from web assistant.",
@@ -4966,12 +5248,15 @@ export class BridgeAssistant extends HTMLElement {
         this.activeHandoff = {
           id: ticketId,
           room_url: roomUrl,
+          ticket_secret: ticketSecret,
+          status: data.status || "waiting",
         };
         if (ticketSecret) {
           try {
             sessionStorage.setItem(`savanna_ticket_secret_${ticketId}`, ticketSecret);
           } catch {}
         }
+        this.startHandoffPolling();
 
         this.dispatchEvent(
           new CustomEvent("db-assistant:escalated", {
@@ -5647,6 +5932,50 @@ export class BridgeAssistant extends HTMLElement {
               <button type="button" class="btn btn-secondary" id="btn-replay-onboarding" style="width:100%; min-height:44px; font-size:0.8125rem; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
                 ${ICONS.accessibility} <span>${this.t("onboardingReplay")}</span>
               </button>
+            </div>
+
+            <!-- Notification Preferences Card -->
+            <div class="settings-card" id="card-notifications">
+              <div class="settings-card-title">${ICONS.bell} <span>${this.t("notificationsTitle")}</span></div>
+              <div class="settings-card-desc">${this.t("notificationsDesc")}</div>
+
+              <label class="toggle-row">
+                <div class="toggle-info"><span class="toggle-title">${this.t("widgetNotifications")}</span></div>
+                <input type="checkbox" id="chk-notify-widget" class="toggle-switch" ${this.notificationPreferences.widget_enabled ? "checked" : ""}>
+              </label>
+              <div style="border-top:1px solid var(--b-border); margin:0.5rem 0;"></div>
+              <label class="toggle-row">
+                <div class="toggle-info">
+                  <span class="toggle-title">${this.t("telegramNotifications")}</span>
+                  <span class="toggle-desc">${this.isTelegramLinked ? this.t("connectedToTelegram") : this.t("telegramPrivacyNotice")}</span>
+                </div>
+                <input type="checkbox" id="chk-notify-telegram" class="toggle-switch" ${this.notificationPreferences.telegram_enabled ? "checked" : ""} ${this.isTelegramLinked ? "" : "disabled"}>
+              </label>
+              <div style="border-top:1px solid var(--b-border); margin:0.5rem 0;"></div>
+              <label class="toggle-row">
+                <div class="toggle-info"><span class="toggle-title">${this.t("deadlineNotifications")}</span></div>
+                <input type="checkbox" id="chk-notify-deadlines" class="toggle-switch" ${this.notificationPreferences.deadlines ? "checked" : ""}>
+              </label>
+              <label class="toggle-row">
+                <div class="toggle-info"><span class="toggle-title">${this.t("jobNotifications")}</span></div>
+                <input type="checkbox" id="chk-notify-jobs" class="toggle-switch" ${this.notificationPreferences.job_alerts ? "checked" : ""}>
+              </label>
+              <label class="toggle-row">
+                <div class="toggle-info"><span class="toggle-title">${this.t("liveHelpNotifications")}</span></div>
+                <input type="checkbox" id="chk-notify-live-help" class="toggle-switch" ${this.notificationPreferences.live_help ? "checked" : ""}>
+              </label>
+              <label class="toggle-row">
+                <div class="toggle-info"><span class="toggle-title">${this.t("lessonNotifications")}</span></div>
+                <input type="checkbox" id="chk-notify-lessons" class="toggle-switch" ${this.notificationPreferences.new_lessons ? "checked" : ""}>
+              </label>
+              <label style="display:block; margin-top:0.75rem; font-size:0.8125rem; font-weight:600;">
+                ${this.t("notificationFrequency")}
+                <select id="select-notify-frequency" class="text-input" style="width:100%; margin-top:0.375rem; min-height:44px;">
+                  <option value="immediate" ${this.notificationPreferences.frequency === "immediate" ? "selected" : ""}>${this.t("immediateFrequency")}</option>
+                  <option value="daily" ${this.notificationPreferences.frequency === "daily" ? "selected" : ""}>${this.t("dailyFrequency")}</option>
+                </select>
+              </label>
+              <div id="notification-save-status" role="status" aria-live="polite" style="font-size:0.75rem; color:var(--b-text-muted); margin-top:0.5rem;"></div>
             </div>
 
             <!-- Account & Telegram Linking Card -->
@@ -6353,6 +6682,31 @@ export class BridgeAssistant extends HTMLElement {
         }
       });
     }
+
+    // Notification delivery and category preferences
+    const bindNotificationToggle = (
+      selector: string,
+      key: keyof Pick<NotificationPreferences, "widget_enabled" | "telegram_enabled" | "deadlines" | "job_alerts" | "live_help" | "new_lessons">
+    ) => {
+      const input = this.shadowRoot?.querySelector<HTMLInputElement>(selector);
+      input?.addEventListener("change", async () => {
+        await this.saveNotificationPreferences({ [key]: input.checked });
+        const status = this.shadowRoot?.querySelector<HTMLElement>("#notification-save-status");
+        if (status) status.textContent = this.t("notificationSaved");
+      });
+    };
+    bindNotificationToggle("#chk-notify-widget", "widget_enabled");
+    bindNotificationToggle("#chk-notify-telegram", "telegram_enabled");
+    bindNotificationToggle("#chk-notify-deadlines", "deadlines");
+    bindNotificationToggle("#chk-notify-jobs", "job_alerts");
+    bindNotificationToggle("#chk-notify-live-help", "live_help");
+    bindNotificationToggle("#chk-notify-lessons", "new_lessons");
+    const notificationFrequency = this.shadowRoot?.querySelector<HTMLSelectElement>("#select-notify-frequency");
+    notificationFrequency?.addEventListener("change", async () => {
+      await this.saveNotificationPreferences({ frequency: notificationFrequency.value as "immediate" | "daily" });
+      const status = this.shadowRoot?.querySelector<HTMLElement>("#notification-save-status");
+      if (status) status.textContent = this.t("notificationSaved");
+    });
 
     // Settings Code Form
     const settingsCodeForm = this.shadowRoot.querySelector<HTMLFormElement>("#settings-code-form");

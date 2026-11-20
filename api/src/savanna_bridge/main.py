@@ -104,6 +104,7 @@ from savanna_bridge.models import (
     TranslationRequest,
     TranslationResponse,
 )
+from savanna_bridge.notifications import NotificationService
 from savanna_bridge.rate_limiter import LoginFailureRateLimiter, RateLimiter
 from savanna_bridge.retrieval import RetrievalEngine
 from savanna_bridge.speech import make_spoken
@@ -125,10 +126,11 @@ login_rate_limiter = LoginFailureRateLimiter(max_failures=5, window_seconds=60)
 
 # Notification channels
 channels = {
-    "telegram": TelegramNotificationChannel(),
+    "telegram": TelegramNotificationChannel(os.getenv("TELEGRAM_BOT_TOKEN", "").strip() or None),
     "sms_sandbox": AfricasTalkingSandboxChannel(),
     "mock": MockNotificationChannel(),
 }
+notification_service = NotificationService(db, channels["telegram"])
 
 
 @contextlib.asynccontextmanager
@@ -1134,6 +1136,8 @@ def claim_handoff(
     record = db.claim_handoff(handoff_id, agent_ref)
     if not record:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Handoff not found")
+    notification_service.telegram = channels["telegram"]
+    notification_service.notify_handoff_claimed(record)
     return record
 
 

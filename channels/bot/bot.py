@@ -107,6 +107,7 @@ def get_user_state(user_id: int) -> dict[str, Any]:
                 "deadlines": True,
                 "job_alerts": True,
                 "new_lessons": True,
+                "live_help": True,
                 "muted": False,
                 "low_bandwidth": True,
             },
@@ -189,16 +190,19 @@ def make_notification_inline(prefs: dict[str, Any], lang: str = "en") -> InlineK
     deadlines = bool(prefs.get("deadlines", True))
     jobs = bool(prefs.get("job_alerts", True))
     lessons = bool(prefs.get("new_lessons", True))
+    live_help = bool(prefs.get("live_help", True))
 
     d_icon = "[ON]" if deadlines else "[OFF]"
     j_icon = "[ON]" if jobs else "[OFF]"
     l_icon = "[ON]" if lessons else "[OFF]"
+    h_icon = "[ON]" if live_help else "[OFF]"
 
     texts = {
         "am": {
             "deadlines": f"የጊዜ ገደቦች {d_icon}",
             "jobs": f"የሥራ ማሳወቂያዎች {j_icon}",
             "lessons": f"የትምህርት/መድረክ ዜናዎች {l_icon}",
+            "live_help": f"የቀጥታ እርዳታ/Jitsi {h_icon}",
             "all": "ሁሉንም አብራ",
             "done": "መዝግብና ቀጥል",
         },
@@ -206,6 +210,7 @@ def make_notification_inline(prefs: dict[str, Any], lang: str = "en") -> InlineK
             "deadlines": f"Yeroo Xumuraa {d_icon}",
             "jobs": f"Beeksisa Hojii {j_icon}",
             "lessons": f"Barnootaa fi Oduu {l_icon}",
+            "live_help": f"Gargaarsa kallattii/Jitsi {h_icon}",
             "all": "Hunda Bansi",
             "done": "Olkaa'iitii Itti Fufi",
         },
@@ -213,6 +218,7 @@ def make_notification_inline(prefs: dict[str, Any], lang: str = "en") -> InlineK
             "deadlines": f"ናይ ምዝዛም ዕለት {d_icon}",
             "jobs": f"ናይ ስራሕ ዕድላት {j_icon}",
             "lessons": f"ትምህርቲን ዜናታትን {l_icon}",
+            "live_help": f"ቀጥታዊ ሓገዝ/Jitsi {h_icon}",
             "all": "ኩሉ ኣብርህ",
             "done": "ኣቐምጥ እሞ ቐጽል",
         },
@@ -220,6 +226,7 @@ def make_notification_inline(prefs: dict[str, Any], lang: str = "en") -> InlineK
             "deadlines": f"المواعيد النهائية {d_icon}",
             "jobs": f"تنبيهات الوظائف {j_icon}",
             "lessons": f"الدروس والتحديثات {l_icon}",
+            "live_help": f"المساعدة المباشرة/Jitsi {h_icon}",
             "all": "تفعيل الكل",
             "done": "حفظ ومتابعة",
         },
@@ -227,6 +234,7 @@ def make_notification_inline(prefs: dict[str, Any], lang: str = "en") -> InlineK
             "deadlines": f"Deadlines & Milestones {d_icon}",
             "jobs": f"Job Alerts {j_icon}",
             "lessons": f"Lessons & Announcements {l_icon}",
+            "live_help": f"Live Help & Jitsi {h_icon}",
             "all": "Enable All",
             "done": "Save & Continue",
         },
@@ -238,6 +246,7 @@ def make_notification_inline(prefs: dict[str, Any], lang: str = "en") -> InlineK
             [InlineKeyboardButton(text=t["deadlines"], callback_data="notif_toggle_deadlines")],
             [InlineKeyboardButton(text=t["jobs"], callback_data="notif_toggle_jobs")],
             [InlineKeyboardButton(text=t["lessons"], callback_data="notif_toggle_lessons")],
+            [InlineKeyboardButton(text=t["live_help"], callback_data="notif_toggle_live_help")],
             [
                 InlineKeyboardButton(text=t["all"], callback_data="notif_enable_all"),
                 InlineKeyboardButton(text=t["done"], callback_data="notif_done"),
@@ -486,6 +495,7 @@ async def choose_notification_frequency(callback: types.CallbackQuery) -> None:
             "deadlines": choice in {"all", "deadlines"},
             "new_lessons": choice == "all",
             "job_alerts": choice in {"all", "jobs"},
+            "live_help": choice == "all",
         }
     )
     keyboard = InlineKeyboardMarkup(
@@ -601,6 +611,7 @@ async def handle_notif_toggle(callback: types.CallbackQuery) -> None:
         "deadlines": "deadlines",
         "jobs": "job_alerts",
         "lessons": "new_lessons",
+        "live_help": "live_help",
     }
     field = key_map.get(target)
     prefs = state.get("notification_prefs", {})
@@ -627,6 +638,7 @@ async def handle_notif_enable_all(callback: types.CallbackQuery) -> None:
     prefs["deadlines"] = True
     prefs["job_alerts"] = True
     prefs["new_lessons"] = True
+    prefs["live_help"] = True
     prefs["muted"] = False
     state["notification_prefs"] = prefs
     learner_ref = state.get("learner_ref", f"tg_{user_id}")

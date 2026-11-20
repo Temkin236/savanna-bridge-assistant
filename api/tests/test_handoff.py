@@ -91,3 +91,57 @@ def test_handoff_full_lifecycle_claim_reply_close(monkeypatch) -> None:
     close_res = client.post(f"/handoff/{handoff_id}/close", json={}, headers=auth_headers)
     assert close_res.status_code == 200
     assert close_res.json()["status"] == "closed"
+
+
+def test_claim_notifies_opted_in_linked_telegram_learner(monkeypatch) -> None:
+    from savanna_bridge import main
+    from savanna_bridge.config import BOT_API_SECRET
+
+    learner_ref = "learner_claim_notification"
+    start = client.post(
+        "/api/v1/link/start",
+        json={"session_id": "claim_notification", "learner_reference": learner_ref},
+    ).json()
+    confirm = client.post(
+        "/api/v1/link/confirm",
+        json={"token": start["token"], "telegram_chat_id": "998877"},
+        headers={"X-Bot-Secret": BOT_API_SECRET},
+    )
+    assert confirm.status_code == 200
+    settings = client.put(
+        f"/api/v1/notification-settings?learner_ref={learner_ref}",
+        json={"telegram_enabled": True, "consent_granted": True, "live_help": True},
+    )
+    assert settings.status_code == 200
+
+    handoff = client.post(
+        "/api/v1/handoff",
+        json={
+            "consent": True,
+            "learner_ref": learner_ref,
+            "card": {"language": "en", "context": "Need video help", "contact_mode": "video"},
+        },
+    ).json()
+
+    sent: list[tuple[str, str]] = []
+
+    class CapturingChannel:
+        def send_notification(self, recipient: str, message: str) -> bool:
+            sent.append((recipient, message))
+            return True
+
+    monkeypatch.setitem(main.channels, "telegram", CapturingChannel())
+    monkeypatch.setenv("HELPER_PASSWORD", "savanna2026")
+    login = client.post(
+        "/api/v1/helper/login",
+        json={"username": "agent_sarah", "password": "savanna2026"},
+    ).json()
+    claimed = client.post(
+        f"/api/v1/handoff/{handoff['id']}/claim",
+        headers={"Authorization": f"Bearer {login['token']}"},
+        json={"agent_ref": "agent_sarah"},
+    )
+    assert claimed.status_code == 200
+    assert sent and sent[0][0] == "998877"
+    assert "claimed" in sent[0][1]
+    assert handoff["room_url"] in sent[0][1]

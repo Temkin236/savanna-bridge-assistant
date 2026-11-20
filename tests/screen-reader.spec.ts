@@ -266,4 +266,163 @@ test.describe("screen-reader and non-visual interaction contract", () => {
     expect(stateAfterClose.isOpen).toBe(false);
     expect(stateAfterClose.isRecording).toBe(false);
   });
+
+  test("voice preview keeps the original transcript and multilingual send commands submit it", async ({ page }) => {
+    await page.goto(`${demoBase}/savanna/`);
+    await page.evaluate(() => customElements.whenDefined("bridge-assistant"));
+    await page.locator("bridge-assistant #launcher-btn").click();
+    await page.locator("bridge-assistant #btn-onboard-skip").click();
+
+    const results = await page.locator("bridge-assistant").evaluate(async (element) => {
+      const assistant = element as any;
+      const input = element.shadowRoot?.querySelector<HTMLInputElement>("#chat-input");
+      if (!input) throw new Error("Chat input not found");
+
+      const submitted: string[] = [];
+      let automaticMicRestarts = 0;
+      assistant.planVoiceAction = async () => ({
+        action: "none",
+        spoken_confirmation: "",
+        requires_confirmation: false,
+        confidence: 0,
+        language: assistant.currentLang,
+      });
+      assistant.startVoiceRecording = async () => { automaticMicRestarts += 1; };
+      assistant.speakText = (_text: string, options?: { onEnd?: () => void }) => {
+        options?.onEnd?.();
+        return true;
+      };
+      assistant.askQuestion = async (text: string) => { submitted.push(text); };
+      const waitForMicRestart = () => new Promise((resolve) => setTimeout(resolve, 240));
+
+      assistant.currentLang = "en";
+      await assistant.handleVoiceTranscript("What do clients value more and more?", input);
+      const enPreview = input.value;
+      await waitForMicRestart();
+      await assistant.handleVoiceTranscript("send it", input);
+
+      assistant.currentLang = "am";
+      await assistant.handleVoiceTranscript("ደንበኞች ምን ዋጋ ይሰጣሉ?", input);
+      const amPreview = input.value;
+      await waitForMicRestart();
+      await assistant.handleVoiceTranscript("ላክ", input);
+
+      assistant.currentLang = "ar";
+      await assistant.handleVoiceTranscript("ما موضوع هذا الدرس؟", input);
+      const arPreview = input.value;
+      await waitForMicRestart();
+      await assistant.handleVoiceTranscript("أرسل", input);
+
+      return { submitted, enPreview, amPreview, arPreview, finalInput: input.value, automaticMicRestarts };
+    });
+
+    expect(results.enPreview).toBe("What do clients value more and more?");
+    expect(results.amPreview).toBe("ደንበኞች ምን ዋጋ ይሰጣሉ?");
+    expect(results.arPreview).toBe("ما موضوع هذا الدرس؟");
+    expect(results.submitted).toEqual([
+      "What do clients value more and more?",
+      "ደንበኞች ምን ዋጋ ይሰጣሉ?",
+      "ما موضوع هذا الدرس؟",
+    ]);
+    expect(results.automaticMicRestarts).toBe(3);
+    expect(results.finalInput).toBe("");
+  });
+
+  test("server speech recognition uses the selected language and waits for send", async ({ page }) => {
+    let transcriptionRequest: Record<string, unknown> | undefined;
+    await page.route("**/api/v1/speech/transcribe", async (route) => {
+      transcriptionRequest = route.request().postDataJSON();
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          transcript: "Koorsiin kun waa'ee maalii ti?",
+          detected_language: "om",
+          language_confidence: 0.99,
+          editable: true,
+          sent: false,
+        }),
+      });
+    });
+
+    await page.goto(`${demoBase}/savanna/`);
+    await page.evaluate(() => customElements.whenDefined("bridge-assistant"));
+    await page.locator("bridge-assistant #launcher-btn").click();
+    await page.locator("bridge-assistant #btn-onboard-skip").click();
+
+    const state = await page.locator("bridge-assistant").evaluate(async (element) => {
+      const assistant = element as any;
+      const input = element.shadowRoot?.querySelector<HTMLInputElement>("#chat-input");
+      if (!input) throw new Error("Chat input not found");
+      const submitted: string[] = [];
+      assistant.currentLang = "om";
+      assistant.planVoiceAction = async () => ({
+        action: "none",
+        spoken_confirmation: "",
+        requires_confirmation: false,
+        confidence: 0,
+        language: "om",
+      });
+      assistant.speakText = () => true;
+      assistant.askQuestion = async (text: string) => { submitted.push(text); };
+      await assistant.sendAudioForTranscription(
+        new Blob(["oromo audio fixture"], { type: "audio/webm" }),
+        "audio/webm",
+        input,
+      );
+      return {
+        pending: assistant.pendingVoiceTranscript,
+        input: input.value,
+        submitted,
+      };
+    });
+
+    expect(transcriptionRequest?.language).toBe("om");
+    expect(state.pending).toBe("Koorsiin kun waa'ee maalii ti?");
+    expect(state.input).toBe("Koorsiin kun waa'ee maalii ti?");
+    expect(state.submitted).toEqual([]);
+  });
+
+  test("non-English confirmation speech restarts listening when server audio is unavailable", async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(window, "speechSynthesis", {
+        configurable: true,
+        value: {
+          cancel: () => undefined,
+          getVoices: () => [],
+          speak: (utterance: SpeechSynthesisUtterance) => {
+            (window as any).__confirmationLanguage = utterance.lang;
+            setTimeout(() => utterance.onend?.(new SpeechSynthesisEvent("end", { utterance })), 0);
+          },
+        },
+      });
+    });
+    await page.route("**/api/v1/speech/synthesize", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ audio_url: "/media/tts/demo.ogg", mocked: true }),
+      });
+    });
+
+    await page.goto(`${demoBase}/savanna/`);
+    await page.evaluate(() => customElements.whenDefined("bridge-assistant"));
+    await page.locator("bridge-assistant #launcher-btn").click();
+    await page.locator("bridge-assistant #btn-onboard-skip").click();
+
+    const state = await page.locator("bridge-assistant").evaluate(async (element) => {
+      const assistant = element as any;
+      const input = element.shadowRoot?.querySelector<HTMLInputElement>("#chat-input");
+      if (!input) throw new Error("Chat input not found");
+      let restarts = 0;
+      assistant.currentLang = "ar";
+      assistant.startVoiceRecording = async () => { restarts += 1; };
+      assistant.speakThenListen("قل أرسل إذا كان النص صحيحاً", input);
+      await new Promise((resolve) => setTimeout(resolve, 350));
+      return { restarts, language: (window as any).__confirmationLanguage };
+    });
+
+    expect(state.language).toBe("ar-SA");
+    expect(state.restarts).toBe(1);
+  });
 });

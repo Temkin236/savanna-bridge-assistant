@@ -156,6 +156,7 @@ class NotificationScheduler:
             "deadlines": True,
             "new_lessons": True,
             "job_alerts": True,
+            "live_help": True,
             "muted": False,
             "low_bandwidth": True,
             "telegram_enabled": True,
@@ -255,3 +256,21 @@ class NotificationScheduler:
         )
         driver = self.telegram if channel == "telegram" else self.sms
         return driver.send(recipient, msg)
+
+    def dispatch_live_help_update(
+        self,
+        handoff_data: dict[str, Any],
+        recipient: str,
+        channel: str = "telegram",
+        learner_ref: str = "default",
+    ) -> bool:
+        """Notify an opted-in learner when a helper claims their Jitsi handoff."""
+        with httpx.Client(timeout=5.0) as client:
+            settings = self.get_settings(client, learner_ref)
+        if not self._can_deliver(settings, "live_help"):
+            return False
+        room_url = handoff_data.get("room_url", "")
+        helper = handoff_data.get("agent_ref") or "A helper"
+        message = f"{helper} has claimed your live-help request. Join your private Jitsi room: {room_url}"
+        driver = self.telegram if channel == "telegram" else self.sms
+        return driver.send(recipient, message)

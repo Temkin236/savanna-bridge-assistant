@@ -1622,6 +1622,12 @@ components:
           type: boolean
         job_alerts:
           type: boolean
+        live_help:
+          type: boolean
+          default: true
+        widget_enabled:
+          type: boolean
+          default: true
         muted:
           type: boolean
         low_bandwidth:
@@ -1637,12 +1643,10 @@ components:
           enum: [immediate, daily]
           default: immediate
         quiet_hours_start:
-          type: string
-          nullable: true
+          type: [string, "null"]
           example: "22:00"
         quiet_hours_end:
-          type: string
-          nullable: true
+          type: [string, "null"]
           example: "07:00"
         timezone:
           type: string

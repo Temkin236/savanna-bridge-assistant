@@ -124,6 +124,8 @@ def init_db(db_path: str = DB_PATH) -> None:
             )
         """)
         for col_name, col_type in [
+            ("live_help", "INTEGER NOT NULL DEFAULT 1"),
+            ("widget_enabled", "INTEGER NOT NULL DEFAULT 1"),
             ("telegram_enabled", "INTEGER NOT NULL DEFAULT 0"),
             ("consent_granted", "INTEGER NOT NULL DEFAULT 0"),
             ("frequency", "TEXT NOT NULL DEFAULT 'immediate'"),
@@ -493,6 +495,25 @@ class Database:
                 closed_at=closed_at,
             )
 
+    def get_handoff_learner_ref(self, handoff_id: str) -> str | None:
+        with get_connection(self.db_path) as conn:
+            row = conn.execute(
+                "SELECT learner_ref FROM handoffs WHERE id = ?", (handoff_id,)
+            ).fetchone()
+            return row["learner_ref"] if row and row["learner_ref"] else None
+
+    def get_linked_telegram_chat_id(self, learner_ref: str) -> str | None:
+        with get_connection(self.db_path) as conn:
+            row = conn.execute(
+                """
+                SELECT telegram_chat_id FROM links
+                WHERE learner_ref = ? AND linked = 1 AND telegram_chat_id IS NOT NULL
+                ORDER BY created_at DESC LIMIT 1
+                """,
+                (learner_ref,),
+            ).fetchone()
+            return str(row["telegram_chat_id"]) if row else None
+
     def list_handoffs(self, status: str | None = None) -> list[Handoff]:
         with get_connection(self.db_path) as conn:
             if status:
@@ -583,6 +604,7 @@ class Database:
                 "id": row["id"],
                 "ticket_id": row["id"],
                 "status": row["status"],
+                "agent_ref": row["agent_ref"],
                 "question": card_dict.get("context", ""),
                 "language": card_dict.get("language", "en"),
                 "consent_flags": {
@@ -700,6 +722,8 @@ class Database:
                 deadlines=bool(row["deadlines"]),
                 new_lessons=bool(row["new_lessons"]),
                 job_alerts=bool(row["job_alerts"]),
+                live_help=bool(row["live_help"]),
+                widget_enabled=bool(row["widget_enabled"]),
                 muted=bool(row["muted"]),
                 low_bandwidth=bool(row["low_bandwidth"]),
                 telegram_enabled=bool(row["telegram_enabled"]),
@@ -720,16 +744,19 @@ class Database:
             conn.execute(
                 """
                 INSERT INTO notification_settings (
-                    learner_ref, deadlines, new_lessons, job_alerts, muted,
+                    learner_ref, deadlines, new_lessons, job_alerts, live_help,
+                    widget_enabled, muted,
                     low_bandwidth, telegram_enabled, consent_granted, frequency,
                     quiet_hours_start, quiet_hours_end, timezone, language,
                     platform_id, updated_at
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(learner_ref) DO UPDATE SET
                     deadlines=excluded.deadlines,
                     new_lessons=excluded.new_lessons,
                     job_alerts=excluded.job_alerts,
+                    live_help=excluded.live_help,
+                    widget_enabled=excluded.widget_enabled,
                     muted=excluded.muted,
                     low_bandwidth=excluded.low_bandwidth,
                     telegram_enabled=excluded.telegram_enabled,
@@ -747,6 +774,8 @@ class Database:
                     1 if settings.deadlines else 0,
                     1 if settings.new_lessons else 0,
                     1 if settings.job_alerts else 0,
+                    1 if settings.live_help else 0,
+                    1 if settings.widget_enabled else 0,
                     1 if settings.muted else 0,
                     1 if settings.low_bandwidth else 0,
                     1 if settings.telegram_enabled else 0,

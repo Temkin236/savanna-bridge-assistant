@@ -276,6 +276,8 @@ class NotificationSettings(BaseModel):
     deadlines: bool = True
     new_lessons: bool = True
     job_alerts: bool = True
+    live_help: bool = True
+    widget_enabled: bool = True
     muted: bool = False
     low_bandwidth: bool = True
     telegram_enabled: bool = False

@@ -252,7 +252,14 @@ class GroqProvider(AIProvider):
                 response = client.post(
                     f"{self.base_url}/audio/transcriptions",
                     headers={"Authorization": f"Bearer {key}"},
-                    data={"model": self.stt_model, "response_format": "json"},
+                    data={
+                        "model": self.stt_model,
+                        "response_format": "json",
+                        # Groq Whisper accepts ISO-639-1 hints. Supplying the
+                        # learner's selected language improves both accuracy
+                        # and latency for short multilingual recordings.
+                        "language": language.value,
+                    },
                     files={"file": (f"voice.{extension}", audio_bytes, media_type)},
                 )
                 response.raise_for_status()

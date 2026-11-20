@@ -65,12 +65,15 @@ def test_notification_settings_get_and_put() -> None:
         "deadlines": True,
         "new_lessons": False,
         "job_alerts": True,
+        "live_help": False,
+        "widget_enabled": True,
         "muted": False,
         "low_bandwidth": True,
     }
     put_res = client.put("/notification-settings", json=payload)
     assert put_res.status_code == 200
     assert put_res.json()["new_lessons"] is False
+    assert put_res.json()["live_help"] is False
 
     get_res = client.get("/notification-settings")
     assert get_res.status_code == 200
