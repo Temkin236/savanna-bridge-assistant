@@ -8,8 +8,8 @@ from __future__ import annotations
 
 import json
 import logging
-from pathlib import Path
 import re
+from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger("savanna_bridge.speech")
@@ -169,24 +169,20 @@ def process_tables(text: str) -> str:
     """Transform markdown tables into natural spoken sentences."""
     lines = text.split("\n")
     processed: list[str] = []
-    in_table = False
 
     for line in lines:
         stripped = line.strip()
         # Check table divider row: |---|---|
         if re.match(r"^\|?[\s\-:|]+\|?$", stripped) and "-" in stripped:
-            in_table = True
             continue
 
         # Check table row: | a | b |
         if stripped.startswith("|") and stripped.endswith("|") and stripped.count("|") >= 2:
-            in_table = True
             cols = [c.strip() for c in stripped.strip("|").split("|") if c.strip()]
             if cols:
                 processed.append(", ".join(cols) + ".")
             continue
 
-        in_table = False
         processed.append(line)
 
     return "\n".join(processed)

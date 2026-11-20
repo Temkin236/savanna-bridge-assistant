@@ -32,7 +32,7 @@ GOOGLE_AI_API_KEY: str = GEMINI_API_KEY
 # Defaults: "gemini" when GEMINI_API_KEY is present, otherwise "offline"
 AI_PROVIDER: str = os.getenv("AI_PROVIDER", "gemini" if GEMINI_API_KEY else "offline").lower()
 TTS_PROVIDER: str = os.getenv("TTS_PROVIDER", "gemini").lower()
-GEMINI_TTS_MODEL: str = os.getenv("GEMINI_TTS_MODEL", "gemini-3.8-flash-lite-tts")
+GEMINI_TTS_MODEL: str = os.getenv("GEMINI_TTS_MODEL", "gemini-3.8-flash-tts")
 GEMINI_TTS_VOICE: str = os.getenv("GEMINI_TTS_VOICE", "Aoede")
 TTS_STYLE: str = os.getenv("TTS_STYLE", "warm, calm tutor, moderate pace, clear, unhurried")
 GOOGLE_TTS_MODEL: str = os.getenv("GOOGLE_TTS_MODEL", GEMINI_TTS_MODEL)
@@ -64,10 +64,36 @@ SECRET_KEY: str = os.getenv("SECRET_KEY", "savanna-bridge-hackathon-2026-secret-
 BOT_API_SECRET: str = os.getenv("BOT_API_SECRET", "change-me-bot-secret")
 TELEGRAM_BOT_USERNAME: str = os.getenv("TELEGRAM_BOT_USERNAME", "savannah_assistant3_bot")
 HELPER_USERNAME: str = os.getenv("HELPER_USERNAME", "agent_sarah")
-HELPER_PASSWORD: str = os.getenv("HELPER_PASSWORD", "savanna2026")
-HELPER_AGENT_KEY: str = os.getenv("HELPER_AGENT_KEY", "helper-secret-key-2026")
+HELPER_PASSWORD: str = os.getenv("HELPER_PASSWORD", "")
+HELPER_API_KEY: str = os.getenv("HELPER_API_KEY", "") or os.getenv("HELPER_AGENT_KEY", "")
+HELPER_AGENT_KEY: str = HELPER_API_KEY
 TOKEN_EXPIRY_MINUTES: int = int(os.getenv("TOKEN_EXPIRY_MINUTES", "60"))
+HELPER_TOKEN_EXPIRY_MINUTES: int = int(os.getenv("HELPER_TOKEN_EXPIRY_MINUTES", "480"))
 RATE_LIMIT_PER_MINUTE: int = int(os.getenv("RATE_LIMIT_PER_MINUTE", "60"))
+TICKET_RETENTION_DAYS: int = int(os.getenv("TICKET_RETENTION_DAYS", "7"))
+
+
+def is_public_demo_mode() -> bool:
+    """Check whether application is launched in public-demo mode."""
+    return (
+        os.getenv("PUBLIC_DEMO", "").strip().lower() in ("true", "1", "yes")
+        or os.getenv("PUBLIC_DEMO_MODE", "").strip().lower() in ("true", "1", "yes")
+        or os.getenv("APP_MODE", "").strip().lower() in ("public-demo", "public_demo")
+        or os.getenv("MODE", "").strip().lower() in ("public-demo", "public_demo")
+    )
+
+
+def validate_auth_config() -> None:
+    """Enforce credential presence: refuse startup in public-demo mode if credentials unset."""
+    if is_public_demo_mode():
+        password = os.getenv("HELPER_PASSWORD", "")
+        api_key = os.getenv("HELPER_API_KEY", "") or os.getenv("HELPER_AGENT_KEY", "")
+        if not password and not api_key:
+            raise RuntimeError(
+                "Refusing to start in public-demo mode: "
+                "HELPER_PASSWORD or HELPER_API_KEY must be set in environment variables."
+            )
+
 CORS_ORIGINS: list[str] = [
     origin.strip()
     for origin in os.getenv(

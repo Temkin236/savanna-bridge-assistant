@@ -75,18 +75,32 @@ def init_db(db_path: str = DB_PATH) -> None:
                 room_url TEXT NOT NULL,
                 agent_ref TEXT,
                 learner_ref TEXT,
-                created_at TEXT NOT NULL
+                created_at TEXT NOT NULL,
+                ticket_secret TEXT,
+                closed_at TEXT,
+                question TEXT
             )
         """)
+        for col_name, col_type in [
+            ("ticket_secret", "TEXT"),
+            ("closed_at", "TEXT"),
+            ("question", "TEXT"),
+        ]:
+            with contextlib.suppress(sqlite3.OperationalError):
+                cursor.execute(f"ALTER TABLE handoffs ADD COLUMN {col_name} {col_type}")
+
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS handoff_replies (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 handoff_id TEXT NOT NULL,
                 agent_ref TEXT NOT NULL,
                 message TEXT NOT NULL,
-                sent_at TEXT NOT NULL
+                sent_at TEXT NOT NULL,
+                sender TEXT NOT NULL DEFAULT 'helper'
             )
         """)
+        with contextlib.suppress(sqlite3.OperationalError):
+            cursor.execute("ALTER TABLE handoff_replies ADD COLUMN sender TEXT NOT NULL DEFAULT 'helper'")
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS alert_subscriptions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -426,16 +440,23 @@ class Database:
         return profile
 
     def create_handoff(
-        self, handoff_id: str, card: HandoffCard, room_url: str, learner_ref: str | None = None
+        self,
+        handoff_id: str,
+        card: HandoffCard,
+        room_url: str,
+        learner_ref: str | None = None,
+        ticket_secret: str | None = None,
     ) -> Handoff:
         created_at = datetime.now(UTC).isoformat()
+        secret = ticket_secret or secrets.token_urlsafe(32)
+        question_text = card.context or ""
         with get_connection(self.db_path) as conn:
             conn.execute(
                 """
-                INSERT INTO handoffs (id, status, card_json, room_url, agent_ref, learner_ref, created_at)
-                VALUES (?, 'waiting', ?, ?, NULL, ?, ?)
+                INSERT INTO handoffs (id, status, card_json, room_url, agent_ref, learner_ref, created_at, ticket_secret, question)
+                VALUES (?, 'waiting', ?, ?, NULL, ?, ?, ?, ?)
                 """,
-                (handoff_id, json.dumps(card.model_dump()), room_url, learner_ref, created_at),
+                (handoff_id, json.dumps(card.model_dump()), room_url, learner_ref, created_at, secret, question_text),
             )
             conn.commit()
         return Handoff(
@@ -446,6 +467,8 @@ class Database:
             agent_ref=None,
             created_at=created_at,
             mocked=False,
+            ticket_id=handoff_id,
+            ticket_secret=secret,
         )
 
     def get_handoff(self, handoff_id: str) -> Handoff | None:
@@ -454,6 +477,9 @@ class Database:
             if not row:
                 return None
             card_dict = json.loads(row["card_json"])
+            keys = row.keys()
+            ticket_secret = row["ticket_secret"] if "ticket_secret" in keys else None
+            closed_at = row["closed_at"] if "closed_at" in keys else None
             return Handoff(
                 id=row["id"],
                 status=row["status"],
@@ -462,6 +488,9 @@ class Database:
                 agent_ref=row["agent_ref"],
                 created_at=row["created_at"],
                 mocked=False,
+                ticket_id=row["id"],
+                ticket_secret=ticket_secret,
+                closed_at=closed_at,
             )
 
     def list_handoffs(self, status: str | None = None) -> list[Handoff]:
@@ -476,6 +505,8 @@ class Database:
             result = []
             for row in rows:
                 card_dict = json.loads(row["card_json"])
+                keys = row.keys()
+                closed_at = row["closed_at"] if "closed_at" in keys else None
                 result.append(
                     Handoff(
                         id=row["id"],
@@ -485,6 +516,9 @@ class Database:
                         agent_ref=row["agent_ref"],
                         created_at=row["created_at"],
                         mocked=False,
+                        ticket_id=row["id"],
+                        ticket_secret=None,  # Do not leak secrets in queue listing
+                        closed_at=closed_at,
                     )
                 )
             return result
@@ -499,10 +533,113 @@ class Database:
         return self.get_handoff(handoff_id)
 
     def close_handoff(self, handoff_id: str) -> Handoff | None:
+        now_iso = datetime.now(UTC).isoformat()
         with get_connection(self.db_path) as conn:
-            conn.execute("UPDATE handoffs SET status = 'closed' WHERE id = ?", (handoff_id,))
+            conn.execute(
+                "UPDATE handoffs SET status = 'closed', closed_at = ? WHERE id = ?",
+                (now_iso, handoff_id),
+            )
             conn.commit()
         return self.get_handoff(handoff_id)
+
+    def get_ticket_detail(self, ticket_id: str) -> dict[str, Any] | None:
+        with get_connection(self.db_path) as conn:
+            row = conn.execute("SELECT * FROM handoffs WHERE id = ?", (ticket_id,)).fetchone()
+            if not row:
+                return None
+            card_dict = json.loads(row["card_json"])
+            keys = row.keys()
+            closed_at = row["closed_at"] if "closed_at" in keys else None
+
+            # Fetch replies
+            reply_rows = conn.execute(
+                "SELECT * FROM handoff_replies WHERE handoff_id = ? ORDER BY sent_at ASC",
+                (ticket_id,),
+            ).fetchall()
+
+            messages = [
+                {
+                    "sender": "learner",
+                    "message": card_dict.get("context", ""),
+                    "sent_at": row["created_at"],
+                }
+            ]
+            for r in reply_rows:
+                r_keys = r.keys()
+                sender = (
+                    r["sender"]
+                    if "sender" in r_keys and r["sender"]
+                    else ("learner" if r["agent_ref"] == "learner" else "helper")
+                )
+                messages.append(
+                    {
+                        "sender": sender,
+                        "message": r["message"],
+                        "sent_at": r["sent_at"],
+                    }
+                )
+
+            return {
+                "ticket_id": row["id"],
+                "status": row["status"],
+                "question": card_dict.get("context", ""),
+                "language": card_dict.get("language", "en"),
+                "consent_flags": {
+                    "consent": True,
+                    "contact_mode": card_dict.get("contact_mode", "text"),
+                    "support_needs": card_dict.get("support_needs", []),
+                },
+                "messages": messages,
+                "created_at": row["created_at"],
+                "closed_at": closed_at,
+                "room_url": row["room_url"],
+                "ticket_secret": row["ticket_secret"] if "ticket_secret" in keys else None,
+            }
+
+    def add_handoff_message(
+        self, handoff_id: str, sender: str, message: str, agent_ref: str = "learner"
+    ) -> str:
+        sent_at = datetime.now(UTC).isoformat()
+        with get_connection(self.db_path) as conn:
+            conn.execute(
+                """
+                INSERT INTO handoff_replies (handoff_id, agent_ref, message, sent_at, sender)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (handoff_id, agent_ref, message, sent_at, sender),
+            )
+            conn.commit()
+        return sent_at
+
+    def delete_ticket(self, ticket_id: str) -> bool:
+        with get_connection(self.db_path) as conn:
+            conn.execute("DELETE FROM handoff_replies WHERE handoff_id = ?", (ticket_id,))
+            cursor = conn.execute("DELETE FROM handoffs WHERE id = ?", (ticket_id,))
+            conn.commit()
+            return cursor.rowcount > 0
+
+    def cleanup_closed_tickets(self, retention_days: int = 7) -> int:
+        cutoff = (datetime.now(UTC) - timedelta(days=retention_days)).isoformat()
+        with get_connection(self.db_path) as conn:
+            rows = conn.execute(
+                """
+                SELECT id FROM handoffs 
+                WHERE status = 'closed' 
+                  AND (
+                    (closed_at IS NOT NULL AND closed_at < ?) 
+                    OR (closed_at IS NULL AND created_at < ?)
+                  )
+                """,
+                (cutoff, cutoff),
+            ).fetchall()
+            deleted = 0
+            for r in rows:
+                t_id = r["id"]
+                conn.execute("DELETE FROM handoff_replies WHERE handoff_id = ?", (t_id,))
+                conn.execute("DELETE FROM handoffs WHERE id = ?", (t_id,))
+                deleted += 1
+            conn.commit()
+            return deleted
 
     def add_handoff_reply(self, handoff_id: str, agent_ref: str, message: str) -> str:
         sent_at = datetime.now(UTC).isoformat()
@@ -654,14 +791,18 @@ class Database:
                 ]
             return [{"question": r["question"], "count": r["count"]} for r in rows]
 
-    def export_learner_data(self, learner_ref: str) -> dict[str, Any]:
+    def export_learner_data(self, learner_ref: str, is_helper: bool = False) -> dict[str, Any]:
         """Export all data associated with a learner reference (GDPR / Privacy requirement)."""
         with get_connection(self.db_path) as conn:
             support = self.get_support_needs(learner_ref)
-            handoff_rows = conn.execute(
-                "SELECT id, status, card_json, room_url, agent_ref, created_at FROM handoffs WHERE learner_ref = ?",
-                (learner_ref,),
-            ).fetchall()
+            handoff_rows = (
+                conn.execute(
+                    "SELECT id, status, card_json, room_url, agent_ref, created_at FROM handoffs WHERE learner_ref = ?",
+                    (learner_ref,),
+                ).fetchall()
+                if is_helper
+                else []
+            )
             settings = self.get_notification_settings(learner_ref)
             links = conn.execute(
                 "SELECT link_id, channel, expires_at, used, created_at FROM links WHERE learner_ref = ?",

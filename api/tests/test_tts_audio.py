@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-import struct
-import wave
 import io
+import wave
 
 from savanna_bridge.ai.audio import (
     clean_text_for_speech,

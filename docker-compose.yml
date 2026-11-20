@@ -117,6 +117,8 @@ services:
     build:
       context: .
       dockerfile: demo-host/Dockerfile
+    volumes:
+      - ./demo-host:/usr/share/nginx/html:ro
     ports:
       - "${DEMO_PORT:-4173}:80"
     healthcheck:

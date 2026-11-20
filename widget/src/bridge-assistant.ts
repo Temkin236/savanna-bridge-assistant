@@ -2175,6 +2175,8 @@ export class BridgeAssistant extends HTMLElement {
       this.syncPreferencesFromBackend();
     }
 
+    this.preloadWelcomeAudio();
+
     // Automatic Voice Accessibility:
     // If voice accessibility was previously enabled, attempt welcome announcement
     if (this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_welcome && !this.hasSpokenWelcomeThisSession) {
@@ -2246,6 +2248,7 @@ export class BridgeAssistant extends HTMLElement {
     this.savePreferences();
     this.setAttribute("lang", lang);
     this.setAttribute("dir", lang === "ar" ? "rtl" : "ltr");
+    this.preloadWelcomeAudio();
     if (fullRender) {
       // Clear chat on language change so that learner sees pure, non-mixed language experience
       this.messages = [];
@@ -2589,30 +2592,39 @@ export class BridgeAssistant extends HTMLElement {
     }
   ): boolean {
     this.lastSpokenText = text;
+    this.playServerAudioText(text, options).then((started) => {
+      if (!started && this.currentLang === "en" && "speechSynthesis" in window) {
+        this.browserSpeechText(text, options);
+      }
+    }).catch((err) => {
+      console.warn("playServerAudioText failed:", err);
+      if (this.currentLang === "en" && "speechSynthesis" in window) {
+        this.browserSpeechText(text, options);
+      } else if (options?.onError) {
+        options.onError(err);
+      }
+    });
+    return true;
+  }
+
+  public browserSpeechText(
+    text: string,
+    options?: {
+      rate?: number;
+      onStart?: () => void;
+      onEnd?: () => void;
+      onError?: (err?: any) => void;
+    }
+  ): boolean {
     if (!("speechSynthesis" in window)) {
       if (options?.onError) options.onError();
       return false;
     }
-
     try {
       window.speechSynthesis.cancel();
-
       const u = new SpeechSynthesisUtterance(text);
-      const langMap: Record<SupportedLanguage, string> = {
-        en: "en-US",
-        am: "am-ET",
-        om: "om-ET",
-        ti: "ti-ET",
-        ar: "ar-SA",
-      };
-      u.lang = langMap[this.currentLang] || "en-US";
-      u.rate = options?.rate || this.accessibilityPrefs.speech_rate || 1.0;
-
-      const voice = this.getBestVoice(this.currentLang);
-      if (voice) {
-        u.voice = voice;
-      }
-
+      u.lang = "en-US";
+      u.rate = options?.rate || this.accessibilityPrefs?.speech_rate || 1.0;
       u.onstart = () => {
         if (options?.onStart) options.onStart();
       };
@@ -2620,37 +2632,148 @@ export class BridgeAssistant extends HTMLElement {
         if (options?.onEnd) options.onEnd();
       };
       u.onerror = (e) => {
-        console.warn("Speech synthesis error or autoplay blocked:", e);
         if (options?.onError) options.onError(e);
       };
-
       window.speechSynthesis.speak(u);
       return true;
-    } catch (err) {
-      console.warn("Could not initiate speech synthesis:", err);
-      if (options?.onError) options.onError(err);
+    } catch {
+      if (options?.onError) options.onError();
       return false;
+    }
+  }
+
+  public async playServerAudioText(
+    text: string,
+    options?: {
+      rate?: number;
+      onStart?: () => void;
+      onEnd?: () => void;
+      onError?: (err?: any) => void;
+    }
+  ): Promise<boolean> {
+    try {
+      if (this.activeAudio) {
+        this.activeAudio.pause();
+        this.activeAudio = null;
+      }
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+      const cleanText = this.cleanTextForSpeech(text);
+      if (!cleanText) return false;
+
+      const style = "warm, calm tutor, moderate pace, clear, unhurried";
+      const cacheKey = `${cleanText}_${this.currentLang}_${style}`;
+      let audioUrl = this.audioCache.get(cacheKey);
+
+      if (!audioUrl) {
+        const res = await fetch(`${this.apiBase}/api/v1/speech/synthesize`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            text: cleanText,
+            language: this.currentLang,
+            speed: options?.rate || this.accessibilityPrefs.speech_rate || 1.0,
+            style: style,
+          }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.audio_url && !data.audio_url.includes("demo.ogg")) {
+            const rawUrl = String(data.audio_url);
+            audioUrl = /^(https?:|data:|blob:)/.test(rawUrl) ? rawUrl : `${this.apiBase}${rawUrl}`;
+            this.audioCache.set(cacheKey, audioUrl);
+          }
+        }
+      }
+
+      if (audioUrl) {
+        this.activeAudio = new Audio(audioUrl);
+        const rate = options?.rate || this.accessibilityPrefs?.speech_rate || 1.0;
+        this.activeAudio.playbackRate = rate;
+        (this.activeAudio as any).preservesPitch = true;
+        (this.activeAudio as any).mozPreservesPitch = true;
+        (this.activeAudio as any).webkitPreservesPitch = true;
+
+        if (options?.onStart) {
+          this.activeAudio.onplay = () => options.onStart!();
+        }
+        this.activeAudio.onended = () => {
+          this.activeAudio = null;
+          if (options?.onEnd) options.onEnd();
+        };
+        this.activeAudio.onerror = (e) => {
+          this.activeAudio = null;
+          if (options?.onError) {
+            options.onError(e);
+          }
+        };
+        await this.activeAudio.play();
+        return true;
+      }
+    } catch (err) {
+      console.warn("Server TTS playback error:", err);
+      if (options?.onError) options.onError(err);
+    }
+
+    return false;
+  }
+
+  public preloadWelcomeAudio(): void {
+    const supportedLangs: SupportedLanguage[] = ["en", "am", "om", "ti", "ar"];
+    const style = "warm, calm tutor, moderate pace, clear, unhurried";
+    for (const lang of supportedLangs) {
+      const dict = I18N[lang] || I18N.en;
+      const welcomeText = dict.voiceWelcomeAnnouncement || I18N.en.voiceWelcomeAnnouncement;
+      const cleanText = this.cleanTextForSpeech(welcomeText);
+      const cacheKey = `${cleanText}_${lang}_${style}`;
+      if (!this.audioCache.has(cacheKey)) {
+        fetch(`${this.apiBase}/api/v1/speech/synthesize`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            text: cleanText,
+            language: lang,
+            speed: 1.0,
+            style: style,
+          }),
+        })
+          .then((r) => (r.ok ? r.json() : null))
+          .then((d) => {
+            if (d && d.audio_url && !d.audio_url.includes("demo.ogg")) {
+              const rawUrl = String(d.audio_url);
+              const fullUrl = /^(https?:|data:|blob:)/.test(rawUrl)
+                ? rawUrl
+                : `${this.apiBase}${rawUrl}`;
+              this.audioCache.set(cacheKey, fullUrl);
+            }
+          })
+          .catch(() => {});
+      }
     }
   }
 
   public triggerSpokenWelcome(): void {
     if (this.hasSpokenWelcomeThisSession) return;
-    this.hasSpokenWelcomeThisSession = true;
 
     const welcomeText = this.t("voiceWelcomeAnnouncement");
-    const played = this.speakText(welcomeText, {
-      onError: () => {
+    this.playServerAudioText(welcomeText, {
+      onStart: () => {
+        this.hasSpokenWelcomeThisSession = true;
+      },
+      onError: (err) => {
+        console.warn("Autoplay blocked or audio error:", err);
         this.showAutoplayBanner = true;
         this.render();
         this.announce(this.t("oneTapVoiceActivation"));
       },
+    }).then((started) => {
+      if (!started && !this.hasSpokenWelcomeThisSession) {
+        this.showAutoplayBanner = true;
+        this.render();
+        this.announce(this.t("oneTapVoiceActivation"));
+      }
     });
-
-    if (!played) {
-      this.showAutoplayBanner = true;
-      this.render();
-      this.announce(this.t("oneTapVoiceActivation"));
-    }
   }
 
   // --- Platform Context Extraction (Reads live page) ---
@@ -3915,8 +4038,19 @@ export class BridgeAssistant extends HTMLElement {
     if (this.audioCache.has(cacheKey)) {
       const cachedUrl = this.audioCache.get(cacheKey)!;
       this.activeAudio = new Audio(cachedUrl);
+      const currentRate = this.accessibilityPrefs?.speech_rate || 1.0;
+      this.activeAudio.playbackRate = currentRate;
+      (this.activeAudio as any).preservesPitch = true;
+      (this.activeAudio as any).mozPreservesPitch = true;
+      (this.activeAudio as any).webkitPreservesPitch = true;
       this.activeAudio.onended = () => this.finishSpeaking(msg);
-      this.activeAudio.onerror = () => this.fallbackTTS(cleanText, msg);
+      this.activeAudio.onerror = () => {
+        if (this.currentLang === "en") {
+          this.fallbackTTS(cleanText, msg);
+        } else {
+          this.finishSpeaking(msg);
+        }
+      };
       try {
         await this.activeAudio.play();
         return;
@@ -3948,6 +4082,11 @@ export class BridgeAssistant extends HTMLElement {
             : `${this.apiBase}${rawAudioUrl}`;
           this.audioCache.set(cacheKey, audioUrl);
           this.activeAudio = new Audio(audioUrl);
+          const currentRate = this.accessibilityPrefs?.speech_rate || 1.0;
+          this.activeAudio.playbackRate = currentRate;
+          (this.activeAudio as any).preservesPitch = true;
+          (this.activeAudio as any).mozPreservesPitch = true;
+          (this.activeAudio as any).webkitPreservesPitch = true;
           this.activeAudio.onended = () => this.finishSpeaking(msg);
           this.activeAudio.onerror = () => {
             if (this.currentLang === "en") {
@@ -3975,21 +4114,12 @@ export class BridgeAssistant extends HTMLElement {
   }
 
   private fallbackTTS(text: string, msg: ChatMessage): void {
-    // Only use browser SpeechSynthesis for English; never for Ethiopian languages where browser lacks native voices
     if (this.currentLang !== "en" || !("speechSynthesis" in window)) {
       this.finishSpeaking(msg);
       return;
     }
-
     const utterance = new SpeechSynthesisUtterance(text);
-    const langMap: Record<string, string> = {
-      en: "en-US",
-      am: "am-ET",
-      om: "om-ET",
-      ti: "ti-ET",
-      ar: "ar-SA",
-    };
-    utterance.lang = langMap[this.currentLang] || "en-US";
+    utterance.lang = "en-US";
     utterance.onend = () => this.finishSpeaking(msg);
     utterance.onerror = () => this.finishSpeaking(msg);
     window.speechSynthesis.speak(utterance);
@@ -4303,78 +4433,37 @@ export class BridgeAssistant extends HTMLElement {
       return;
     }
 
-    if ("speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
-      try {
-        window.speechSynthesis.resume();
-      } catch {}
+    const advanceNext = () => {
+      if (this.readingWatchdogTimer) {
+        clearTimeout(this.readingWatchdogTimer);
+        this.readingWatchdogTimer = null;
+      }
+      this.activeUtterance = null;
+      (window as any).__activeUtterance = null;
 
-      const advanceNext = () => {
-        if (this.readingWatchdogTimer) {
-          clearTimeout(this.readingWatchdogTimer);
-          this.readingWatchdogTimer = null;
-        }
-        this.activeUtterance = null;
-        (window as any).__activeUtterance = null;
+      if (!this.currentReading || this.currentReading.msgId !== msg.id || this.currentReading.isPaused) {
+        return;
+      }
+      // Advance to next paragraph sequentially!
+      this.currentReading.currentIndex++;
+      this.playNextReadingItem(msg);
+    };
 
-        if (!this.currentReading || this.currentReading.msgId !== msg.id || this.currentReading.isPaused) {
-          return;
-        }
-        // Advance to next paragraph sequentially!
-        this.currentReading.currentIndex++;
-        this.playNextReadingItem(msg);
-      };
-
-      const u = new SpeechSynthesisUtterance(cleanSpoken);
-      // Retain strong reference to prevent Chromium garbage collection of utterance during speech!
-      this.activeUtterance = u;
-      (window as any).__activeUtterance = u;
-
-      const langMap: Record<SupportedLanguage, string> = {
-        en: "en-US",
-        am: "am-ET",
-        om: "om-ET",
-        ti: "ti-ET",
-        ar: "ar-SA",
-      };
-      u.lang = langMap[this.currentLang] || "en-US";
-      u.rate = 1.0;
-
-      u.onstart = () => {
+    msg.isAudioPlaying = true;
+    msg.isAudioPaused = false;
+    this.playServerAudioText(cleanSpoken, {
+      onStart: () => {
         msg.isAudioPlaying = true;
         msg.isAudioPaused = false;
-      };
-
-      u.onend = () => {
+        this.renderMessages();
+      },
+      onEnd: () => {
         advanceNext();
-      };
-
-      u.onerror = (e) => {
-        console.warn("TTS segment error:", e);
+      },
+      onError: () => {
         advanceNext();
-      };
-
-      // Watchdog timer: If Chrome drops onend or speech gets stuck, automatically advance to next paragraph!
-      const words = cleanSpoken.split(/\s+/).filter(Boolean).length;
-      const estimatedDurationMs = Math.min(14000, Math.max(3000, Math.ceil((words / 2.0) * 1000) + 1200));
-      this.readingWatchdogTimer = setTimeout(() => {
-        advanceNext();
-      }, estimatedDurationMs);
-
-      // Short delay ensures window.speechSynthesis.cancel() has completed before speak() is scheduled
-      setTimeout(() => {
-        try {
-          window.speechSynthesis.speak(u);
-        } catch {
-          advanceNext();
-        }
-      }, 40);
-    } else {
-      msg.isAudioPlaying = false;
-      msg.isAudioPaused = false;
-      this.stopPageReadingHighlight();
-      this.renderMessages();
-    }
+      },
+    });
   }
 
   private async handleListen(msg: ChatMessage): Promise<void> {
@@ -4415,7 +4504,7 @@ export class BridgeAssistant extends HTMLElement {
         return;
       }
       if (this.activeAudio && this.activeAudio.paused) {
-        this.activeAudio.play().catch(() => this.startSequentialReading(msg, 0));
+        this.activeAudio.play().catch(() => this.speakResponse(msg));
         msg.isAudioPlaying = true;
         msg.isAudioPaused = false;
         this.renderMessages();
@@ -4424,7 +4513,7 @@ export class BridgeAssistant extends HTMLElement {
       }
     }
 
-    this.startSequentialReading(msg, 0);
+    this.speakResponse(msg);
   }
 
   private handleStop(msg: ChatMessage): void {
@@ -4457,7 +4546,7 @@ export class BridgeAssistant extends HTMLElement {
   private handleReplay(msg: ChatMessage): void {
     this.handleStop(msg);
     setTimeout(() => {
-      this.startSequentialReading(msg, 0);
+      this.speakResponse(msg);
     }, 120);
   }
 
@@ -4716,6 +4805,36 @@ export class BridgeAssistant extends HTMLElement {
         this.messages.push(assistantMsg);
         this.saveChatState();
         this.renderMessages();
+
+        const prefetchRaw = assistantMsg.spoken || assistantMsg.text;
+        const prefetchClean = this.cleanTextForSpeech(prefetchRaw);
+        if (prefetchClean) {
+          const style = "warm, calm tutor, moderate pace, clear, unhurried";
+          const prefetchKey = `${prefetchClean}_${this.currentLang}_${style}`;
+          if (!this.audioCache.has(prefetchKey)) {
+            fetch(`${this.apiBase}/api/v1/speech/synthesize`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                text: prefetchClean,
+                language: this.currentLang,
+                speed: 1.0,
+                style: style,
+              }),
+            })
+              .then((r) => (r.ok ? r.json() : null))
+              .then((d) => {
+                if (d && d.audio_url && !d.audio_url.includes("demo.ogg")) {
+                  const rawUrl = String(d.audio_url);
+                  const fullUrl = /^(https?:|data:|blob:)/.test(rawUrl)
+                    ? rawUrl
+                    : `${this.apiBase}${rawUrl}`;
+                  this.audioCache.set(prefetchKey, fullUrl);
+                }
+              })
+              .catch(() => {});
+          }
+        }
 
         if (fromVoice) {
           setTimeout(() => {
@@ -5054,6 +5173,7 @@ export class BridgeAssistant extends HTMLElement {
     this.savePreferences();
     this.render();
     if (saveSelected && this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_welcome) {
+      this.hasSpokenWelcomeThisSession = false;
       this.triggerSpokenWelcome();
     }
     if (saveSelected && this.accessibilityPrefs.voice_enabled) this.initWakeWordDetection();
@@ -6344,12 +6464,14 @@ export class BridgeAssistant extends HTMLElement {
 
     // Autoplay Voice Activation Handlers
     const handleActivateVoice = () => {
+      this.hasSpokenWelcomeThisSession = false;
       this.showAutoplayBanner = false;
       this.accessibilityPrefs.voice_enabled = true;
+      this.accessibilityPrefs.auto_tts = true;
+      this.autoReadSpeech = true;
       this.savePreferences();
-      this.announce(this.t("voiceWelcomeAnnouncement"));
-      this.triggerSpokenWelcome();
       this.render();
+      this.triggerSpokenWelcome();
     };
     this.shadowRoot.querySelector("#btn-activate-voice-welcome")?.addEventListener("click", handleActivateVoice);
     this.shadowRoot.querySelector("#btn-activate-voice-welcome-floating")?.addEventListener("click", handleActivateVoice);
@@ -6451,7 +6573,7 @@ export class BridgeAssistant extends HTMLElement {
     this.shadowRoot.querySelector("#btn-read-page")?.addEventListener("click", () => this.readPageAloud());
     this.shadowRoot.querySelector("#btn-read-section")?.addEventListener("click", () => this.readSectionAloud());
     this.shadowRoot.querySelector("#btn-test-voice")?.addEventListener("click", () => {
-      this.speakText(this.t("voiceWelcomeAnnouncement"));
+      this.playServerAudioText(this.t("voiceWelcomeAnnouncement"));
     });
 
     const chkScreenReader = this.shadowRoot.querySelector<HTMLInputElement>("#chk-screen-reader");

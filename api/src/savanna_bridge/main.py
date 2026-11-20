@@ -52,7 +52,6 @@ from savanna_bridge.config import (
 )
 from savanna_bridge.database import Database
 from savanna_bridge.language import LanguageGuard, LanguageRegistry
-from savanna_bridge.speech import make_spoken
 from savanna_bridge.models import (
     AccessibilityProfile,
     AccommodationDraft,
@@ -102,6 +101,7 @@ from savanna_bridge.models import (
 )
 from savanna_bridge.rate_limiter import RateLimiter
 from savanna_bridge.retrieval import RetrievalEngine
+from savanna_bridge.speech import make_spoken
 from savanna_bridge.tenant import TenantRegistry
 
 # Configure logging

@@ -14,6 +14,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from typing import Any
 
 from adapters.base import ContentChunk
 from savanna_bridge.ai.audio import (
@@ -28,6 +29,9 @@ from savanna_bridge.models import Language
 from savanna_bridge.speech import make_spoken, split_sentences
 
 logger = logging.getLogger("savanna_bridge.ai.cloud")
+
+# Global in-memory cache for synthesized audio to persist across stateless provider instantiations
+_AUDIO_CACHE: dict[str, str] = {}
 
 
 class CloudProvider(AIProvider):
@@ -55,7 +59,7 @@ class CloudProvider(AIProvider):
         self.tts_model = (
             os.getenv("GEMINI_TTS_MODEL")
             or os.getenv("GOOGLE_TTS_MODEL")
-            or "gemini-3.8-flash-lite-tts"
+            or "gemini-3.8-flash-tts"
         )
         self.tts_voice = (
             os.getenv("GEMINI_TTS_VOICE")
@@ -66,7 +70,7 @@ class CloudProvider(AIProvider):
             os.getenv("TTS_STYLE")
             or "warm, calm tutor, moderate pace, clear, unhurried"
         )
-        self._audio_cache: dict[str, str] = {}
+        self._audio_cache = _AUDIO_CACHE
         self._last_call_mocked = not bool(self.api_keys or self.translate_key or self.speech_key)
 
     @property
@@ -331,7 +335,7 @@ Return only JSON:
 
         # Cache audio by hash of (spoken, language, voice, style)
         cache_key = hashlib.sha256(
-            f"{cleaned_text}|{language.value}|{voice_name}|{style_val}".encode("utf-8")
+            f"{cleaned_text}|{language.value}|{voice_name}|{style_val}".encode()
         ).hexdigest()
         if cache_key in self._audio_cache:
             return self._audio_cache[cache_key]
@@ -580,27 +584,44 @@ Return only JSON:
                 },
             },
         }
-        response = self._call_gemini_endpoint(
-            f"{self.tts_model}:generateContent",
-            payload,
-        )
-        candidates = response.get("candidates", [])
-        if not isinstance(candidates, list) or not candidates:
-            return "", "audio/pcm;rate=24000"
-        parts = candidates[0].get("content", {}).get("parts", [])
-        if not parts:
-            return "", "audio/pcm;rate=24000"
-        inline = parts[0].get("inlineData", {})
-        audio = inline.get("data", "") if isinstance(inline, dict) else ""
-        media_type = (
-            inline.get("mimeType", "audio/pcm;rate=24000")
-            if isinstance(inline, dict)
-            else "audio/pcm;rate=24000"
-        )
-        return (
-            audio if isinstance(audio, str) else "",
-            media_type if isinstance(media_type, str) else "audio/pcm;rate=24000",
-        )
+
+        models_to_try = [self.tts_model]
+        for alt in ("gemini-3.8-flash-tts", "gemini-3.8-flash-lite-tts"):
+            if alt not in models_to_try:
+                models_to_try.append(alt)
+
+        last_exc: Exception | None = None
+        for m in models_to_try:
+            try:
+                response = self._call_gemini_endpoint(
+                    f"{m}:generateContent",
+                    payload,
+                )
+                candidates = response.get("candidates", [])
+                if not isinstance(candidates, list) or not candidates:
+                    continue
+                parts = candidates[0].get("content", {}).get("parts", [])
+                if not parts:
+                    continue
+                inline = parts[0].get("inlineData", {})
+                audio = inline.get("data", "") if isinstance(inline, dict) else ""
+                media_type = (
+                    inline.get("mimeType", "audio/wav")
+                    if isinstance(inline, dict)
+                    else "audio/wav"
+                )
+                if audio:
+                    return (
+                        audio if isinstance(audio, str) else "",
+                        media_type if isinstance(media_type, str) else "audio/wav",
+                    )
+            except Exception as exc:
+                last_exc = exc
+                logger.warning("Gemini TTS model %s failed: %s; trying next model", m, exc)
+                continue
+        if last_exc:
+            raise last_exc
+        return "", "audio/wav"
 
     @staticmethod
     def _language_code(language: Language) -> str:

@@ -1772,8 +1772,7 @@ components:
           maximum: 2
           default: 1
         style:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: Optional voice and speech style instruction (e.g. warm, calm tutor, moderate pace).
       example:
         text: Module 2 explains how to listen and respond clearly.
@@ -1800,9 +1799,7 @@ components:
         mocked:
           type: boolean
         style:
-          type: string
-          nullable: true
-          type: boolean
+          type: [string, "null"]
       example:
         audio_url: http://localhost:8000/media/tts/demo.ogg
         text: Module 2 explains how to listen and respond clearly.

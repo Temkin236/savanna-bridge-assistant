@@ -183,6 +183,38 @@ class Handoff(BaseModel):
     agent_ref: str | None = None
     created_at: str
     mocked: bool | None = None
+    ticket_id: str | None = None
+    ticket_secret: str | None = None
+    closed_at: str | None = None
+
+
+class TicketMessage(BaseModel):
+    sender: str = "learner"
+    message: str
+    sent_at: str
+
+
+class TicketDetail(BaseModel):
+    ticket_id: str
+    status: Literal["waiting", "claimed", "closed"]
+    question: str
+    language: str = "en"
+    consent_flags: dict[str, Any] = Field(default_factory=dict)
+    messages: list[TicketMessage] = Field(default_factory=list)
+    created_at: str
+    closed_at: str | None = None
+    room_url: str | None = None
+
+
+class TicketMessageInput(BaseModel):
+    message: str = Field(..., min_length=1)
+    ticket_secret: str | None = None
+
+
+class TicketDeleteResponse(BaseModel):
+    deleted: bool = True
+    ticket_id: str
+    message: str = "Ticket deleted successfully."
 
 
 class AgentAction(BaseModel):
@@ -423,8 +455,9 @@ class TranslationResponse(BaseModel):
 
 
 class HelperLoginRequest(BaseModel):
-    username: str
-    password: str
+    username: str | None = "agent_sarah"
+    password: str | None = None
+    api_key: str | None = None
 
 
 class HelperLoginResponse(BaseModel):

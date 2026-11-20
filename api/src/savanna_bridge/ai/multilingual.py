@@ -61,9 +61,7 @@ class MultilingualProvider(AIProvider):
 
     def translate(self, text: str, source_lang: str, target_lang: str) -> str:
         target = Language(target_lang) if target_lang in {item.value for item in Language} else Language.EN
-        if {source_lang, target_lang} & {"am", "om", "ti", "so"}:
-            providers = [self.google, self.groq]
-        elif "ar" in (source_lang, target_lang):
+        if {source_lang, target_lang} & {"am", "om", "ti", "so"} or "ar" in (source_lang, target_lang):
             providers = [self.google, self.groq]
         else:
             providers = self._providers_for_language(target, "translate")

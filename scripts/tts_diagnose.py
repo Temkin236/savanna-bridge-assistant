@@ -32,6 +32,7 @@ from pathlib import Path
 # Load audio utilities directly from module file
 ROOT_DIR = Path(__file__).resolve().parents[1]
 API_DIR = ROOT_DIR / "api"
+sys.path.insert(0, str(API_DIR / "src"))
 AUDIO_MODULE_PATH = API_DIR / "src" / "savanna_bridge" / "ai" / "audio.py"
 import importlib.util
 spec = importlib.util.spec_from_file_location("audio_utils", AUDIO_MODULE_PATH)
@@ -88,37 +89,50 @@ def generate_synthetic_24k_pcm(duration_sec: float = 3.5, freq: float = 440.0) -
     return bytes(pcm_bytes)
 
 
-def call_gemini_tts(text: str, api_key: str, model: str = "gemini-3.8-flash-lite-tts", voice: str = "Aoede") -> bytes:
+def call_gemini_tts(text: str, api_key: str, model: str = "gemini-3.8-flash-tts", voice: str = "Aoede") -> bytes:
     """Call Gemini generateContent with AUDIO modality and Aoede voice."""
-    url = (
-        f"https://generativelanguage.googleapis.com/v1beta/models/"
-        f"{model}:generateContent?key={urllib.parse.quote(api_key)}"
-    )
-    payload = {
-        "contents": [{"parts": [{"text": text}]}],
-        "generationConfig": {
-            "responseModalities": ["AUDIO"],
-            "speechConfig": {
-                "voiceConfig": {"prebuiltVoiceConfig": {"voiceName": voice}}
+    models = [model]
+    for m in ("gemini-3.8-flash-tts", "gemini-3.8-flash-lite-tts"):
+        if m not in models:
+            models.append(m)
+
+    last_err: Exception | None = None
+    for m in models:
+        url = (
+            f"https://generativelanguage.googleapis.com/v1beta/models/"
+            f"{m}:generateContent?key={urllib.parse.quote(api_key)}"
+        )
+        payload = {
+            "contents": [{"parts": [{"text": text}]}],
+            "generationConfig": {
+                "responseModalities": ["AUDIO"],
+                "speechConfig": {
+                    "voiceConfig": {"prebuiltVoiceConfig": {"voiceName": voice}}
+                },
             },
-        },
-    }
-    req = urllib.request.Request(
-        url,
-        data=json.dumps(payload).encode("utf-8"),
-        headers={"Content-Type": "application/json"},
-        method="POST",
-    )
-    with urllib.request.urlopen(req, timeout=15) as resp:
-        data = json.loads(resp.read().decode("utf-8"))
-        candidates = data.get("candidates", [])
-        if candidates:
-            parts = candidates[0].get("content", {}).get("parts", [])
-            if parts:
-                inline = parts[0].get("inlineData", {})
-                b64_audio = inline.get("data", "")
-                if b64_audio:
-                    return base64.b64decode(b64_audio)
+        }
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                candidates = data.get("candidates", [])
+                if candidates:
+                    parts = candidates[0].get("content", {}).get("parts", [])
+                    if parts:
+                        inline = parts[0].get("inlineData", {})
+                        b64_audio = inline.get("data", "")
+                        if b64_audio:
+                            return base64.b64decode(b64_audio)
+        except Exception as e:
+            last_err = e
+            continue
+    if last_err:
+        raise last_err
     return b""
 
 
@@ -191,11 +205,13 @@ def run_diagnostics() -> list[dict[str, object]]:
     # Stage 1: Raw response from Gemini API
     stage1_path = OUT_DIR / "1_raw_gemini_response.bin"
     raw_pcm: bytes = b""
+    active_key: str = ""
     for idx, key in enumerate(api_keys):
         try:
             print(f"Fetching live Gemini TTS audio using key #{idx+1}...")
             raw_pcm = call_gemini_tts(AMHARIC_SENTENCE, key, model=model, voice=voice)
             print(f"Success! Received {len(raw_pcm)} raw bytes from Gemini API.")
+            active_key = key
             break
         except Exception as exc:
             print(f"Key #{idx+1} failed: {exc}")
@@ -216,17 +232,28 @@ def run_diagnostics() -> list[dict[str, object]]:
     cleaned_text = clean_text_for_speech(AMHARIC_SENTENCE, "am")
     print(f"Cleaned Amharic text (numbers spelled out): '{cleaned_text}'")
 
-    # Split into chunks, simulate/synthesize each chunk, join at PCM level
-    chunks = [c.strip() for c in cleaned_text.replace("፡", "፣").split("፣") if c.strip()]
-    pcm_chunks: list[bytes] = []
-    for chunk in chunks:
-        # Each chunk synthesized with fixed voice at 24 kHz
-        chunk_pcm = generate_synthetic_24k_pcm(duration_sec=max(0.8, len(chunk) * 0.08), freq=300.0)
-        pcm_chunks.append(chunk_pcm)
+    stage3_wav: bytes = b""
+    if active_key:
+        try:
+            print("Synthesizing cleaned text with Gemini TTS...")
+            live_cleaned = call_gemini_tts(cleaned_text, active_key, model=model, voice=voice)
+            if live_cleaned:
+                stage3_wav = pcm_to_wav(live_cleaned, sample_rate=24000, channels=1, bit_depth=16)
+        except Exception as e:
+            print("Live cleaned synthesis failed:", e)
 
-    # Join sentence chunks at raw PCM level with 120ms silence pause
-    joined_pcm = join_pcm_chunks(pcm_chunks, sample_rate=24000, silence_ms=120)
-    stage3_wav = pcm_to_wav(joined_pcm, sample_rate=24000, channels=1, bit_depth=16)
+    if not stage3_wav:
+        # Split into chunks, simulate/synthesize each chunk, join at PCM level
+        chunks = [c.strip() for c in cleaned_text.replace("፡", "፣").split("፣") if c.strip()]
+        pcm_chunks: list[bytes] = []
+        for chunk in chunks:
+            # Each chunk synthesized with fixed voice at 24 kHz
+            chunk_pcm = generate_synthetic_24k_pcm(duration_sec=max(0.8, len(chunk) * 0.08), freq=300.0)
+            pcm_chunks.append(chunk_pcm)
+
+        # Join sentence chunks at raw PCM level with 120ms silence pause
+        joined_pcm = join_pcm_chunks(pcm_chunks, sample_rate=24000, silence_ms=120)
+        stage3_wav = pcm_to_wav(joined_pcm, sample_rate=24000, channels=1, bit_depth=16)
     stage3_path.write_bytes(stage3_wav)
 
     # Stage 4: After conversion for Telegram (OGG/Opus via libopus mono @ 32kbps)

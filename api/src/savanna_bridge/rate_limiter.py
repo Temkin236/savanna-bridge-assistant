@@ -32,3 +32,34 @@ class RateLimiter:
 
         self.requests[key].append(now)
         return True, 0
+
+
+class LoginFailureRateLimiter:
+    """Sliding-window rate limiter for failed login attempts."""
+
+    def __init__(self, max_failures: int = 5, window_seconds: int = 60) -> None:
+        self.max_failures = max_failures
+        self.window_seconds = window_seconds
+        self.failures: dict[str, list[float]] = defaultdict(list)
+
+    def is_blocked(self, key: str) -> tuple[bool, int]:
+        now = time.time()
+        window_start = now - self.window_seconds
+        timestamps = [ts for ts in self.failures[key] if ts > window_start]
+        self.failures[key] = timestamps
+        if len(timestamps) >= self.max_failures:
+            oldest = timestamps[0]
+            retry_after = max(1, int(oldest + self.window_seconds - now))
+            return True, retry_after
+        return False, 0
+
+    def record_failure(self, key: str) -> None:
+        now = time.time()
+        window_start = now - self.window_seconds
+        timestamps = [ts for ts in self.failures[key] if ts > window_start]
+        timestamps.append(now)
+        self.failures[key] = timestamps
+
+    def record_success(self, key: str) -> None:
+        self.failures.pop(key, None)
+
