@@ -1,0 +1,55 @@
+{
+  "read_more_offer": "Deebii guutuu akka siif dubbisu barbaaddaa?",
+  "ordinals": [
+    "Tokkoffaa,",
+    "Lammaffaa,",
+    "Sadaffaa,",
+    "Afraffaa,",
+    "Shanaffaa,",
+    "Jahaffaa,",
+    "Torbaffaa,",
+    "Saddettaffaa,",
+    "Sagalaffaa,",
+    "Kurnaffaa,"
+  ],
+  "final_ordinal": "Dhuma irratti,",
+  "source_prefix": "Kun kutaa barnootaa keessatti argama",
+  "units": {
+    "0": "zeeroo",
+    "1": "tokko",
+    "2": "lama",
+    "3": "sadii",
+    "4": "afur",
+    "5": "shan",
+    "6": "ja'a",
+    "7": "torba",
+    "8": "saddet",
+    "9": "sagal"
+  },
+  "teens": {
+    "10": "kudan",
+    "11": "kudha tokko",
+    "12": "kudha lama",
+    "13": "kudha sadii",
+    "14": "kudha afur",
+    "15": "kudha shan",
+    "16": "kudha ja'a",
+    "17": "kudha torba",
+    "18": "kudha saddet",
+    "19": "kudha sagal"
+  },
+  "tens": {
+    "20": "digdama",
+    "30": "soddoma",
+    "40": "afurtama",
+    "50": "shantama",
+    "60": "jaatama",
+    "70": "torbaatama",
+    "80": "saddeettama",
+    "90": "sagaltama"
+  },
+  "hundred": "dhibba",
+  "thousand": "kuma",
+  "negative": "hir'uu"
+}
+

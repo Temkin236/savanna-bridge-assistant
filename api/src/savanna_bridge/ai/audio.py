@@ -7,6 +7,8 @@ import re
 import struct
 import wave
 
+from savanna_bridge.speech import make_spoken, number_to_words
+
 AMHARIC_UNITS = {
     0: "ዜሮ",
     1: "አንድ",
