@@ -542,7 +542,6 @@ Return only JSON:
         self, text: str, language: Language, speed: float = 1.0, style: str | None = None
     ) -> tuple[str, str]:
         """Synthesize speech with Gemini using clean text and voice configuration."""
-        style_val = style or self.tts_style
         payload: dict[str, Any] = {
             "contents": [
                 {
@@ -560,13 +559,6 @@ Return only JSON:
                         "prebuiltVoiceConfig": {"voiceName": self.tts_voice}
                     },
                 },
-            },
-            "systemInstruction": {
-                "parts": [
-                    {
-                        "text": f"Speak as a {style_val}."
-                    }
-                ]
             },
         }
         response = self._call_gemini_endpoint(
