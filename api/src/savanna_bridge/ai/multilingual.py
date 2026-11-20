@@ -97,11 +97,14 @@ class MultilingualProvider(AIProvider):
             retain,
         )
 
-    def synthesize(self, text: str, language: Language, speed: float = 1.0) -> str:
+    def synthesize(
+        self, text: str, language: Language, speed: float = 1.0, style: str | None = None
+    ) -> str:
         return self._run_chain(
             self._providers_for_language(language, "synthesize"),
             "synthesize",
             text,
             language,
             speed,
+            style,
         )

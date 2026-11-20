@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import hashlib
 import html
 import json
 import logging
@@ -14,10 +15,16 @@ import urllib.parse
 import urllib.request
 
 from adapters.base import ContentChunk
-from savanna_bridge.ai.audio import clean_text_for_speech, pcm_to_wav
+from savanna_bridge.ai.audio import (
+    clean_text_for_speech,
+    join_pcm_chunks,
+    pcm_to_wav,
+    wav_to_pcm,
+)
 from savanna_bridge.ai.base import AIProvider
 from savanna_bridge.ai.offline import OfflineFaqProvider
 from savanna_bridge.models import Language
+from savanna_bridge.speech import make_spoken, split_sentences
 
 logger = logging.getLogger("savanna_bridge.ai.cloud")
 
@@ -54,6 +61,11 @@ class CloudProvider(AIProvider):
             or os.getenv("GOOGLE_TTS_VOICE")
             or "Aoede"
         )
+        self.tts_style = (
+            os.getenv("TTS_STYLE")
+            or "warm, calm tutor, moderate pace, clear, unhurried"
+        )
+        self._audio_cache: dict[str, str] = {}
         self._last_call_mocked = not bool(self.api_keys or self.translate_key or self.speech_key)
 
     @property
@@ -135,18 +147,19 @@ class CloudProvider(AIProvider):
         self._last_call_mocked = True
         return self._offline_fallback.translate(text, source, target)
 
-    def generate_answer(
+    def generate_answer_pair(
         self,
         question: str,
         context_chunks: list[ContentChunk],
         language: Language,
         simple_mode: bool = False,
-    ) -> str:
+    ) -> tuple[str, str]:
         if not self.api_key:
             self._last_call_mocked = True
-            return self._offline_fallback.generate_answer(
+            ans = self._offline_fallback.generate_answer(
                 question, context_chunks, language, simple_mode
             )
+            return ans, make_spoken(ans, language)
 
         context_text = "\n\n".join(
             f"--- Section: {chunk.heading} ---\n{chunk.text}"
@@ -169,24 +182,116 @@ Base your answer strictly and solely on the Course Content below.
 Do not invent information. {simplicity_instruction}
 {language_instruction}
 
+You must return a JSON object with exactly two string fields: "answer" and "spoken".
+Rules:
+1. "answer":
+   - Plain text formatted for on-screen reading.
+   - Absolutely no emoji or decorative symbols.
+   - Keep citations and links in the sources field, not in the text.
+2. "spoken":
+   - A version written specifically to be heard aloud via text-to-speech.
+   - Start directly with the answer.
+   - Two to four short sentences.
+   - No markdown, emoji, URLs, citation markers, headings, or labels.
+   - Turn lists into spoken transitions ('first, second, and finally').
+   - Mention the source naturally (e.g. 'this is in the lesson section called X') without reading any web address or URL.
+   - Write numbers, dates, and abbreviations as words in the same language.
+   - Never drop numbers, negations, or warnings.
+   - Use normal commas and full stops for pauses (Ethiopic punctuation for Amharic).
+   - If the full answer is long, speak only the main points and end with a short offer to read more.
+3. Language:
+   - Write both "answer" and "spoken" in the learner's language ({language.value}).
+   - Never mix languages inside one sentence.
+
 Course Content:
 {context_text}
 
 Learner Question:
 {question}
+
+Return only JSON:
+{{"answer": "...", "spoken": "..."}}
 """
         try:
-            answer = self._call_gemini(prompt)
+            raw_response = self._call_gemini_json(prompt)
+            answer, spoken = self._parse_answer_spoken(raw_response, language)
             if answer.strip():
                 self._last_call_mocked = False
-                return answer.strip()
+                return answer.strip(), spoken.strip()
         except Exception as exc:
-            logger.warning("Gemini API error: %s", exc)
+            logger.warning("Gemini API error in generate_answer_pair: %s", exc)
 
         self._last_call_mocked = True
-        return self._offline_fallback.generate_answer(
+        ans = self._offline_fallback.generate_answer(
             question, context_chunks, language, simple_mode
         )
+        return ans, make_spoken(ans, language)
+
+    def generate_answer(
+        self,
+        question: str,
+        context_chunks: list[ContentChunk],
+        language: Language,
+        simple_mode: bool = False,
+    ) -> str:
+        ans, _ = self.generate_answer_pair(question, context_chunks, language, simple_mode)
+        return ans
+
+    def _parse_answer_spoken(self, raw: str, language: Language) -> tuple[str, str]:
+        if not raw or not raw.strip():
+            return "", ""
+        cleaned = raw.strip()
+        if cleaned.startswith("```json"):
+            cleaned = cleaned[7:]
+        if cleaned.startswith("```"):
+            cleaned = cleaned[3:]
+        if cleaned.endswith("```"):
+            cleaned = cleaned[:-3]
+        cleaned = cleaned.strip()
+
+        try:
+            data = json.loads(cleaned)
+            if isinstance(data, dict):
+                ans = str(data.get("answer", "")).strip()
+                spk = str(data.get("spoken", "")).strip()
+                if ans and spk:
+                    return ans, spk
+                if ans:
+                    return ans, make_spoken(ans, language)
+        except Exception:
+            pass
+
+        # Try regex if JSON was malformed
+        ans_m = re.search(r'"answer"\s*:\s*"((?:[^"\\]|\\.)*)"', cleaned, re.DOTALL)
+        spk_m = re.search(r'"spoken"\s*:\s*"((?:[^"\\]|\\.)*)"', cleaned, re.DOTALL)
+        if ans_m:
+            try:
+                ans = json.loads(f'"{ans_m.group(1)}"')
+                spk = json.loads(f'"{spk_m.group(1)}"') if spk_m else make_spoken(ans, language)
+                return ans, spk
+            except Exception:
+                pass
+
+        # Fall back to Step 3 rule-based cleaner
+        return raw.strip(), make_spoken(raw.strip(), language)
+
+    def _call_gemini_json(self, prompt: str) -> str:
+        response = self._call_gemini_endpoint(
+            f"{self.model}:generateContent",
+            {
+                "contents": [{"parts": [{"text": prompt}]}],
+                "generationConfig": {
+                    "temperature": 0.2,
+                    "maxOutputTokens": 1000,
+                    "responseMimeType": "application/json",
+                },
+            },
+        )
+        candidates = response.get("candidates", [])
+        if not isinstance(candidates, list) or not candidates:
+            return ""
+        parts = candidates[0].get("content", {}).get("parts", [])
+        return parts[0].get("text", "") if parts else ""
 
     def transcribe(
         self, audio_bytes: bytes, media_type: str, language: Language, retain: bool = False
@@ -213,31 +318,87 @@ Learner Question:
         self._last_call_mocked = True
         return self._offline_fallback.transcribe(audio_bytes, media_type, language, retain)
 
-    def synthesize(self, text: str, language: Language, speed: float = 1.0) -> str:
+    def synthesize(
+        self, text: str, language: Language, speed: float = 1.0, style: str | None = None
+    ) -> str:
         cleaned_text = clean_text_for_speech(text, language.value)
         if not cleaned_text:
             cleaned_text = text
 
+        voice_name = self.tts_voice
+        style_val = style or self.tts_style
+
+        # Cache audio by hash of (spoken, language, voice, style)
+        cache_key = hashlib.sha256(
+            f"{cleaned_text}|{language.value}|{voice_name}|{style_val}".encode("utf-8")
+        ).hexdigest()
+        if cache_key in self._audio_cache:
+            return self._audio_cache[cache_key]
+
         if self.api_key:
             try:
-                audio_b64, media_type = self._call_gemini_tts(cleaned_text, language, speed)
-                if audio_b64:
+                # Group by 2 to 3 sentences per clip
+                sentences = split_sentences(cleaned_text, language.value)
+                if not sentences:
+                    sentences = [cleaned_text]
+
+                chunk_size = 2 if len(sentences) <= 4 else 3
+                sentence_groups = []
+                for i in range(0, len(sentences), chunk_size):
+                    sentence_groups.append(" ".join(sentences[i : i + chunk_size]))
+
+                if len(sentence_groups) == 1:
+                    audio_b64, media_type = self._call_gemini_tts(
+                        sentence_groups[0], language, speed=speed, style=style_val
+                    )
+                    if audio_b64:
+                        raw_audio = base64.b64decode(audio_b64)
+                        if "mp3" in media_type or raw_audio.startswith(b"ID3") or (len(raw_audio) >= 2 and raw_audio[:2] in (b"\xff\xfb", b"\xff\xf3", b"\xff\xf2")):
+                            self._last_call_mocked = False
+                            res = f"data:audio/mp3;base64,{audio_b64}"
+                            self._audio_cache[cache_key] = res
+                            return res
+                        elif "ogg" in media_type or raw_audio.startswith(b"OggS"):
+                            self._last_call_mocked = False
+                            res = f"data:audio/ogg;base64,{audio_b64}"
+                            self._audio_cache[cache_key] = res
+                            return res
+                        elif raw_audio.startswith(b"RIFF"):
+                            self._last_call_mocked = False
+                            res = f"data:audio/wav;base64,{audio_b64}"
+                            self._audio_cache[cache_key] = res
+                            return res
+                        else:
+                            wav_bytes = pcm_to_wav(raw_audio, sample_rate=24000, channels=1, bit_depth=16)
+                            out_b64 = base64.b64encode(wav_bytes).decode("ascii")
+                            self._last_call_mocked = False
+                            res = f"data:audio/wav;base64,{out_b64}"
+                            self._audio_cache[cache_key] = res
+                            return res
+
+                pcm_parts: list[bytes] = []
+                for group in sentence_groups:
+                    audio_b64, media_type = self._call_gemini_tts(
+                        group, language, speed=speed, style=style_val
+                    )
+                    if not audio_b64:
+                        continue
                     raw_audio = base64.b64decode(audio_b64)
-                    if "mp3" in media_type or raw_audio.startswith(b"ID3") or (len(raw_audio) >= 2 and raw_audio[:2] in (b"\xff\xfb", b"\xff\xf3", b"\xff\xf2")):
-                        self._last_call_mocked = False
-                        return f"data:audio/mp3;base64,{audio_b64}"
-                    elif "ogg" in media_type or raw_audio.startswith(b"OggS"):
-                        self._last_call_mocked = False
-                        return f"data:audio/ogg;base64,{audio_b64}"
-                    elif raw_audio.startswith(b"RIFF"):
-                        self._last_call_mocked = False
-                        return f"data:audio/wav;base64,{audio_b64}"
+                    if raw_audio.startswith(b"RIFF"):
+                        pcm, _, _, _ = wav_to_pcm(raw_audio)
                     else:
-                        # Raw PCM returned from Gemini AUDIO modality: wrap in exact 24 kHz WAV
-                        wav_bytes = pcm_to_wav(raw_audio, sample_rate=24000, channels=1, bit_depth=16)
-                        out_b64 = base64.b64encode(wav_bytes).decode("ascii")
-                        self._last_call_mocked = False
-                        return f"data:audio/wav;base64,{out_b64}"
+                        pcm = raw_audio
+                    pcm_parts.append(pcm)
+
+                if pcm_parts:
+                    # Join at PCM level with natural silence pause, then wrap in WAV once
+                    joined_pcm = join_pcm_chunks(pcm_parts, sample_rate=24000, silence_ms=200)
+                    wav_bytes = pcm_to_wav(joined_pcm, sample_rate=24000, channels=1, bit_depth=16)
+                    out_b64 = base64.b64encode(wav_bytes).decode("ascii")
+                    self._last_call_mocked = False
+                    result_url = f"data:audio/wav;base64,{out_b64}"
+                    self._audio_cache[cache_key] = result_url
+                    return result_url
             except Exception as exc:
                 logger.warning("Gemini Text-to-Speech error: %s", exc)
 
@@ -246,12 +407,14 @@ Learner Question:
                 audio = self._call_text_to_speech(cleaned_text, language, speed)
                 if audio:
                     self._last_call_mocked = False
-                    return f"data:audio/mp3;base64,{audio}"
+                    result_url = f"data:audio/mp3;base64,{audio}"
+                    self._audio_cache[cache_key] = result_url
+                    return result_url
             except Exception as exc:
                 logger.warning("Google Text-to-Speech error: %s", exc)
 
         self._last_call_mocked = True
-        return self._offline_fallback.synthesize(cleaned_text, language, speed)
+        return self._offline_fallback.synthesize(cleaned_text, language, speed, style)
 
     def _call_cloud_translate(
         self, text: str, source_lang: str, target_lang: str
@@ -376,30 +539,39 @@ Learner Question:
         return parts[0].get("text", "").strip() if parts else ""
 
     def _call_gemini_tts(
-        self, text: str, language: Language, speed: float
+        self, text: str, language: Language, speed: float = 1.0, style: str | None = None
     ) -> tuple[str, str]:
         """Synthesize speech with Gemini using clean text and voice configuration."""
-        response = self._call_gemini_endpoint(
-            f"{self.tts_model}:generateContent",
-            {
-                "contents": [
-                    {
-                        "parts": [
-                            {
-                                "text": text
-                            }
-                        ]
-                    }
-                ],
-                "generationConfig": {
-                    "responseModalities": ["AUDIO"],
-                    "speechConfig": {
-                        "voiceConfig": {
-                            "prebuiltVoiceConfig": {"voiceName": self.tts_voice}
-                        },
+        style_val = style or self.tts_style
+        payload: dict[str, Any] = {
+            "contents": [
+                {
+                    "parts": [
+                        {
+                            "text": text
+                        }
+                    ]
+                }
+            ],
+            "generationConfig": {
+                "responseModalities": ["AUDIO"],
+                "speechConfig": {
+                    "voiceConfig": {
+                        "prebuiltVoiceConfig": {"voiceName": self.tts_voice}
                     },
                 },
             },
+            "systemInstruction": {
+                "parts": [
+                    {
+                        "text": f"Speak as a {style_val}."
+                    }
+                ]
+            },
+        }
+        response = self._call_gemini_endpoint(
+            f"{self.tts_model}:generateContent",
+            payload,
         )
         candidates = response.get("candidates", [])
         if not isinstance(candidates, list) or not candidates:

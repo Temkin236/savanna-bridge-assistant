@@ -52,6 +52,7 @@ from savanna_bridge.config import (
 )
 from savanna_bridge.database import Database
 from savanna_bridge.language import LanguageGuard, LanguageRegistry
+from savanna_bridge.speech import make_spoken
 from savanna_bridge.models import (
     AccessibilityProfile,
     AccommodationDraft,
@@ -530,8 +531,11 @@ def ask(payload: AskRequest, _token: Any = Depends(verify_optional_token)) -> An
             Language.AR: "مرحباً بك! أنا مساعدك في سافانا بريدج. يمكنني مساعدتك في استعراض وحدات الدورة، المواعيد النهائية، أو الإجابة عن استفساراتك. كيف يمكنني مساعدتك اليوم؟",
             Language.EN: "Hello! Welcome to the Savanna Bridge Assistant. I can help answer questions about your course modules, deadlines, assignments, or connect you with a mentor. How can I assist you today?",
         }
+        welcome_ans = welcome_msgs.get(user_lang, welcome_msgs[Language.EN])
+        welcome_spoken = make_spoken(welcome_ans, user_lang)
         return Answer(
-            answer=welcome_msgs.get(user_lang, welcome_msgs[Language.EN]),
+            answer=welcome_ans,
+            spoken=welcome_spoken,
             citations=[],
             language=user_lang,
             offer_human=False,
@@ -623,8 +627,10 @@ def ask(payload: AskRequest, _token: Any = Depends(verify_optional_token)) -> An
                 )
             )
         )
+        spoken_refusal = make_spoken(refusal_msg, user_lang)
         return Answer(
             answer=refusal_msg,
+            spoken=spoken_refusal,
             citations=[],
             language=user_lang,
             offer_human=True,
@@ -639,7 +645,7 @@ def ask(payload: AskRequest, _token: Any = Depends(verify_optional_token)) -> An
 
     # Generate answer from context
     chunks = [m[0] for m in matches]
-    answer_text = ai.generate_answer(
+    answer_text, spoken_text = ai.generate_answer_pair(
         question=question,
         context_chunks=chunks,
         language=user_lang,
@@ -651,6 +657,7 @@ def ask(payload: AskRequest, _token: Any = Depends(verify_optional_token)) -> An
         c.language == user_lang.value for c in chunks
     ):
         answer_text = ai.translate(answer_text, "en", user_lang.value)
+        spoken_text = make_spoken(answer_text, user_lang)
 
     citations = retrieval_engine.format_citations(matches)
     # Deduplicate citations and ensure clean readable labels for accessibility & screen readers
@@ -676,6 +683,7 @@ def ask(payload: AskRequest, _token: Any = Depends(verify_optional_token)) -> An
 
     return Answer(
         answer=answer_text,
+        spoken=spoken_text,
         citations=clean_citations or citations[:1],
         language=user_lang,
         offer_human=False,
@@ -1242,7 +1250,12 @@ def synthesize_speech(payload: SynthesisRequest) -> SynthesisResult:
     tts_provider_name = os.getenv("TTS_PROVIDER") or os.getenv("AI_PROVIDER")
     ai = get_ai_provider(tts_provider_name)
 
-    audio_url = ai.synthesize(text=payload.text, language=payload.language, speed=payload.speed)
+    audio_url = ai.synthesize(
+        text=payload.text,
+        language=payload.language,
+        speed=payload.speed,
+        style=payload.style,
+    )
     is_mocked = (
         ai.is_mocked
         or ai.name == "offline"
@@ -1257,6 +1270,7 @@ def synthesize_speech(payload: SynthesisRequest) -> SynthesisResult:
         expires_at=expires_at,
         provider=ai.name,
         mocked=is_mocked,
+        style=payload.style,
     )
 
 

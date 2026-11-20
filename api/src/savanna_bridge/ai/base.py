@@ -30,6 +30,18 @@ class AIProvider(ABC):
         """Generate a grounded answer in the requested language."""
         ...
 
+    def generate_answer_pair(
+        self,
+        question: str,
+        context_chunks: list[ContentChunk],
+        language: Language,
+        simple_mode: bool = False,
+    ) -> tuple[str, str]:
+        """Generate on-screen answer and natural spoken tutor speech."""
+        ans = self.generate_answer(question, context_chunks, language, simple_mode)
+        from savanna_bridge.speech import make_spoken
+        return ans, make_spoken(ans, language)
+
     @abstractmethod
     def translate(self, text: str, source_lang: str, target_lang: str) -> str:
         """Translate text between languages."""
@@ -48,6 +60,8 @@ class AIProvider(ABC):
         ...
 
     @abstractmethod
-    def synthesize(self, text: str, language: Language, speed: float = 1.0) -> str:
+    def synthesize(
+        self, text: str, language: Language, speed: float = 1.0, style: str | None = None
+    ) -> str:
         """Synthesize text into speech; returns URL or path to audio."""
         ...

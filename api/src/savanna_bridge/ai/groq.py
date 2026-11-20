@@ -267,10 +267,12 @@ class GroqProvider(AIProvider):
         self._last_call_mocked = True
         return self._offline.transcribe(audio_bytes, media_type, language, False)
 
-    def synthesize(self, text: str, language: Language, speed: float = 1.0) -> str:
+    def synthesize(
+        self, text: str, language: Language, speed: float = 1.0, style: str | None = None
+    ) -> str:
         if language not in (Language.EN, Language.AR):
             self._last_call_mocked = True
-            return self._offline.synthesize(text, language, speed)
+            return self._offline.synthesize(text, language, speed, style)
         model = self.tts_model_ar if language == Language.AR else self.tts_model_en
 
         def request(key: str) -> bytes:
@@ -297,4 +299,4 @@ class GroqProvider(AIProvider):
         except Exception as exc:
             logger.warning("Groq speech synthesis unavailable: %s", type(exc).__name__)
         self._last_call_mocked = True
-        return self._offline.synthesize(text, language, speed)
+        return self._offline.synthesize(text, language, speed, style)

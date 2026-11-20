@@ -466,5 +466,7 @@ class OfflineFaqProvider(AIProvider):
             return "እዚ ኮርስ ብዛዕባ እንታይ እዩ? ግለጹለይ።"
         return "What is this course about? Explain this lesson to me."
 
-    def synthesize(self, text: str, language: Language, speed: float = 1.0) -> str:
+    def synthesize(
+        self, text: str, language: Language, speed: float = 1.0, style: str | None = None
+    ) -> str:
         return "http://localhost:8000/media/tts/demo.ogg"
