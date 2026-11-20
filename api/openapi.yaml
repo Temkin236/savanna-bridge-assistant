@@ -1122,6 +1122,10 @@ components:
       properties:
         answer:
           type: string
+          description: Grounded plain text answer for on-screen reading.
+        spoken:
+          type: string
+          description: Natural conversational tutor speech version for read-aloud TTS.
         citations:
           type: array
           items:
@@ -1143,6 +1147,7 @@ components:
           type: boolean
       example:
         answer: Module 2 explains how to listen, clarify a customer's need, and respond clearly.
+        spoken: Module 2 explains how to listen, clarify a customer's need, and respond clearly.
         citations:
           - title: Customer Service Foundations
             heading: Module 2 - Communicating with customers
@@ -1766,10 +1771,15 @@ components:
           minimum: 0.5
           maximum: 2
           default: 1
+        style:
+          type: string
+          nullable: true
+          description: Optional voice and speech style instruction (e.g. warm, calm tutor, moderate pace).
       example:
         text: Module 2 explains how to listen and respond clearly.
         language: en
         speed: 1
+        style: warm, calm tutor, moderate pace, clear, unhurried
 
     SynthesisResult:
       type: object
@@ -1788,6 +1798,10 @@ components:
         provider:
           type: string
         mocked:
+          type: boolean
+        style:
+          type: string
+          nullable: true
           type: boolean
       example:
         audio_url: http://localhost:8000/media/tts/demo.ogg

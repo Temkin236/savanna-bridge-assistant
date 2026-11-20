@@ -48,6 +48,7 @@ class AskRequest(BaseModel):
 
 class Answer(BaseModel):
     answer: str
+    spoken: str = ""
     citations: list[Citation]
     language: Language
     offer_human: bool
@@ -343,6 +344,7 @@ class SynthesisRequest(BaseModel):
     text: str = Field(..., min_length=1, max_length=5000)
     language: Language
     speed: float = Field(default=1.0, ge=0.5, le=2.0)
+    style: str | None = None
 
 
 class SynthesisResult(BaseModel):
@@ -352,6 +354,7 @@ class SynthesisResult(BaseModel):
     expires_at: str
     provider: str
     mocked: bool | None = None
+    style: str | None = None
 
 
 class QuestionStat(BaseModel):

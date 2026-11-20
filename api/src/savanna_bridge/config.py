@@ -34,6 +34,7 @@ AI_PROVIDER: str = os.getenv("AI_PROVIDER", "gemini" if GEMINI_API_KEY else "off
 TTS_PROVIDER: str = os.getenv("TTS_PROVIDER", "gemini").lower()
 GEMINI_TTS_MODEL: str = os.getenv("GEMINI_TTS_MODEL", "gemini-3.8-flash-lite-tts")
 GEMINI_TTS_VOICE: str = os.getenv("GEMINI_TTS_VOICE", "Aoede")
+TTS_STYLE: str = os.getenv("TTS_STYLE", "warm, calm tutor, moderate pace, clear, unhurried")
 GOOGLE_TTS_MODEL: str = os.getenv("GOOGLE_TTS_MODEL", GEMINI_TTS_MODEL)
 GOOGLE_TTS_VOICE: str = os.getenv("GOOGLE_TTS_VOICE", GEMINI_TTS_VOICE)
 
