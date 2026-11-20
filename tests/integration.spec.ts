@@ -74,7 +74,19 @@ test.describe("Savanna Bridge integration", () => {
     await expect(roomLink).toBeVisible({ timeout: 10_000 });
     await expect(roomLink).toHaveAttribute("href", /meet\.jit\.si/);
 
-    const response = await request.get(`${apiBase}/handoff/queue`);
+    // Unauthenticated access to helper queue must return 401
+    const unauthResponse = await request.get(`${apiBase}/handoff/queue`);
+    expect(unauthResponse.status()).toBe(401);
+
+    // Helper login to retrieve queue
+    const loginRes = await request.post(`${apiBase}/api/v1/helper/login`, {
+      data: { username: "agent_sarah", password: "savanna2026" },
+    });
+    expect(loginRes.ok()).toBeTruthy();
+    const { token } = await loginRes.json();
+    const helperHeaders = { Authorization: `Bearer ${token}` };
+
+    const response = await request.get(`${apiBase}/handoff/queue`, { headers: helperHeaders });
     expect(response.ok()).toBeTruthy();
     const queue = await response.json();
     const handoff =
@@ -106,7 +118,9 @@ test.describe("Savanna Bridge integration", () => {
       timeout: 10_000,
     });
 
-    const closeResponse = await request.post(`${apiBase}/handoff/${handoff.id}/close`);
+    const closeResponse = await request.post(`${apiBase}/handoff/${handoff.id}/close`, {
+      headers: helperHeaders,
+    });
     expect(closeResponse.ok()).toBeTruthy();
   });
 

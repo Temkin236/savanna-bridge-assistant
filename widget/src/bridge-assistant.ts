@@ -280,6 +280,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     followupQ1: "Explain with examples",
     followupQ2: "What to know before next lesson?",
     followupQ3: "Quiz me on this topic",
+    ticketPrivacyNotice: "We store only your question, language preference, and messages for 7 days to assist you. No account or email required.",
   },
   am: {
     appTitle: "የሳቫና ብሪጅ ረዳት",
@@ -427,6 +428,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     followupQ1: "በምሳሌዎች አስረዳኝ",
     followupQ2: "ወደ ቀጣዩ ትምህርት ከመሄዴ በፊት ምን ልወቅ?",
     followupQ3: "ግንዛቤዬን ፈትነኝ",
+    ticketPrivacyNotice: "እርስዎን ለመርዳት የጠየቁትን ጥያቄ፣ የቋንቋ ምርጫ እና መልዕክቶችን ብቻ ለ7 ቀናት እናስቀምጣለን። መለያ ወይም ኢሜይል አያስፈልግም።",
   },
   om: {
     appTitle: "Gargaaraa Savanna Bridge",
@@ -574,6 +576,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     followupQ1: "Fakkeenyotaan naaf ibsi",
     followupQ2: "Barnoota itti aanuuf maal beekuun qaba?",
     followupQ3: "Hubannoo koo na qori",
+    ticketPrivacyNotice: "Isin gargaaruuf gaaffii keessan, filannoo afaanii, fi ergaalee qofa guyyoota 7f kuusna. Akkaawuntii yookaan imeelii hin barbaachisu.",
   },
   ti: {
     appTitle: "ናይ ሳቫና ብሪጅ ሓጋዚ",
@@ -721,6 +724,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     followupQ1: "ብኣብነታት ኣረድኣኒ",
     followupQ2: "ናብ ዝቕጽል ትምህርቲ ቅድሚ ምኻደይ እንታይ ክፈልጥ ኣለኒ?",
     followupQ3: "ግንዛበይ ፈትነኒ",
+    ticketPrivacyNotice: "ንዓኹም ንምሕጋዝ ዝሓተትኩምዎ ሕቶ፣ ምርጫ ቋንቋን መልእኽትታትን ጥራይ ን7 መዓልታት ነቐምጥ። ኣካውንት ወይ ኢመይል ኣየድልን እዩ።",
   },
   ar: {
     appTitle: "مساعد سافانا بريدج",
@@ -868,6 +872,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     followupQ1: "اشرح بالأمثلة",
     followupQ2: "ماذا يجب أن أفهم قبل الدرس التالي؟",
     followupQ3: "اختبر فهمي لهذا الموضوع",
+    ticketPrivacyNotice: "نحتفظ فقط بسؤالك وتفضيل اللغة والرسائل لمدة 7 أيام لمساعدتك. لا يلزم إنشاء حساب أو بريد إلكتروني.",
   },
 };
 
@@ -4956,11 +4961,17 @@ export class BridgeAssistant extends HTMLElement {
       if (res && res.ok) {
         const data = await res.json();
         const ticketId = data.ticketId || data.handoff_id || data.id || "ticket_01";
+        const ticketSecret = data.ticket_secret || data.ticketSecret || "";
         const roomUrl = data.room_url || data.roomUrl || "https://meet.jit.si/savanna-bridge-demo";
         this.activeHandoff = {
           id: ticketId,
           room_url: roomUrl,
         };
+        if (ticketSecret) {
+          try {
+            sessionStorage.setItem(`savanna_ticket_secret_${ticketId}`, ticketSecret);
+          } catch {}
+        }
 
         this.dispatchEvent(
           new CustomEvent("db-assistant:escalated", {
@@ -5454,6 +5465,9 @@ export class BridgeAssistant extends HTMLElement {
             <div class="settings-card-desc">
               ${this.t("appSubtitle")}
             </div>
+            <p class="ticket-privacy-notice" style="font-size:0.75rem; color:#4b5563; line-height:1.4; margin:0.25rem 0 0.625rem 0; padding:0.375rem 0.5rem; background:#f3f4f6; border-radius:0.375rem;">
+              ${this.t("ticketPrivacyNotice")}
+            </p>
             <form id="handoff-request-form" style="display:flex; flex-direction:column; gap:0.625rem;">
               <div id="handoff-consent-error" style="display:none; color:#dc2626; font-size:0.8125rem; font-weight:600; padding:0.375rem 0.5rem; background:#fee2e2; border:1px solid #fca5a5; border-radius:0.375rem;" role="alert"></div>
               <label class="checkbox-card">
@@ -5924,6 +5938,9 @@ export class BridgeAssistant extends HTMLElement {
             ? `
                 <div class="not-verified-box" role="alert">
                   <div>${this.t("notVerifiedNotice")}</div>
+                  <p class="ticket-privacy-notice" style="font-size:0.75rem; color:#4b5563; line-height:1.3; margin:0.25rem 0 0.5rem 0;">
+                    ${this.t("ticketPrivacyNotice")}
+                  </p>
                   <div style="display:flex; gap:0.375rem; flex-wrap:wrap;">
                     <button type="button" class="btn btn-primary btn-talk-person" data-msg-id="${msg.id}" style="font-size:0.8125rem; min-height:44px; display:inline-flex; align-items:center; gap:0.375rem;">
                       ${ICONS.user} <span>${this.t("talkToPersonButton")}</span>

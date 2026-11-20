@@ -439,7 +439,7 @@
           <div id="loginError" class="hidden text-xs text-red-600 font-medium bg-red-50 p-2.5 rounded-lg border border-red-200" role="alert"></div>
 
           <div class="bg-blue-50 border border-blue-200 rounded-lg p-2.5 text-[11px] text-blue-800 leading-relaxed">
-            <strong>Demo Credentials:</strong> User: <code>agent_sarah</code> · Password: <code>savanna2026</code>
+            <strong>Helper Access:</strong> Enter the helper credentials configured via environment variables (<code>HELPER_PASSWORD</code>).
           </div>
 
           <button type="submit" id="loginSubmitBtn" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
@@ -1013,7 +1013,13 @@
       }
 
       if (logoutBtn) {
-        logoutBtn.addEventListener("click", () => {
+        logoutBtn.addEventListener("click", async () => {
+          try {
+            await fetch(`${getApiUrl()}/api/v1/helper/logout`, {
+              method: "POST",
+              headers: getAuthHeaders(),
+            });
+          } catch {}
           sessionStorage.setItem("savanna_logged_out", "true");
           setHelperToken("");
           currentHandoffs = [];

@@ -186,7 +186,8 @@ const r = {
     followupTitle: "Follow-up questions:",
     followupQ1: "Explain with examples",
     followupQ2: "What to know before next lesson?",
-    followupQ3: "Quiz me on this topic"
+    followupQ3: "Quiz me on this topic",
+    ticketPrivacyNotice: "We store only your question, language preference, and messages for 7 days to assist you. No account or email required."
   },
   am: {
     appTitle: "የሳቫና ብሪጅ ረዳት",
@@ -333,7 +334,8 @@ const r = {
     followupTitle: "ተከታይ ጥያቄዎች፡",
     followupQ1: "በምሳሌዎች አስረዳኝ",
     followupQ2: "ወደ ቀጣዩ ትምህርት ከመሄዴ በፊት ምን ልወቅ?",
-    followupQ3: "ግንዛቤዬን ፈትነኝ"
+    followupQ3: "ግንዛቤዬን ፈትነኝ",
+    ticketPrivacyNotice: "እርስዎን ለመርዳት የጠየቁትን ጥያቄ፣ የቋንቋ ምርጫ እና መልዕክቶችን ብቻ ለ7 ቀናት እናስቀምጣለን። መለያ ወይም ኢሜይል አያስፈልግም።"
   },
   om: {
     appTitle: "Gargaaraa Savanna Bridge",
@@ -480,7 +482,8 @@ const r = {
     followupTitle: "Gaaffilee itti aanan:",
     followupQ1: "Fakkeenyotaan naaf ibsi",
     followupQ2: "Barnoota itti aanuuf maal beekuun qaba?",
-    followupQ3: "Hubannoo koo na qori"
+    followupQ3: "Hubannoo koo na qori",
+    ticketPrivacyNotice: "Isin gargaaruuf gaaffii keessan, filannoo afaanii, fi ergaalee qofa guyyoota 7f kuusna. Akkaawuntii yookaan imeelii hin barbaachisu."
   },
   ti: {
     appTitle: "ናይ ሳቫና ብሪጅ ሓጋዚ",
@@ -627,7 +630,8 @@ const r = {
     followupTitle: "ቀጸልቲ ሕቶታት፡",
     followupQ1: "ብኣብነታት ኣረድኣኒ",
     followupQ2: "ናብ ዝቕጽል ትምህርቲ ቅድሚ ምኻደይ እንታይ ክፈልጥ ኣለኒ?",
-    followupQ3: "ግንዛበይ ፈትነኒ"
+    followupQ3: "ግንዛበይ ፈትነኒ",
+    ticketPrivacyNotice: "ንዓኹም ንምሕጋዝ ዝሓተትኩምዎ ሕቶ፣ ምርጫ ቋንቋን መልእኽትታትን ጥራይ ን7 መዓልታት ነቐምጥ። ኣካውንት ወይ ኢመይል ኣየድልን እዩ።"
   },
   ar: {
     appTitle: "مساعد سافانا بريدج",
@@ -774,7 +778,8 @@ const r = {
     followupTitle: "أسئلة متابعة مقترحة:",
     followupQ1: "اشرح بالأمثلة",
     followupQ2: "ماذا يجب أن أفهم قبل الدرس التالي؟",
-    followupQ3: "اختبر فهمي لهذا الموضوع"
+    followupQ3: "اختبر فهمي لهذا الموضوع",
+    ticketPrivacyNotice: "نحتفظ فقط بسؤالك وتفضيل اللغة والرسائل لمدة 7 أيام لمساعدتك. لا يلزم إنشاء حساب أو بريد إلكتروني."
   }
 }, Q = `
   :host {
@@ -3554,15 +3559,20 @@ ${d}
         } catch {
         }
       if (l && l.ok) {
-        const o = await l.json(), d = o.ticketId || o.handoff_id || o.id || "ticket_01", g = o.room_url || o.roomUrl || "https://meet.jit.si/savanna-bridge-demo";
-        this.activeHandoff = {
+        const o = await l.json(), d = o.ticketId || o.handoff_id || o.id || "ticket_01", g = o.ticket_secret || o.ticketSecret || "", p = o.room_url || o.roomUrl || "https://meet.jit.si/savanna-bridge-demo";
+        if (this.activeHandoff = {
           id: d,
-          room_url: g
-        }, this.dispatchEvent(
+          room_url: p
+        }, g)
+          try {
+            sessionStorage.setItem(`savanna_ticket_secret_${d}`, g);
+          } catch {
+          }
+        this.dispatchEvent(
           new CustomEvent("db-assistant:escalated", {
             bubbles: !0,
             composed: !0,
-            detail: { ticketId: d, roomUrl: g }
+            detail: { ticketId: d, roomUrl: p }
           })
         ), this.messages.push({
           id: `msg_${Date.now()}_handoff`,
@@ -3570,38 +3580,38 @@ ${d}
           text: `${this.t("handoffReadyTitle")}: ${this.activeHandoff.room_url}`,
           heading: this.t("handoffReadyTitle"),
           isHandoff: !0,
-          roomUrl: g,
+          roomUrl: p,
           offerHuman: !1
         }), this.saveChatState();
-        const p = this.shadowRoot?.querySelector("#handoff-room-box");
-        if (p) {
-          p.innerHTML = `
+        const b = this.shadowRoot?.querySelector("#handoff-room-box");
+        if (b) {
+          b.innerHTML = `
             <div style="padding:0.75rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:0.5rem; margin-top:0.75rem;">
               <p style="margin:0 0 0.5rem 0; font-size:0.875rem; font-weight:600; color:#166534; display:flex; align-items:center; gap:0.375rem;">
                 ${r.celebrate} <span>${this.t("handoffReadyTitle")}</span>
               </p>
               <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-                <a href="${g}" target="_blank" rel="noopener noreferrer" class="btn btn-primary room-link" style="text-decoration:none; display:inline-flex; align-items:center; gap:0.375rem;">
+                <a href="${p}" target="_blank" rel="noopener noreferrer" class="btn btn-primary room-link" style="text-decoration:none; display:inline-flex; align-items:center; gap:0.375rem;">
                   ${r.video} <span>${this.t("joinRoomButton")}</span>
                 </a>
-                <button type="button" class="btn btn-secondary btn-copy-room" data-url="${this.escapeHtml(g)}" style="font-size:0.8125rem; min-height:44px; display:inline-flex; align-items:center; gap:0.375rem;">
+                <button type="button" class="btn btn-secondary btn-copy-room" data-url="${this.escapeHtml(p)}" style="font-size:0.8125rem; min-height:44px; display:inline-flex; align-items:center; gap:0.375rem;">
                   ${r.copy} <span>${this.t("copyRoomBtn")}</span>
                 </button>
               </div>
             </div>
           `;
-          const b = p.querySelector(".btn-copy-room");
-          b && b.addEventListener("click", async () => {
-            const m = b.getAttribute("data-url");
-            if (m) {
+          const m = b.querySelector(".btn-copy-room");
+          m && m.addEventListener("click", async () => {
+            const f = m.getAttribute("data-url");
+            if (f) {
               try {
-                await navigator.clipboard.writeText(m);
+                await navigator.clipboard.writeText(f);
               } catch {
-                const f = document.createElement("textarea");
-                f.value = m, document.body.appendChild(f), f.select(), document.execCommand("copy"), document.body.removeChild(f);
+                const y = document.createElement("textarea");
+                y.value = f, document.body.appendChild(y), y.select(), document.execCommand("copy"), document.body.removeChild(y);
               }
-              b.innerHTML = `${r.check} <span>${this.t("linkCodeCopied")}</span>`, this.announce(this.t("linkCodeCopied")), setTimeout(() => {
-                b.innerHTML = `${r.copy} <span>${this.t("copyRoomBtn")}</span>`;
+              m.innerHTML = `${r.check} <span>${this.t("linkCodeCopied")}</span>`, this.announce(this.t("linkCodeCopied")), setTimeout(() => {
+                m.innerHTML = `${r.copy} <span>${this.t("copyRoomBtn")}</span>`;
               }, 2e3);
             }
           });
@@ -3965,6 +3975,9 @@ ${d}
             <div class="settings-card-desc">
               ${this.t("appSubtitle")}
             </div>
+            <p class="ticket-privacy-notice" style="font-size:0.75rem; color:#4b5563; line-height:1.4; margin:0.25rem 0 0.625rem 0; padding:0.375rem 0.5rem; background:#f3f4f6; border-radius:0.375rem;">
+              ${this.t("ticketPrivacyNotice")}
+            </p>
             <form id="handoff-request-form" style="display:flex; flex-direction:column; gap:0.625rem;">
               <div id="handoff-consent-error" style="display:none; color:#dc2626; font-size:0.8125rem; font-weight:600; padding:0.375rem 0.5rem; background:#fee2e2; border:1px solid #fca5a5; border-radius:0.375rem;" role="alert"></div>
               <label class="checkbox-card">
@@ -4302,6 +4315,9 @@ ${d}
             ${l ? `
                 <div class="not-verified-box" role="alert">
                   <div>${this.t("notVerifiedNotice")}</div>
+                  <p class="ticket-privacy-notice" style="font-size:0.75rem; color:#4b5563; line-height:1.3; margin:0.25rem 0 0.5rem 0;">
+                    ${this.t("ticketPrivacyNotice")}
+                  </p>
                   <div style="display:flex; gap:0.375rem; flex-wrap:wrap;">
                     <button type="button" class="btn btn-primary btn-talk-person" data-msg-id="${t.id}" style="font-size:0.8125rem; min-height:44px; display:inline-flex; align-items:center; gap:0.375rem;">
                       ${r.user} <span>${this.t("talkToPersonButton")}</span>

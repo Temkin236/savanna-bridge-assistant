@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import secrets
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -50,7 +51,9 @@ def verify_widget_token(token: str) -> dict[str, Any] | None:
         clean_token = clean_token[7:].strip()
     try:
         payload = jwt.decode(clean_token, SECRET_KEY, algorithms=["HS256"])
-        return payload
+        if "course_id" in payload or payload.get("role") == "learner":
+            return payload
+        return None
     except (jwt.PyJWTError, Exception):
         return None
 
@@ -63,15 +66,13 @@ def is_learner_token(token: str) -> bool:
     if clean_token.lower().startswith("bearer "):
         clean_token = clean_token[7:].strip()
     try:
-        # Decode without verifying expiration to identify token origin
         unverified = jwt.decode(
             clean_token,
             options={"verify_signature": False, "verify_exp": False},
         )
         if unverified.get("role") == "learner" or "course_id" in unverified:
             return True
-        if unverified.get("role") not in ("helper", "admin", "agent"):
-            return True
+        return unverified.get("role") not in ("helper", "admin", "agent")
     except Exception:
         pass
     return False
@@ -85,6 +86,7 @@ def create_helper_token(
     """Generate a signed HMAC-SHA256 JWT helper token."""
     now = datetime.now(UTC)
     payload = {
+        "jti": secrets.token_hex(16),
         "sub": agent_ref,
         "role": role,
         "iat": int(now.timestamp()),

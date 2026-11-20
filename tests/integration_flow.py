@@ -16,13 +16,17 @@ def request_json(
     method: str,
     path: str,
     payload: dict[str, Any] | None = None,
+    headers: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     body = None if payload is None else json.dumps(payload).encode("utf-8")
+    req_headers = {"Content-Type": "application/json"}
+    if headers:
+        req_headers.update(headers)
     request = Request(
         f"{base_url.rstrip('/')}{path}",
         data=body,
         method=method,
-        headers={"Content-Type": "application/json"},
+        headers=req_headers,
     )
     try:
         with urlopen(request, timeout=10) as response:  # noqa: S310 - local test URL
@@ -82,7 +86,28 @@ def main() -> None:
         },
     )
     handoff_id = handoff["id"]
-    queue = request_json(args.api, "GET", "/handoff/queue")
+
+    # Verify unauthenticated queue request returns 401
+    unauth_rejected = False
+    try:
+        request_json(args.api, "GET", "/handoff/queue")
+    except AssertionError as auth_err:
+        if "401" in str(auth_err):
+            unauth_rejected = True
+    require(unauth_rejected, "Expected 401 Unauthorized for queue access without helper login")
+
+    # Helper signs in to manage queue
+    helper_login = request_json(
+        args.api,
+        "POST",
+        "/api/v1/helper/login",
+        {"username": "agent_sarah", "password": "savanna2026"},
+    )
+    token = helper_login.get("token")
+    require(bool(token), "Helper login did not return session token")
+    helper_headers = {"Authorization": f"Bearer {token}"}
+
+    queue = request_json(args.api, "GET", "/handoff/queue", headers=helper_headers)
     require(any(item["id"] == handoff_id for item in queue["items"]), "Handoff missing from queue")
 
     claimed = request_json(
@@ -90,6 +115,7 @@ def main() -> None:
         "POST",
         f"/handoff/{handoff_id}/claim",
         {"agent_ref": "integration_agent"},
+        headers=helper_headers,
     )
     require(claimed.get("status") == "claimed", "Console claim did not persist")
     reply = request_json(
@@ -97,9 +123,16 @@ def main() -> None:
         "POST",
         f"/handoff/{handoff_id}/reply",
         {"agent_ref": "integration_agent", "message": "I can help by text."},
+        headers=helper_headers,
     )
     require(reply.get("delivered") is True, "Console reply was not delivered")
-    closed = request_json(args.api, "POST", f"/handoff/{handoff_id}/close", {})
+    closed = request_json(
+        args.api,
+        "POST",
+        f"/handoff/{handoff_id}/close",
+        {},
+        headers=helper_headers,
+    )
     require(closed.get("status") == "closed", "Handoff did not close")
 
     request_json(

@@ -30,6 +30,8 @@ def test_unknown_answer_refuses_and_offers_human() -> None:
 
 
 def test_handoff_round_trip() -> None:
+    from savanna_bridge.auth import create_helper_token
+
     created = client.post(
         "/handoff",
         json={
@@ -43,5 +45,15 @@ def test_handoff_round_trip() -> None:
         },
     )
     assert created.status_code == 201
-    queue = client.get("/handoff/queue")
+    assert "ticket_id" in created.json()
+    assert "ticket_secret" in created.json()
+
+    # Queue list strictly requires helper auth (returns 401 without auth)
+    unauth = client.get("/handoff/queue")
+    assert unauth.status_code == 401
+
+    # Authorized helper can read queue
+    token = create_helper_token()
+    queue = client.get("/handoff/queue", headers={"Authorization": f"Bearer {token}"})
+    assert queue.status_code == 200
     assert any(item["id"] == created.json()["id"] for item in queue.json()["items"])

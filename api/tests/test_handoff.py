@@ -21,7 +21,10 @@ def test_handoff_requires_consent() -> None:
     assert res.status_code == 400
 
 
-def test_handoff_full_lifecycle_claim_reply_close() -> None:
+def test_handoff_full_lifecycle_claim_reply_close(monkeypatch) -> None:
+    # Set helper credentials in environment (no default credentials permitted)
+    monkeypatch.setenv("HELPER_PASSWORD", "savanna2026")
+
     # 1. Create handoff
     create_payload = {
         "consent": True,
@@ -38,13 +41,14 @@ def test_handoff_full_lifecycle_claim_reply_close() -> None:
     handoff_data = created.json()
     handoff_id = handoff_data["id"]
     assert handoff_data["status"] == "waiting"
+    assert "ticket_secret" in handoff_data
     assert "https://meet.jit.si/savanna-bridge-demo-" in handoff_data["room_url"]
 
-    # 2. Privacy check: unauthenticated queue read & close from console/browser must be rejected (401)
-    unauth_queue = client.get("/handoff/queue", headers={"Origin": "http://localhost:8080"})
+    # 2. Privacy check: unauthenticated queue read & close must be rejected (401)
+    unauth_queue = client.get("/handoff/queue")
     assert unauth_queue.status_code == 401
 
-    unauth_close = client.post(f"/handoff/{handoff_id}/close", json={}, headers={"Origin": "http://localhost:8080"})
+    unauth_close = client.post(f"/handoff/{handoff_id}/close", json={})
     assert unauth_close.status_code == 401
 
     # 3. Helper login

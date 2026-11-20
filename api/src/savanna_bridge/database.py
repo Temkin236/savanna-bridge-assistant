@@ -532,7 +532,7 @@ class Database:
             conn.commit()
         return self.get_handoff(handoff_id)
 
-    def close_handoff(self, handoff_id: str) -> Handoff | None:
+    def close_handoff(self, handoff_id: str, resolution: str | None = None) -> Handoff | None:
         now_iso = datetime.now(UTC).isoformat()
         with get_connection(self.db_path) as conn:
             conn.execute(
@@ -580,6 +580,7 @@ class Database:
                 )
 
             return {
+                "id": row["id"],
                 "ticket_id": row["id"],
                 "status": row["status"],
                 "question": card_dict.get("context", ""),

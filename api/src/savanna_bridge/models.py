@@ -222,8 +222,8 @@ class AgentAction(BaseModel):
 
 
 class HandoffReplyRequest(BaseModel):
-    agent_ref: str
     message: str
+    agent_ref: str | None = None
 
 
 class HandoffReply(BaseModel):

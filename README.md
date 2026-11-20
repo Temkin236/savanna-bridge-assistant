@@ -447,6 +447,14 @@ The system currently supports:
 
 ## Data and Privacy
 
+### Tickets and privacy
+
+- **Strict Minimal Storage**: Support tickets store only the question text, language preference, explicit consent flags, messages, and timestamps. No account, password, email, or personal identity is ever requested or stored.
+- **Anonymous Secret-Based Access**: When a learner requests human help, the system returns an anonymous `{ ticket_id, ticket_secret }` (random URL-safe string of >= 32 characters). A learner accesses or updates only their own ticket by presenting both. Wrong or missing secrets return a uniform 403 without disclosing whether the ticket exists.
+- **Retention & Auto-Cleanup**: Closed tickets are automatically deleted after `TICKET_RETENTION_DAYS` (default: 7 days). Operators can trigger cleanup via `POST /api/v1/tickets/cleanup`, and cleanup is executed automatically on API startup.
+- **Learner Self-Deletion**: Learners can permanently erase their ticket immediately at any time via `DELETE /api/v1/tickets/{ticket_id}` with their ticket secret.
+- **Helper Isolation & Protected Queue**: Helper queue inspection, claims, replies, and closures require helper authentication (`401` without login, `403` with learner token). Helper credentials are sourced strictly from environment variables (`HELPER_PASSWORD` or `HELPER_API_KEY`) with constant-time verification, session expiration, logout revocation, and rate limiting against brute-force attempts. Public statistics (`/teacher/stats`) are aggregate and anonymous with zero ticket text.
+
 - **What is Collected**:
   - Learner questions (stripped of names/emails for anonymous teacher analytics).
   - Self-declared support preferences (stored in SQLite under an anonymous session reference).

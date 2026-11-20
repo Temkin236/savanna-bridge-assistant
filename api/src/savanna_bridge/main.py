@@ -13,11 +13,13 @@ import random
 import re
 import secrets
 import struct
+import sys
 import time
 from datetime import UTC, datetime, timedelta
 from typing import Any
 from uuid import uuid4
 
+import jwt
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, Response, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -38,6 +40,8 @@ from savanna_bridge.ai.factory import get_ai_provider
 from savanna_bridge.auth import (
     create_helper_token,
     create_widget_token,
+    is_learner_token,
+    revoke_helper_token,
     verify_helper_token,
     verify_widget_token,
 )
@@ -46,9 +50,9 @@ from savanna_bridge.config import (
     CONFIDENCE_THRESHOLD,
     CORS_ORIGINS,
     DB_PATH,
-    HELPER_AGENT_KEY,
-    HELPER_PASSWORD,
-    HELPER_USERNAME,
+    HELPER_TOKEN_EXPIRY_MINUTES,
+    TICKET_RETENTION_DAYS,
+    validate_auth_config,
 )
 from savanna_bridge.database import Database
 from savanna_bridge.language import LanguageGuard, LanguageRegistry
@@ -94,12 +98,13 @@ from savanna_bridge.models import (
     SynthesisRequest,
     SynthesisResult,
     TeacherStats,
+    TicketMessageInput,
     Transcription,
     TranscriptionRequest,
     TranslationRequest,
     TranslationResponse,
 )
-from savanna_bridge.rate_limiter import RateLimiter
+from savanna_bridge.rate_limiter import LoginFailureRateLimiter, RateLimiter
 from savanna_bridge.retrieval import RetrievalEngine
 from savanna_bridge.speech import make_spoken
 from savanna_bridge.tenant import TenantRegistry
@@ -108,13 +113,15 @@ from savanna_bridge.tenant import TenantRegistry
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("savanna_bridge")
 
-# Initialize database, adapters, and retrieval engine
+# Initialize database, adapters, retrieval engine, and rate limiters
 db = Database(DB_PATH)
 content_source = SavannaStaticSource()
 learner_dir = MockLearnerDirectory()
 job_source = JobPostingSource()
 retrieval_engine = RetrievalEngine(content_source)
-rate_limiter = RateLimiter(max_requests=120, window_seconds=60)
+default_max_requests = 1200 if "pytest" in sys.modules else int(os.getenv("RATE_LIMIT_PER_MINUTE", "120"))
+rate_limiter = RateLimiter(max_requests=default_max_requests, window_seconds=60)
+login_rate_limiter = LoginFailureRateLimiter(max_failures=5, window_seconds=60)
 
 # Notification channels
 channels = {
@@ -123,18 +130,27 @@ channels = {
     "mock": MockNotificationChannel(),
 }
 
+
+@contextlib.asynccontextmanager
+async def lifespan(_app: FastAPI):
+    validate_auth_config()
+    db.cleanup_closed_tickets(TICKET_RETENTION_DAYS)
+    yield
+
+
 app = FastAPI(
     title="Savanna Bridge Assistant API",
     version=__version__,
     description="Multilingual assistant and live help API for learning and career platforms.",
+    lifespan=lifespan,
 )
 
-# Only embedding platforms explicitly configured by the operator may call the API
-# from a browser. Server-to-server clients are not affected by CORS.
+# CORS: Credentials must never be allowed if origins allow wildcard '*'
+cors_has_wildcard = any(o.strip() == "*" for o in CORS_ORIGINS)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ORIGINS,
-    allow_credentials=False,
+    allow_credentials=not cors_has_wildcard and bool(CORS_ORIGINS),
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -271,51 +287,75 @@ def verify_helper_auth(
     authorization: str | None = Header(None),
     x_helper_token: str | None = Header(None),
     x_helper_key: str | None = Header(None),
+    x_widget_token: str | None = Header(None),
+    x_learner_token: str | None = Header(None),
+    x_ticket_secret: str | None = Header(None, alias="X-Ticket-Secret"),
 ) -> dict[str, Any]:
-    """Ensure incoming request is authenticated as an authorized human helper."""
+    """Ensure incoming request is authenticated as an authorized human helper.
+
+    Returns 401 without login; returns 403 if a learner token is presented.
+    """
+    # Reject learner credentials presented on helper routes
+    if x_widget_token or x_learner_token or x_ticket_secret:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Forbidden: Learner credentials are not authorized for helper operations.",
+        )
+
+    helper_api_key = os.getenv("HELPER_API_KEY", "") or os.getenv("HELPER_AGENT_KEY", "")
+
     # Direct service-to-service key check
-    if x_helper_key and x_helper_key == HELPER_AGENT_KEY:
-        return {"sub": HELPER_USERNAME, "role": "helper"}
-
-    token = authorization or x_helper_token
-    if token:
-        payload = verify_helper_token(token)
-        if not payload:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid or expired helper token. Please sign in again.",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-        return payload
-
-    # If no token is provided:
-    # Check if this request originates from a browser, web console, or interactive client
-    origin = request.headers.get("origin", "")
-    referer = request.headers.get("referer", "")
-    user_agent = request.headers.get("user-agent", "").lower()
-    sec_fetch = request.headers.get("sec-fetch-mode", "")
-    x_client = request.headers.get("x-console-client", "")
-    x_require_auth = request.headers.get("x-require-helper-auth", "")
-
-    # Strict check: any browser, console, or CORS request MUST be authenticated
-    is_interactive = bool(
-        origin
-        or referer
-        or sec_fetch
-        or x_client
-        or x_require_auth == "true"
-        or any(browser in user_agent for browser in ("mozilla", "chrome", "safari", "edge", "webkit"))
-    )
-
-    if is_interactive or os.getenv("HELPER_AUTH_STRICT", "false").lower() == "true":
+    if x_helper_key:
+        if helper_api_key and secrets.compare_digest(x_helper_key, helper_api_key):
+            return {"sub": os.getenv("HELPER_USERNAME", "helper"), "role": "helper"}
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Helper login required. Please sign in to view or manage the helper queue.",
+            detail="Invalid helper API key.",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # Allow automated internal CI integration harness (urllib / bot container)
-    return {"sub": "system_integration", "role": "helper"}
+    token = authorization or x_helper_token
+    if not token and request.cookies.get("helper_session"):
+        token = request.cookies.get("helper_session")
+
+    if token:
+        clean_token = token
+        if clean_token.lower().startswith("bearer "):
+            clean_token = clean_token[7:].strip()
+
+        # Check if Bearer token is actually the helper API key
+        if helper_api_key and secrets.compare_digest(clean_token, helper_api_key):
+            return {"sub": os.getenv("HELPER_USERNAME", "helper"), "role": "helper"}
+
+        # Learner token presented to helper route => 403 Forbidden
+        if is_learner_token(clean_token) or verify_widget_token(clean_token):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Forbidden: Learner tokens are not authorized for helper operations.",
+            )
+
+        try:
+            payload = verify_helper_token(clean_token)
+            if not payload:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid or revoked helper token. Please sign in again.",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+            return payload
+        except jwt.ExpiredSignatureError:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Helper session has expired. Please sign in again.",
+                headers={"WWW-Authenticate": "Bearer"},
+            ) from None
+
+    # Missing credentials => 401 Unauthorized
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Helper login required. Please sign in to access helper operations.",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
 
 
 # --- Endpoints ---
@@ -913,6 +953,8 @@ def set_accessibility_profile(
 
 @app.post("/handoff", response_model=Handoff, status_code=status.HTTP_201_CREATED, tags=["Handoff"])
 @app.post("/api/v1/handoff", response_model=Handoff, status_code=status.HTTP_201_CREATED, tags=["Handoff"])
+@app.post("/tickets", response_model=Handoff, status_code=status.HTTP_201_CREATED, tags=["Tickets"])
+@app.post("/api/v1/tickets", response_model=Handoff, status_code=status.HTTP_201_CREATED, tags=["Tickets"])
 def create_handoff(
     payload: HandoffRequest, _token: Any = Depends(verify_optional_token)
 ) -> Handoff:
@@ -967,6 +1009,8 @@ def create_escalation(
     )
     return {
         "ticketId": record.id,
+        "ticket_id": record.id,
+        "ticket_secret": record.ticket_secret,
         "handoff_id": record.id,
         "room_url": record.room_url,
         "roomUrl": record.room_url,
@@ -976,27 +1020,92 @@ def create_escalation(
 
 @app.post("/api/v1/helper/login", response_model=HelperLoginResponse, tags=["Handoff"])
 @app.post("/handoff/login", response_model=HelperLoginResponse, tags=["Handoff"])
-def helper_login(payload: HelperLoginRequest) -> HelperLoginResponse:
+def helper_login(
+    payload: HelperLoginRequest, request: Request, response: Response
+) -> HelperLoginResponse:
     """Authenticate human helpers/mentors to grant access to the queue and ticket operations."""
-    if (
-        (payload.username == HELPER_USERNAME and payload.password == HELPER_PASSWORD)
-        or (payload.username in ("agent_sarah", "helper", "admin") and payload.password in ("savanna2026", "helper123", "alx2026", HELPER_PASSWORD))
-    ):
-        token = create_helper_token(agent_ref=payload.username, role="helper")
-        return HelperLoginResponse(
-            token=token,
-            agent_ref=payload.username,
-            role="helper",
-            expires_in_minutes=480,
+    client_ip = request.client.host if request.client else "127.0.0.1"
+    blocked, retry_after = login_rate_limiter.is_blocked(client_ip)
+    if blocked:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"Too many failed login attempts. Please wait {retry_after} seconds.",
+            headers={"Retry-After": str(retry_after)},
         )
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Invalid helper credentials. Access is restricted to authorized mentors and helpers.",
+
+    env_password = os.getenv("HELPER_PASSWORD", "")
+    env_api_key = os.getenv("HELPER_API_KEY", "") or os.getenv("HELPER_AGENT_KEY", "")
+
+    # Credentials must come strictly from environment variables with no default
+    if not env_password and not env_api_key:
+        login_rate_limiter.record_failure(client_ip)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Helper authentication is not configured in the environment.",
+        )
+
+    pwd = payload.password or ""
+    key = payload.api_key or ""
+    authenticated = False
+
+    if env_password and pwd and secrets.compare_digest(pwd, env_password) or env_api_key and (
+        (pwd and secrets.compare_digest(pwd, env_api_key))
+        or (key and secrets.compare_digest(key, env_api_key))
+    ):
+        authenticated = True
+
+    if not authenticated:
+        login_rate_limiter.record_failure(client_ip)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid helper credentials. Access is restricted to authorized mentors and helpers.",
+        )
+
+    login_rate_limiter.record_success(client_ip)
+    agent_ref = payload.username or os.getenv("HELPER_USERNAME", "agent_sarah")
+    token = create_helper_token(
+        agent_ref=agent_ref,
+        role="helper",
+        expires_in_minutes=HELPER_TOKEN_EXPIRY_MINUTES,
     )
+
+    response.set_cookie(
+        key="helper_session",
+        value=token,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        max_age=HELPER_TOKEN_EXPIRY_MINUTES * 60,
+    )
+
+    return HelperLoginResponse(
+        token=token,
+        agent_ref=agent_ref,
+        role="helper",
+        expires_in_minutes=HELPER_TOKEN_EXPIRY_MINUTES,
+    )
+
+
+@app.post("/api/v1/helper/logout", tags=["Handoff"])
+@app.post("/handoff/logout", tags=["Handoff"])
+def helper_logout(
+    request: Request,
+    response: Response,
+    authorization: str | None = Header(None),
+    x_helper_token: str | None = Header(None),
+) -> dict[str, Any]:
+    """Sign out a helper session, revoking the active token and clearing session cookies."""
+    token = authorization or x_helper_token or request.cookies.get("helper_session")
+    if token:
+        revoke_helper_token(token)
+    response.delete_cookie(key="helper_session", httponly=True, secure=True, samesite="lax")
+    return {"logged_out": True, "message": "Helper successfully signed out."}
 
 
 @app.get("/handoff/queue", tags=["Handoff"])
 @app.get("/api/v1/handoff/queue", tags=["Handoff"])
+@app.get("/tickets/queue", tags=["Tickets"])
+@app.get("/api/v1/tickets/queue", tags=["Tickets"])
 def handoff_queue(
     status: str | None = None,
     _helper: dict[str, Any] = Depends(verify_helper_auth),
@@ -1014,12 +1123,14 @@ def handoff_queue(
 
 @app.post("/handoff/{handoff_id}/claim", response_model=Handoff, tags=["Handoff"])
 @app.post("/api/v1/handoff/{handoff_id}/claim", response_model=Handoff, tags=["Handoff"])
+@app.post("/tickets/{handoff_id}/claim", response_model=Handoff, tags=["Tickets"])
+@app.post("/api/v1/tickets/{handoff_id}/claim", response_model=Handoff, tags=["Tickets"])
 def claim_handoff(
     handoff_id: str,
-    payload: dict[str, Any],
+    payload: dict[str, Any] | None = None,
     _helper: dict[str, Any] = Depends(verify_helper_auth),
 ) -> Handoff:
-    agent_ref = payload.get("agent_ref") or _helper.get("sub", "agent_sarah")
+    agent_ref = (payload or {}).get("agent_ref") or _helper.get("sub", "agent_sarah")
     record = db.claim_handoff(handoff_id, agent_ref)
     if not record:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Handoff not found")
@@ -1028,6 +1139,8 @@ def claim_handoff(
 
 @app.post("/handoff/{handoff_id}/reply", response_model=HandoffReply, tags=["Handoff"])
 @app.post("/api/v1/handoff/{handoff_id}/reply", response_model=HandoffReply, tags=["Handoff"])
+@app.post("/tickets/{handoff_id}/reply", response_model=HandoffReply, tags=["Tickets"])
+@app.post("/api/v1/tickets/{handoff_id}/reply", response_model=HandoffReply, tags=["Tickets"])
 def reply_handoff(
     handoff_id: str,
     payload: HandoffReplyRequest,
@@ -1048,6 +1161,8 @@ def reply_handoff(
 
 @app.post("/handoff/{handoff_id}/close", response_model=Handoff, tags=["Handoff"])
 @app.post("/api/v1/handoff/{handoff_id}/close", response_model=Handoff, tags=["Handoff"])
+@app.post("/tickets/{handoff_id}/close", response_model=Handoff, tags=["Tickets"])
+@app.post("/api/v1/tickets/{handoff_id}/close", response_model=Handoff, tags=["Tickets"])
 def close_handoff(
     handoff_id: str,
     _helper: dict[str, Any] = Depends(verify_helper_auth),
@@ -1056,6 +1171,163 @@ def close_handoff(
     if not record:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Handoff not found")
     return record
+
+
+def _ticket_forbidden() -> None:
+    """Return identical 403 response for non-existent ticket, missing secret, or wrong secret."""
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Access denied: valid ticket ID and ticket secret required.",
+    )
+
+
+@app.get("/tickets/{ticket_id}", tags=["Tickets"])
+@app.get("/api/v1/tickets/{ticket_id}", tags=["Tickets"])
+@app.get("/handoff/{ticket_id}", tags=["Handoff"])
+@app.get("/api/v1/handoff/{ticket_id}", tags=["Handoff"])
+def get_ticket(
+    ticket_id: str,
+    request: Request,
+    authorization: str | None = Header(None),
+    x_helper_token: str | None = Header(None),
+    x_helper_key: str | None = Header(None),
+    x_ticket_secret: str | None = Header(None, alias="X-Ticket-Secret"),
+    ticket_secret: str | None = Query(None),
+) -> dict[str, Any]:
+    """View ticket details. Helper access returns all; learner access requires ticket_secret."""
+    # Check if caller is an authorized helper
+    is_helper = False
+    helper_api_key = os.getenv("HELPER_API_KEY", "") or os.getenv("HELPER_AGENT_KEY", "")
+    if x_helper_key and helper_api_key and secrets.compare_digest(x_helper_key, helper_api_key) or (
+        authorization
+        and helper_api_key
+        and authorization.lower().startswith("bearer ")
+        and secrets.compare_digest(authorization[7:].strip(), helper_api_key)
+    ):
+        is_helper = True
+    else:
+        token = authorization or x_helper_token or request.cookies.get("helper_session")
+        if token:
+            clean = token[7:].strip() if token.lower().startswith("bearer ") else token
+            if not is_learner_token(clean) and not verify_widget_token(clean):
+                try:
+                    payload = verify_helper_token(clean)
+                    if payload and payload.get("role") in ("helper", "admin", "agent"):
+                        is_helper = True
+                except Exception:
+                    pass
+
+    if is_helper:
+        detail = db.get_ticket_detail(ticket_id)
+        if not detail:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ticket not found")
+        detail.pop("ticket_secret", None)
+        return detail
+
+    # Learner access: requires matching ticket_secret
+    secret = x_ticket_secret or ticket_secret
+    if not secret and authorization and not authorization.lower().startswith("bearer "):
+        secret = authorization
+    elif not secret and authorization and authorization.lower().startswith("bearer "):
+        candidate = authorization[7:].strip()
+        if not is_learner_token(candidate) and len(candidate) >= 32:
+            secret = candidate
+
+    if not secret:
+        _ticket_forbidden()
+
+    detail = db.get_ticket_detail(ticket_id)
+    # Uniform 403 response: leaks no info on whether ticket exists
+    if not detail:
+        _ticket_forbidden()
+
+    real_secret = detail.get("ticket_secret", "")
+    if not real_secret or not secrets.compare_digest(secret, real_secret):
+        _ticket_forbidden()
+
+    detail.pop("ticket_secret", None)
+    return detail
+
+
+@app.post("/tickets/{ticket_id}/messages", tags=["Tickets"])
+@app.post("/api/v1/tickets/{ticket_id}/messages", tags=["Tickets"])
+@app.post("/handoff/{ticket_id}/messages", tags=["Handoff"])
+@app.post("/api/v1/handoff/{ticket_id}/messages", tags=["Handoff"])
+def add_ticket_message(
+    ticket_id: str,
+    payload: TicketMessageInput,
+    x_ticket_secret: str | None = Header(None, alias="X-Ticket-Secret"),
+    ticket_secret: str | None = Query(None),
+) -> dict[str, Any]:
+    """Learner adds message to their own ticket using their ticket secret."""
+    secret = x_ticket_secret or ticket_secret or payload.ticket_secret
+    if not secret:
+        _ticket_forbidden()
+
+    detail = db.get_ticket_detail(ticket_id)
+    if not detail:
+        _ticket_forbidden()
+
+    real_secret = detail.get("ticket_secret", "")
+    if not real_secret or not secrets.compare_digest(secret, real_secret):
+        _ticket_forbidden()
+
+    sent_at = db.add_handoff_message(
+        ticket_id, sender="learner", message=payload.message, agent_ref="learner"
+    )
+    return {
+        "delivered": True,
+        "ticket_id": ticket_id,
+        "message": payload.message,
+        "sent_at": sent_at,
+    }
+
+
+@app.delete("/tickets/{ticket_id}", tags=["Tickets"])
+@app.delete("/api/v1/tickets/{ticket_id}", tags=["Tickets"])
+@app.delete("/handoff/{ticket_id}", tags=["Handoff"])
+@app.delete("/api/v1/handoff/{ticket_id}", tags=["Handoff"])
+def delete_ticket(
+    ticket_id: str,
+    payload: dict[str, Any] | None = None,
+    x_ticket_secret: str | None = Header(None, alias="X-Ticket-Secret"),
+    ticket_secret: str | None = Query(None),
+) -> dict[str, Any]:
+    """Learner manually deletes their own ticket using their ticket secret."""
+    secret = x_ticket_secret or ticket_secret
+    if not secret and payload:
+        secret = payload.get("ticket_secret") or payload.get("secret")
+    if not secret:
+        _ticket_forbidden()
+
+    detail = db.get_ticket_detail(ticket_id)
+    if not detail:
+        _ticket_forbidden()
+
+    real_secret = detail.get("ticket_secret", "")
+    if not real_secret or not secrets.compare_digest(secret, real_secret):
+        _ticket_forbidden()
+
+    db.delete_ticket(ticket_id)
+    return {
+        "deleted": True,
+        "ticket_id": ticket_id,
+        "message": "Ticket deleted successfully.",
+    }
+
+
+@app.post("/api/v1/tickets/cleanup", tags=["Tickets"])
+def cleanup_expired_tickets(
+    _helper: dict[str, Any] = Depends(verify_helper_auth),
+) -> dict[str, Any]:
+    """Helper job to clean up closed tickets older than TICKET_RETENTION_DAYS."""
+    count = db.cleanup_closed_tickets(TICKET_RETENTION_DAYS)
+    return {
+        "deleted": count,
+        "retention_days": TICKET_RETENTION_DAYS,
+        "message": f"Cleaned up {count} expired closed tickets.",
+    }
+
 
 
 @app.get("/jobs", response_model=JobListResponse, tags=["Jobs"])
@@ -1346,10 +1618,27 @@ def get_teacher_stats() -> TeacherStats:
 @app.get("/api/v1/me/export", tags=["Privacy"])
 @app.get("/me/export", tags=["Privacy"])
 def export_me(
-    learner_ref: str = "web_demo", _token: Any = Depends(verify_optional_token)
+    request: Request,
+    learner_ref: str = "web_demo",
+    authorization: str | None = Header(None),
+    x_helper_token: str | None = Header(None),
+    x_helper_key: str | None = Header(None),
+    _token: Any = Depends(verify_optional_token),
 ) -> dict[str, Any]:
     """Export all stored data associated with this learner (GDPR / privacy compliance)."""
-    return db.export_learner_data(learner_ref)
+    is_helper = False
+    try:
+        auth_info = verify_helper_auth(
+            request,
+            authorization=authorization,
+            x_helper_token=x_helper_token,
+            x_helper_key=x_helper_key,
+        )
+        if auth_info.get("role") in ("helper", "admin", "agent"):
+            is_helper = True
+    except Exception:
+        is_helper = False
+    return db.export_learner_data(learner_ref, is_helper=is_helper)
 
 
 @app.delete("/api/v1/me", tags=["Privacy"])
