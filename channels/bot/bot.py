@@ -16,6 +16,7 @@ import base64
 import contextlib
 import logging
 import os
+import re
 from typing import Any
 
 import httpx
@@ -52,22 +53,35 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(na
 logger = logging.getLogger("savanna_bridge.bot")
 
 
+EMOJI_PATTERN = re.compile(
+    r"[\U00010000-\U0010ffff\u2600-\u26ff\u2700-\u27bf\u2300-\u23ff\u2b50-\u2b55\u200c-\u200d\ufe00-\ufe0f\u203c\u2049\u2139\u2194-\u21aa\u2934\u2935\u3030\u303d\u3297\u3299]"
+)
+
+
+def strip_emojis(text: str) -> str:
+    if not text:
+        return ""
+    cleaned = EMOJI_PATTERN.sub("", text)
+    return re.sub(r" +", " ", cleaned).strip()
+
+
 async def send_safe_message(
     message: types.Message,
     text: str,
     parse_mode: str | None = "Markdown",
     reply_markup: Any = None,
 ) -> Any:
-    """Send message safely, gracefully falling back if Telegram Markdown parsing fails."""
+    """Send message safely, ensuring no emoji and gracefully falling back if Telegram Markdown parsing fails."""
+    clean_text = strip_emojis(text)
     try:
-        return await message.answer(text, parse_mode=parse_mode, reply_markup=reply_markup)
+        return await message.answer(clean_text, parse_mode=parse_mode, reply_markup=reply_markup)
     except Exception as e:
         logger.warning(
             "Failed sending message with parse_mode=%s: %s. Falling back to plain text.",
             parse_mode,
             e,
         )
-        clean = text.replace("**", "").replace("*", "").replace("`", "")
+        clean = clean_text.replace("**", "").replace("*", "").replace("`", "")
         return await message.answer(clean, reply_markup=reply_markup)
 
 
@@ -117,38 +131,38 @@ def make_main_keyboard(lang: str = "am", lite: bool = False) -> ReplyKeyboardMar
 
     if lang == "am":
         kb = [
-            [KeyboardButton(text="❓ ጥያቄ ጠይቅ"), KeyboardButton(text="👥 ከሰው ጋር ተገናኝ")],
-            [KeyboardButton(text="📅 ምን ይጠበቃል?"), KeyboardButton(text="📚 ሞጁሎች")],
-            [KeyboardButton(text="💼 የሥራ እድሎች"), KeyboardButton(text="⚙️ ቅንብሮች")],
-            [KeyboardButton(text="🔗 መለያ አገናኝ"), KeyboardButton(text="❓ እርዳታ")],
+            [KeyboardButton(text="ጥያቄ ጠይቅ"), KeyboardButton(text="ከሰው ጋር ተገናኝ")],
+            [KeyboardButton(text="ምን ይጠበቃል?"), KeyboardButton(text="ሞጁሎች")],
+            [KeyboardButton(text="የሥራ እድሎች"), KeyboardButton(text="ቅንብሮች")],
+            [KeyboardButton(text="መለያ አገናኝ"), KeyboardButton(text="እርዳታ")],
         ]
     elif lang == "om":
         kb = [
-            [KeyboardButton(text="❓ Gaaffii Gaafadhu"), KeyboardButton(text="👥 Nama Waliin Dubbadhu")],
-            [KeyboardButton(text="📅 Yeroo Xumuraa"), KeyboardButton(text="📚 Kutaa Barnootaa")],
-            [KeyboardButton(text="💼 Carraa Hojii"), KeyboardButton(text="⚙️ Qindaa'inoota")],
-            [KeyboardButton(text="🔗 Herrega Walqabsiisi"), KeyboardButton(text="❓ Gargaarsa")],
+            [KeyboardButton(text="Gaaffii Gaafadhu"), KeyboardButton(text="Nama Waliin Dubbadhu")],
+            [KeyboardButton(text="Yeroo Xumuraa"), KeyboardButton(text="Kutaa Barnootaa")],
+            [KeyboardButton(text="Carraa Hojii"), KeyboardButton(text="Qindaa'inoota")],
+            [KeyboardButton(text="Herrega Walqabsiisi"), KeyboardButton(text="Gargaarsa")],
         ]
     elif lang == "ti":
         kb = [
-            [KeyboardButton(text="❓ ሕቶ ሕተት"), KeyboardButton(text="👥 ምስ ሰብ ተራኸብ")],
-            [KeyboardButton(text="📅 ናይ ምዝዛም ዕለት"), KeyboardButton(text="📚 ሞጁላት")],
-            [KeyboardButton(text="💼 ናይ ስራሕ ዕድላት"), KeyboardButton(text="⚙️ ቅጥዕታት")],
-            [KeyboardButton(text="🔗 ኣካውንት ኣላግብ"), KeyboardButton(text="❓ ሓገዝ")],
+            [KeyboardButton(text="ሕቶ ሕተት"), KeyboardButton(text="ምስ ሰብ ተራኸብ")],
+            [KeyboardButton(text="ናይ ምዝዛም ዕለት"), KeyboardButton(text="ሞጁላት")],
+            [KeyboardButton(text="ናይ ስራሕ ዕድላት"), KeyboardButton(text="ቅጥዕታት")],
+            [KeyboardButton(text="ኣካውንት ኣላግብ"), KeyboardButton(text="ሓገዝ")],
         ]
     elif lang == "ar":
         kb = [
-            [KeyboardButton(text="❓ طرح سؤال"), KeyboardButton(text="👥 التحدث مع شخص")],
-            [KeyboardButton(text="📅 المواعيد النهائية"), KeyboardButton(text="📚 وحدات الدورة")],
-            [KeyboardButton(text="💼 فرص العمل"), KeyboardButton(text="⚙️ الإعدادات")],
-            [KeyboardButton(text="🔗 ربط الحساب"), KeyboardButton(text="❓ المساعدة")],
+            [KeyboardButton(text="طرح سؤال"), KeyboardButton(text="التحدث مع شخص")],
+            [KeyboardButton(text="المواعيد النهائية"), KeyboardButton(text="وحدات الدورة")],
+            [KeyboardButton(text="فرص العمل"), KeyboardButton(text="الإعدادات")],
+            [KeyboardButton(text="ربط الحساب"), KeyboardButton(text="المساعدة")],
         ]
     else:
         kb = [
-            [KeyboardButton(text="❓ Ask a Question"), KeyboardButton(text="👥 Talk to a Person")],
-            [KeyboardButton(text="📅 Deadlines"), KeyboardButton(text="📚 Course Modules")],
-            [KeyboardButton(text="💼 Job Alerts"), KeyboardButton(text="⚙️ Settings")],
-            [KeyboardButton(text="🔗 Link Account"), KeyboardButton(text="❓ Help")],
+            [KeyboardButton(text="Ask a Question"), KeyboardButton(text="Talk to a Person")],
+            [KeyboardButton(text="Deadlines"), KeyboardButton(text="Course Modules")],
+            [KeyboardButton(text="Job Alerts"), KeyboardButton(text="Settings")],
+            [KeyboardButton(text="Link Account"), KeyboardButton(text="Help")],
         ]
     return ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
 
@@ -157,15 +171,15 @@ def make_language_inline() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
-                InlineKeyboardButton(text="🇪🇹 አማርኛ (Amharic)", callback_data="lang_am"),
-                InlineKeyboardButton(text="🇬🇧 English", callback_data="lang_en"),
+                InlineKeyboardButton(text="አማርኛ (Amharic)", callback_data="lang_am"),
+                InlineKeyboardButton(text="English", callback_data="lang_en"),
             ],
             [
                 InlineKeyboardButton(text="Afaan Oromoo", callback_data="lang_om"),
                 InlineKeyboardButton(text="ትግርኛ (Tigrinya)", callback_data="lang_ti"),
             ],
             [
-                InlineKeyboardButton(text="🇸🇦 العربية (Arabic)", callback_data="lang_ar"),
+                InlineKeyboardButton(text="العربية (Arabic)", callback_data="lang_ar"),
             ],
         ]
     )
@@ -176,45 +190,45 @@ def make_notification_inline(prefs: dict[str, Any], lang: str = "en") -> InlineK
     jobs = bool(prefs.get("job_alerts", True))
     lessons = bool(prefs.get("new_lessons", True))
 
-    d_icon = "🟢" if deadlines else "🔴"
-    j_icon = "🟢" if jobs else "🔴"
-    l_icon = "🟢" if lessons else "🔴"
+    d_icon = "[ON]" if deadlines else "[OFF]"
+    j_icon = "[ON]" if jobs else "[OFF]"
+    l_icon = "[ON]" if lessons else "[OFF]"
 
     texts = {
         "am": {
-            "deadlines": f"📅 የጊዜ ገደቦች {d_icon}",
-            "jobs": f"💼 የሥራ ማሳወቂያዎች {j_icon}",
-            "lessons": f"📚 የትምህርት/መድረክ ዜናዎች {l_icon}",
-            "all": "🔔 ሁሉንም አብራ",
-            "done": "✅ መዝግብና ቀጥል",
+            "deadlines": f"የጊዜ ገደቦች {d_icon}",
+            "jobs": f"የሥራ ማሳወቂያዎች {j_icon}",
+            "lessons": f"የትምህርት/መድረክ ዜናዎች {l_icon}",
+            "all": "ሁሉንም አብራ",
+            "done": "መዝግብና ቀጥል",
         },
         "om": {
-            "deadlines": f"📅 Yeroo Xumuraa {d_icon}",
-            "jobs": f"💼 Beeksisa Hojii {j_icon}",
-            "lessons": f"📚 Barnootaa fi Oduu {l_icon}",
-            "all": "🔔 Hunda Bansi",
-            "done": "✅ Olkaa'iitii Itti Fufi",
+            "deadlines": f"Yeroo Xumuraa {d_icon}",
+            "jobs": f"Beeksisa Hojii {j_icon}",
+            "lessons": f"Barnootaa fi Oduu {l_icon}",
+            "all": "Hunda Bansi",
+            "done": "Olkaa'iitii Itti Fufi",
         },
         "ti": {
-            "deadlines": f"📅 ናይ ምዝዛም ዕለት {d_icon}",
-            "jobs": f"💼 ናይ ስራሕ ዕድላት {j_icon}",
-            "lessons": f"📚 ትምህርቲን ዜናታትን {l_icon}",
-            "all": "🔔 ኩሉ ኣብርህ",
-            "done": "✅ ኣቐምጥ እሞ ቐጽል",
+            "deadlines": f"ናይ ምዝዛም ዕለት {d_icon}",
+            "jobs": f"ናይ ስራሕ ዕድላት {j_icon}",
+            "lessons": f"ትምህርቲን ዜናታትን {l_icon}",
+            "all": "ኩሉ ኣብርህ",
+            "done": "ኣቐምጥ እሞ ቐጽል",
         },
         "ar": {
-            "deadlines": f"📅 المواعيد النهائية {d_icon}",
-            "jobs": f"💼 تنبيهات الوظائف {j_icon}",
-            "lessons": f"📚 الدروس والتحديثات {l_icon}",
-            "all": "🔔 تفعيل الكل",
-            "done": "✅ حفظ ومتابعة",
+            "deadlines": f"المواعيد النهائية {d_icon}",
+            "jobs": f"تنبيهات الوظائف {j_icon}",
+            "lessons": f"الدروس والتحديثات {l_icon}",
+            "all": "تفعيل الكل",
+            "done": "حفظ ومتابعة",
         },
         "en": {
-            "deadlines": f"📅 Deadlines & Milestones {d_icon}",
-            "jobs": f"💼 Job Alerts {j_icon}",
-            "lessons": f"📚 Lessons & Announcements {l_icon}",
-            "all": "🔔 Enable All",
-            "done": "✅ Save & Continue",
+            "deadlines": f"Deadlines & Milestones {d_icon}",
+            "jobs": f"Job Alerts {j_icon}",
+            "lessons": f"Lessons & Announcements {l_icon}",
+            "all": "Enable All",
+            "done": "Save & Continue",
         },
     }
     t = texts.get(lang, texts["en"])
@@ -316,36 +330,36 @@ async def handle_start(message: types.Message) -> None:
                 state["notification_prefs"] = prefs
                 success_msgs = {
                     "am": (
-                        f"✅ **ከ{platform_title} ክፍለ-ጊዜዎ ጋር ተገናኝቷል!**\n\n"
-                        f"🔔 **የማሳወቂያ ምርጫዎች**\n"
+                        f" **ከ{platform_title} ክፍለ-ጊዜዎ ጋር ተገናኝቷል!**\n\n"
+                        f" **የማሳወቂያ ምርጫዎች**\n"
                         f"ይህ ረዳት በበርካታ መድረኮች (ትምህርት፣ ሥራ፣ ስልጠና) ላይ ያገለግላል። "
                         f"ለዚህ መድረክ በቴሌግራም ምን ዓይነት ማሳወቂያዎችን ማግኘት ይፈልጋሉ?\n\n"
                         f"ከታች ያሉትን ቁልፎች በመጫን ምርጫዎችዎን ያብሩ/ያጥፉ፣ ሲጨርሱ **መዝግብና ቀጥል** የሚለውን ይጫኑ፡"
                     ),
                     "om": (
-                        f"✅ **Kutaan keessan {platform_title} waliin walqabateera!**\n\n"
-                        f"🔔 **Filannoo Beeksisaa**\n"
+                        f" **Kutaan keessan {platform_title} waliin walqabateera!**\n\n"
+                        f" **Filannoo Beeksisaa**\n"
                         f"Gargaaraan kun platformiiwwan hedduu (barnoota, carraa hojii, leenjii) tajaajila. "
                         f"Platformii kanaaf beeksisa akkamii Telegram irratti argachuu barbaaddu?\n\n"
                         f"Banuuf ykn cufuuf cuqqaallawwan armaan gadii tuqaa, yommuu xumurtan **Olkaa'iitii Itti Fufi** tuqaa:"
                     ),
                     "ti": (
-                        f"✅ **ምስ {platform_title} ክፍለ-ግዜኹም ተላጊቡ ኣሎ!**\n\n"
-                        f"🔔 **ናይ መተሓሳሰቢ ምርጫታት**\n"
+                        f" **ምስ {platform_title} ክፍለ-ግዜኹም ተላጊቡ ኣሎ!**\n\n"
+                        f" **ናይ መተሓሳሰቢ ምርጫታት**\n"
                         f"እዚ ረዳኢ ኣብ ዝተፈላለዩ መድረኻት (ትምህርቲ፣ ስራሕ፣ ስልጠና) የገልግል እዩ። "
                         f"ነዚ መድረኽ ዝምልከት ኣብ ቴሌግራም እንታይ ዓይነት መተሓሳሰቢታት ክበጽሓኩም ትደልዩ?\n\n"
                         f"ንምኽፋት ወይ ንምዕጻው ካብ ታሕቲ ዘለዉ መተሓሳሰቢታት ጠውቑ፣ ምስ ወደእኹም **ኣቐምጥ እሞ ቐጽል** ጠውቑ፡"
                     ),
                     "ar": (
-                        f"✅ **تم الاتصال بنجاح مع جلستك في {platform_title}!**\n\n"
-                        f"🔔 **تفضيلات الإشعارات**\n"
+                        f" **تم الاتصال بنجاح مع جلستك في {platform_title}!**\n\n"
+                        f" **تفضيلات الإشعارات**\n"
                         f"يعمل هذا المساعد عبر منصات متعددة (دورات، فرص عمل، وتدريب). "
                         f"ما هي التحديثات التي ترغب في تلقيها على تيليجرام لهذه المنصة؟\n\n"
                         f"اضغط على الأزرار أدناه للتبديل، وعند الانتهاء اضغط على **حفظ ومتابعة**:"
                     ),
                     "en": (
-                        f"✅ **Connected to your session on {platform_title}!**\n\n"
-                        f"🔔 **Notification Preferences**\n"
+                        f" **Connected to your session on {platform_title}!**\n\n"
+                        f" **Notification Preferences**\n"
                         f"This assistant supports multiple platforms (courses, job alerts, training). "
                         f"What updates would you like to receive on Telegram for this platform?\n\n"
                         f"Tap the buttons below to customize your alerts, then tap **Save & Continue**:"
@@ -403,7 +417,7 @@ async def handle_start(message: types.Message) -> None:
             return
 
     welcome_text = (
-        "👋 **እንኳን ወደ ሳቫና ብሪጅ ረዳት በደህና መጡ!**\n"
+        " **እንኳን ወደ ሳቫና ብሪጅ ረዳት በደህና መጡ!**\n"
         "Welcome to the **Savanna Bridge Assistant**.\n"
         "مرحباً بك في مساعد **سافانا بريدج**.\n\n"
         "ቋንቋዎን ይምረጡ / Choose your language / اختر لغتك:\n"
@@ -558,15 +572,15 @@ async def handle_language_choice(callback: types.CallbackQuery) -> None:
     chosen = names.get(lang_code, lang_code)
 
     if lang_code == "am":
-        ack = f"✅ ቋንቋ ወደ **{chosen}** ተቀይሯል።"
+        ack = f" ቋንቋ ወደ **{chosen}** ተቀይሯል።"
     elif lang_code == "om":
-        ack = f"✅ Afaan gara **{chosen}**tti jijjiirameera."
+        ack = f" Afaan gara **{chosen}**tti jijjiirameera."
     elif lang_code == "ti":
-        ack = f"✅ ቋንቋ ናብ **{chosen}** ተቐይሩ ኣሎ።"
+        ack = f" ቋንቋ ናብ **{chosen}** ተቐይሩ ኣሎ።"
     elif lang_code == "ar":
-        ack = f"✅ تم تغيير اللغة إلى **{chosen}**."
+        ack = f" تم تغيير اللغة إلى **{chosen}**."
     else:
-        ack = f"✅ Language switched to **{chosen}**."
+        ack = f" Language switched to **{chosen}**."
 
     await callback.message.answer(
         ack,
@@ -635,27 +649,27 @@ async def handle_notif_done(callback: types.CallbackQuery) -> None:
 
     done_msgs = {
         "am": (
-            f"🎉 **የማሳወቂያ ምርጫዎችዎ ለ{platform_title} ተቀምጠዋል!**\n\n"
+            f" **የማሳወቂያ ምርጫዎችዎ ለ{platform_title} ተቀምጠዋል!**\n\n"
             f"በማንኛውም ጊዜ በ /settings ወይም በምናሌው መቀየር ይችላሉ። "
             f"አሁን ማንኛውንም ጥያቄ በጽሑፍ ወይም በድምጽ ይጠይቁ ወይም 'ከሰው ጋር ተገናኝ' የሚለውን ይጫኑ።"
         ),
         "om": (
-            f"🎉 **Filannoowwan beeksisaa {platform_title} keessanii olkaa'amaniiru!**\n\n"
+            f" **Filannoowwan beeksisaa {platform_title} keessanii olkaa'amaniiru!**\n\n"
             f"Yeroo barbaaddanitti /settings ykn baafata fayyadamuun jijjiiruu dandeessu. "
             f"Amma gaaffii keessan barreeffamaan ykn sagaleedhaan gaafadhaa ykn 'Nama Waliin Dubbadhu' tuqaa."
         ),
         "ti": (
-            f"🎉 **ናይ {platform_title} መተሓሳሰቢ ምርጫታትኩም ተዓቂቦም ኣለዉ!**\n\n"
+            f" **ናይ {platform_title} መተሓሳሰቢ ምርጫታትኩም ተዓቂቦም ኣለዉ!**\n\n"
             f"ኣብ ዝኾነ ግዜ ብ /settings ወይ ብመንዩ ክትቅይርዎም ትኽእሉ ኢኹም። "
             f"ሕጂ ዝኾነ ሕቶ ብጽሑፍ ወይ ብድምጺ ሕተቱ ወይ 'ምስ ሰብ ተራኸብ' ዝብል ጠውቑ።"
         ),
         "ar": (
-            f"🎉 **تم حفظ تفضيلات الإشعارات الخاصة بك لمنصة {platform_title}!**\n\n"
+            f" **تم حفظ تفضيلات الإشعارات الخاصة بك لمنصة {platform_title}!**\n\n"
             f"يمكنك تغييرها في أي وقت عبر /settings أو من القائمة. "
             f"اطرح الآن أي سؤال نصياً أو صوتياً أو اضغط 'التحدث مع شخص'."
         ),
         "en": (
-            f"🎉 **Your notification preferences for {platform_title} have been saved!**\n\n"
+            f" **Your notification preferences for {platform_title} have been saved!**\n\n"
             f"You can adjust them anytime via /settings or the menu. "
             f"Ask any question in plain text or voice, or tap Talk to a person."
         ),
@@ -670,7 +684,7 @@ async def handle_notif_done(callback: types.CallbackQuery) -> None:
 
 
 @router.message(Command("help"))
-@router.message(F.text.in_({"❓ እርዳታ", "❓ Help", "❓ Gargaarsa", "❓ ሓገዝ", "❓ المساعدة"}))
+@router.message(F.text.in_({"እርዳታ", "Help", "Gargaarsa", "ሓገዝ", "المساعدة", "❓ እርዳታ", "❓ Help", "❓ Gargaarsa", "❓ ሓገዝ", "❓ المساعدة"}))
 async def handle_help(message: types.Message) -> None:
     user_id = message.from_user.id if message.from_user else 0
     state = get_user_state(user_id)
@@ -678,7 +692,7 @@ async def handle_help(message: types.Message) -> None:
 
     help_texts = {
         "am": (
-            "📖 **የሳቫና ብሪጅ ረዳት መመሪያ**\n\n"
+            " **የሳቫና ብሪጅ ረዳት መመሪያ**\n\n"
             "ትዕዛዞች:\n"
             "/start - ቋንቋ ለመምረጥና እንደገና ለመጀመር\n"
             "/deadlines - መጪ የማጠናቀቂያ ቀኖችን ለማየት\n"
@@ -689,10 +703,10 @@ async def handle_help(message: types.Message) -> None:
             "/link - የመለያ ማገናኛ ኮድ ለማግኘት\n"
             "/lite - የዳታ ቁጠባን ለማብራት/ለማጥፋት\n"
             "/settings - የማሳወቂያ ቅንብሮችን ለማስተካከል\n\n"
-            "💬 ወይም በቀጥታ ጥያቄዎን በጽሑፍ ወይም በድምጽ ይላኩ።"
+            " ወይም በቀጥታ ጥያቄዎን በጽሑፍ ወይም በድምጽ ይላኩ።"
         ),
         "om": (
-            "📖 **Qajeelfama Gargaaraa Savanna Bridge**\n\n"
+            " **Qajeelfama Gargaaraa Savanna Bridge**\n\n"
             "Ajajoota:\n"
             "/start - Afaan filachuu fi deebisanii eegaluuf\n"
             "/deadlines - Yeroo xumuraa barnootaa arguuf\n"
@@ -703,10 +717,10 @@ async def handle_help(message: types.Message) -> None:
             "/link - Koodii herrega walqunnamsiisuuf\n"
             "/lite - Quusannaa daataa banuu/cufuuf\n"
             "/settings - Qindaa'inoota beeksisaa to'achuuf\n\n"
-            "💬 Ykn kallattiin gaaffii keessan barreessaa ykn sagaleedhaan ergaa."
+            " Ykn kallattiin gaaffii keessan barreessaa ykn sagaleedhaan ergaa."
         ),
         "ti": (
-            "📖 **መምርሒ ሓጋዚ ሳቫና ብሪጅ**\n\n"
+            " **መምርሒ ሓጋዚ ሳቫና ብሪጅ**\n\n"
             "ትእዛዛት:\n"
             "/start - ቋንቋ ንምምራጽን እንደገና ንምጅማርን\n"
             "/deadlines - ናይ ምዝዛም ዕለታት ንምርኣይ\n"
@@ -717,10 +731,10 @@ async def handle_help(message: types.Message) -> None:
             "/link - ናይ ምትእስሳር ኮድ ንምርካብ\n"
             "/lite - ቍጠባ ዳታ ንምኽፋት/ንምዕጻው\n"
             "/settings - ቅጥዕታት መተሓሳሰቢ ንምስትኻኻል\n\n"
-            "💬 ወይ ድማ ብቐጥታ ሕቶኹም ብጽሑፍ ወይ ብድምጺ ስደዱ።"
+            " ወይ ድማ ብቐጥታ ሕቶኹም ብጽሑፍ ወይ ብድምጺ ስደዱ።"
         ),
         "ar": (
-            "📖 **دليل مساعد سافانا بريدج**\n\n"
+            " **دليل مساعد سافانا بريدج**\n\n"
             "الأوامر المتاحة:\n"
             "/start - لاختيار اللغة وإعادة تشغيل المساعد\n"
             "/deadlines - لعرض المواعيد النهائية للمقررات\n"
@@ -731,10 +745,10 @@ async def handle_help(message: types.Message) -> None:
             "/link - للحصول على رمز ربط الحساب بدون هوية\n"
             "/lite - لتشغيل أو إيقاف وضع توفير البيانات\n"
             "/settings - لإدارة إعدادات التنبيهات والإشعارات\n\n"
-            "💬 أو يمكنك ببساطة كتابة سؤالك أو إرسال رسالة صوتية."
+            " أو يمكنك ببساطة كتابة سؤالك أو إرسال رسالة صوتية."
         ),
         "en": (
-            "📖 **Savanna Bridge Assistant Help**\n\n"
+            " **Savanna Bridge Assistant Help**\n\n"
             "Commands:\n"
             "/start - Choose language and restart\n"
             "/deadlines - View upcoming course deadlines\n"
@@ -745,7 +759,7 @@ async def handle_help(message: types.Message) -> None:
             "/link - Get one-time barrier-free account linking code\n"
             "/lite - Toggle low-bandwidth data saving mode\n"
             "/settings - Manage notification preferences\n\n"
-            "💬 Or simply type your question or send a voice message."
+            " Or simply type your question or send a voice message."
         ),
     }
     await send_safe_message(message, help_texts.get(lang, help_texts["en"]))
@@ -760,19 +774,19 @@ async def handle_lite_toggle(message: types.Message) -> None:
 
     if state["lite_mode"]:
         msgs = {
-            "am": "⚡ **የዳታ ቁጠባ በርቷል**: አጫጭር የጽሑፍ መልሶች እና የቁጥር ምላሾች (1, 2, 3)።",
-            "om": "⚡ **Quusannaa Daataa Banameera**: Deebiiwwan gabaaboo fi lakkoofsa (1, 2, 3).",
-            "ti": "⚡ **ቍጠባ ዳታ ተኸፊቱ**: ሓጸርቲ ጽሑፋዊ መልስታትን ቁጽርታትን (1, 2, 3)።",
-            "ar": "⚡ **وضع توفير البيانات مفعل**: إجابات نصية موجزة وردود رقمية (1, 2, 3).",
-            "en": "⚡ **Lite Mode On**: Text-only, concise answers, and numeric replies (1, 2, 3).",
+            "am": " **የዳታ ቁጠባ በርቷል**: አጫጭር የጽሑፍ መልሶች እና የቁጥር ምላሾች (1, 2, 3)።",
+            "om": " **Quusannaa Daataa Banameera**: Deebiiwwan gabaaboo fi lakkoofsa (1, 2, 3).",
+            "ti": " **ቍጠባ ዳታ ተኸፊቱ**: ሓጸርቲ ጽሑፋዊ መልስታትን ቁጽርታትን (1, 2, 3)።",
+            "ar": " **وضع توفير البيانات مفعل**: إجابات نصية موجزة وردود رقمية (1, 2, 3).",
+            "en": " **Lite Mode On**: Text-only, concise answers, and numeric replies (1, 2, 3).",
         }
     else:
         msgs = {
-            "am": "⚡ **መደበኛ ሁኔታ ተመልሷል**: ሙሉ ሜኑ እና የድምጽ መልሶች ተከፍተዋል።",
-            "om": "⚡ **Haalli Idilee Deebi'eera**: Menyuu guutuu fi deebiiwwan sagalee banamaniiru.",
-            "ti": "⚡ **ስሩዕ ኩነታት ተመሊሱ**: ምሉእ ሜኑን ናይ ድምጺ መልስታትን ተኸፊቱ ኣሎ።",
-            "ar": "⚡ **تم استعادة الوضع القياسي**: القوائم الكاملة والتشغيل الصوتي مفعلة.",
-            "en": "⚡ **Lite Mode Off**: Standard rich mode restored with audio playback and full menus.",
+            "am": " **መደበኛ ሁኔታ ተመልሷል**: ሙሉ ሜኑ እና የድምጽ መልሶች ተከፍተዋል።",
+            "om": " **Haalli Idilee Deebi'eera**: Menyuu guutuu fi deebiiwwan sagalee banamaniiru.",
+            "ti": " **ስሩዕ ኩነታት ተመሊሱ**: ምሉእ ሜኑን ናይ ድምጺ መልስታትን ተኸፊቱ ኣሎ።",
+            "ar": " **تم استعادة الوضع القياسي**: القوائم الكاملة والتشغيل الصوتي مفعلة.",
+            "en": " **Lite Mode Off**: Standard rich mode restored with audio playback and full menus.",
         }
 
     await send_safe_message(
@@ -783,7 +797,7 @@ async def handle_lite_toggle(message: types.Message) -> None:
 
 
 @router.message(Command("link"))
-@router.message(F.text.in_({"🔗 መለያ አገናኝ", "🔗 Link Account", "🔗 Herrega Walqabsiisi", "🔗 ኣካውንት ኣላግብ", "🔗 ربط الحساب"}))
+@router.message(F.text.in_({"መለያ አገናኝ", "Link Account", "Herrega Walqabsiisi", "ኣካውንት ኣላግብ", "ربط الحساب", "🔗 መለያ አገናኝ", "🔗 Link Account", "🔗 Herrega Walqabsiisi", "🔗 ኣካውንት ኣላግብ", "🔗 ربط الحساب"}))
 async def handle_link(message: types.Message) -> None:
     user_id = message.from_user.id if message.from_user else 0
     state = get_user_state(user_id)
@@ -802,7 +816,7 @@ async def handle_link(message: types.Message) -> None:
         code = res["code"]
         link_msgs = {
             "am": (
-                f"🔗 **የመለያ ማገናኛ ኮድ**\n\n"
+                f" **የመለያ ማገናኛ ኮድ**\n\n"
                 f"የእርስዎ ኮድ: `{code}`\n"
                 f"ይህ ኮድ ለ 10 ደቂቃ ብቻ ያገለግላል። በድር ገጹ ላይ ባለው የረዳት መስኮት ያስገቡት።\n\n"
                 f"ወይም ከድር ገጹ ኮድ ካገኙ እዚህ በሚከተለው መልኩ ይላኩ:\n"
@@ -810,7 +824,7 @@ async def handle_link(message: types.Message) -> None:
                 f"*ምንም መታወቂያ ወይም የሕክምና ማረጋገጫ አይጠየቅም።*"
             ),
             "om": (
-                f"🔗 **Koodii Herrega Walqunnamsiisuu**\n\n"
+                f" **Koodii Herrega Walqunnamsiisuu**\n\n"
                 f"Koodii keessan: `{code}`\n"
                 f"Koodiin kun daqiiqaa 10 qofaaf hojjeta. Fuula weebsaayitii irratti galchaa.\n\n"
                 f"Ykn koodii weebsaayitii irraa argattan asitti ergaa:\n"
@@ -818,7 +832,7 @@ async def handle_link(message: types.Message) -> None:
                 f"*Waraqaan eenyummaa ykn ragaan yaalaa hin gaafatamu.*"
             ),
             "ti": (
-                f"🔗 **ናይ ኣካውንት መላገቢ ኮድ**\n\n"
+                f" **ናይ ኣካውንት መላገቢ ኮድ**\n\n"
                 f"ኮድኩም: `{code}`\n"
                 f"እዚ ኮድ ን10 ደቒቕ ጥራይ የገልግል። ኣብ መርበብ ሓበሬታ የእትውዎ።\n\n"
                 f"ወይ ድማ ካብ መርበብ ሓበሬታ ዝረኸብክምዎ ኮድ ኣብዚ ስደዱ:\n"
@@ -826,7 +840,7 @@ async def handle_link(message: types.Message) -> None:
                 f"*ዋላ ሓደ መታወቒ ወይ ናይ ሕክምና መርትዖ ኣይሕተትን እዩ።*"
             ),
             "ar": (
-                f"🔗 **رمز ربط الحساب**\n\n"
+                f" **رمز ربط الحساب**\n\n"
                 f"الرمز الخاص بك: `{code}`\n"
                 f"صالح لمدة 10 دقائق فقط. أدخل هذا الرمز في نافذة المساعد على موقع الويب.\n\n"
                 f"أو إذا حصلت على رمز من الموقع، أرسله هنا:\n"
@@ -834,7 +848,7 @@ async def handle_link(message: types.Message) -> None:
                 f"*لا يُطلب أي إثبات هوية أو وثائق طبية على الإطلاق.*"
             ),
             "en": (
-                f"🔗 **Account Link Code**\n\n"
+                f" **Account Link Code**\n\n"
                 f"Your one-time code: `{code}`\n"
                 f"Expires in 10 minutes. Enter this code on the web assistant widget.\n\n"
                 f"Or if you already generated a code on the web widget, reply here with:\n"
@@ -845,11 +859,11 @@ async def handle_link(message: types.Message) -> None:
         await send_safe_message(message, link_msgs.get(lang, link_msgs["en"]))
     else:
         err_msgs = {
-            "am": "⚠️ ኮዱን ማግኘት አልተቻለም። እባክዎ እንደገና ይሞክሩ።",
-            "om": "⚠️ Koodii argachuun hin danda'amne. Mee irra deebi'aa yaalaa.",
-            "ti": "⚠️ ኮድ ምርካብ ኣይተኻእለን። በጃኹም ደጊምኩም ፈትኑ።",
-            "ar": "⚠️ تعذر إنشاء رمز الربط. يرجى المحاولة مرة أخرى.",
-            "en": "⚠️ Could not generate link code. Please try again.",
+            "am": " ኮዱን ማግኘት አልተቻለም። እባክዎ እንደገና ይሞክሩ።",
+            "om": " Koodii argachuun hin danda'amne. Mee irra deebi'aa yaalaa.",
+            "ti": " ኮድ ምርካብ ኣይተኻእለን። በጃኹም ደጊምኩም ፈትኑ።",
+            "ar": " تعذر إنشاء رمز الربط. يرجى المحاولة مرة أخرى.",
+            "en": " Could not generate link code. Please try again.",
         }
         await send_safe_message(message, err_msgs.get(lang, err_msgs["en"]))
 
@@ -888,28 +902,28 @@ async def handle_confirm(message: types.Message) -> None:
         state["notification_prefs"] = prefs
         ok_msgs = {
             "am": (
-                f"✅ **መለያዎ በተሳካ ሁኔታ ተገናኝቷል ({platform_title})!**\n\n"
-                f"🔔 ለዚህ መድረክ በቴሌግራም ምን ዓይነት ማሳወቂያዎችን ማግኘት ይፈልጋሉ?\n"
+                f" **መለያዎ በተሳካ ሁኔታ ተገናኝቷል ({platform_title})!**\n\n"
+                f" ለዚህ መድረክ በቴሌግራም ምን ዓይነት ማሳወቂያዎችን ማግኘት ይፈልጋሉ?\n"
                 f"ከታች ያሉትን ቁልፎች በመጫን ያስተካክሉ፡"
             ),
             "om": (
-                f"✅ **Herregni keessan milkaa'inaan walqabateera ({platform_title})!**\n\n"
-                f"🔔 Platformii kanaaf beeksisa akkamii barbaaddu?\n"
+                f" **Herregni keessan milkaa'inaan walqabateera ({platform_title})!**\n\n"
+                f" Platformii kanaaf beeksisa akkamii barbaaddu?\n"
                 f"Cuqqaallawwan armaan gadii fayyadamaa:"
             ),
             "ti": (
-                f"✅ **ኣካውንትኩም ብዓወት ተላጊቡ ኣሎ ({platform_title})!**\n\n"
-                f"🔔 ነዚ መድረኽ ዝምልከት እንታይ ዓይነት መተሓሳሰቢታት ክበጽሓኩም ትደልዩ?\n"
+                f" **ኣካውንትኩም ብዓወት ተላጊቡ ኣሎ ({platform_title})!**\n\n"
+                f" ነዚ መድረኽ ዝምልከት እንታይ ዓይነት መተሓሳሰቢታት ክበጽሓኩም ትደልዩ?\n"
                 f"ካብ ታሕቲ ዘለዉ መተሓሳሰቢታት ተጠቐሙ:"
             ),
             "ar": (
-                f"✅ **تم ربط حسابك بنجاح ({platform_title})!**\n\n"
-                f"🔔 ما هي التحديثات التي ترغب في تلقيها لهذه المنصة على تيليجرام؟\n"
+                f" **تم ربط حسابك بنجاح ({platform_title})!**\n\n"
+                f" ما هي التحديثات التي ترغب في تلقيها لهذه المنصة على تيليجرام؟\n"
                 f"استخدم الأزرار أدناه لتخصيص تنبيهاتك:"
             ),
             "en": (
-                f"✅ **Account successfully linked ({platform_title})!**\n\n"
-                f"🔔 What notifications would you like to receive on Telegram for this platform?\n"
+                f" **Account successfully linked ({platform_title})!**\n\n"
+                f" What notifications would you like to receive on Telegram for this platform?\n"
                 f"Use the buttons below to customize alerts:"
             ),
         }
@@ -920,11 +934,11 @@ async def handle_confirm(message: types.Message) -> None:
         )
     else:
         fail_msgs = {
-            "am": "❌ ኮዱ ትክክል አይደለም ወይም ጊዜው አልፏል። እባክዎ እንደገና ይሞክሩ።",
-            "om": "❌ Koodiin dogoggora ykn yeroon isaa darbeera. Mee irra deebi'aa yaalaa.",
-            "ti": "❌ ኮድ ጌጋ እዩ ወይ ግዜኡ ሓሊፉ። በጃኹም ደጊምኩም ፈትኑ።",
-            "ar": "❌ الرمز غير صحيح أو انتهت صلاحيته. يرجى المحاولة مرة أخرى.",
-            "en": "❌ Invalid or expired code. Please request a fresh code and try again.",
+            "am": " ኮዱ ትክክል አይደለም ወይም ጊዜው አልፏል። እባክዎ እንደገና ይሞክሩ።",
+            "om": " Koodiin dogoggora ykn yeroon isaa darbeera. Mee irra deebi'aa yaalaa.",
+            "ti": " ኮድ ጌጋ እዩ ወይ ግዜኡ ሓሊፉ። በጃኹም ደጊምኩም ፈትኑ።",
+            "ar": " الرمز غير صحيح أو انتهت صلاحيته. يرجى المحاولة مرة أخرى.",
+            "en": " Invalid or expired code. Please request a fresh code and try again.",
         }
         await send_safe_message(message, fail_msgs.get(lang, fail_msgs["en"]))
 
@@ -938,11 +952,11 @@ async def handle_unlink(message: types.Message) -> None:
     await call_api("POST", "/link/revoke", {"link_id": f"link_{user_id}"})
     await call_api("POST", "/link/disconnect", {"learner_ref": state["learner_ref"]})
     unlink_msgs = {
-        "am": "🔓 መለያዎ በተሳካ ሁኔታ ተለያይቷል። የግል ምርጫዎችዎ ከእንግዲህ አይመሳሰሉም።",
-        "om": "🔓 Herregni keessan wal-gadhiiseera. Filannoowwan keessan gara fuulduraatti wal hin simatan.",
-        "ti": "🔓 ኣካውንትኩም ተፈላልዩ ኣሎ። ምርጫታትኩም ድሕሪ ሕጂ ኣይመሳሰሉን እዮም።",
-        "ar": "🔓 تم إلغاء ربط حسابك بنجاح. لن تتم مزامنة تفضيلاتك بعد الآن.",
-        "en": "🔓 Account unlinked successfully. Your preferences will no longer sync with the web assistant.",
+        "am": " መለያዎ በተሳካ ሁኔታ ተለያይቷል። የግል ምርጫዎችዎ ከእንግዲህ አይመሳሰሉም።",
+        "om": " Herregni keessan wal-gadhiiseera. Filannoowwan keessan gara fuulduraatti wal hin simatan.",
+        "ti": " ኣካውንትኩም ተፈላልዩ ኣሎ። ምርጫታትኩም ድሕሪ ሕጂ ኣይመሳሰሉን እዮም።",
+        "ar": " تم إلغاء ربط حسابك بنجاح. لن تتم مزامنة تفضيلاتك بعد الآن.",
+        "en": " Account unlinked successfully. Your preferences will no longer sync with the web assistant.",
     }
     await send_safe_message(message, unlink_msgs.get(lang, unlink_msgs["en"]))
 
@@ -950,7 +964,7 @@ async def handle_unlink(message: types.Message) -> None:
 
 @router.message(Command("handoff"))
 @router.message(
-    F.text.in_({"👥 ከሰው ጋር ተገናኝ", "👥 Talk to a Person", "👥 Nama Waliin Dubbadhu", "👥 ምስ ሰብ ተራኸብ", "👥 التحدث مع شخص"})
+    F.text.in_({"ከሰው ጋር ተገናኝ", "Talk to a Person", "Nama Waliin Dubbadhu", "ምስ ሰብ ተራኸብ", "التحدث مع شخص", "👥 ከሰው ጋር ተገናኝ", "👥 Talk to a Person", "👥 Nama Waliin Dubbadhu", "👥 ምስ ሰብ ተራኸብ", "👥 التحدث مع شخص"})
 )
 async def handle_handoff(message: types.Message) -> None:
     user_id = message.from_user.id if message.from_user else 0
@@ -974,45 +988,45 @@ async def handle_handoff(message: types.Message) -> None:
 
         handoff_msgs = {
             "am": (
-                f"👤 **ለሰው ባለሙያ ጥያቄዎ ተላልፏል!** (ጥያቄ ቁጥር: `{handoff_id}`)\n\n"
-                f"የባለሙያ ድጋፍ ክፍል አገናኝ:\n👉 {room_url}\n\n"
-                f"ℹ️ *ማሳሰቢያ:* ማያ ገጽ ማጋራትን የሚቆጣጠሩት እርስዎ ብቻ ነዎት። እርስዎ ሳይፈቅዱ ምንም ነገር አይጋራም።"
+                f" **ለሰው ባለሙያ ጥያቄዎ ተላልፏል!** (ጥያቄ ቁጥር: `{handoff_id}`)\n\n"
+                f"የባለሙያ ድጋፍ ክፍል አገናኝ:\n {room_url}\n\n"
+                f"ℹ *ማሳሰቢያ:* ማያ ገጽ ማጋራትን የሚቆጣጠሩት እርስዎ ብቻ ነዎት። እርስዎ ሳይፈቅዱ ምንም ነገር አይጋራም።"
             ),
             "om": (
-                f"👤 **Gargaaraa namaaf dhiyaateera!** (Tikkeetii: `{handoff_id}`)\n\n"
-                f"Liinkii kutaa kallattii:\n👉 {room_url}\n\n"
-                f"ℹ️ *Hubachiisa:* Iskiriinii qooduu guutummaatti to'achuu kan dandeessan isin qofa. Hayyama keessan malee homtuu hin qoodamu."
+                f" **Gargaaraa namaaf dhiyaateera!** (Tikkeetii: `{handoff_id}`)\n\n"
+                f"Liinkii kutaa kallattii:\n {room_url}\n\n"
+                f"ℹ *Hubachiisa:* Iskiriinii qooduu guutummaatti to'achuu kan dandeessan isin qofa. Hayyama keessan malee homtuu hin qoodamu."
             ),
             "ti": (
-                f"👤 **ናብ ሰብ ሓጋዚ ሕቶኹም ተመሓላሊፉ ኣሎ!** (ቑጽሪ ትኬት: `{handoff_id}`)\n\n"
-                f"ናይ ቀጥታ መራኸቢ ሊንክ:\n👉 {room_url}\n\n"
-                f"ℹ️ *መተሓሳሰቢ:* ስክሪን ምክፋል ንስኻ ጥራይ ኢኻ ትቆጻጸሮ። ብዘይ ፍቓድካ ዋላ ሓደ ነገር ኣይክፈልን እዩ።"
+                f" **ናብ ሰብ ሓጋዚ ሕቶኹም ተመሓላሊፉ ኣሎ!** (ቑጽሪ ትኬት: `{handoff_id}`)\n\n"
+                f"ናይ ቀጥታ መራኸቢ ሊንክ:\n {room_url}\n\n"
+                f"ℹ *መተሓሳሰቢ:* ስክሪን ምክፋል ንስኻ ጥራይ ኢኻ ትቆጻጸሮ። ብዘይ ፍቓድካ ዋላ ሓደ ነገር ኣይክፈልን እዩ።"
             ),
             "ar": (
-                f"👤 **تم إخطار فريق الدعم البشري!** (رقم التذكرة: `{handoff_id}`)\n\n"
-                f"رابط الغرفة المباشرة:\n👉 {room_url}\n\n"
-                f"ℹ️ *ملاحظة:* أنت وحدك من يتحكم في مشاركة الشاشة. لن تتم مشاركة أي شيء بدون موافقتك الصريحة."
+                f" **تم إخطار فريق الدعم البشري!** (رقم التذكرة: `{handoff_id}`)\n\n"
+                f"رابط الغرفة المباشرة:\n {room_url}\n\n"
+                f"ℹ *ملاحظة:* أنت وحدك من يتحكم في مشاركة الشاشة. لن تتم مشاركة أي شيء بدون موافقتك الصريحة."
             ),
             "en": (
-                f"👤 **A support person has been notified!** (Ticket: `{handoff_id}`)\n\n"
-                f"Live room link:\n👉 {room_url}\n\n"
-                f"ℹ️ *Notice:* You have full control over screen sharing. Nothing is shared without your explicit action."
+                f" **A support person has been notified!** (Ticket: `{handoff_id}`)\n\n"
+                f"Live room link:\n {room_url}\n\n"
+                f"ℹ *Notice:* You have full control over screen sharing. Nothing is shared without your explicit action."
             ),
         }
         await send_safe_message(message, handoff_msgs.get(lang, handoff_msgs["en"]))
     else:
         err_msgs = {
-            "am": "⚠️ እርዳታ ለማግኘት አልተቻለም። እባክዎ ጥቂት ቆይተው እንደገና ይሞክሩ።",
-            "om": "⚠️ Gargaarsa argachuun hin danda'amne. Mee xiqqoo booda yaalaa.",
-            "ti": "⚠️ ሓገዝ ምርካብ ኣይተኻእለን። በጃኹም ጸኒሕኩም ደጊምኩም ፈትኑ።",
-            "ar": "⚠️ تعذر الاتصال بفريق الدعم حالياً. يرجى المحاولة بعد قليل.",
-            "en": "⚠️ Could not connect to support. Please try again shortly.",
+            "am": " እርዳታ ለማግኘት አልተቻለም። እባክዎ ጥቂት ቆይተው እንደገና ይሞክሩ።",
+            "om": " Gargaarsa argachuun hin danda'amne. Mee xiqqoo booda yaalaa.",
+            "ti": " ሓገዝ ምርካብ ኣይተኻእለን። በጃኹም ጸኒሕኩም ደጊምኩም ፈትኑ።",
+            "ar": " تعذر الاتصال بفريق الدعم حالياً. يرجى المحاولة بعد قليل.",
+            "en": " Could not connect to support. Please try again shortly.",
         }
         await send_safe_message(message, err_msgs.get(lang, err_msgs["en"]))
 
 
 @router.message(
-    F.text.in_({"❓ ጥያቄ ጠይቅ", "❓ Ask a Question", "❓ Gaaffii Gaafadhu", "❓ ሕቶ ሕተት", "❓ طرح سؤال"})
+    F.text.in_({"ጥያቄ ጠይቅ", "Ask a Question", "Gaaffii Gaafadhu", "ሕቶ ሕተት", "طرح سؤال", "❓ ጥያቄ ጠይቅ", "❓ Ask a Question", "❓ Gaaffii Gaafadhu", "❓ ሕቶ ሕተት", "❓ طرح سؤال"})
 )
 async def handle_ask_prompt(message: types.Message) -> None:
     user_id = message.from_user.id if message.from_user else 0
@@ -1021,23 +1035,23 @@ async def handle_ask_prompt(message: types.Message) -> None:
 
     prompts = {
         "am": (
-            "❓ **ጥያቄዎን ይጻፉ ወይም የድምጽ መልዕክት ይላኩ**\n\n"
+            " **ጥያቄዎን ይጻፉ ወይም የድምጽ መልዕክት ይላኩ**\n\n"
             "ስለ ኮርሱ፣ ስለ ምዝገባ፣ ስለ ማጠናቀቂያ ቀኖች ወይም ስለ ሞጁሎች የሚፈልጉትን ይጠይቁ።"
         ),
         "om": (
-            "❓ **Gaaffii keessan barreessaa ykn sagaleedhaan ergaa**\n\n"
+            " **Gaaffii keessan barreessaa ykn sagaleedhaan ergaa**\n\n"
             "Waa'ee barnootaa, galmee, ykn qabiyyee kamiyyuu gaafachuu dandeessu."
         ),
         "ti": (
-            "❓ **ሕቶኹም ብጽሑፍ ወይ ብድምጺ ስደዱ**\n\n"
+            " **ሕቶኹም ብጽሑፍ ወይ ብድምጺ ስደዱ**\n\n"
             "ብዛዕባ ትሕዝቶ ኮርስ፣ ምዝገባ፣ ወይ ካልእ ዝኾነ ሕቶ ክትሓቱ ትኽእሉ ኢኹም።"
         ),
         "ar": (
-            "❓ **يرجى كتابة سؤالك أو إرسال رسالة صوتية.**\n\n"
+            " **يرجى كتابة سؤالك أو إرسال رسالة صوتية.**\n\n"
             "يمكنك السؤال عن وحدات الدورة، المواعيد النهائية، أو التنقل في المنصة."
         ),
         "en": (
-            "❓ **Please type your question or send a voice message.**\n\n"
+            " **Please type your question or send a voice message.**\n\n"
             "You can ask about course modules, deadlines, assignments, or platform navigation."
         ),
     }
@@ -1046,7 +1060,7 @@ async def handle_ask_prompt(message: types.Message) -> None:
 
 @router.message(Command("deadlines"))
 @router.message(
-    F.text.in_({"📅 ምን ይጠበቃል?", "📅 Deadlines", "📅 Yeroo Xumuraa", "📅 ናይ ምዝዛም ዕለት", "📅 المواعيد النهائية"})
+    F.text.in_({"ምን ይጠበቃል?", "Deadlines", "Yeroo Xumuraa", "ናይ ምዝዛም ዕለት", "المواعيد النهائية", "📅 ምን ይጠበቃል?", "📅 Deadlines", "📅 Yeroo Xumuraa", "📅 ናይ ምዝዛም ዕለት", "📅 المواعيد النهائية"})
 )
 async def handle_deadlines(message: types.Message) -> None:
     user_id = message.from_user.id if message.from_user else 0
@@ -1066,11 +1080,11 @@ async def handle_deadlines(message: types.Message) -> None:
         return
 
     titles = {
-        "am": ("📅 **መጪ የኮርስ ማጠናቀቂያዎች:**\n", "ቀን", "ሊንክ", "እርዳታ ከፈለጉ `2` ብለው ይመልሱ።"),
-        "om": ("📅 **Yeroo Xumuraa Barnootaa Mirkanaa'e:**\n", "Yeroo", "Liinkii", "Gargaarsa yoo barbaaddan `2` jedhaa deebisaa."),
-        "ti": ("📅 **መጪ ናይ ኮርስ ምዝዛም ዕለታት:**\n", "ዕለት", "ሊንክ", "ሓገዝ እንተደሊኹም `2` ኢልኩም መልሱ።"),
-        "ar": ("📅 **المواعيد النهائية القادمة للدورة:**\n", "تاريخ الاستحقاق", "الرابط", "إذا كنت بحاجة للمساعدة، أرسل `2`."),
-        "en": ("📅 **Upcoming Course Deadlines:**\n", "Due", "Link", "Reply `2` if you need assistance."),
+        "am": (" **መጪ የኮርስ ማጠናቀቂያዎች:**\n", "ቀን", "ሊንክ", "እርዳታ ከፈለጉ `2` ብለው ይመልሱ።"),
+        "om": (" **Yeroo Xumuraa Barnootaa Mirkanaa'e:**\n", "Yeroo", "Liinkii", "Gargaarsa yoo barbaaddan `2` jedhaa deebisaa."),
+        "ti": (" **መጪ ናይ ኮርስ ምዝዛም ዕለታት:**\n", "ዕለት", "ሊንክ", "ሓገዝ እንተደሊኹም `2` ኢልኩም መልሱ።"),
+        "ar": (" **المواعيد النهائية القادمة للدورة:**\n", "تاريخ الاستحقاق", "الرابط", "إذا كنت بحاجة للمساعدة، أرسل `2`."),
+        "en": (" **Upcoming Course Deadlines:**\n", "Due", "Link", "Reply `2` if you need assistance."),
     }
     header, due_lbl, link_lbl, helper = titles.get(lang, titles["en"])
     lines = [header]
@@ -1084,7 +1098,7 @@ async def handle_deadlines(message: types.Message) -> None:
 
 @router.message(Command("modules"))
 @router.message(
-    F.text.in_({"📚 ሞጁሎች", "📚 Course Modules", "📚 Kutaa Barnootaa", "📚 ሞጁላት", "📚 وحدات الدورة"})
+    F.text.in_({"ሞጁሎች", "Course Modules", "Kutaa Barnootaa", "ሞጁላት", "وحدات الدورة", "📚 ሞጁሎች", "📚 Course Modules", "📚 Kutaa Barnootaa", "📚 ሞጁላት", "📚 وحدات الدورة"})
 )
 async def handle_modules(message: types.Message) -> None:
     user_id = message.from_user.id if message.from_user else 0
@@ -1104,11 +1118,11 @@ async def handle_modules(message: types.Message) -> None:
         return
 
     titles = {
-        "am": ("📚 **የኮርሱ ሞጁሎች:**\n", "ሞጁል", "መግቢያ", "ስለ አንድ ሞጁል ለማብራራት ጥያቄዎን ይጻፉ።"),
-        "om": ("📚 **Kutaalee Barnootaa:**\n", "Kutaa", "Seensa", "Waa'ee kutaa tokkoo caalaatti baruuf gaaffii keessan barreessaa."),
-        "ti": ("📚 **ሞጁላት ኮርስ:**\n", "ሞጁል", "መእተዊ", "ብዛዕባ ሓደ ሞጁል መብርሂ ንምርካብ ሕቶኹም ጸሓፉ።"),
-        "ar": ("📚 **وحدات الدورة التدريبية:**\n", "الوحدة", "الرابط", "اطرح أي سؤال لمعرفة المزيد عن أي وحدة."),
-        "en": ("📚 **Course Modules:**\n", "Module", "Open", "Ask any question to learn more about a module."),
+        "am": (" **የኮርሱ ሞጁሎች:**\n", "ሞጁል", "መግቢያ", "ስለ አንድ ሞጁል ለማብራራት ጥያቄዎን ይጻፉ።"),
+        "om": (" **Kutaalee Barnootaa:**\n", "Kutaa", "Seensa", "Waa'ee kutaa tokkoo caalaatti baruuf gaaffii keessan barreessaa."),
+        "ti": (" **ሞጁላት ኮርስ:**\n", "ሞጁል", "መእተዊ", "ብዛዕባ ሓደ ሞጁል መብርሂ ንምርካብ ሕቶኹም ጸሓፉ።"),
+        "ar": (" **وحدات الدورة التدريبية:**\n", "الوحدة", "الرابط", "اطرح أي سؤال لمعرفة المزيد عن أي وحدة."),
+        "en": (" **Course Modules:**\n", "Module", "Open", "Ask any question to learn more about a module."),
     }
     header, mod_lbl, open_lbl, helper = titles.get(lang, titles["en"])
     lines = [header]
@@ -1122,7 +1136,7 @@ async def handle_modules(message: types.Message) -> None:
 
 @router.message(Command("jobs"))
 @router.message(
-    F.text.in_({"💼 የሥራ እድሎች", "💼 Job Alerts", "💼 Carraa Hojii", "💼 ናይ ስራሕ ዕድላት", "💼 فرص العمل"})
+    F.text.in_({"የሥራ እድሎች", "Job Alerts", "Carraa Hojii", "ናይ ስራሕ ዕድላት", "فرص العمل", "💼 የሥራ እድሎች", "💼 Job Alerts", "💼 Carraa Hojii", "💼 ናይ ስራሕ ዕድላት", "💼 فرص العمل"})
 )
 async def handle_jobs(message: types.Message) -> None:
     user_id = message.from_user.id if message.from_user else 0
@@ -1147,63 +1161,63 @@ async def handle_jobs(message: types.Message) -> None:
 
     job_labels = {
         "am": (
-            f"💼 **{job['title']}**\n"
+            f" **{job['title']}**\n"
             f"ድርጅት: {job['hiring_organization']}\n"
             f"ቦታ: {job['job_location']}\n"
             f"ተደራሽነት: `{accommodations}`\n\n"
             f"{job['description']}\n\n"
             f"ምላሽ ለመስጠት ቁጥር ይላኩ:\n"
-            f"1️⃣ - ፍላጎት አለኝ\n"
-            f"2️⃣ - ደውሉልኝ (ከሰው ጋር ተገናኝ)\n"
-            f"3️⃣ - ስለ ሥራው አብራራልኝ\n"
+            f"1⃣ - ፍላጎት አለኝ\n"
+            f"2⃣ - ደውሉልኝ (ከሰው ጋር ተገናኝ)\n"
+            f"3⃣ - ስለ ሥራው አብራራልኝ\n"
             f"ለመስተንግዶ ማመልከቻ: /accommodations"
         ),
         "om": (
-            f"💼 **{job['title']}**\n"
+            f" **{job['title']}**\n"
             f"Dhaabbata: {job['hiring_organization']}\n"
             f"Bakka: {job['job_location']}\n"
             f"Mijaawina: `{accommodations}`\n\n"
             f"{job['description']}\n\n"
             f"Deebii kennuuf lakkoofsa ergaa:\n"
-            f"1️⃣ - Fedhii qaba\n"
-            f"2️⃣ - Naaf bilbilaa (Nama waliin dubbadhu)\n"
-            f"3️⃣ - Waa'ee hojichaa naaf ibsaa\n"
+            f"1⃣ - Fedhii qaba\n"
+            f"2⃣ - Naaf bilbilaa (Nama waliin dubbadhu)\n"
+            f"3⃣ - Waa'ee hojichaa naaf ibsaa\n"
             f"Iyyannoo mijaawinaaf: /accommodations"
         ),
         "ti": (
-            f"💼 **{job['title']}**\n"
+            f" **{job['title']}**\n"
             f"ትካል: {job['hiring_organization']}\n"
             f"ቦታ: {job['job_location']}\n"
             f"መስተንግዶታት: `{accommodations}`\n\n"
             f"{job['description']}\n\n"
             f"መልሲ ንምሃብ ቑጽሪ ስደዱ:\n"
-            f"1️⃣ - ድሌት ኣለኒ\n"
-            f"2️⃣ - ደውሉለይ (ምስ ሰብ ተራኸብ)\n"
-            f"3️⃣ - ብዛዕባ ስራሕ ኣብርሃለይ\n"
+            f"1⃣ - ድሌት ኣለኒ\n"
+            f"2⃣ - ደውሉለይ (ምስ ሰብ ተራኸብ)\n"
+            f"3⃣ - ብዛዕባ ስራሕ ኣብርሃለይ\n"
             f"ናይ ምምችቻው ጠለብ: /accommodations"
         ),
         "ar": (
-            f"💼 **{job['title']}**\n"
+            f" **{job['title']}**\n"
             f"المنظمة: {job['hiring_organization']}\n"
             f"الموقع: {job['job_location']}\n"
             f"تسهيلات الوصول: `{accommodations}`\n\n"
             f"{job['description']}\n\n"
             f"للرد، أرسل رقماً:\n"
-            f"1️⃣ - مهتم بالتقديم\n"
-            f"2️⃣ - اتصل بي (التحدث مع شخص)\n"
-            f"3️⃣ - اشرح تفاصيل هذه الوظيفة\n"
+            f"1⃣ - مهتم بالتقديم\n"
+            f"2⃣ - اتصل بي (التحدث مع شخص)\n"
+            f"3⃣ - اشرح تفاصيل هذه الوظيفة\n"
             f"لطلب تسهيلات المقابلة: /accommodations"
         ),
         "en": (
-            f"💼 **{job['title']}**\n"
+            f" **{job['title']}**\n"
             f"Organization: {job['hiring_organization']}\n"
             f"Location: {job['job_location']}\n"
             f"Accommodations: `{accommodations}`\n\n"
             f"{job['description']}\n\n"
             f"Reply with a number:\n"
-            f"1️⃣ - Interested in applying\n"
-            f"2️⃣ - Call me (Talk to a person)\n"
-            f"3️⃣ - Explain this job in detail\n"
+            f"1⃣ - Interested in applying\n"
+            f"2⃣ - Call me (Talk to a person)\n"
+            f"3⃣ - Explain this job in detail\n"
             f"Request interview accommodations: /accommodations"
         ),
     }
@@ -1231,29 +1245,29 @@ async def handle_accommodations(message: types.Message) -> None:
         body = res.get("message", "")
 
         draft_headers = {
-            "am": ("📝 **የቃለ-መጠይቅ ማስተናገጃ ማመልከቻ ረቂቅ**", "ርዕስ", "መልዕክት", "*ይህ ረቂቅ ለእርስዎ እንዲያስተካክሉት የተዘጋጀ ነው። እርስዎ ሳያረጋግጡ አይላክም።*"),
-            "om": ("📝 **Wixinee Iyyannoo Mijaawina Gaaffii fi Deebii**", "Mata Duree", "Ergaa", "*Wixineen kun akka sirreessitaniif qophaa'e. Hayyama keessan malee hin ergamu.*"),
-            "ti": ("📝 **ንድፊ ጠለብ ምምችቻው ቃለ-መሕተት**", "ኣርእስቲ", "መልእኽቲ", "*እዚ ንድፊ ንስኹም ክትእርምዎ ዝተዳለወ እዩ። ብዘይ ፍቓድኩም ኣይስደድን።*"),
-            "ar": ("📝 **مسودة طلب تسهيلات المقابلة الشخصية**", "الموضوع", "الرسالة", "*هذه مسودة قابلة للتعديل. لن يتم إرسال أي شيء دون تأكيد منك.*"),
-            "en": ("📝 **Interview Accommodation Request Draft**", "Subject", "Message", "*Editable draft; sent=false until you review and confirm.*"),
+            "am": (" **የቃለ-መጠይቅ ማስተናገጃ ማመልከቻ ረቂቅ**", "ርዕስ", "መልዕክት", "*ይህ ረቂቅ ለእርስዎ እንዲያስተካክሉት የተዘጋጀ ነው። እርስዎ ሳያረጋግጡ አይላክም።*"),
+            "om": (" **Wixinee Iyyannoo Mijaawina Gaaffii fi Deebii**", "Mata Duree", "Ergaa", "*Wixineen kun akka sirreessitaniif qophaa'e. Hayyama keessan malee hin ergamu.*"),
+            "ti": (" **ንድፊ ጠለብ ምምችቻው ቃለ-መሕተት**", "ኣርእስቲ", "መልእኽቲ", "*እዚ ንድፊ ንስኹም ክትእርምዎ ዝተዳለወ እዩ። ብዘይ ፍቓድኩም ኣይስደድን።*"),
+            "ar": (" **مسودة طلب تسهيلات المقابلة الشخصية**", "الموضوع", "الرسالة", "*هذه مسودة قابلة للتعديل. لن يتم إرسال أي شيء دون تأكيد منك.*"),
+            "en": (" **Interview Accommodation Request Draft**", "Subject", "Message", "*Editable draft; sent=false until you review and confirm.*"),
         }
         title_lbl, subj_lbl, msg_lbl, notice_lbl = draft_headers.get(lang, draft_headers["en"])
-        msg = f"{title_lbl}\n\n**{subj_lbl}:** {subject}\n\n**{msg_lbl}:**\n{body}\n\nℹ️ {notice_lbl}"
+        msg = f"{title_lbl}\n\n**{subj_lbl}:** {subject}\n\n**{msg_lbl}:**\n{body}\n\nℹ {notice_lbl}"
         await send_safe_message(message, msg)
     else:
         err_msg = {
-            "am": "⚠️ ረቂቁን ማመንጨት አልተቻለም።",
-            "om": "⚠️ Wixinee qopheessuun hin danda'amne.",
-            "ti": "⚠️ ንድፊ ምድላው ኣይተኻእለን።",
-            "ar": "⚠️ تعذر إنشاء المسودة حالياً.",
-            "en": "⚠️ Could not generate accommodation draft.",
+            "am": " ረቂቁን ማመንጨት አልተቻለም።",
+            "om": " Wixinee qopheessuun hin danda'amne.",
+            "ti": " ንድፊ ምድላው ኣይተኻእለን።",
+            "ar": " تعذر إنشاء المسودة حالياً.",
+            "en": " Could not generate accommodation draft.",
         }
         await send_safe_message(message, err_msg.get(lang, err_msg["en"]))
 
 
 @router.message(Command("settings"))
 @router.message(
-    F.text.in_({"⚙️ ቅንብሮች", "⚙️ Settings", "⚙️ Qindaa'inoota", "⚙️ ቅጥዕታት", "⚙️ الإعدادات"})
+    F.text.in_({"ቅንብሮች", "Settings", "Qindaa'inoota", "ቅጥዕታት", "الإعدادات", "⚙️ ቅንብሮች", "⚙️ Settings", "⚙️ Qindaa'inoota", "⚙️ ቅጥዕታት", "⚙️ الإعدادات"})
 )
 async def handle_settings(message: types.Message) -> None:
     user_id = message.from_user.id if message.from_user else 0
@@ -1289,52 +1303,52 @@ async def handle_settings(message: types.Message) -> None:
 
     settings_msgs = {
         "am": (
-            f"⚙️ **የማሳወቂያ ቅንብሮች ({platform_title})**\n\n"
-            f"• ድምጽ አልባ: {'🔴 አዎ' if muted else '🟢 አይደለም'}\n"
-            f"• የጊዜ ገደብ ማሳወቂያ: {'🟢 በርቷል' if deadlines else '🔴 ጠፍቷል'}\n"
-            f"• የሥራ ማሳወቂያ: {'🟢 በርቷል' if jobs else '🔴 ጠፍቷል'}\n"
-            f"• የትምህርት/መድረክ ዜና: {'🟢 በርቷል' if lessons else '🔴 ጠፍቷል'}\n"
-            f"• ዝቅተኛ ዳታ: {'🟢 በርቷል' if bandwidth else '🔴 ጠፍቷል'}\n\n"
+            f" **የማሳወቂያ ቅንብሮች ({platform_title})**\n\n"
+            f"• ድምጽ አልባ: {' አዎ' if muted else ' አይደለም'}\n"
+            f"• የጊዜ ገደብ ማሳወቂያ: {' በርቷል' if deadlines else ' ጠፍቷል'}\n"
+            f"• የሥራ ማሳወቂያ: {' በርቷል' if jobs else ' ጠፍቷል'}\n"
+            f"• የትምህርት/መድረክ ዜና: {' በርቷል' if lessons else ' ጠፍቷል'}\n"
+            f"• ዝቅተኛ ዳታ: {' በርቷል' if bandwidth else ' ጠፍቷል'}\n\n"
             f"ከታች ያሉትን ቁልፎች በመጫን ማሳወቂያዎችን ያብሩ/ያጥፉ፡\n"
             f"/mute - ድምጽ አልባ ለማድረግ\n/unmute - ድምጽ ለማብራት\n/lite - የዳታ ቁጠባን ለመቀየር"
         ),
         "om": (
-            f"⚙️ **Qindaa'inoota Beeksisaa ({platform_title})**\n\n"
-            f"• Sagalee Cufuu: {'🔴 Eeyyee' if muted else '🟢 Lakki'}\n"
-            f"• Beeksisa Yeroo Xumuraa: {'🟢 Hojjechaa Jira' if deadlines else '🔴 Dhaamameera'}\n"
-            f"• Beeksisa Hojii: {'🟢 Hojjechaa Jira' if jobs else '🔴 Dhaamameera'}\n"
-            f"• Barnootaa fi Oduu: {'🟢 Hojjechaa Jira' if lessons else '🔴 Dhaamameera'}\n"
-            f"• Quusannaa Daataa: {'🟢 Hojjechaa Jira' if bandwidth else '🔴 Dhaamameera'}\n\n"
+            f" **Qindaa'inoota Beeksisaa ({platform_title})**\n\n"
+            f"• Sagalee Cufuu: {' Eeyyee' if muted else ' Lakki'}\n"
+            f"• Beeksisa Yeroo Xumuraa: {' Hojjechaa Jira' if deadlines else ' Dhaamameera'}\n"
+            f"• Beeksisa Hojii: {' Hojjechaa Jira' if jobs else ' Dhaamameera'}\n"
+            f"• Barnootaa fi Oduu: {' Hojjechaa Jira' if lessons else ' Dhaamameera'}\n"
+            f"• Quusannaa Daataa: {' Hojjechaa Jira' if bandwidth else ' Dhaamameera'}\n\n"
             f"Cuqqaallawwan armaan gadii fayyadamuun jijjiiraa:\n"
             f"/mute - Sagalee cufuuf\n/unmute - Sagalee banuuf\n/lite - Quusannaa daataa jijjiiruuf"
         ),
         "ti": (
-            f"⚙️ **ቅጥዕታት መተሓሳሰቢ ({platform_title})**\n\n"
-            f"• ድምጺ ምዕጻው: {'🔴 እወ' if muted else '🟢 ኣይኮነን'}\n"
-            f"• ናይ ዕለት መተሓሳሰቢ: {'🟢 ይሰርሕ ኣሎ' if deadlines else '🔴 ጠፊኡ'}\n"
-            f"• ናይ ስራሕ መተሓሳሰቢ: {'🟢 ይሰርሕ ኣሎ' if jobs else '🔴 ጠፊኡ'}\n"
-            f"• ትምህርቲን ዜናታትን: {'🟢 ይሰርሕ ኣሎ' if lessons else '🔴 ጠፊኡ'}\n"
-            f"• ውሑድ ዳታ: {'🟢 ይሰርሕ ኣሎ' if bandwidth else '🔴 ጠፊኡ'}\n\n"
+            f" **ቅጥዕታት መተሓሳሰቢ ({platform_title})**\n\n"
+            f"• ድምጺ ምዕጻው: {' እወ' if muted else ' ኣይኮነን'}\n"
+            f"• ናይ ዕለት መተሓሳሰቢ: {' ይሰርሕ ኣሎ' if deadlines else ' ጠፊኡ'}\n"
+            f"• ናይ ስራሕ መተሓሳሰቢ: {' ይሰርሕ ኣሎ' if jobs else ' ጠፊኡ'}\n"
+            f"• ትምህርቲን ዜናታትን: {' ይሰርሕ ኣሎ' if lessons else ' ጠፊኡ'}\n"
+            f"• ውሑድ ዳታ: {' ይሰርሕ ኣሎ' if bandwidth else ' ጠፊኡ'}\n\n"
             f"ንምቕያር ካብ ታሕቲ ዘለዉ መተሓሳሰቢታት ተጠቐሙ:\n"
             f"/mute - ድምጺ ንምዕጻው\n/unmute - ድምጺ ንምኽፋት\n/lite - ቍጠባ ዳታ ንምቕያር"
         ),
         "ar": (
-            f"⚙️ **إعدادات الإشعارات ({platform_title})**\n\n"
-            f"• كتم الصوت: {'🔴 نعم' if muted else '🟢 لا'}\n"
-            f"• إشعارات المواعيد النهائية: {'🟢 مفعلة' if deadlines else '🔴 معطلة'}\n"
-            f"• إشعارات الوظائف: {'🟢 مفعلة' if jobs else '🔴 معطلة'}\n"
-            f"• الدروس والتحديثات: {'🟢 مفعلة' if lessons else '🔴 معطلة'}\n"
-            f"• وضع توفير البيانات: {'🟢 مفعل' if bandwidth else '🔴 معطل'}\n\n"
+            f" **إعدادات الإشعارات ({platform_title})**\n\n"
+            f"• كتم الصوت: {'[نعم]' if muted else '[لا]'}\n"
+            f"• إشعارات المواعيد النهائية: {'[مفعلة]' if deadlines else '[معطلة]'}\n"
+            f"• إشعارات الوظائف: {'[مفعلة]' if jobs else '[معطلة]'}\n"
+            f"• الدروس والتحديثات: {'[مفعلة]' if lessons else '[معطلة]'}\n"
+            f"• وضع توفير البيانات: {'[مفعل]' if bandwidth else '[معطل]'}\n\n"
             f"اضغط على الأزرار أدناه للتبديل:\n"
             f"/mute - لكتم الإشعارات\n/unmute - لإلغاء كتم الإشعارات\n/lite - لتبديل وضع توفير البيانات"
         ),
         "en": (
-            f"⚙️ **Notification Settings ({platform_title})**\n\n"
-            f"• Muted: {'🔴 Yes' if muted else '🟢 No'}\n"
-            f"• Deadlines Alert: {'🟢 Active' if deadlines else '🔴 Off'}\n"
-            f"• Job Alerts: {'🟢 Active' if jobs else '🔴 Off'}\n"
-            f"• Lessons & Platform Updates: {'🟢 Active' if lessons else '🔴 Off'}\n"
-            f"• Low Bandwidth: {'🟢 Active' if bandwidth else '🔴 Off'}\n\n"
+            f" **Notification Settings ({platform_title})**\n\n"
+            f"• Muted: {'[YES]' if muted else '[NO]'}\n"
+            f"• Deadlines Alert: {'[ON]' if deadlines else '[OFF]'}\n"
+            f"• Job Alerts: {'[ON]' if jobs else '[OFF]'}\n"
+            f"• Lessons & Platform Updates: {'[ON]' if lessons else '[OFF]'}\n"
+            f"• Low Bandwidth: {'[ON]' if bandwidth else '[OFF]'}\n\n"
             f"Use the buttons below to toggle alerts:\n"
             f"/mute - Mute alerts\n/unmute - Unmute alerts\n/lite - Toggle low bandwidth"
         ),
@@ -1358,11 +1372,11 @@ async def handle_mute(message: types.Message) -> None:
         {"muted": True},
     )
     mute_msgs = {
-        "am": "🔕 ማሳወቂያዎች ድምጽ አልባ ሆነዋል።",
-        "om": "🔕 Beeksisawwan sagalee dhabaniiru.",
-        "ti": "🔕 መተሓሳሰቢታት ድምጺ ተዓጽዩ ኣሎ።",
-        "ar": "🔕 تم كتم صوت الإشعارات.",
-        "en": "🔕 Notifications muted.",
+        "am": " ማሳወቂያዎች ድምጽ አልባ ሆነዋል።",
+        "om": " Beeksisawwan sagalee dhabaniiru.",
+        "ti": " መተሓሳሰቢታት ድምጺ ተዓጽዩ ኣሎ።",
+        "ar": " تم كتم صوت الإشعارات.",
+        "en": " Notifications muted.",
     }
     await send_safe_message(message, mute_msgs.get(lang, mute_msgs["en"]))
 
@@ -1379,11 +1393,11 @@ async def handle_unmute(message: types.Message) -> None:
         {"muted": False},
     )
     unmute_msgs = {
-        "am": "🔔 ማሳወቂያዎች ተከፍተዋል።",
-        "om": "🔔 Beeksisawwan banamaniiru.",
-        "ti": "🔔 መተሓሳሰቢታት ተኸፊቱ ኣሎ።",
-        "ar": "🔔 تم تفعيل صوت الإشعارات.",
-        "en": "🔔 Notifications unmuted.",
+        "am": " ማሳወቂያዎች ተከፍተዋል።",
+        "om": " Beeksisawwan banamaniiru.",
+        "ti": " መተሓሳሰቢታት ተኸፊቱ ኣሎ።",
+        "ar": " تم تفعيل صوت الإشعارات.",
+        "en": " Notifications unmuted.",
     }
     await send_safe_message(message, unmute_msgs.get(lang, unmute_msgs["en"]))
 
@@ -1398,27 +1412,27 @@ async def handle_numeric_reply(message: types.Message) -> None:
     if choice == "1":
         noted_msgs = {
             "am": (
-                "👍 **ተመዝግቧል!**\n"
+                " **ተመዝግቧል!**\n"
                 "የሥራ ማመልከቻ መረጃ: https://jobs.example.org/apply\n"
                 "የመስተንግዶ ጥያቄ ረቂቅ ለማዘጋጀት: /accommodations"
             ),
             "om": (
-                "👍 **Galmaa'eera!**\n"
+                " **Galmaa'eera!**\n"
                 "Odeeffannoo iyyannoo: https://jobs.example.org/apply\n"
                 "Wixinee mijaawinaaf: /accommodations"
             ),
             "ti": (
-                "👍 **ተመዝጊቡ ኣሎ!**\n"
+                " **ተመዝጊቡ ኣሎ!**\n"
                 "ሓበሬታ ምምልካት ስራሕ: https://jobs.example.org/apply\n"
                 "ንድፊ ጠለብ መስተንግዶ ንምድላው: /accommodations"
             ),
             "ar": (
-                "👍 **تم تسجيل اهتمامك بنجاح!**\n"
+                " **تم تسجيل اهتمامك بنجاح!**\n"
                 "رابط التقديم: https://jobs.example.org/apply\n"
                 "لصياغة طلب تسهيلات المقابلة: /accommodations"
             ),
             "en": (
-                "👍 **Noted!**\n"
+                " **Noted!**\n"
                 "Application link: https://jobs.example.org/apply\n"
                 "Draft interview accommodation: /accommodations"
             ),
@@ -1436,11 +1450,11 @@ async def handle_numeric_reply(message: types.Message) -> None:
         )
         if res and "answer" in res:
             exp_header = {
-                "am": "💼 **የሥራው ማብራሪያ:**\n\n",
-                "om": "💼 **Ibsa Hojichaa:**\n\n",
-                "ti": "💼 **መብርሂ ስራሕ:**\n\n",
-                "ar": "💼 **شرح الوظيفة:**\n\n",
-                "en": "💼 **Job Explanation:**\n\n",
+                "am": " **የሥራው ማብራሪያ:**\n\n",
+                "om": " **Ibsa Hojichaa:**\n\n",
+                "ti": " **መብርሂ ስራሕ:**\n\n",
+                "ar": " **شرح الوظيفة:**\n\n",
+                "en": " **Job Explanation:**\n\n",
             }
             await send_safe_message(
                 message,
@@ -1464,11 +1478,11 @@ async def handle_voice_message(message: types.Message, bot: Bot) -> None:
     lang = state.get("language", "en")
 
     wait_voice = {
-        "am": "🎧 ድምጽዎን በማዳመጥ ላይ...",
-        "om": "🎧 Sagalee keessan dhaggeeffachaa jira...",
-        "ti": "🎧 ድምጽኹም እናተሰምዐ እዩ...",
-        "ar": "🎧 جاري الاستماع إلى رسالتك الصوتية ومعالجتها...",
-        "en": "🎧 Processing your voice note...",
+        "am": " ድምጽዎን በማዳመጥ ላይ...",
+        "om": " Sagalee keessan dhaggeeffachaa jira...",
+        "ti": " ድምጽኹም እናተሰምዐ እዩ...",
+        "ar": " جاري الاستماع إلى رسالتك الصوتية ومعالجتها...",
+        "en": " Processing your voice note...",
     }
     await send_safe_message(message, wait_voice.get(lang, wait_voice["en"]))
 
@@ -1503,11 +1517,11 @@ async def handle_voice_message(message: types.Message, bot: Bot) -> None:
         state["language"] = lang
 
     trans_labels = {
-        "am": f"📝 **የድምጽ ግልባጭ:**\n_{transcript}_",
-        "om": f"📝 **Barreeffama Sagalee:**\n_{transcript}_",
-        "ti": f"📝 **ቅዳሕ ድምጺ:**\n_{transcript}_",
-        "ar": f"📝 **النص المفرغ من الصوت:**\n_{transcript}_",
-        "en": f"📝 **Voice Transcript:**\n_{transcript}_",
+        "am": f" **የድምጽ ግልባጭ:**\n_{transcript}_",
+        "om": f" **Barreeffama Sagalee:**\n_{transcript}_",
+        "ti": f" **ቅዳሕ ድምጺ:**\n_{transcript}_",
+        "ar": f" **النص المفرغ من الصوت:**\n_{transcript}_",
+        "en": f" **Voice Transcript:**\n_{transcript}_",
     }
     await send_safe_message(message, trans_labels.get(lang, trans_labels["en"]))
 
@@ -1523,11 +1537,11 @@ async def handle_voice_message(message: types.Message, bot: Bot) -> None:
     )
     if not ask_res:
         no_ans = {
-            "am": "⚠️ መልስ ማግኘት አልተቻለም።",
-            "om": "⚠️ Deebii argachuun hin danda'amne.",
-            "ti": "⚠️ መልሲ ምርካብ ኣይተኻእለን።",
-            "ar": "⚠️ تعذر الحصول على إجابة حالياً.",
-            "en": "⚠️ Could not retrieve answer.",
+            "am": " መልስ ማግኘት አልተቻለም።",
+            "om": " Deebii argachuun hin danda'amne.",
+            "ti": " መልሲ ምርካብ ኣይተኻእለን።",
+            "ar": " تعذر الحصول على إجابة حالياً.",
+            "en": " Could not retrieve answer.",
         }
         await send_safe_message(message, no_ans.get(lang, no_ans["en"]))
         return
@@ -1540,11 +1554,11 @@ async def handle_voice_message(message: types.Message, bot: Bot) -> None:
     citations = ask_res.get("citations", [])
 
     ans_header = {
-        "am": ("💡 **መልስ:**\n\n", "📚 **ዋቢዎች:**", "ገጽ"),
-        "om": ("💡 **Deebii:**\n\n", "📚 **Wabiiwwan:**", "Fuula"),
-        "ti": ("💡 **መልሲ:**\n\n", "📚 **መወከሲታት:**", "ገጽ"),
-        "ar": ("💡 **الإجابة:**\n\n", "📚 **المراجع والمصادر:**", "صفحة"),
-        "en": ("💡 **Answer:**\n\n", "📚 **Citations:**", "Page"),
+        "am": (" **መልስ:**\n\n", " **ዋቢዎች:**", "ገጽ"),
+        "om": (" **Deebii:**\n\n", " **Wabiiwwan:**", "Fuula"),
+        "ti": (" **መልሲ:**\n\n", " **መወከሲታት:**", "ገጽ"),
+        "ar": (" **الإجابة:**\n\n", " **المراجع والمصادر:**", "صفحة"),
+        "en": (" **Answer:**\n\n", " **Citations:**", "Page"),
     }
     ans_lbl, cit_lbl, page_lbl = ans_header.get(lang, ans_header["en"])
     formatted = f"{ans_lbl}{answer_text}"
@@ -1555,19 +1569,26 @@ async def handle_voice_message(message: types.Message, bot: Bot) -> None:
 
     await send_safe_message(message, formatted)
 
+    spoken_text = ask_res.get("spoken") or answer_text
+
     if not state["lite_mode"]:
         synth_res = await call_api(
             "POST",
             "/speech/synthesize",
-            {"text": answer_text[:200], "language": lang, "speed": 1.0},
+            {
+                "text": spoken_text,
+                "language": lang,
+                "speed": 1.0,
+                "style": "warm, calm tutor, moderate pace, clear, unhurried",
+            },
         )
         if synth_res and "audio_url" in synth_res:
             audio_lbl = {
-                "am": "🔊 የድምጽ መልስ:",
-                "om": "🔊 Deebii sagalee:",
-                "ti": "🔊 ናይ ድምጺ መልሲ:",
-                "ar": "🔊 إعادة التشغيل الصوتي:",
-                "en": "🔊 Audio replay:",
+                "am": "የድምጽ መልስ:",
+                "om": "Deebii sagalee:",
+                "ti": "ናይ ድምጺ መልሲ:",
+                "ar": "إعادة التشغيل الصوتي:",
+                "en": "Audio replay:",
             }
             await send_safe_message(
                 message,

@@ -26,15 +26,15 @@ def test_user_session_defaults() -> None:
 def test_make_main_keyboard_amharic_and_english() -> None:
     kb_am = make_main_keyboard(lang="am", lite=False)
     button_texts_am = [btn.text for row in kb_am.keyboard for btn in row]
-    assert "❓ ጥያቄ ጠይቅ" in button_texts_am
-    assert "👥 ከሰው ጋር ተገናኝ" in button_texts_am
-    assert "📅 ምን ይጠበቃል?" in button_texts_am
+    assert any("ጥያቄ ጠይቅ" in b for b in button_texts_am)
+    assert any("ከሰው ጋር ተገናኝ" in b for b in button_texts_am)
+    assert any("ምን ይጠበቃል" in b for b in button_texts_am)
 
     kb_en = make_main_keyboard(lang="en", lite=False)
     button_texts_en = [btn.text for row in kb_en.keyboard for btn in row]
-    assert "❓ Ask a Question" in button_texts_en
-    assert "👥 Talk to a Person" in button_texts_en
-    assert "📅 Deadlines" in button_texts_en
+    assert any("Ask a Question" in b for b in button_texts_en)
+    assert any("Talk to a Person" in b for b in button_texts_en)
+    assert any("Deadlines" in b for b in button_texts_en)
 
 
 def test_make_main_keyboard_lite_mode_numeric() -> None:
@@ -168,8 +168,8 @@ def test_make_notification_inline_structure() -> None:
 
     deadlines_btn = next(btn for btn in buttons_en if btn.callback_data == "notif_toggle_deadlines")
     jobs_btn = next(btn for btn in buttons_en if btn.callback_data == "notif_toggle_jobs")
-    assert "🟢" in deadlines_btn.text
-    assert "🔴" in jobs_btn.text
+    assert "[ON]" in deadlines_btn.text
+    assert "[OFF]" in jobs_btn.text
 
     kb_am = make_notification_inline(prefs, lang="am")
     buttons_am = [btn.text for row in kb_am.inline_keyboard for btn in row]
