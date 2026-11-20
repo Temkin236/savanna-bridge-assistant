@@ -242,6 +242,7 @@ class LanguageGuard:
             "explain with examples", "show an example", "concrete example",
             "በምሳሌ", "ምሳሌ", "ምሳሌዎች", "በምሳሌ አስረዳኝ", "ምሳሌ ስጠኝ", "ምሳሌዎችን አሳየኝ",
             "fakkeenya", "fakkeenyota", "fakkeenyaan", "fakkeenyotaan naaf ibsi", "fakkeenya naaf kenni",
+            "ብኣብነታት ኣረድኣኒ", "ብኣብነት", "ኣብነት", "ኣብነታት", "ኣብነት ሃበኒ",
             "مثال", "أمثلة", "اشرح بالأمثلة", "أعطني مثالا", "مع أمثلة", "مثال عملي",
         ]
         return any(t in q for t in triggers)
@@ -256,6 +257,7 @@ class LanguageGuard:
             "ready for next lesson", "before advancing",
             "ወደ ቀጣዩ ትምህርት ከመሄዴ በፊት", "ቀጣዩ ትምህርት", "ቅድመ ሁኔታ", "ምን ማወቅ አለብኝ", "ከመቀጠሌ በፊት",
             "barnoota itti aanuuf", "barnoota itti aanutti darbuun dura", "maal beekuun qaba", "dura maal beekuu qaba",
+            "ናብ ዝቕጽል ትምህርቲ ቅድሚ ምኻደይ እንታይ ክፈልጥ ኣለኒ?", "ቅድሚ ምኻደይ", "እንታይ ክፈልጥ ኣለኒ", "ቅድመ ኩነት", "ዝቕጽል ትምህርቲ", "ናብ ዝቕጽል ትምህርቲ",
             "قبل الانتقال للدرس التالي", "الدرس التالي", "المتطلبات", "ماذا يجب أن أفهم قبل", "قبل المتابعة",
         ]
         return any(t in q for t in triggers)
@@ -269,6 +271,7 @@ class LanguageGuard:
             "ask me questions", "practice questions", "knowledge check",
             "ፈትነኝ", "ጥያቄ ጠይቀኝ", "ግንዛቤዬን ፈትነኝ", "ጥያቄዎች ጠይቀኝ", "ፈተና",
             "na qori", "hubannoo koo na qori", "gaaffii na gaafadhu", "qormaata",
+            "ግንዛበይ ፈትነኒ", "ፈትነኒ", "ሕቶታት ሕተተኒ", "ሕቶ ሕተተኒ",
             "اختبرني", "اختبر فهمي", "اسألني سؤالاً", "اطرح علي أسئلة", "اختبار قصير",
         ]
         return any(t in q for t in triggers)
@@ -303,6 +306,9 @@ class LanguageGuard:
             "ስለ ይዘቱ አብራራልኝ", "ስለ ይዘቱ አስረዳኝ", "ስለ ይዘቱ ንገረኝ", "ስለዚህ ኮርስ ንገረኝ",
             "ይህን ትምህርት አስረዳኝ", "ይህንን ትምህርት አብራራልኝ", "ትምህርቱን አስረዳኝ", "ትምህርቱን አብራራልኝ",
             "ይህንን ርዕስ አብራራልኝ", "ምን እማራለሁ", "ስለዚህ ትምህርት ንገረኝ", "ስለዚህ ገጽ ንገረኝ",
+            # Tigrinya triggers
+            "ናይዚ ኮርስ ዕላማ እንታይ እዩ?", "ናይዚ ኮርስ ዕላማ እንታይ እዩ", "ብዛዕባ እዚ ትምህርቲ", "ናይዚ ትምህርቲ",
+            "እዚ ትምህርቲ እንታይ እዩ", "ብዛዕባ ኮርስ ንገረኒ", "ትሕዝቶ ኣረድኣኒ", "እዚ ኮርስ ብዛዕባ እንታይ እዩ",
             # Afaan Oromo triggers
             "koorsiin kun waa'ee maalii ti", "koorsii kana naaf ibsi", "waa'ee koorsii natti himi",
             "waa'ee koorsii naaf ibsi", "qabiyyee naaf ibsi", "waa'ee qabiyyee naaf ibsi",

@@ -4548,9 +4548,36 @@ export class BridgeAssistant extends HTMLElement {
   }
   // --- Q&A / Ask ---
 
+  public switchTab(tabId: "chat" | "support" | "handoff"): void {
+    this.activeTab = tabId;
+    if (!this.shadowRoot) return;
+    const mainTabs = [
+      { id: "chat", btn: this.shadowRoot.querySelector<HTMLButtonElement>("#tab-chat"), pane: this.shadowRoot.querySelector<HTMLElement>("#pane-chat") },
+      { id: "support", btn: this.shadowRoot.querySelector<HTMLButtonElement>("#tab-support"), pane: this.shadowRoot.querySelector<HTMLElement>("#pane-support") },
+      { id: "handoff", btn: this.shadowRoot.querySelector<HTMLButtonElement>("#tab-handoff"), pane: this.shadowRoot.querySelector<HTMLElement>("#pane-handoff") },
+    ];
+    mainTabs.forEach((t) => {
+      const selected = t.id === tabId;
+      t.btn?.setAttribute("aria-selected", selected ? "true" : "false");
+      if (t.pane) {
+        t.pane.hidden = !selected;
+        t.pane.style.display = selected ? (t.id === "chat" ? "flex" : "block") : "none";
+      }
+    });
+    const activeBtn = mainTabs.find((t) => t.id === tabId)?.btn;
+    if (activeBtn) {
+      activeBtn.focus();
+      this.announce(`${activeBtn.textContent?.trim()} tab selected`);
+    }
+  }
+
   public async askQuestion(questionText: string, forceSimple = false, fromVoice = false): Promise<void> {
     const q = questionText.trim();
     if (!q || this.isThinking) return;
+
+    if (this.activeTab !== "chat") {
+      this.switchTab("chat");
+    }
 
     // Check if user entered a 6-digit linking code or /confirm <code> directly in chat
     const codeMatch = q.match(/^(?:\/confirm|\/link)?\s*([0-9]{6})$/i);
@@ -4589,10 +4616,14 @@ export class BridgeAssistant extends HTMLElement {
     this.renderMessages();
     const pageContext = this.extractPlatformContext();
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 25000);
+
     try {
       let res = await fetch(`${this.apiBase}/api/v1/ask`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
         body: JSON.stringify({
           question: q,
           language: this.currentLang,
@@ -4609,6 +4640,7 @@ export class BridgeAssistant extends HTMLElement {
         res = await fetch(`${this.apiBase}/ask`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          signal: controller.signal,
           body: JSON.stringify({
             question: q,
             language: this.currentLang,
@@ -4621,8 +4653,6 @@ export class BridgeAssistant extends HTMLElement {
           }),
         });
       }
-
-      this.isThinking = false;
 
       if (res.ok) {
         const data = await res.json();
@@ -4662,7 +4692,6 @@ export class BridgeAssistant extends HTMLElement {
         this.renderMessages();
       }
     } catch {
-      this.isThinking = false;
       try {
         const queue = JSON.parse(localStorage.getItem("db_assistant_offline_queue") || "[]");
         queue.push({ question: q, language: this.currentLang, timestamp: Date.now() });
@@ -4675,8 +4704,13 @@ export class BridgeAssistant extends HTMLElement {
         sender: "assistant",
         text: this.t("savedOnPhoneNotice"),
         offerHuman: true,
+        isRefusal: true,
       };
       this.messages.push(offlineMsg);
+      this.renderMessages();
+    } finally {
+      clearTimeout(timeoutId);
+      this.isThinking = false;
       this.renderMessages();
     }
   }
@@ -4688,30 +4722,78 @@ export class BridgeAssistant extends HTMLElement {
       alert(this.t("offlineBanner"));
       return;
     }
-    if (!window.confirm(this.t("handoffConsentCheck"))) return;
+
+    const consentBox = this.shadowRoot?.querySelector<HTMLInputElement>("#handoff-consent");
+    if (consentBox && !consentBox.checked) {
+      const errBox = this.shadowRoot?.querySelector<HTMLElement>("#handoff-consent-error");
+      if (errBox) {
+        errBox.textContent = `⚠️ ${this.t("handoffConsentCheck")}`;
+        errBox.style.display = "block";
+      }
+      consentBox.focus();
+      return;
+    }
+
+    // If initiated outside form (e.g. from chat button), switch to handoff tab with context
+    if (this.activeTab !== "handoff") {
+      this.switchTab("handoff");
+      const reasonInput = this.shadowRoot?.querySelector<HTMLInputElement>("#handoff-reason");
+      if (reasonInput && contextReason) {
+        reasonInput.value = contextReason;
+      }
+    }
+
+    const errBox = this.shadowRoot?.querySelector<HTMLElement>("#handoff-consent-error");
+    if (errBox) errBox.style.display = "none";
+
+    const submitBtn = this.shadowRoot?.querySelector<HTMLButtonElement>("#btn-submit-handoff");
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `⏳ <span>${this.t("lookingInCourse")}...</span>`;
+    }
 
     this.announce(this.t("lookingInCourse"));
 
     try {
-      const res = await fetch(`${this.apiBase}/api/v1/escalations`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          consent: true,
-          learner_ref: `learner_${this.sessionId}`,
-          card: {
-            language: this.currentLang,
-            context: contextReason || "Learner requested a human mentor from web assistant.",
-            support_needs: this.supportNeeds.needs,
-            contact_mode: this.supportNeeds.preferred_contact_mode,
-          },
-          channel: "web",
-        }),
-      });
+      const endpoints = [
+        `${this.apiBase}/api/v1/escalations`,
+        `${this.apiBase}/escalations`,
+        `${this.apiBase}/api/v1/handoff`,
+        `${this.apiBase}/handoff`,
+      ];
 
-      if (res.ok) {
+      const payload = {
+        consent: true,
+        learner_ref: this.getAttribute("learner-id") || `learner_${this.sessionId}`,
+        card: {
+          language: this.currentLang,
+          context: contextReason || this.shadowRoot?.querySelector<HTMLInputElement>("#handoff-reason")?.value || "Learner requested a human mentor from web assistant.",
+          support_needs: this.supportNeeds.needs,
+          contact_mode: this.supportNeeds.preferred_contact_mode,
+        },
+        channel: "web",
+      };
+
+      let res: Response | null = null;
+      for (const endpoint of endpoints) {
+        try {
+          const r = await fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          if (r.ok) {
+            res = r;
+            break;
+          }
+        } catch {
+          // try next fallback endpoint
+        }
+      }
+
+      if (res && res.ok) {
         const data = await res.json();
-        const ticketId = data.ticketId || data.id || "ticket_01";
+        const ticketId = data.ticketId || data.handoff_id || data.id || "ticket_01";
         const roomUrl = data.room_url || data.roomUrl || "https://meet.jit.si/savanna-bridge-demo";
         this.activeHandoff = {
           id: ticketId,
@@ -4754,14 +4836,55 @@ export class BridgeAssistant extends HTMLElement {
               </div>
             </div>
           `;
+
+          const copyBtn = roomBox.querySelector<HTMLButtonElement>(".btn-copy-room");
+          if (copyBtn) {
+            copyBtn.addEventListener("click", async () => {
+              const url = copyBtn.getAttribute("data-url");
+              if (url) {
+                try {
+                  await navigator.clipboard.writeText(url);
+                } catch {
+                  const ta = document.createElement("textarea");
+                  ta.value = url;
+                  document.body.appendChild(ta);
+                  ta.select();
+                  document.execCommand("copy");
+                  document.body.removeChild(ta);
+                }
+                copyBtn.innerHTML = `${ICONS.check} <span>${this.t("linkCodeCopied")}</span>`;
+                this.announce(this.t("linkCodeCopied"));
+                setTimeout(() => {
+                  copyBtn.innerHTML = `${ICONS.copy} <span>${this.t("copyRoomBtn")}</span>`;
+                }, 2000);
+              }
+            });
+          }
         }
 
         this.renderMessages();
       } else {
-        alert(this.t("serverErrorNotice"));
+        const errNotice = this.shadowRoot?.querySelector<HTMLElement>("#handoff-consent-error");
+        if (errNotice) {
+          errNotice.textContent = `⚠️ ${this.t("serverErrorNotice")}`;
+          errNotice.style.display = "block";
+        } else {
+          alert(this.t("serverErrorNotice"));
+        }
       }
     } catch {
-      alert(this.t("serverErrorNotice"));
+      const errNotice = this.shadowRoot?.querySelector<HTMLElement>("#handoff-consent-error");
+      if (errNotice) {
+        errNotice.textContent = `⚠️ ${this.t("serverErrorNotice")}`;
+        errNotice.style.display = "block";
+      } else {
+        alert(this.t("serverErrorNotice"));
+      }
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `${ICONS.users} <span>${this.t("requestMentorBtn")}</span>`;
+      }
     }
   }
 
@@ -5169,8 +5292,9 @@ export class BridgeAssistant extends HTMLElement {
               ${this.t("appSubtitle")}
             </div>
             <form id="handoff-request-form" style="display:flex; flex-direction:column; gap:0.625rem;">
+              <div id="handoff-consent-error" style="display:none; color:#dc2626; font-size:0.8125rem; font-weight:600; padding:0.375rem 0.5rem; background:#fee2e2; border:1px solid #fca5a5; border-radius:0.375rem;" role="alert"></div>
               <label class="checkbox-card">
-                <input type="checkbox" id="handoff-consent" required checked>
+                <input type="checkbox" id="handoff-consent" checked>
                 <div class="checkbox-card-content">
                   <span style="font-size:0.8125rem;">${this.t("handoffConsentCheck")}</span>
                 </div>
@@ -5699,13 +5823,13 @@ export class BridgeAssistant extends HTMLElement {
                     <span>${this.t("followupTitle")}</span>
                   </div>
                   <div class="followup-chips">
-                    <button type="button" class="btn btn-secondary btn-followup" data-query="${this.escapeHtml(this.t("followupQ1"))}">
+                    <button type="button" class="btn btn-secondary btn-followup" data-query="${this.escapeHtml(this.t("followupQ1"))}" ${this.isThinking ? "disabled" : ""}>
                       ${this.t("followupQ1")}
                     </button>
-                    <button type="button" class="btn btn-secondary btn-followup" data-query="${this.escapeHtml(this.t("followupQ2"))}">
+                    <button type="button" class="btn btn-secondary btn-followup" data-query="${this.escapeHtml(this.t("followupQ2"))}" ${this.isThinking ? "disabled" : ""}>
                       ${this.t("followupQ2")}
                     </button>
-                    <button type="button" class="btn btn-secondary btn-followup" data-query="${this.escapeHtml(this.t("followupQ3"))}">
+                    <button type="button" class="btn btn-secondary btn-followup" data-query="${this.escapeHtml(this.t("followupQ3"))}" ${this.isThinking ? "disabled" : ""}>
                       ${this.t("followupQ3")}
                     </button>
                   </div>
@@ -5807,8 +5931,9 @@ export class BridgeAssistant extends HTMLElement {
     });
 
     chatLog.querySelectorAll<HTMLButtonElement>(".btn-followup").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const query = btn.getAttribute("data-query");
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const query = btn.getAttribute("data-query") || btn.textContent?.trim();
         if (query) {
           this.askQuestion(query);
         }
@@ -5937,20 +6062,7 @@ export class BridgeAssistant extends HTMLElement {
     ];
 
     const switchMainTab = (index: number) => {
-      this.activeTab = mainTabs[index].id as "chat" | "support" | "handoff";
-      mainTabs.forEach((t, i) => {
-        const selected = i === index;
-        t.btn?.setAttribute("aria-selected", selected ? "true" : "false");
-        if (t.pane) {
-          t.pane.hidden = !selected;
-          t.pane.style.display = selected ? (t.id === "chat" ? "flex" : "block") : "none";
-        }
-      });
-      const activeBtn = mainTabs[index].btn;
-      if (activeBtn) {
-        activeBtn.focus();
-        this.announce(activeBtn.textContent?.trim() + " tab selected");
-      }
+      this.switchTab(mainTabs[index].id as "chat" | "support" | "handoff");
     };
 
     mainTabs.forEach(({ btn }, idx) => {
@@ -5971,8 +6083,7 @@ export class BridgeAssistant extends HTMLElement {
     this.shadowRoot.querySelectorAll<HTMLButtonElement>(".btn-talk-person, #btn-footer-handoff").forEach((btn) => {
       btn.addEventListener("click", (e) => {
         e.preventDefault();
-        const handoffIdx = mainTabs.findIndex((t) => t.id === "handoff");
-        if (handoffIdx >= 0) switchMainTab(handoffIdx);
+        this.switchTab("handoff");
       });
     });
 
@@ -6068,13 +6179,67 @@ export class BridgeAssistant extends HTMLElement {
       this.generateLinkCode();
     });
 
-    // Handoff Request Form in Settings
+    // Handoff Request Form & Button
     const settingsHandoffForm = this.shadowRoot.querySelector<HTMLFormElement>("#handoff-request-form");
+    const submitHandoffBtn = this.shadowRoot.querySelector<HTMLButtonElement>("#btn-submit-handoff");
+    const triggerHandoff = (e?: Event) => {
+      if (e) e.preventDefault();
+      const reasonInput = this.shadowRoot?.querySelector<HTMLInputElement>("#handoff-reason");
+      this.requestHandoff(reasonInput?.value || undefined);
+    };
     if (settingsHandoffForm) {
-      settingsHandoffForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const reasonInput = this.shadowRoot?.querySelector<HTMLInputElement>("#handoff-reason");
-        this.requestHandoff(reasonInput?.value || undefined);
+      settingsHandoffForm.addEventListener("submit", triggerHandoff);
+    }
+    if (submitHandoffBtn) {
+      submitHandoffBtn.addEventListener("click", (e) => {
+        triggerHandoff(e);
+      });
+    }
+
+    // Chat Log Event Delegation (for suggested and follow-up chips)
+    const chatLogEl = this.shadowRoot.querySelector<HTMLElement>("#chat-log");
+    if (chatLogEl) {
+      chatLogEl.addEventListener("click", (e) => {
+        const target = e.target as HTMLElement;
+
+        // Follow-up question chip
+        const followupBtn = target.closest<HTMLButtonElement>(".btn-followup");
+        if (followupBtn) {
+          e.preventDefault();
+          const query = followupBtn.getAttribute("data-query") || followupBtn.textContent?.trim();
+          if (query) {
+            this.askQuestion(query);
+          }
+          return;
+        }
+
+        // Suggested question in empty state
+        const suggestedBtn = target.closest<HTMLButtonElement>(".btn-suggested");
+        if (suggestedBtn) {
+          e.preventDefault();
+          const q = suggestedBtn.getAttribute("data-q") || suggestedBtn.textContent?.trim();
+          if (q) {
+            this.askQuestion(q);
+          }
+          return;
+        }
+
+        // Quick action buttons in empty state
+        if (target.closest(".btn-quick-explain")) {
+          e.preventDefault();
+          this.askQuestion(this.t("explainLessonBtn"));
+          return;
+        }
+        if (target.closest(".btn-quick-summarize")) {
+          e.preventDefault();
+          this.askQuestion(this.t("summarizePageBtn"));
+          return;
+        }
+        if (target.closest(".btn-quick-read")) {
+          e.preventDefault();
+          this.askQuestion(this.t("readPageBtn"));
+          return;
+        }
       });
     }
 
@@ -6278,9 +6443,13 @@ export class BridgeAssistant extends HTMLElement {
   }
 
   private escapeHtml(text: string): string {
-    const div = document.createElement("div");
-    div.textContent = text;
-    return div.innerHTML;
+    if (!text) return "";
+    return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
   }
 }
 

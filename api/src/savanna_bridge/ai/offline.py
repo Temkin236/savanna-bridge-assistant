@@ -188,6 +188,14 @@ class OfflineFaqProvider(AIProvider):
                     f"• Gaaffii walxaxaa ykn ifa hin taane gaafachuu mannaa (fkf: 'barreeffama naaf barreessi'), daangaa fi kallattii ifa ta'e kennuu (fkf: 'Akka ogeessa tajaajilaatti qabxiilee gurguddoo 3 qofa naaf ibsi').\n"
                     f"• Kunis bu'aa qulqullina qabu argachuuf gargaara."
                 )
+            elif language == Language.TI:
+                ans = (
+                    f"ነዚ ፅንሰ-ሓሳብ ብተግባራዊ ኣብነት ንርኣዮ፡\n\n"
+                    f"ኣብዚ ትምህርቲ ('{title}') መሠረት፦ {concept_core}\n\n"
+                    f"📌 ተግባራዊ ኣብነት፦\n"
+                    f"• ሓፈሻዊ ሕቶ ካብ ምሕታት (ንኣብነት፡ 'ጽሑፍ ጸሓፈለይ')፣ ንጹር መምርሒ ምሃብ (ንኣብነት፡ 'ከም ላዕለዋይ ኣማኻሪ ኴንካ 3 ዋና ነጥብታት ሓዘል ሓጺር ጽሑፍ ኣዳሉ')።\n"
+                    f"• እዚ ድማ ዝተዓወተ ውጽኢት ንምርካብ ይሕግዝ።"
+                )
             elif language == Language.AR:
                 ans = (
                     f"لنوضح هذا المفهوم بمثال عملي من الدرس:\n\n"
@@ -226,6 +234,13 @@ class OfflineFaqProvider(AIProvider):
                     f"{items_str}\n\n"
                     f"Qabxiilee kanneen yoo hubatte, barnoota itti aanuuf qophii taata."
                 )
+            elif language == Language.TI:
+                items_str = "\n".join([f"• {h}" for h in headings_list])
+                ans = (
+                    f"ናብ ዝቕጽል ትምህርቲ ቅድሚ ምኻድኩም ካብዚ ገጽ ('{title}') ነዞም ዝስዕቡ ዋና ነጥብታት ምርዳእኩም ኣረጋግጹ፡\n\n"
+                    f"{items_str}\n\n"
+                    f"ነዞም ነጥብታት ብግቡእ ምስ ተረዳእኩም ናብ ዝቕጽል ትምህርቲ ንምስግጋር ቅሩብ ትኾኑ።"
+                )
             elif language == Language.AR:
                 items_str = "\n".join([f"• {h}" for h in headings_list])
                 ans = (
@@ -261,6 +276,13 @@ class OfflineFaqProvider(AIProvider):
                     f"1. Akkaataa {primary_topic} keessatti ibsametti, kaayyoon ijoo maali?\n"
                     f"2. Qabxiilee kanneen hojii kee keessatti akkamitti itti fayyadamta?\n\n"
                     f"Deebii kee naaf barreessi, yaada sirreeffamaa siifan kenna!"
+                )
+            elif language == Language.TI:
+                ans = (
+                    f"ብዛዕባ '{title}' ዘለኩም ግንዛበ ንምፍታን ዝሕግዙ ቅልጡፋት ሕቶታት፡\n\n"
+                    f"1. ብመሰረት {primary_topic}፣ ቀንዲ ዕላማን ጥቕምን እንታይ እዩ?\n"
+                    f"2. ነዚ ሜላ ኣብ ስራሕኩም ወይ ትምህርትኹም ብኸመይ ትጥቀሙሉ?\n\n"
+                    f"መልስኹም ብናይ ባዕልኹም ቃላት ጽሓፉለይ፣ ኣነ ድማ ርእይቶ ክህበኩም እየ!"
                 )
             elif language == Language.AR:
                 ans = (
@@ -335,6 +357,8 @@ class OfflineFaqProvider(AIProvider):
                 ans = f"ይህ ትምህርት ('{topic_name}') የሚያስተምረው ዋና ዋና ነጥቦች፦\n\n{explanation_body}"
             elif language == Language.OM:
                 ans = f"Barnoonni kun ('{topic_name}') qabxiilee armaan gadii barsiisa፦\n\n{explanation_body}"
+            elif language == Language.TI:
+                ans = f"እዚ ትምህርቲ ('{topic_name}') ነዞም ዝስዕቡ ቀንዲ ነጥብታት የስተምህር፦\n\n{explanation_body}"
             elif language == Language.AR:
                 ans = f"يشرح هذا الدرس ('{topic_name}') المحاور التالية بالتفصيل:\n\n{explanation_body}"
             else:
@@ -406,6 +430,13 @@ class OfflineFaqProvider(AIProvider):
                 "• Yaada kana fakkeenyota qabatamoodhaan siif ibsuu?\n"
                 "• Barnoota itti aanutti darbuun dura maal beekuu akka qabdu siif himuu?\n"
                 "• Hubannoo kee qoruuf gaaffii si gaafachuu?"
+            )
+        elif language == Language.TI:
+            return (
+                "\n\nእንታይ ክግበረልኩም ትደልዩ?\n"
+                "• ነዚ ፅንሰ-ሓሳብ ብተግባራዊ ኣብነታት ከረድኣኩም?\n"
+                "• ናብ ዝቕጽል ትምህርቲ ቅድሚ ምኻድኩም እንታይ ክትርድኡ ከም ዘለኩም ከብርሃልኩም?\n"
+                "• ግንዛበኹም ንምፍታን ሕቶታት ክሓተኩም?"
             )
         elif language == Language.AR:
             return (

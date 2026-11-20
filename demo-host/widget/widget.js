@@ -1,6 +1,6 @@
-var j = Object.defineProperty;
-var W = (T, S, e) => S in T ? j(T, S, { enumerable: !0, configurable: !0, writable: !0, value: e }) : T[S] = e;
-var l = (T, S, e) => W(T, typeof S != "symbol" ? S + "" : S, e);
+var H = Object.defineProperty;
+var O = (T, S, e) => S in T ? H(T, S, { enumerable: !0, configurable: !0, writable: !0, value: e }) : T[S] = e;
+var l = (T, S, e) => O(T, typeof S != "symbol" ? S + "" : S, e);
 const o = {
   launcher: '<svg class="icon-inline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="7.2" r="1.5" fill="currentColor"></circle><path d="M5.5 10.5h13"></path><path d="M12 10.5v4"></path><path d="M12 14.5l-2.8 5"></path><path d="M12 14.5l2.8 5"></path></svg>',
   accessibility: '<svg class="icon-inline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="7.2" r="1.5" fill="currentColor"></circle><path d="M5.5 10.5h13"></path><path d="M12 10.5v4"></path><path d="M12 14.5l-2.8 5"></path><path d="M12 14.5l2.8 5"></path></svg>',
@@ -40,7 +40,7 @@ const o = {
   speed: '<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>',
   sync: '<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>',
   sparkles: '<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>'
-}, k = {
+}, w = {
   en: {
     appTitle: "Savanna Bridge Assistant",
     appSubtitle: "Ask questions, adjust support, or connect with a mentor",
@@ -771,7 +771,7 @@ const o = {
     followupQ2: "ماذا يجب أن أفهم قبل الدرس التالي؟",
     followupQ3: "اختبر فهمي لهذا الموضوع"
   }
-}, D = `
+}, Q = `
   :host {
     --b-font: var(--bs-body-font-family, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Ethiopic", "Noto Sans Arabic", "Nyala", sans-serif);
     --b-bg: var(--bs-body-bg, #ffffff);
@@ -1856,7 +1856,7 @@ const o = {
     outline-offset: 3px !important;
   }
 `;
-class V extends HTMLElement {
+class D extends HTMLElement {
   constructor() {
     super(...arguments);
     l(this, "isOpen", !1);
@@ -1979,7 +1979,7 @@ class V extends HTMLElement {
     ];
   }
   attributeChangedCallback(e, i, t) {
-    if (i !== t && (e === "lang" || e === "data-lang") && t in k) {
+    if (i !== t && (e === "lang" || e === "data-lang") && t in w) {
       if (this.currentLang === t) {
         this.setAttribute("dir", t === "ar" ? "rtl" : "ltr");
         return;
@@ -1991,7 +1991,7 @@ class V extends HTMLElement {
     if (this.shadowRoot) return;
     this.restoreState();
     const e = this.getAttribute("lang") || this.getAttribute("data-lang"), i = localStorage.getItem("savanna_bridge_preferred_lang"), t = sessionStorage.getItem("savanna_bridge_lang");
-    e && e in k ? this.currentLang = e : this.accessibilityPrefs.language && this.accessibilityPrefs.language in k ? this.currentLang = this.accessibilityPrefs.language : i && i in k ? this.currentLang = i : t && t in k && (this.currentLang = t), this.accessibilityPrefs.keyboard_navigation && this.classList.add("keyboard-focus-enhanced"), this.accessibilityPrefs.screen_reader_mode && this.classList.add("screen-reader-mode"), this.attachShadow({ mode: "open" }), this.render(), this.setupNetworkMonitor(), this.setupPageNavigationMonitor(), this.voiceActivationEnabled && this.setupWakeWordDetector(), this.popstateListener = () => {
+    e && e in w ? this.currentLang = e : this.accessibilityPrefs.language && this.accessibilityPrefs.language in w ? this.currentLang = this.accessibilityPrefs.language : i && i in w ? this.currentLang = i : t && t in w && (this.currentLang = t), this.accessibilityPrefs.keyboard_navigation && this.classList.add("keyboard-focus-enhanced"), this.accessibilityPrefs.screen_reader_mode && this.classList.add("screen-reader-mode"), this.attachShadow({ mode: "open" }), this.render(), this.setupNetworkMonitor(), this.setupPageNavigationMonitor(), this.voiceActivationEnabled && this.setupWakeWordDetector(), this.popstateListener = () => {
       this.isReadingPage && this.stopPageReading();
     }, window.addEventListener("popstate", this.popstateListener), this.fetchTelegramStartLink(), this.fetchSupportNeeds(), this.accessibilityPrefs.voice_enabled && this.initWakeWordDetection(), this.initGlobalKeyboardShortcuts(), this.accessibilityPrefs.sync_enabled && this.syncPreferencesFromBackend(), this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_welcome && !this.hasSpokenWelcomeThisSession && setTimeout(() => this.triggerSpokenWelcome(), 500);
   }
@@ -2013,7 +2013,7 @@ class V extends HTMLElement {
     this.stopSpeaking(), this.popstateListener && (window.removeEventListener("popstate", this.popstateListener), this.popstateListener = null), this.navCheckTimer && (window.clearInterval(this.navCheckTimer), this.navCheckTimer = null), this.isReadingPage && this.stopPageReading(), this.stopPageReadingHighlight();
   }
   t(e) {
-    return (k[this.currentLang] || k.en)[e] || k.en[e] || e;
+    return (w[this.currentLang] || w.en)[e] || w.en[e] || e;
   }
   announce(e) {
     const i = this.shadowRoot?.querySelector("#live-announcer");
@@ -2126,12 +2126,12 @@ class V extends HTMLElement {
       const i = localStorage.getItem("savanna_voice_prefs");
       if (i)
         try {
-          const c = JSON.parse(i);
-          this.accessibilityPrefs = { ...this.accessibilityPrefs, ...c };
+          const h = JSON.parse(i);
+          this.accessibilityPrefs = { ...this.accessibilityPrefs, ...h };
         } catch {
         }
       const t = localStorage.getItem("savanna_bridge_preferred_lang");
-      t && t in k && (this.currentLang = t, this.accessibilityPrefs.language = t);
+      t && t in w && (this.currentLang = t, this.accessibilityPrefs.language = t);
       const a = localStorage.getItem("savanna_bridge_contrast");
       a && (this.highContrast = a === "high", this.accessibilityPrefs.high_contrast = this.highContrast);
       const n = localStorage.getItem("savanna_bridge_text_size");
@@ -2187,7 +2187,7 @@ class V extends HTMLElement {
       const e = this.getAttribute("learner-id") || `learner_${this.sessionId}`, i = await fetch(`${this.apiBase}/api/v1/accessibility-profile?learner_ref=${encodeURIComponent(e)}`);
       if (i.ok) {
         const t = await i.json();
-        t && t.updated_at && (this.accessibilityPrefs.voice_enabled = !!t.voice_enabled, this.accessibilityPrefs.auto_welcome = !!t.auto_welcome, this.accessibilityPrefs.auto_tts = !!t.auto_tts, typeof t.speech_rate == "number" && (this.accessibilityPrefs.speech_rate = t.speech_rate), t.language && t.language in k && (this.currentLang = t.language, this.accessibilityPrefs.language = t.language), t.large_text && (this.textSize = t.large_text), typeof t.high_contrast == "boolean" && (this.highContrast = t.high_contrast), typeof t.simple_mode == "boolean" && (this.simpleMode = t.simple_mode), typeof t.onboarded == "boolean" && (this.accessibilityPrefs.onboarded = t.onboarded), this.savePreferences(), this.render());
+        t && t.updated_at && (this.accessibilityPrefs.voice_enabled = !!t.voice_enabled, this.accessibilityPrefs.auto_welcome = !!t.auto_welcome, this.accessibilityPrefs.auto_tts = !!t.auto_tts, typeof t.speech_rate == "number" && (this.accessibilityPrefs.speech_rate = t.speech_rate), t.language && t.language in w && (this.currentLang = t.language, this.accessibilityPrefs.language = t.language), t.large_text && (this.textSize = t.large_text), typeof t.high_contrast == "boolean" && (this.highContrast = t.high_contrast), typeof t.simple_mode == "boolean" && (this.simpleMode = t.simple_mode), typeof t.onboarded == "boolean" && (this.accessibilityPrefs.onboarded = t.onboarded), this.savePreferences(), this.render());
       }
     } catch (e) {
       console.warn("Could not fetch accessibility profile from backend:", e);
@@ -2204,8 +2204,8 @@ class V extends HTMLElement {
       ti: "ti-ET",
       ar: "ar-SA"
     }[e].toLowerCase(), n = e.toLowerCase();
-    let s = i.find((c) => c.lang.toLowerCase() === a);
-    if (s || (s = i.find((c) => c.lang.toLowerCase().startsWith(n)), s)) return s;
+    let s = i.find((h) => h.lang.toLowerCase() === a);
+    if (s || (s = i.find((h) => h.lang.toLowerCase().startsWith(n)), s)) return s;
     const r = {
       en: "english",
       am: "amharic",
@@ -2213,7 +2213,7 @@ class V extends HTMLElement {
       ti: "tigrinya",
       ar: "arabic"
     }[e];
-    return s = i.find((c) => c.name.toLowerCase().includes(r)), s || null;
+    return s = i.find((h) => h.name.toLowerCase().includes(r)), s || null;
   }
   speakText(e, i) {
     if (this.lastSpokenText = e, !("speechSynthesis" in window))
@@ -2275,12 +2275,12 @@ class V extends HTMLElement {
           ).forEach((r) => r.remove());
           const d = [];
           s.querySelectorAll("h1, h2, h3, h4, h5, p, li").forEach((r) => {
-            const c = (r.textContent || "").replace(/\s+/g, " ").trim();
-            if (c) {
-              const p = r.tagName.toLowerCase();
-              p.startsWith("h") ? d.push(`
-${c}
-`) : p === "li" ? d.push(`• ${c}`) : d.push(c);
+            const h = (r.textContent || "").replace(/\s+/g, " ").trim();
+            if (h) {
+              const g = r.tagName.toLowerCase();
+              g.startsWith("h") ? d.push(`
+${h}
+`) : g === "li" ? d.push(`• ${h}`) : d.push(h);
             }
           }), d.length > 0 ? a = d.join(`
 
@@ -2922,11 +2922,11 @@ ${c}
   async sendAudioForTranscription(e, i, t) {
     this.isProcessingSpeech = !0, this.updateVoiceStatusUI(), this.announce(this.t("voiceProcessing"));
     try {
-      const a = new FileReader(), n = new Promise((r, c) => {
+      const a = new FileReader(), n = new Promise((r, h) => {
         a.onloadend = () => {
-          const p = a.result;
-          r(p.split(",")[1] || "");
-        }, a.onerror = c;
+          const g = a.result;
+          r(g.split(",")[1] || "");
+        }, a.onerror = h;
       });
       a.readAsDataURL(e);
       const s = await n, d = await fetch(`${this.apiBase}/api/v1/speech/transcribe`, {
@@ -2942,12 +2942,12 @@ ${c}
       if (d.ok) {
         const r = await d.json();
         if (r.transcript) {
-          const c = r.detected_language, p = Number(r.language_confidence || 0);
-          if (c && c in k && p >= 0.82 && c !== this.currentLang)
-            this.setLanguage(c, !1);
+          const h = r.detected_language, g = Number(r.language_confidence || 0);
+          if (h && h in w && g >= 0.82 && h !== this.currentLang)
+            this.setLanguage(h, !1);
           else {
-            const v = this.detectLanguage(r.transcript);
-            v !== this.currentLang && this.setLanguage(v, !1);
+            const b = this.detectLanguage(r.transcript);
+            b !== this.currentLang && this.setLanguage(b, !1);
           }
           await this.handleVoiceTranscript(r.transcript, t), this.playEarcon("transcribed"), this.announce(this.t("voicePreviewNotice")), await this.askQuestion(r.transcript, !1, !0);
         }
@@ -3138,22 +3138,22 @@ ${c}
       r
     ))), n = a.length > 0 ? a : [e.text];
     let s = -1;
-    const d = n.map((r, c) => {
-      const p = r.replace(/[#*•_`]/g, " ").replace(/\s+/g, " ").trim().toLowerCase(), v = /^(this course|this lesson|summary of|የዚህ|ይህ ትምህርት|barnoonni|يشرح|ملخص)/i.test(p), g = p.slice(0, 35);
-      let m = null, b = -1;
+    const d = n.map((r, h) => {
+      const g = r.replace(/[#*•_`]/g, " ").replace(/\s+/g, " ").trim().toLowerCase(), b = /^(this course|this lesson|summary of|የዚህ|ይህ ትምህርት|barnoonni|يشرح|ملخص)/i.test(g), p = g.slice(0, 35);
+      let m = null, f = -1;
       for (let y = 0; y < t.length; y++) {
-        const R = t[y], L = (R.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
-        if ((g.length > 10 && L.includes(g) || p.length > 20 && L.includes(p.slice(10, 45)) || L.length > 15 && p.includes(L.slice(0, 35))) && (y > s || b === -1) && (m = R, b = y, y > s))
+        const L = t[y], R = (L.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+        if ((p.length > 10 && R.includes(p) || g.length > 20 && R.includes(g.slice(10, 45)) || R.length > 15 && g.includes(R.slice(0, 35))) && (y > s || f === -1) && (m = L, f = y, y > s))
           break;
       }
       if (!m)
-        if (v && t.length > 0)
-          m = t[0], b = 0;
+        if (b && t.length > 0)
+          m = t[0], f = 0;
         else {
           const y = s + 1;
-          y < t.length ? (m = t[y], b = y) : c < t.length && (m = t[c], b = c);
+          y < t.length ? (m = t[y], f = y) : h < t.length && (m = t[h], f = h);
         }
-      return b !== -1 && (s = b), {
+      return f !== -1 && (s = f), {
         text: r,
         element: m || null
       };
@@ -3200,8 +3200,8 @@ ${c}
         e.isAudioPlaying = !0, e.isAudioPaused = !1;
       }, n.onend = () => {
         a();
-      }, n.onerror = (c) => {
-        console.warn("TTS segment error:", c), a();
+      }, n.onerror = (h) => {
+        console.warn("TTS segment error:", h), a();
       };
       const d = t.split(/\s+/).filter(Boolean).length, r = Math.min(14e3, Math.max(3e3, Math.ceil(d / 2 * 1e3) + 1200));
       this.readingWatchdogTimer = setTimeout(() => {
@@ -3298,13 +3298,28 @@ ${c}
     }, 250);
   }
   // --- Q&A / Ask ---
+  switchTab(e) {
+    if (this.activeTab = e, !this.shadowRoot) return;
+    const i = [
+      { id: "chat", btn: this.shadowRoot.querySelector("#tab-chat"), pane: this.shadowRoot.querySelector("#pane-chat") },
+      { id: "support", btn: this.shadowRoot.querySelector("#tab-support"), pane: this.shadowRoot.querySelector("#pane-support") },
+      { id: "handoff", btn: this.shadowRoot.querySelector("#tab-handoff"), pane: this.shadowRoot.querySelector("#pane-handoff") }
+    ];
+    i.forEach((a) => {
+      const n = a.id === e;
+      a.btn?.setAttribute("aria-selected", n ? "true" : "false"), a.pane && (a.pane.hidden = !n, a.pane.style.display = n ? a.id === "chat" ? "flex" : "block" : "none");
+    });
+    const t = i.find((a) => a.id === e)?.btn;
+    t && (t.focus(), this.announce(`${t.textContent?.trim()} tab selected`));
+  }
   async askQuestion(e, i = !1, t = !1) {
     const a = e.trim();
     if (!a || this.isThinking) return;
+    this.activeTab !== "chat" && this.switchTab("chat");
     const n = a.match(/^(?:\/confirm|\/link)?\s*([0-9]{6})$/i);
     if (n) {
-      const r = n[1];
-      if (await this.confirmLinkCode(r)) {
+      const g = n[1];
+      if (await this.confirmLinkCode(g)) {
         this.messages.push({
           id: `msg_link_${Date.now()}`,
           sender: "assistant",
@@ -3326,11 +3341,12 @@ ${c}
       text: a
     };
     this.messages.push(s), this.isThinking = !0, this.announce(this.t("lookingInCourse")), this.renderMessages();
-    const d = this.extractPlatformContext();
+    const d = this.extractPlatformContext(), r = new AbortController(), h = setTimeout(() => r.abort(), 25e3);
     try {
-      let r = await fetch(`${this.apiBase}/api/v1/ask`, {
+      let g = await fetch(`${this.apiBase}/api/v1/ask`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: r.signal,
         body: JSON.stringify({
           question: a,
           language: this.currentLang,
@@ -3342,9 +3358,10 @@ ${c}
           ...d
         })
       });
-      if (!r.ok && r.status === 404 && (r = await fetch(`${this.apiBase}/ask`, {
+      if (!g.ok && g.status === 404 && (g = await fetch(`${this.apiBase}/ask`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: r.signal,
         body: JSON.stringify({
           question: a,
           language: this.currentLang,
@@ -3355,44 +3372,46 @@ ${c}
           platform_id: this.platformId,
           ...d
         })
-      })), this.isThinking = !1, r.ok) {
-        const c = await r.json(), p = c.language;
-        c.language_changed && p && p in k && p !== this.currentLang && this.setLanguage(p, !1);
-        const v = !!c.offer_human || c.reason === "low_confidence", g = {
+      })), g.ok) {
+        const b = await g.json(), p = b.language;
+        b.language_changed && p && p in w && p !== this.currentLang && this.setLanguage(p, !1);
+        const m = !!b.offer_human || b.reason === "low_confidence", f = {
           id: `msg_${Date.now()}_assistant`,
           sender: "assistant",
-          text: c.answer,
+          text: b.answer,
           heading: this.t("answerHeading"),
-          citations: c.citations || [],
-          offerHuman: c.offer_human,
-          isRefusal: v
+          citations: b.citations || [],
+          offerHuman: b.offer_human,
+          isRefusal: m
         };
-        this.messages.push(g), this.saveChatState(), this.renderMessages(), t ? setTimeout(() => {
-          this.handleListen(g);
-        }, 300) : (this.autoReadSpeech || this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_tts) && this.speakResponse(g);
+        this.messages.push(f), this.saveChatState(), this.renderMessages(), t ? setTimeout(() => {
+          this.handleListen(f);
+        }, 300) : (this.autoReadSpeech || this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_tts) && this.speakResponse(f);
       } else {
-        const c = {
+        const b = {
           id: `msg_${Date.now()}_err`,
           sender: "assistant",
           text: this.t("serverErrorNotice"),
           offerHuman: !0
         };
-        this.messages.push(c), this.renderMessages();
+        this.messages.push(b), this.renderMessages();
       }
     } catch {
-      this.isThinking = !1;
       try {
-        const c = JSON.parse(localStorage.getItem("db_assistant_offline_queue") || "[]");
-        c.push({ question: a, language: this.currentLang, timestamp: Date.now() }), localStorage.setItem("db_assistant_offline_queue", JSON.stringify(c));
+        const b = JSON.parse(localStorage.getItem("db_assistant_offline_queue") || "[]");
+        b.push({ question: a, language: this.currentLang, timestamp: Date.now() }), localStorage.setItem("db_assistant_offline_queue", JSON.stringify(b));
       } catch {
       }
-      const r = {
+      const g = {
         id: `msg_${Date.now()}_offline`,
         sender: "assistant",
         text: this.t("savedOnPhoneNotice"),
-        offerHuman: !0
+        offerHuman: !0,
+        isRefusal: !0
       };
-      this.messages.push(r), this.renderMessages();
+      this.messages.push(g), this.renderMessages();
+    } finally {
+      clearTimeout(h), this.isThinking = !1, this.renderMessages();
     }
   }
   // --- Human Handoff ---
@@ -3401,65 +3420,115 @@ ${c}
       alert(this.t("offlineBanner"));
       return;
     }
-    if (window.confirm(this.t("handoffConsentCheck"))) {
-      this.announce(this.t("lookingInCourse"));
-      try {
-        const i = await fetch(`${this.apiBase}/api/v1/escalations`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            consent: !0,
-            learner_ref: `learner_${this.sessionId}`,
-            card: {
-              language: this.currentLang,
-              context: e || "Learner requested a human mentor from web assistant.",
-              support_needs: this.supportNeeds.needs,
-              contact_mode: this.supportNeeds.preferred_contact_mode
-            },
-            channel: "web"
+    const i = this.shadowRoot?.querySelector("#handoff-consent");
+    if (i && !i.checked) {
+      const n = this.shadowRoot?.querySelector("#handoff-consent-error");
+      n && (n.textContent = `⚠️ ${this.t("handoffConsentCheck")}`, n.style.display = "block"), i.focus();
+      return;
+    }
+    if (this.activeTab !== "handoff") {
+      this.switchTab("handoff");
+      const n = this.shadowRoot?.querySelector("#handoff-reason");
+      n && e && (n.value = e);
+    }
+    const t = this.shadowRoot?.querySelector("#handoff-consent-error");
+    t && (t.style.display = "none");
+    const a = this.shadowRoot?.querySelector("#btn-submit-handoff");
+    a && (a.disabled = !0, a.innerHTML = `⏳ <span>${this.t("lookingInCourse")}...</span>`), this.announce(this.t("lookingInCourse"));
+    try {
+      const n = [
+        `${this.apiBase}/api/v1/escalations`,
+        `${this.apiBase}/escalations`,
+        `${this.apiBase}/api/v1/handoff`,
+        `${this.apiBase}/handoff`
+      ], s = {
+        consent: !0,
+        learner_ref: this.getAttribute("learner-id") || `learner_${this.sessionId}`,
+        card: {
+          language: this.currentLang,
+          context: e || this.shadowRoot?.querySelector("#handoff-reason")?.value || "Learner requested a human mentor from web assistant.",
+          support_needs: this.supportNeeds.needs,
+          contact_mode: this.supportNeeds.preferred_contact_mode
+        },
+        channel: "web"
+      };
+      let d = null;
+      for (const r of n)
+        try {
+          const h = await fetch(r, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(s)
+          });
+          if (h.ok) {
+            d = h;
+            break;
+          }
+        } catch {
+        }
+      if (d && d.ok) {
+        const r = await d.json(), h = r.ticketId || r.handoff_id || r.id || "ticket_01", g = r.room_url || r.roomUrl || "https://meet.jit.si/savanna-bridge-demo";
+        this.activeHandoff = {
+          id: h,
+          room_url: g
+        }, this.dispatchEvent(
+          new CustomEvent("db-assistant:escalated", {
+            bubbles: !0,
+            composed: !0,
+            detail: { ticketId: h, roomUrl: g }
           })
-        });
-        if (i.ok) {
-          const t = await i.json(), a = t.ticketId || t.id || "ticket_01", n = t.room_url || t.roomUrl || "https://meet.jit.si/savanna-bridge-demo";
-          this.activeHandoff = {
-            id: a,
-            room_url: n
-          }, this.dispatchEvent(
-            new CustomEvent("db-assistant:escalated", {
-              bubbles: !0,
-              composed: !0,
-              detail: { ticketId: a, roomUrl: n }
-            })
-          ), this.messages.push({
-            id: `msg_${Date.now()}_handoff`,
-            sender: "assistant",
-            text: `${this.t("handoffReadyTitle")}: ${this.activeHandoff.room_url}`,
-            heading: this.t("handoffReadyTitle"),
-            isHandoff: !0,
-            roomUrl: n,
-            offerHuman: !1
-          }), this.saveChatState();
-          const s = this.shadowRoot?.querySelector("#handoff-room-box");
-          s && (s.innerHTML = `
+        ), this.messages.push({
+          id: `msg_${Date.now()}_handoff`,
+          sender: "assistant",
+          text: `${this.t("handoffReadyTitle")}: ${this.activeHandoff.room_url}`,
+          heading: this.t("handoffReadyTitle"),
+          isHandoff: !0,
+          roomUrl: g,
+          offerHuman: !1
+        }), this.saveChatState();
+        const b = this.shadowRoot?.querySelector("#handoff-room-box");
+        if (b) {
+          b.innerHTML = `
             <div style="padding:0.75rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:0.5rem; margin-top:0.75rem;">
               <p style="margin:0 0 0.5rem 0; font-size:0.875rem; font-weight:600; color:#166534; display:flex; align-items:center; gap:0.375rem;">
                 ${o.celebrate} <span>${this.t("handoffReadyTitle")}</span>
               </p>
               <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-                <a href="${n}" target="_blank" rel="noopener noreferrer" class="btn btn-primary room-link" style="text-decoration:none; display:inline-flex; align-items:center; gap:0.375rem;">
+                <a href="${g}" target="_blank" rel="noopener noreferrer" class="btn btn-primary room-link" style="text-decoration:none; display:inline-flex; align-items:center; gap:0.375rem;">
                   ${o.video} <span>${this.t("joinRoomButton")}</span>
                 </a>
-                <button type="button" class="btn btn-secondary btn-copy-room" data-url="${this.escapeHtml(n)}" style="font-size:0.8125rem; min-height:44px; display:inline-flex; align-items:center; gap:0.375rem;">
+                <button type="button" class="btn btn-secondary btn-copy-room" data-url="${this.escapeHtml(g)}" style="font-size:0.8125rem; min-height:44px; display:inline-flex; align-items:center; gap:0.375rem;">
                   ${o.copy} <span>${this.t("copyRoomBtn")}</span>
                 </button>
               </div>
             </div>
-          `), this.renderMessages();
-        } else
-          alert(this.t("serverErrorNotice"));
-      } catch {
-        alert(this.t("serverErrorNotice"));
+          `;
+          const p = b.querySelector(".btn-copy-room");
+          p && p.addEventListener("click", async () => {
+            const m = p.getAttribute("data-url");
+            if (m) {
+              try {
+                await navigator.clipboard.writeText(m);
+              } catch {
+                const f = document.createElement("textarea");
+                f.value = m, document.body.appendChild(f), f.select(), document.execCommand("copy"), document.body.removeChild(f);
+              }
+              p.innerHTML = `${o.check} <span>${this.t("linkCodeCopied")}</span>`, this.announce(this.t("linkCodeCopied")), setTimeout(() => {
+                p.innerHTML = `${o.copy} <span>${this.t("copyRoomBtn")}</span>`;
+              }, 2e3);
+            }
+          });
+        }
+        this.renderMessages();
+      } else {
+        const r = this.shadowRoot?.querySelector("#handoff-consent-error");
+        r ? (r.textContent = `⚠️ ${this.t("serverErrorNotice")}`, r.style.display = "block") : alert(this.t("serverErrorNotice"));
       }
+    } catch {
+      const n = this.shadowRoot?.querySelector("#handoff-consent-error");
+      n ? (n.textContent = `⚠️ ${this.t("serverErrorNotice")}`, n.style.display = "block") : alert(this.t("serverErrorNotice"));
+    } finally {
+      a && (a.disabled = !1, a.innerHTML = `${o.users} <span>${this.t("requestMentorBtn")}</span>`);
     }
   }
   renderOnboardingWizard() {
@@ -3547,8 +3616,8 @@ ${c}
   }
   captureOnboardingStep() {
     const e = (r) => {
-      const c = this.shadowRoot?.querySelector(`#${r}`);
-      return c ? c.checked : null;
+      const h = this.shadowRoot?.querySelector(`#${r}`);
+      return h ? h.checked : null;
     }, i = e("onboard-chk-screen-reader"), t = e("onboard-chk-keyboard-nav"), a = e("onboard-chk-contrast"), n = e("onboard-chk-large-text"), s = e("onboard-chk-voice"), d = e("onboard-chk-auto-tts");
     i !== null && (this.accessibilityPrefs.screen_reader_mode = i), t !== null && (this.accessibilityPrefs.keyboard_navigation = t), a !== null && (this.accessibilityPrefs.high_contrast = a), n !== null && (this.accessibilityPrefs.large_text = n ? "larger" : "normal"), s !== null && (this.accessibilityPrefs.voice_enabled = s), d !== null && (this.accessibilityPrefs.auto_tts = d), this.highContrast = this.accessibilityPrefs.high_contrast, this.textSize = this.accessibilityPrefs.large_text;
   }
@@ -3558,7 +3627,7 @@ ${c}
   // --- Rendering ---
   render() {
     this.shadowRoot && (this.setAttribute("data-contrast", this.highContrast ? "high" : "normal"), this.setAttribute("data-size", this.textSize), this.setAttribute("dir", this.currentLang === "ar" ? "rtl" : "ltr"), this.accessibilityPrefs?.keyboard_navigation ? this.classList.add("keyboard-focus-enhanced") : this.classList.remove("keyboard-focus-enhanced"), this.accessibilityPrefs?.screen_reader_mode ? this.classList.add("screen-reader-mode") : this.classList.remove("screen-reader-mode"), this.shadowRoot.innerHTML = `
-      <style>${D}</style>
+      <style>${Q}</style>
 
       <!-- Live Announcer -->
       <div id="live-announcer" class="sr-only" aria-live="polite" aria-atomic="true" style="position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); border:0;"></div>
@@ -3810,8 +3879,9 @@ ${c}
               ${this.t("appSubtitle")}
             </div>
             <form id="handoff-request-form" style="display:flex; flex-direction:column; gap:0.625rem;">
+              <div id="handoff-consent-error" style="display:none; color:#dc2626; font-size:0.8125rem; font-weight:600; padding:0.375rem 0.5rem; background:#fee2e2; border:1px solid #fca5a5; border-radius:0.375rem;" role="alert"></div>
               <label class="checkbox-card">
-                <input type="checkbox" id="handoff-consent" required checked>
+                <input type="checkbox" id="handoff-consent" checked>
                 <div class="checkbox-card-content">
                   <span style="font-size:0.8125rem;">${this.t("handoffConsentCheck")}</span>
                 </div>
@@ -4116,15 +4186,15 @@ ${c}
           `;
       const a = [], n = /* @__PURE__ */ new Set();
       if (t.citations)
-        for (const g of t.citations) {
-          const b = (g.title || g.heading || "").replace(/\s*\|\s*.*$/, "").replace(/^Concept page:\s*/i, "").trim();
-          b && !n.has(b) && (n.add(b), a.push({ ...g, title: b }));
+        for (const p of t.citations) {
+          const f = (p.title || p.heading || "").replace(/\s*\|\s*.*$/, "").replace(/^Concept page:\s*/i, "").trim();
+          f && !n.has(f) && (n.add(f), a.push({ ...p, title: f }));
         }
-      const s = a.length > 0, d = !!t.isRefusal, r = t.heading || (t.isHandoff ? this.t("handoffReadyTitle") : this.t("answerHeading")), c = !!(this.currentReading && this.currentReading.msgId === t.id), v = t.text.split(/\n\s*\n/).map((g) => g.trim()).filter(Boolean).map((g, m) => `<div class="answer-para-item ${c && this.currentReading.currentIndex === m ? "active-reading-para" : ""}" data-msg-id="${t.id}" data-idx="${m}" title="Click to read and highlight this paragraph" style="cursor:pointer; margin-bottom:0.625rem; line-height:1.5;">${this.escapeHtml(g)}</div>`).join("");
+      const s = a.length > 0, d = !!t.isRefusal, r = t.heading || (t.isHandoff ? this.t("handoffReadyTitle") : this.t("answerHeading")), h = !!(this.currentReading && this.currentReading.msgId === t.id), b = t.text.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean).map((p, m) => `<div class="answer-para-item ${h && this.currentReading.currentIndex === m ? "active-reading-para" : ""}" data-msg-id="${t.id}" data-idx="${m}" title="Click to read and highlight this paragraph" style="cursor:pointer; margin-bottom:0.625rem; line-height:1.5;">${this.escapeHtml(p)}</div>`).join("");
       return `
           <div class="msg-row msg-assistant" id="${t.id}">
             <h4 class="answer-heading">${this.escapeHtml(r)}</h4>
-            <div class="answer-text">${v}</div>
+            <div class="answer-text">${b}</div>
 
             ${t.isHandoff ? `
                 <div class="handoff-card" style="margin-top:0.75rem; padding:0.75rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:0.5rem;">
@@ -4180,10 +4250,10 @@ ${c}
             ${s ? `
                 <div class="sources-box">
                   <div class="sources-title">${this.t("sourcesTitle")}</div>
-                  ${(t.citations || []).filter((g, m, b) => b.findIndex((y) => y.url === g.url) === m).map(
-        (g) => `
-                    <a href="${this.escapeHtml(g.url)}" target="_blank" rel="noopener noreferrer" class="source-link citation-link" style="display:inline-flex; align-items:center; gap:0.375rem;">
-                      ${o.book} <span>${this.escapeHtml(g.title || g.heading)}</span>
+                  ${(t.citations || []).filter((p, m, f) => f.findIndex((y) => y.url === p.url) === m).map(
+        (p) => `
+                    <a href="${this.escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" class="source-link citation-link" style="display:inline-flex; align-items:center; gap:0.375rem;">
+                      ${o.book} <span>${this.escapeHtml(p.title || p.heading)}</span>
                     </a>
                   `
       ).join("")}
@@ -4197,13 +4267,13 @@ ${c}
                     <span>${this.t("followupTitle")}</span>
                   </div>
                   <div class="followup-chips">
-                    <button type="button" class="btn btn-secondary btn-followup" data-query="${this.escapeHtml(this.t("followupQ1"))}">
+                    <button type="button" class="btn btn-secondary btn-followup" data-query="${this.escapeHtml(this.t("followupQ1"))}" ${this.isThinking ? "disabled" : ""}>
                       ${this.t("followupQ1")}
                     </button>
-                    <button type="button" class="btn btn-secondary btn-followup" data-query="${this.escapeHtml(this.t("followupQ2"))}">
+                    <button type="button" class="btn btn-secondary btn-followup" data-query="${this.escapeHtml(this.t("followupQ2"))}" ${this.isThinking ? "disabled" : ""}>
                       ${this.t("followupQ2")}
                     </button>
-                    <button type="button" class="btn btn-secondary btn-followup" data-query="${this.escapeHtml(this.t("followupQ3"))}">
+                    <button type="button" class="btn btn-secondary btn-followup" data-query="${this.escapeHtml(this.t("followupQ3"))}" ${this.isThinking ? "disabled" : ""}>
                       ${this.t("followupQ3")}
                     </button>
                   </div>
@@ -4255,9 +4325,10 @@ ${c}
         n && this.askQuestion(`Explain simpler: ${n.text}`, !0);
       });
     }), e.querySelectorAll(".btn-followup").forEach((t) => {
-      t.addEventListener("click", () => {
-        const a = t.getAttribute("data-query");
-        a && this.askQuestion(a);
+      t.addEventListener("click", (a) => {
+        a.stopPropagation();
+        const n = t.getAttribute("data-query") || t.textContent?.trim();
+        n && this.askQuestion(n);
       });
     }), e.querySelectorAll(".btn-talk-person").forEach((t) => {
       t.addEventListener("click", () => {
@@ -4278,67 +4349,60 @@ ${c}
     const e = this.shadowRoot.querySelector("#launcher-btn"), i = this.shadowRoot.querySelector("#assistant-dialog"), t = this.shadowRoot.querySelector("#btn-close-dialog"), a = this.shadowRoot.querySelector("#btn-open-settings"), n = this.shadowRoot.querySelector("#btn-close-settings");
     e.addEventListener("click", () => {
       this.isOpen ? this.closeAssistant() : (this.previousFocus = e, this.openAssistant());
-    }), t.addEventListener("click", () => this.closeAssistant()), i.addEventListener("focusin", (h) => {
-      h.target?.scrollIntoView({ block: "nearest", inline: "nearest" });
-    }), i.addEventListener("keydown", (h) => {
-      if (h.key === "Escape")
+    }), t.addEventListener("click", () => this.closeAssistant()), i.addEventListener("focusin", (c) => {
+      c.target?.scrollIntoView({ block: "nearest", inline: "nearest" });
+    }), i.addEventListener("keydown", (c) => {
+      if (c.key === "Escape")
         if (this.isSettingsOpen) {
           this.isSettingsOpen = !1;
           const u = this.shadowRoot?.querySelector("#settings-dialog");
           u && u.setAttribute("hidden", "true");
         } else
           this.closeAssistant();
-      if (h.key === "Tab") {
-        const u = this.shadowRoot?.querySelector("#onboarding-overlay"), f = this.shadowRoot?.querySelector("#settings-dialog:not([hidden])"), x = Array.from(
-          (u || f || i).querySelectorAll(
+      if (c.key === "Tab") {
+        const u = this.shadowRoot?.querySelector("#onboarding-overlay"), v = this.shadowRoot?.querySelector("#settings-dialog:not([hidden])"), k = Array.from(
+          (u || v || i).querySelectorAll(
             'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
           )
-        ).filter((C) => C.getClientRects().length > 0);
-        if (x.length > 0) {
-          const C = x[0], z = x[x.length - 1], N = this.shadowRoot?.activeElement;
-          h.shiftKey && N === C ? (h.preventDefault(), z.focus()) : !h.shiftKey && N === z && (h.preventDefault(), C.focus());
+        ).filter((B) => B.getClientRects().length > 0);
+        if (k.length > 0) {
+          const B = k[0], j = k[k.length - 1], W = this.shadowRoot?.activeElement;
+          c.shiftKey && W === B ? (c.preventDefault(), j.focus()) : !c.shiftKey && W === j && (c.preventDefault(), B.focus());
         }
       }
-    }), this.shadowRoot.querySelectorAll(".lang-toggle-btn").forEach((h) => {
-      h.addEventListener("click", () => {
-        const u = h.id.replace(/^btn-lang-|^onboard-lang-/, "");
+    }), this.shadowRoot.querySelectorAll(".lang-toggle-btn").forEach((c) => {
+      c.addEventListener("click", () => {
+        const u = c.id.replace(/^btn-lang-|^onboard-lang-/, "");
         u && ["en", "am", "om", "ti", "ar"].includes(u) && this.setLanguage(u);
       });
     }), a.addEventListener("click", () => {
       this.isSettingsOpen = !0;
-      const h = this.shadowRoot?.querySelector("#settings-dialog");
-      if (h) {
-        h.removeAttribute("hidden");
-        const u = h.querySelector("button, input");
+      const c = this.shadowRoot?.querySelector("#settings-dialog");
+      if (c) {
+        c.removeAttribute("hidden");
+        const u = c.querySelector("button, input");
         u && u.focus();
       }
     }), n.addEventListener("click", () => {
       this.isSettingsOpen = !1;
-      const h = this.shadowRoot?.querySelector("#settings-dialog");
-      h && h.setAttribute("hidden", "true"), a.focus();
+      const c = this.shadowRoot?.querySelector("#settings-dialog");
+      c && c.setAttribute("hidden", "true"), a.focus();
     });
     const s = [
       { id: "chat", btn: this.shadowRoot.querySelector("#tab-chat"), pane: this.shadowRoot.querySelector("#pane-chat") },
       { id: "support", btn: this.shadowRoot.querySelector("#tab-support"), pane: this.shadowRoot.querySelector("#pane-support") },
       { id: "handoff", btn: this.shadowRoot.querySelector("#tab-handoff"), pane: this.shadowRoot.querySelector("#pane-handoff") }
-    ], d = (h) => {
-      this.activeTab = s[h].id, s.forEach((f, w) => {
-        const x = w === h;
-        f.btn?.setAttribute("aria-selected", x ? "true" : "false"), f.pane && (f.pane.hidden = !x, f.pane.style.display = x ? f.id === "chat" ? "flex" : "block" : "none");
-      });
-      const u = s[h].btn;
-      u && (u.focus(), this.announce(u.textContent?.trim() + " tab selected"));
+    ], d = (c) => {
+      this.switchTab(s[c].id);
     };
-    s.forEach(({ btn: h }, u) => {
-      h?.addEventListener("click", () => d(u)), h?.addEventListener("keydown", (f) => {
-        const w = f;
-        w.key === "ArrowRight" ? (w.preventDefault(), d((u + 1) % s.length)) : w.key === "ArrowLeft" && (w.preventDefault(), d((u - 1 + s.length) % s.length));
+    s.forEach(({ btn: c }, u) => {
+      c?.addEventListener("click", () => d(u)), c?.addEventListener("keydown", (v) => {
+        const x = v;
+        x.key === "ArrowRight" ? (x.preventDefault(), d((u + 1) % s.length)) : x.key === "ArrowLeft" && (x.preventDefault(), d((u - 1 + s.length) % s.length));
       });
-    }), this.shadowRoot.querySelectorAll(".btn-talk-person, #btn-footer-handoff").forEach((h) => {
-      h.addEventListener("click", (u) => {
-        u.preventDefault();
-        const f = s.findIndex((w) => w.id === "handoff");
-        f >= 0 && d(f);
+    }), this.shadowRoot.querySelectorAll(".btn-talk-person, #btn-footer-handoff").forEach((c) => {
+      c.addEventListener("click", (u) => {
+        u.preventDefault(), this.switchTab("handoff");
       });
     }), this.shadowRoot.querySelector("#btn-size-smaller")?.addEventListener("click", () => {
       this.textSize = "smaller", localStorage.setItem("savanna_bridge_text_size", "smaller"), this.render();
@@ -4351,17 +4415,17 @@ ${c}
     r && r.addEventListener("change", () => {
       this.highContrast = r.checked, localStorage.setItem("savanna_bridge_contrast", this.highContrast ? "high" : "normal"), this.render();
     });
-    const c = this.shadowRoot.querySelector("#chk-simple-mode");
-    c && c.addEventListener("change", () => {
-      this.simpleMode = c.checked;
+    const h = this.shadowRoot.querySelector("#chk-simple-mode");
+    h && h.addEventListener("change", () => {
+      this.simpleMode = h.checked;
     });
-    const p = this.shadowRoot.querySelector("#chk-auto-read");
-    p && p.addEventListener("change", () => {
-      this.autoReadSpeech = p.checked, localStorage.setItem("savanna_bridge_auto_read", this.autoReadSpeech ? "true" : "false"), !this.autoReadSpeech && this.isSpeaking && this.stopSpeaking();
+    const g = this.shadowRoot.querySelector("#chk-auto-read");
+    g && g.addEventListener("change", () => {
+      this.autoReadSpeech = g.checked, localStorage.setItem("savanna_bridge_auto_read", this.autoReadSpeech ? "true" : "false"), !this.autoReadSpeech && this.isSpeaking && this.stopSpeaking();
     });
-    const v = this.shadowRoot.querySelector("#chk-wake-word");
-    v && v.addEventListener("change", () => {
-      if (this.voiceActivationEnabled = v.checked, localStorage.setItem("savanna_bridge_wake_word", this.voiceActivationEnabled ? "true" : "false"), this.voiceActivationEnabled)
+    const b = this.shadowRoot.querySelector("#chk-wake-word");
+    b && b.addEventListener("change", () => {
+      if (this.voiceActivationEnabled = b.checked, localStorage.setItem("savanna_bridge_wake_word", this.voiceActivationEnabled ? "true" : "false"), this.voiceActivationEnabled)
         this.setupWakeWordDetector();
       else if (this.wakeWordRecognition) {
         try {
@@ -4371,11 +4435,11 @@ ${c}
         this.wakeWordRecognition = null;
       }
     });
-    const g = this.shadowRoot.querySelector("#settings-code-form");
-    g && g.addEventListener("submit", (h) => {
-      h.preventDefault();
-      const u = this.shadowRoot?.querySelector("#settings-input-code"), f = this.shadowRoot?.querySelector("#settings-code-msg");
-      u && u.value && this.confirmLinkCode(u.value, f);
+    const p = this.shadowRoot.querySelector("#settings-code-form");
+    p && p.addEventListener("submit", (c) => {
+      c.preventDefault();
+      const u = this.shadowRoot?.querySelector("#settings-input-code"), v = this.shadowRoot?.querySelector("#settings-code-msg");
+      u && u.value && this.confirmLinkCode(u.value, v);
     }), this.shadowRoot.querySelector("#btn-settings-disconnect-tg")?.addEventListener("click", () => {
       this.disconnectTelegram();
     }), this.shadowRoot.querySelector("#btn-clear-chat")?.addEventListener("click", () => {
@@ -4383,36 +4447,67 @@ ${c}
     }), this.shadowRoot.querySelector("#btn-generate-code")?.addEventListener("click", () => {
       this.generateLinkCode();
     });
-    const m = this.shadowRoot.querySelector("#handoff-request-form");
-    m && m.addEventListener("submit", (h) => {
-      h.preventDefault();
+    const m = this.shadowRoot.querySelector("#handoff-request-form"), f = this.shadowRoot.querySelector("#btn-submit-handoff"), y = (c) => {
+      c && c.preventDefault();
       const u = this.shadowRoot?.querySelector("#handoff-reason");
       this.requestHandoff(u?.value || void 0);
+    };
+    m && m.addEventListener("submit", y), f && f.addEventListener("click", (c) => {
+      y(c);
     });
-    const b = this.shadowRoot.querySelector("#support-form");
-    b && b.addEventListener("submit", (h) => {
-      h.preventDefault();
-      const u = new FormData(b), f = u.getAll("need"), w = u.get("other_text") || "", x = u.get("contact_mode") || "text";
-      this.saveSupportNeeds(f, w, x);
+    const L = this.shadowRoot.querySelector("#chat-log");
+    L && L.addEventListener("click", (c) => {
+      const u = c.target, v = u.closest(".btn-followup");
+      if (v) {
+        c.preventDefault();
+        const k = v.getAttribute("data-query") || v.textContent?.trim();
+        k && this.askQuestion(k);
+        return;
+      }
+      const x = u.closest(".btn-suggested");
+      if (x) {
+        c.preventDefault();
+        const k = x.getAttribute("data-q") || x.textContent?.trim();
+        k && this.askQuestion(k);
+        return;
+      }
+      if (u.closest(".btn-quick-explain")) {
+        c.preventDefault(), this.askQuestion(this.t("explainLessonBtn"));
+        return;
+      }
+      if (u.closest(".btn-quick-summarize")) {
+        c.preventDefault(), this.askQuestion(this.t("summarizePageBtn"));
+        return;
+      }
+      if (u.closest(".btn-quick-read")) {
+        c.preventDefault(), this.askQuestion(this.t("readPageBtn"));
+        return;
+      }
     });
-    const y = this.shadowRoot.querySelector("#chat-form"), R = this.shadowRoot.querySelector("#chat-input"), L = this.shadowRoot.querySelector("#mic-btn");
-    y && R && y.addEventListener("submit", (h) => {
-      h.preventDefault();
-      const u = R.value;
-      R.value = "", this.askQuestion(u);
-    }), L && R && L.addEventListener("click", () => {
-      this.toggleVoiceInput(R);
+    const R = this.shadowRoot.querySelector("#support-form");
+    R && R.addEventListener("submit", (c) => {
+      c.preventDefault();
+      const u = new FormData(R), v = u.getAll("need"), x = u.get("other_text") || "", k = u.get("contact_mode") || "text";
+      this.saveSupportNeeds(v, x, k);
     });
-    const E = () => {
+    const I = this.shadowRoot.querySelector("#chat-form"), A = this.shadowRoot.querySelector("#chat-input"), M = this.shadowRoot.querySelector("#mic-btn");
+    I && A && I.addEventListener("submit", (c) => {
+      c.preventDefault();
+      const u = A.value;
+      A.value = "", this.askQuestion(u);
+    }), M && A && M.addEventListener("click", () => {
+      this.toggleVoiceInput(A);
+    });
+    const z = () => {
       this.showAutoplayBanner = !1, this.accessibilityPrefs.voice_enabled = !0, this.savePreferences(), this.announce(this.t("voiceWelcomeAnnouncement")), this.triggerSpokenWelcome(), this.render();
     };
-    this.shadowRoot.querySelector("#btn-activate-voice-welcome")?.addEventListener("click", E), this.shadowRoot.querySelector("#btn-activate-voice-welcome-floating")?.addEventListener("click", E);
-    const I = () => {
+    this.shadowRoot.querySelector("#btn-activate-voice-welcome")?.addEventListener("click", z), this.shadowRoot.querySelector("#btn-activate-voice-welcome-floating")?.addEventListener("click", z);
+    const N = () => {
       this.showAutoplayBanner = !1, this.render();
     };
-    this.shadowRoot.querySelector("#btn-dismiss-voice-banner")?.addEventListener("click", I), this.shadowRoot.querySelector("#btn-dismiss-voice-banner-floating")?.addEventListener("click", I), this.shadowRoot.querySelector("#btn-reading-pause")?.addEventListener("click", () => this.pausePageReading()), this.shadowRoot.querySelector("#btn-reading-resume")?.addEventListener("click", () => this.resumePageReading()), this.shadowRoot.querySelector("#btn-reading-stop")?.addEventListener("click", () => this.stopPageReading()), ["en", "am", "om", "ti", "ar"].forEach((h) => {
-      this.shadowRoot?.querySelector(`#onboard-lang-${h}`)?.addEventListener("click", () => {
-        this.setLanguage(h);
+    this.shadowRoot.querySelector("#btn-dismiss-voice-banner")?.addEventListener("click", N), this.shadowRoot.querySelector("#btn-dismiss-voice-banner-floating")?.addEventListener("click", N), this.shadowRoot.querySelector("#btn-reading-pause")?.addEventListener("click", () => this.pausePageReading()), this.shadowRoot.querySelector("#btn-reading-resume")?.addEventListener("click", () => this.resumePageReading()), this.shadowRoot.querySelector("#btn-reading-stop")?.addEventListener("click", () => this.stopPageReading()), ["en", "am", "om", "ti", "ar"].forEach((c) => {
+      this.shadowRoot?.querySelector(`#onboard-lang-${c}`)?.addEventListener("click", () => {
+        this.setLanguage(c);
       });
     }), this.shadowRoot.querySelector("#btn-spoken-onboarding")?.addEventListener("click", () => {
       this.startSpokenOnboarding();
@@ -4421,9 +4516,9 @@ ${c}
     }), this.shadowRoot.querySelector("#btn-onboard-back")?.addEventListener("click", () => {
       this.captureOnboardingStep(), this.onboardingStep = Math.max(0, this.onboardingStep - 1), this.render();
     }), this.shadowRoot.querySelector("#btn-onboard-save")?.addEventListener("click", () => this.completeOnboarding(!0)), this.shadowRoot.querySelector("#btn-onboard-skip")?.addEventListener("click", () => this.completeOnboarding(!1)), this.shadowRoot.querySelector("#btn-onboard-close")?.addEventListener("click", () => this.completeOnboarding(!1));
-    const A = this.shadowRoot.querySelector("#chk-voice-master");
-    A && A.addEventListener("change", () => {
-      if (this.accessibilityPrefs.voice_enabled = A.checked, this.savePreferences(), A.checked)
+    const $ = this.shadowRoot.querySelector("#chk-voice-master");
+    $ && $.addEventListener("change", () => {
+      if (this.accessibilityPrefs.voice_enabled = $.checked, this.savePreferences(), $.checked)
         this.initWakeWordDetection();
       else if (this.wakeWordRecognizer) {
         try {
@@ -4432,26 +4527,26 @@ ${c}
         }
         this.wakeWordRecognizer = null;
       }
-      this.announce(A.checked ? "Voice accessibility enabled" : "Voice accessibility disabled");
+      this.announce($.checked ? "Voice accessibility enabled" : "Voice accessibility disabled");
     });
-    const B = this.shadowRoot.querySelector("#chk-auto-welcome");
-    B && B.addEventListener("change", () => {
-      this.accessibilityPrefs.auto_welcome = B.checked, this.savePreferences();
-    });
-    const q = this.shadowRoot.querySelector("#chk-auto-tts");
+    const q = this.shadowRoot.querySelector("#chk-auto-welcome");
     q && q.addEventListener("change", () => {
-      this.accessibilityPrefs.auto_tts = q.checked, this.savePreferences();
+      this.accessibilityPrefs.auto_welcome = q.checked, this.savePreferences();
     });
-    const M = [
+    const E = this.shadowRoot.querySelector("#chk-auto-tts");
+    E && E.addEventListener("change", () => {
+      this.accessibilityPrefs.auto_tts = E.checked, this.savePreferences();
+    });
+    const V = [
       { id: "#btn-rate-075", rate: 0.75 },
       { id: "#btn-rate-100", rate: 1 },
       { id: "#btn-rate-125", rate: 1.25 },
       { id: "#btn-rate-150", rate: 1.5 }
     ];
-    M.forEach(({ id: h, rate: u }) => {
-      this.shadowRoot?.querySelector(h)?.addEventListener("click", () => {
-        this.accessibilityPrefs.speech_rate = u, this.activeAudio && (this.activeAudio.playbackRate = u, this.activeAudio.preservesPitch = !0, this.activeAudio.mozPreservesPitch = !0, this.activeAudio.webkitPreservesPitch = !0), this.savePreferences(), M.forEach((f) => {
-          this.shadowRoot?.querySelector(f.id)?.setAttribute("aria-pressed", f.rate === u ? "true" : "false");
+    V.forEach(({ id: c, rate: u }) => {
+      this.shadowRoot?.querySelector(c)?.addEventListener("click", () => {
+        this.accessibilityPrefs.speech_rate = u, this.activeAudio && (this.activeAudio.playbackRate = u, this.activeAudio.preservesPitch = !0, this.activeAudio.mozPreservesPitch = !0, this.activeAudio.webkitPreservesPitch = !0), this.savePreferences(), V.forEach((v) => {
+          this.shadowRoot?.querySelector(v.id)?.setAttribute("aria-pressed", v.rate === u ? "true" : "false");
         }), this.announce(`Speech rate set to ${u}x`);
       });
     }), this.shadowRoot.querySelector("#btn-read-page")?.addEventListener("click", () => this.readPageAloud()), this.shadowRoot.querySelector("#btn-read-section")?.addEventListener("click", () => this.readSectionAloud()), this.shadowRoot.querySelector("#btn-test-voice")?.addEventListener("click", () => {
@@ -4461,30 +4556,29 @@ ${c}
     P && P.addEventListener("change", () => {
       this.accessibilityPrefs.screen_reader_mode = P.checked, P.checked && (this.accessibilityPrefs.auto_tts = !1, this.autoReadSpeech = !1, localStorage.setItem("savanna_bridge_auto_read", "false"), this.stopSpeaking()), this.savePreferences(), this.announce(P.checked ? "Screen reader mode enabled" : "Screen reader mode disabled");
     });
-    const $ = this.shadowRoot.querySelector("#chk-keyboard-nav");
-    $ && $.addEventListener("change", () => {
-      this.accessibilityPrefs.keyboard_navigation = $.checked, this.savePreferences(), $.checked ? this.classList.add("keyboard-focus-enhanced") : this.classList.remove("keyboard-focus-enhanced"), this.announce($.checked ? "Enhanced keyboard navigation enabled" : "Enhanced keyboard navigation disabled");
-    });
-    const _ = this.shadowRoot.querySelector("#chk-sync-prefs");
+    const _ = this.shadowRoot.querySelector("#chk-keyboard-nav");
     _ && _.addEventListener("change", () => {
-      this.accessibilityPrefs.sync_enabled = _.checked, this.savePreferences(), _.checked ? (this.syncPreferencesToBackend(), this.announce("Cross-website synchronization enabled")) : this.announce("Cross-website synchronization disabled");
+      this.accessibilityPrefs.keyboard_navigation = _.checked, this.savePreferences(), _.checked ? this.classList.add("keyboard-focus-enhanced") : this.classList.remove("keyboard-focus-enhanced"), this.announce(_.checked ? "Enhanced keyboard navigation enabled" : "Enhanced keyboard navigation disabled");
+    });
+    const C = this.shadowRoot.querySelector("#chk-sync-prefs");
+    C && C.addEventListener("change", () => {
+      this.accessibilityPrefs.sync_enabled = C.checked, this.savePreferences(), C.checked ? (this.syncPreferencesToBackend(), this.announce("Cross-website synchronization enabled")) : this.announce("Cross-website synchronization disabled");
     }), this.shadowRoot.querySelector("#btn-replay-onboarding")?.addEventListener("click", () => {
       this.accessibilityPrefs.onboarded = !1, this.onboardingDismissed = !1, this.onboardingStep = 0, this.isSettingsOpen = !1, this.render();
     });
   }
   escapeHtml(e) {
-    const i = document.createElement("div");
-    return i.textContent = e, i.innerHTML;
+    return e ? e.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;") : "";
   }
 }
-customElements.get("bridge-assistant") || customElements.define("bridge-assistant", V);
+customElements.get("bridge-assistant") || customElements.define("bridge-assistant", D);
 if (!customElements.get("db-assistant")) {
-  class T extends V {
+  class T extends D {
   }
   customElements.define("db-assistant", T);
 }
 export {
-  V as BridgeAssistant,
+  D as BridgeAssistant,
   o as ICONS
 };
 //# sourceMappingURL=widget.js.map
