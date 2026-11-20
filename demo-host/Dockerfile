@@ -9,3 +9,4 @@ RUN npm run build
 FROM nginx:1.27-alpine
 COPY demo-host/ /usr/share/nginx/html/
 COPY --from=widget-builder /widget/dist/ /usr/share/nginx/html/widget/
+COPY channels/console/ /usr/share/nginx/html/console/

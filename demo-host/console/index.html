@@ -1,0 +1,1064 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Savanna Bridge - Agent Support Console</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              antd: {
+                primary: "#1677ff",
+                primaryHover: "#4096ff",
+                primaryActive: "#0958d9",
+                bg: "#f0f2f5",
+                card: "#ffffff",
+                border: "#d9d9d9",
+                borderLight: "#f0f0f0",
+                text: "rgba(0, 0, 0, 0.88)",
+                textSecondary: "rgba(0, 0, 0, 0.55)",
+                success: "#52c41a",
+                warning: "#faad14",
+                error: "#ff4d4f",
+              },
+            },
+            fontFamily: {
+              sans: [
+                "-apple-system",
+                "BlinkMacSystemFont",
+                "'Segoe UI'",
+                "Roboto",
+                "'Helvetica Neue'",
+                "Arial",
+                "sans-serif",
+              ],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        background-color: #f0f2f5;
+        color: rgba(0, 0, 0, 0.88);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      }
+      .antd-shadow {
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px 0 rgba(0, 0, 0, 0.02);
+      }
+      .antd-shadow-hover:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      }
+      /* Custom Drawer transition */
+      .drawer-backdrop {
+        transition: opacity 0.25s ease-in-out;
+      }
+      .drawer-panel {
+        transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+      }
+      .drawer-hidden {
+        pointer-events: none;
+        visibility: hidden;
+      }
+      .drawer-hidden .drawer-backdrop {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .drawer-hidden .drawer-panel {
+        transform: translateX(100%);
+      }
+      /* Pulsing live dot */
+      @keyframes pulse-dot {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.4; transform: scale(0.85); }
+      }
+      .live-dot {
+        animation: pulse-dot 2s infinite ease-in-out;
+      }
+      :focus-visible {
+        outline: 3px solid #1677ff;
+        outline-offset: 2px;
+      }
+      button, a.button {
+        min-height: 2.75rem;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen antialiased flex flex-col">
+    <!-- Top Ant Design Style Header -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-30 antd-shadow">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <!-- Logo & Brand -->
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
+              SB
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h1 class="text-base font-bold text-gray-900 tracking-tight">Savanna Bridge</h1>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                  Support Console
+                </span>
+              </div>
+              <p class="text-xs text-gray-500">Live Learner Handoffs &amp; Mentorship</p>
+            </div>
+          </div>
+
+          <!-- Live Status & Agent Config -->
+          <div class="flex items-center gap-4">
+            <!-- Connection Status -->
+            <div id="connectionStatus" class="hidden sm:flex items-center gap-2 text-xs font-medium text-gray-600 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 live-dot"></span>
+              <span id="connectionText">Checking connection...</span>
+            </div>
+            <div id="actionStatus" role="status" aria-live="polite" class="sr-only"></div>
+
+            <!-- Agent Identity Selector -->
+            <div class="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1">
+              <div class="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold" id="agentAvatar">
+                A
+              </div>
+              <div class="flex flex-col">
+                <label for="agentRef" class="sr-only">Active Agent Name</label>
+                <span class="text-[10px] text-gray-600 font-semibold uppercase leading-tight">Agent ID</span>
+                <input
+                  type="text"
+                  id="agentRef"
+                  value="Agent Sarah"
+                  aria-label="Active Agent Name"
+                  class="bg-transparent border-0 p-0 text-xs font-semibold text-gray-800 focus:ring-0 focus:outline-none w-24 sm:w-28"
+                />
+              </div>
+            </div>
+
+            <!-- API Base URL Accessible Binding -->
+            <label for="apiEndpoint" class="sr-only">API Base URL:</label>
+            <input type="text" id="apiEndpoint" value="http://localhost:8000" aria-label="API Base URL:" class="sr-only" />
+
+            <!-- Refresh Button -->
+            <button
+              id="refreshBtn"
+              type="button"
+              aria-label="Refresh Queue"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-semibold rounded-md shadow-sm transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              <span>Refresh Queue</span>
+            </button>
+
+            <!-- Logout Button -->
+            <button
+              id="logoutBtn"
+              type="button"
+              aria-label="Sign out"
+              class="hidden inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-md shadow-xs transition-colors focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              <span>Log Out</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Workspace — locked (opacity-0 + pointer-events-none) until sign-in -->
+    <main id="mainContent" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 transition-opacity duration-300 opacity-0 pointer-events-none">
+      <!-- Privacy & Control Notice (ALX Requirement) -->
+      <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg flex items-start gap-3 shadow-xs">
+        <svg class="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <div class="text-xs text-amber-900 leading-relaxed">
+          <p><strong class="font-bold">Strict Learner-Controlled Session Rule:</strong> The agent console never starts screen sharing on behalf of the learner. The learner initiates, controls, and stops screen sharing solely within the Jitsi room. No remote takeover is possible. All handoffs require explicit learner consent.</p>
+          <p class="mt-1.5 pt-1.5 border-t border-amber-200 text-amber-800"><strong class="font-bold">Learner Privacy &amp; Data Retention:</strong> Tickets store only the learner's submitted question, selected accessibility needs, and contact mode for 30 days to facilitate mentor assistance. Personal credentials and browsing sessions are never logged.</p>
+        </div>
+      </div>
+
+      <!-- Stat Overview Cards -->
+      <section aria-label="Queue Statistics" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <!-- Stat 1: Total Waiting -->
+        <div class="bg-white border border-gray-200 rounded-lg p-4 antd-shadow">
+          <div class="text-xs font-medium text-gray-500 uppercase tracking-wider">Waiting in Queue</div>
+          <div class="mt-1 flex items-baseline justify-between">
+            <span id="statWaiting" class="text-2xl font-bold text-amber-600">0</span>
+            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium bg-amber-50 text-amber-700">Needs Action</span>
+          </div>
+        </div>
+
+        <!-- Stat 2: Active / Claimed -->
+        <div class="bg-white border border-gray-200 rounded-lg p-4 antd-shadow">
+          <div class="text-xs font-medium text-gray-500 uppercase tracking-wider">Active Sessions</div>
+          <div class="mt-1 flex items-baseline justify-between">
+            <span id="statClaimed" class="text-2xl font-bold text-blue-600">0</span>
+            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium bg-blue-50 text-blue-700">In Progress</span>
+          </div>
+        </div>
+
+        <!-- Stat 3: Claimed By You -->
+        <div class="bg-white border border-gray-200 rounded-lg p-4 antd-shadow">
+          <div class="text-xs font-medium text-gray-500 uppercase tracking-wider">Claimed by You</div>
+          <div class="mt-1 flex items-baseline justify-between">
+            <span id="statMine" class="text-2xl font-bold text-emerald-600">0</span>
+            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium bg-emerald-50 text-emerald-700">Your Calls</span>
+          </div>
+        </div>
+
+        <!-- Stat 4: Support Preferences Ratio -->
+        <div class="bg-white border border-gray-200 rounded-lg p-4 antd-shadow">
+          <div class="text-xs font-medium text-gray-500 uppercase tracking-wider">Consent Verified</div>
+          <div class="mt-1 flex items-baseline justify-between">
+            <span class="text-2xl font-bold text-gray-800">100%</span>
+            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium bg-purple-50 text-purple-700">Zero-Proof</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Segmented Controls / Tabs & Search -->
+      <section class="bg-white border border-gray-200 rounded-lg p-3 antd-shadow flex flex-col sm:flex-row items-center justify-between gap-3">
+        <!-- AntD Segmented Tabs -->
+        <div class="inline-flex p-1 bg-gray-100 rounded-md w-full sm:w-auto" role="tablist">
+          <button
+            type="button"
+            id="tabAll"
+            role="tab"
+            aria-selected="true"
+            onclick="switchTab('all')"
+            class="tab-btn flex-1 sm:flex-initial px-3.5 py-1.5 text-xs font-medium rounded transition-all bg-white text-gray-900 shadow-xs"
+          >
+            All Requests (<span id="countTabAll">0</span>)
+          </button>
+          <button
+            type="button"
+            id="tabWaiting"
+            role="tab"
+            aria-selected="false"
+            onclick="switchTab('waiting')"
+            class="tab-btn flex-1 sm:flex-initial px-3.5 py-1.5 text-xs font-medium rounded transition-all text-gray-600 hover:text-gray-900"
+          >
+            Waiting (<span id="countTabWaiting">0</span>)
+          </button>
+          <button
+            type="button"
+            id="tabClaimed"
+            role="tab"
+            aria-selected="false"
+            onclick="switchTab('claimed')"
+            class="tab-btn flex-1 sm:flex-initial px-3.5 py-1.5 text-xs font-medium rounded transition-all text-gray-600 hover:text-gray-900"
+          >
+            Claimed / Active (<span id="countTabClaimed">0</span>)
+          </button>
+        </div>
+
+        <!-- Search / Filter input -->
+        <div class="relative w-full sm:w-64">
+          <input
+            type="text"
+            id="searchFilter"
+            placeholder="Search context or ID..."
+            oninput="renderQueue()"
+            class="w-full pl-8 pr-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-md focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+          />
+          <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-2.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+      </section>
+
+      <!-- Cards Grid -->
+      <section aria-labelledby="queueHeading" class="space-y-4">
+        <h2 id="queueHeading" class="sr-only">Handoff Queue</h2>
+
+        <div id="queueGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" aria-live="polite">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+    </main>
+
+    <!-- Side Drawer (Ant Design Style Detail Pane) -->
+    <div id="detailDrawer" class="fixed inset-0 z-50 overflow-hidden drawer-hidden" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+      <!-- Backdrop -->
+      <div class="fixed inset-0 bg-black/40 drawer-backdrop backdrop-blur-xs" onclick="closeDrawer()"></div>
+
+      <div class="fixed inset-y-0 right-0 max-w-full flex pl-10">
+        <div class="w-screen max-w-lg bg-white shadow-2xl drawer-panel flex flex-col border-l border-gray-200">
+          <!-- Drawer Header -->
+          <div class="p-5 border-b border-gray-200 flex items-center justify-between bg-gray-50">
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 id="drawerTitle" class="text-base font-bold text-gray-900">Request Details</h3>
+                <span id="drawerStatusTag" class="px-2 py-0.5 rounded text-xs font-semibold"></span>
+              </div>
+              <p id="drawerIdText" class="text-xs text-gray-500 font-mono mt-0.5"></p>
+            </div>
+            <button
+              type="button"
+              onclick="closeDrawer()"
+              class="w-8 h-8 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-200/60 flex items-center justify-center transition-colors"
+              aria-label="Close details"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Drawer Body -->
+          <div class="flex-1 overflow-y-auto p-6 space-y-6 text-sm">
+            <!-- Context Card -->
+            <div class="bg-blue-50/60 border border-blue-100 rounded-lg p-4">
+              <span class="text-xs font-bold uppercase tracking-wider text-blue-900 block mb-1">Learner Request Context</span>
+              <p id="drawerContext" class="text-gray-800 text-sm font-medium leading-relaxed"></p>
+            </div>
+
+            <!-- Full Details Grid -->
+            <div class="bg-white border border-gray-200 rounded-lg divide-y divide-gray-100">
+              <div class="p-3 flex items-center justify-between">
+                <span class="text-xs font-medium text-gray-500">Language</span>
+                <span id="drawerLanguage" class="text-xs font-semibold text-gray-800"></span>
+              </div>
+              <div class="p-3 flex items-center justify-between">
+                <span class="text-xs font-medium text-gray-500">Contact Mode</span>
+                <span id="drawerMode" class="text-xs font-semibold text-gray-800"></span>
+              </div>
+              <div class="p-3 flex items-center justify-between">
+                <span class="text-xs font-medium text-gray-500">Created At</span>
+                <span id="drawerCreated" class="text-xs font-mono text-gray-700"></span>
+              </div>
+              <div class="p-3 flex items-center justify-between">
+                <span class="text-xs font-medium text-gray-500">Assigned Agent</span>
+                <span id="drawerAgent" class="text-xs font-semibold text-indigo-700"></span>
+              </div>
+            </div>
+
+            <!-- Support Preferences -->
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-gray-600 block mb-2">Declared Support Needs</span>
+              <div id="drawerNeedsList" class="flex flex-wrap gap-1.5">
+                <!-- Badges -->
+              </div>
+            </div>
+
+            <!-- Jitsi Video Room Section -->
+            <div class="border border-gray-200 rounded-lg p-4 bg-gray-50 space-y-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-gray-700 block">Live Meeting Room</span>
+              <p class="text-xs text-gray-500">Secure end-to-end Jitsi room created specifically for this handoff session.</p>
+              <a
+                id="drawerRoomLink"
+                href="#"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md shadow-xs transition-colors text-xs"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                <span>Launch Jitsi Video / Voice Call</span>
+              </a>
+            </div>
+
+            <!-- Reply Box -->
+            <div class="border border-gray-200 rounded-lg p-4 bg-white space-y-3">
+              <span class="text-xs font-bold uppercase tracking-wider text-gray-700 block">Send Response to Learner</span>
+              <form id="drawerReplyForm" onsubmit="event.preventDefault(); submitDrawerReply();" class="space-y-2">
+                <textarea
+                  id="drawerReplyMessage"
+                  rows="3"
+                  placeholder="Type message to send directly to learner..."
+                  required
+                  class="w-full text-xs p-2.5 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                ></textarea>
+                
+                <!-- Quick macro buttons -->
+                <div class="flex flex-wrap gap-1">
+                  <button type="button" onclick="setQuickReply('Hello! I have reviewed your request and I am ready to assist you.')" class="text-[11px] px-2 py-0.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded border border-gray-200">
+                    Quick: Ready to assist
+                  </button>
+                  <button type="button" onclick="setQuickReply('I am in the Jitsi live room now. Feel free to join when ready!')" class="text-[11px] px-2 py-0.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded border border-gray-200">
+                    Quick: In Jitsi room
+                  </button>
+                  <button type="button" onclick="setQuickReply('I have sent the step-by-step written instructions.')" class="text-[11px] px-2 py-0.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded border border-gray-200">
+                    Quick: Sent instructions
+                  </button>
+                </div>
+
+                <button
+                  type="submit"
+                  class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-md shadow-xs transition-colors"
+                >
+                  Send Reply
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Drawer Footer Actions -->
+          <div id="drawerFooterActions" class="p-4 border-t border-gray-200 bg-gray-50 flex items-center justify-between gap-3">
+            <!-- Dynamically populated based on status -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Helper Login Modal (Security & Learner Privacy Gate) -->
+    <!-- Shown immediately on page load; dismissed only after successful sign-in -->
+    <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/70 backdrop-blur-sm p-4" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle">
+      <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 border border-gray-200">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm" aria-hidden="true">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+          </div>
+          <div>
+            <h2 id="loginModalTitle" class="text-base font-bold text-gray-900">Helper Queue Sign-In</h2>
+            <p class="text-xs text-gray-500">Learner privacy protected · Authorized mentors only</p>
+          </div>
+        </div>
+
+        <form id="helperLoginForm" class="space-y-4">
+          <div>
+            <label for="loginUsername" class="block text-xs font-semibold text-gray-700 mb-1">Mentor / Helper ID</label>
+            <input type="text" id="loginUsername" autocomplete="username" required
+              class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              placeholder="e.g. agent_sarah" />
+          </div>
+          <div>
+            <label for="loginPassword" class="block text-xs font-semibold text-gray-700 mb-1">Password / Passcode</label>
+            <input type="password" id="loginPassword" autocomplete="current-password" required
+              class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              placeholder="••••••••" />
+          </div>
+          <div id="loginError" class="hidden text-xs text-red-600 font-medium bg-red-50 p-2.5 rounded-lg border border-red-200" role="alert"></div>
+
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-2.5 text-[11px] text-blue-800 leading-relaxed">
+            <strong>Helper Access:</strong> Enter the helper credentials configured via environment variables (<code>HELPER_PASSWORD</code>).
+          </div>
+
+          <button type="submit" id="loginSubmitBtn" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+            Sign In to Support Queue
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Application JavaScript Logic -->
+    <script>
+      const uiIcon = (name) => {
+        const paths = {
+          voice: '<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3"/>',
+          video: '<path d="M15 10l4.5-2.5v9L15 14v2H4V8h11v2Z"/>',
+          text: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10Z"/>',
+        };
+        return `<svg class="w-3.5 h-3.5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${paths[name] || paths.text}</svg>`;
+      };
+      let currentHandoffs = [];
+      let activeTab = "all"; // 'all' | 'waiting' | 'claimed'
+      let activeDrawerHandoff = null;
+
+      function getApiUrl() {
+        const params = new URLSearchParams(window.location.search);
+        const qApi = params.get("api");
+        if (qApi) return qApi.trim().replace(/\/$/, "");
+        if (typeof window !== "undefined" && window.SAVANNA_API_URL) {
+          return window.SAVANNA_API_URL.trim().replace(/\/$/, "");
+        }
+        if (typeof window !== "undefined" && window.location && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1") {
+          const host = window.location.hostname;
+          if (host.includes("-demo.onrender.com")) {
+            return `${window.location.protocol}//${host.replace("-demo.onrender.com", "-api.onrender.com")}`;
+          }
+          if (host.includes("-console.onrender.com")) {
+            return `${window.location.protocol}//${host.replace("-console.onrender.com", "-api.onrender.com")}`;
+          }
+          if (host.includes(".onrender.com")) {
+            return window.location.origin;
+          }
+        }
+        const input = document.getElementById("apiEndpoint");
+        return (input && input.value) ? input.value.trim().replace(/\/$/, "") : "http://localhost:8000";
+      }
+
+      const connectionStatus = document.getElementById("connectionStatus");
+      const connectionText = document.getElementById("connectionText");
+      const agentRefInput = document.getElementById("agentRef");
+      const agentAvatar = document.getElementById("agentAvatar");
+      const refreshBtn = document.getElementById("refreshBtn");
+      const logoutBtn = document.getElementById("logoutBtn");
+      const searchFilter = document.getElementById("searchFilter");
+      const queueGrid = document.getElementById("queueGrid");
+
+      // Auth elements
+      const loginModal = document.getElementById("loginModal");
+      const helperLoginForm = document.getElementById("helperLoginForm");
+      const loginError = document.getElementById("loginError");
+      const loginSubmitBtn = document.getElementById("loginSubmitBtn");
+
+      function getHelperToken() {
+        return sessionStorage.getItem("savanna_helper_token") || "";
+      }
+
+      function setHelperToken(token) {
+        if (token) {
+          sessionStorage.setItem("savanna_helper_token", token);
+          // Hide the login gate and reveal main content
+          if (loginModal) {
+            loginModal.classList.add("hidden");
+            loginModal.setAttribute("aria-hidden", "true");
+          }
+          if (logoutBtn) logoutBtn.classList.remove("hidden");
+          document.getElementById("mainContent")?.classList.remove("pointer-events-none", "opacity-0");
+        } else {
+          sessionStorage.removeItem("savanna_helper_token");
+          // Show the login gate and lock down main content
+          if (loginModal) {
+            loginModal.classList.remove("hidden");
+            loginModal.removeAttribute("aria-hidden");
+            // Focus the username field for keyboard users
+            setTimeout(() => document.getElementById("loginUsername")?.focus(), 60);
+          }
+          if (logoutBtn) logoutBtn.classList.add("hidden");
+          document.getElementById("mainContent")?.classList.add("pointer-events-none", "opacity-0");
+        }
+      }
+
+      function getAuthHeaders() {
+        const headers = { "Content-Type": "application/json" };
+        const token = getHelperToken();
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+        return headers;
+      }
+
+      // Stats
+      const statWaiting = document.getElementById("statWaiting");
+      const statClaimed = document.getElementById("statClaimed");
+      const statMine = document.getElementById("statMine");
+      const countTabAll = document.getElementById("countTabAll");
+      const countTabWaiting = document.getElementById("countTabWaiting");
+      const countTabClaimed = document.getElementById("countTabClaimed");
+
+      // Drawer Elements
+      const detailDrawer = document.getElementById("detailDrawer");
+      const drawerTitle = document.getElementById("drawerTitle");
+      const drawerStatusTag = document.getElementById("drawerStatusTag");
+      const drawerIdText = document.getElementById("drawerIdText");
+      const drawerContext = document.getElementById("drawerContext");
+      const drawerLanguage = document.getElementById("drawerLanguage");
+      const drawerMode = document.getElementById("drawerMode");
+      const drawerCreated = document.getElementById("drawerCreated");
+      const drawerAgent = document.getElementById("drawerAgent");
+      const drawerNeedsList = document.getElementById("drawerNeedsList");
+      const drawerRoomLink = document.getElementById("drawerRoomLink");
+      const drawerReplyMessage = document.getElementById("drawerReplyMessage");
+      const drawerFooterActions = document.getElementById("drawerFooterActions");
+
+      // Update agent avatar on input
+      agentRefInput.addEventListener("input", (e) => {
+        const val = e.target.value.trim();
+        agentAvatar.textContent = val ? val[0].toUpperCase() : "A";
+        renderQueue();
+      });
+
+      function getAgentRef() {
+        return agentRefInput.value.trim() || "Agent Demo";
+      }
+
+      function switchTab(tab) {
+        activeTab = tab;
+        document.querySelectorAll(".tab-btn").forEach((btn) => {
+          btn.classList.remove("bg-white", "text-gray-900", "shadow-xs");
+          btn.classList.add("text-gray-600");
+          btn.setAttribute("aria-selected", "false");
+        });
+
+        const activeBtn = document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`);
+        if (activeBtn) {
+          activeBtn.classList.add("bg-white", "text-gray-900", "shadow-xs");
+          activeBtn.classList.remove("text-gray-600");
+          activeBtn.setAttribute("aria-selected", "true");
+        }
+        renderQueue();
+      }
+
+      function timeAgo(dateString) {
+        try {
+          const date = new Date(dateString);
+          const now = new Date();
+          const diffSec = Math.floor((now - date) / 1000);
+          if (diffSec < 60) return "Just now";
+          if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`;
+          if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}h ago`;
+          return `${Math.floor(diffSec / 86400)}d ago`;
+        } catch {
+          return "Recently";
+        }
+      }
+
+      // ensureHelperAuth: does NOT auto-login. Returns true only if a valid token is already stored.
+      function ensureHelperAuth() {
+        return Boolean(getHelperToken());
+      }
+
+      async function fetchQueue() {
+        const token = getHelperToken();
+        if (!token) {
+          // No token: show login gate, do not attempt to fetch
+          setHelperToken("");
+          return;
+        }
+        try {
+          // Fetch queue from API with helper auth header (status=active returns waiting + claimed)
+          const res = await fetch(`${getApiUrl()}/handoff/queue`, {
+            headers: getAuthHeaders(),
+          });
+          if (res.status === 401) {
+            setHelperToken("");
+            connectionStatus.classList.remove("hidden");
+            connectionText.textContent = "Authentication required";
+            return;
+          }
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          currentHandoffs = data.items || [];
+
+          connectionStatus.classList.remove("hidden");
+          connectionText.textContent = `Connected (Synced ${new Date().toLocaleTimeString()})`;
+          updateStats();
+          renderQueue();
+
+          // If drawer is open, keep its state synced
+          if (activeDrawerHandoff) {
+            const updated = currentHandoffs.find(h => h.id === activeDrawerHandoff.id);
+            if (updated) {
+              openDrawer(updated);
+            }
+          }
+        } catch (err) {
+          connectionStatus.classList.remove("hidden");
+          connectionText.textContent = "Offline / Connection error";
+        }
+      }
+
+      function updateStats() {
+        const waitingCount = currentHandoffs.filter(h => h.status === "waiting").length;
+        const claimedCount = currentHandoffs.filter(h => h.status === "claimed").length;
+        const myName = getAgentRef().toLowerCase();
+        const myClaimedCount = currentHandoffs.filter(h => h.status === "claimed" && (h.agent_ref || "").toLowerCase() === myName).length;
+
+        statWaiting.textContent = waitingCount;
+        statClaimed.textContent = claimedCount;
+        statMine.textContent = myClaimedCount;
+
+        countTabAll.textContent = currentHandoffs.length;
+        countTabWaiting.textContent = waitingCount;
+        countTabClaimed.textContent = claimedCount;
+      }
+
+      function renderQueue() {
+        const query = searchFilter.value.trim().toLowerCase();
+        const myName = getAgentRef().toLowerCase();
+
+        // Filter by tab
+        let filtered = currentHandoffs.filter((item) => {
+          if (activeTab === "waiting") return item.status === "waiting";
+          if (activeTab === "claimed") return item.status === "claimed";
+          return true;
+        });
+
+        // Filter by search query
+        if (query) {
+          filtered = filtered.filter((item) => {
+            const ctx = (item.card?.context || "").toLowerCase();
+            const id = (item.id || "").toLowerCase();
+            const lang = (item.card?.language || "").toLowerCase();
+            return ctx.includes(query) || id.includes(query) || lang.includes(query);
+          });
+        }
+
+        if (filtered.length === 0) {
+          queueGrid.innerHTML = `
+            <div class="col-span-full bg-white border border-dashed border-gray-300 rounded-xl p-12 text-center text-gray-500">
+              <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <h3 class="text-sm font-semibold text-gray-800">No requests in this view</h3>
+              <p class="text-xs text-gray-600 mt-1">Learners requesting support will appear here automatically.</p>
+            </div>
+          `;
+          return;
+        }
+
+        queueGrid.innerHTML = "";
+
+        filtered.forEach((item) => {
+          const card = item.card || {};
+          const isClaimed = item.status === "claimed";
+          const isMine = isClaimed && (item.agent_ref || "").toLowerCase() === myName;
+
+          // Status Badge styling (Ant Design Tag System)
+          const statusBadge = !isClaimed
+            ? `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                 <span class="w-1.5 h-1.5 rounded-full bg-amber-500 live-dot"></span> Waiting
+               </span>`
+            : `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                 <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Claimed: ${escapeHtml(item.agent_ref || "Agent")}
+               </span>`;
+
+          // Support Needs Pills
+          const needsPills = (card.support_needs || [])
+            .map(n => `<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">${escapeHtml(n.replace(/_/g, " "))}</span>`)
+            .join(" ");
+
+          const cardEl = document.createElement("article");
+          cardEl.className = `bg-white border rounded-xl p-5 antd-shadow antd-shadow-hover transition-all flex flex-col justify-between ${
+            isMine ? "border-indigo-300 ring-1 ring-indigo-200" : isClaimed ? "border-blue-200" : "border-gray-200"
+          }`;
+
+          cardEl.innerHTML = `
+            <div class="space-y-3.5">
+              <!-- Top Row: ID, Time & Status -->
+              <div class="flex items-start justify-between gap-2">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h3 class="font-mono text-xs font-bold text-gray-900">Learner Request #${escapeHtml(item.id)}</h3>
+                    <span class="text-[11px] text-gray-600 font-medium">${timeAgo(item.created_at)}</span>
+                  </div>
+                  <div class="flex items-center gap-1.5 mt-1">
+                    <span class="text-[11px] font-semibold text-gray-700 uppercase tracking-wider bg-gray-100 px-1.5 py-0.5 rounded">
+                      ${escapeHtml(card.language || "en").toUpperCase()}
+                    </span>
+                    <span class="text-[11px] font-semibold text-gray-700 capitalize bg-gray-100 px-1.5 py-0.5 rounded flex items-center gap-1">
+                      ${card.contact_mode === "voice" ? `${uiIcon("voice")} Voice` : card.contact_mode === "video" ? `${uiIcon("video")} Video` : `${uiIcon("text")} Text`}
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  ${statusBadge}
+                </div>
+              </div>
+
+              <!-- Context Message Box -->
+              <div class="bg-slate-50 border border-slate-200/80 rounded-lg p-3">
+                <span class="text-[10px] font-bold text-gray-600 uppercase tracking-wider block mb-1">Issue / Context</span>
+                <p class="text-xs font-medium text-gray-800 line-clamp-3 leading-relaxed">
+                  ${escapeHtml(card.context || "Learner requested a live mentor.")}
+                </p>
+              </div>
+
+              <!-- Declared Needs -->
+              <div>
+                <span class="text-[10px] font-bold text-gray-600 uppercase tracking-wider block mb-1.5">Support Preferences</span>
+                <div class="flex flex-wrap gap-1">
+                  ${needsPills || '<span class="text-xs text-gray-600 italic">None specified</span>'}
+                </div>
+              </div>
+            </div>
+
+            <!-- Card Actions -->
+            <div class="pt-4 mt-4 border-t border-gray-100 flex items-center justify-between gap-2">
+              <button
+                type="button"
+                onclick='openDrawerById("${item.id}")'
+                class="text-xs font-semibold text-gray-600 hover:text-blue-600 px-2.5 py-1.5 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                Inspect Details &rarr;
+              </button>
+
+              ${!isClaimed ? `
+                <button
+                  type="button"
+                  aria-label="Claim this Request"
+                  onclick="claimHandoff('${item.id}')"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-semibold rounded-md shadow-xs transition-colors"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>Claim this Request</span>
+                </button>
+              ` : `
+                <div class="flex items-center gap-1.5">
+                  <a
+                    href="${escapeHtml(item.room_url)}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 text-xs font-semibold rounded-md transition-colors"
+                  >
+                    ${uiIcon("video")} Join Call
+                  </a>
+                  <button
+                    type="button"
+                    onclick="closeHandoff('${item.id}')"
+                    class="inline-flex items-center px-2 py-1.5 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors text-xs font-medium"
+                    title="Close Request"
+                  >
+                    Close
+                  </button>
+                </div>
+              `}
+            </div>
+          `;
+
+          queueGrid.appendChild(cardEl);
+        });
+      }
+
+      async function claimHandoff(id) {
+        const agent = getAgentRef();
+        try {
+          const res = await fetch(`${getApiUrl()}/handoff/${id}/claim`, {
+            method: "POST",
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ agent_ref: agent }),
+          });
+          if (res.ok) {
+            const actionStatus = document.getElementById("actionStatus");
+            if (actionStatus) {
+              actionStatus.textContent = `Claimed request #${id}`;
+            }
+            if (connectionText) {
+              connectionText.textContent = `Claimed request #${id}`;
+            }
+            await fetchQueue();
+            openDrawerById(id);
+          } else if (res.status === 401) {
+            setHelperToken("");
+            alert("Helper session expired. Please sign in again.");
+          } else {
+            alert("Failed to claim request.");
+          }
+        } catch (err) {
+          alert(`Claim failed: ${err.message}`);
+        }
+      }
+
+      async function closeHandoff(id) {
+        if (!confirm("Are you sure you want to resolve and close this request?")) return;
+        try {
+          const res = await fetch(`${getApiUrl()}/handoff/${id}/close`, {
+            method: "POST",
+            headers: getAuthHeaders(),
+            body: JSON.stringify({}),
+          });
+          if (res.ok) {
+            closeDrawer();
+            fetchQueue();
+          } else if (res.status === 401) {
+            setHelperToken("");
+            alert("Helper session expired. Please sign in again.");
+          }
+        } catch (err) {
+          alert(`Failed to close request: ${err.message}`);
+        }
+      }
+
+      function openDrawerById(id) {
+        const item = currentHandoffs.find(h => h.id === id);
+        if (item) {
+          openDrawer(item);
+        }
+      }
+
+      function openDrawer(item) {
+        activeDrawerHandoff = item;
+        const card = item.card || {};
+        const isClaimed = item.status === "claimed";
+
+        drawerIdText.textContent = `ID: ${item.id}`;
+        drawerContext.textContent = card.context || "No context provided.";
+        drawerLanguage.textContent = (card.language || "en").toUpperCase();
+        drawerMode.textContent = (card.contact_mode || "text").toUpperCase();
+        drawerCreated.textContent = new Date(item.created_at).toLocaleString();
+        drawerAgent.textContent = item.agent_ref || "Unassigned";
+
+        // Status Tag
+        if (isClaimed) {
+          drawerStatusTag.className = "px-2 py-0.5 rounded text-xs font-semibold bg-blue-100 text-blue-800";
+          drawerStatusTag.textContent = `Claimed by ${item.agent_ref || "Agent"}`;
+        } else {
+          drawerStatusTag.className = "px-2 py-0.5 rounded text-xs font-semibold bg-amber-100 text-amber-800";
+          drawerStatusTag.textContent = "Waiting for Agent";
+        }
+
+        // Needs List
+        drawerNeedsList.innerHTML = (card.support_needs || [])
+          .map(n => `<span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-emerald-100 text-emerald-800">${escapeHtml(n.replace(/_/g, " "))}</span>`)
+          .join(" ") || '<span class="text-xs text-gray-600">None specified</span>';
+
+        // Room Link
+        drawerRoomLink.href = item.room_url;
+
+        // Drawer Footer Actions
+        if (!isClaimed) {
+          drawerFooterActions.innerHTML = `
+            <button type="button" onclick="closeDrawer()" class="px-3.5 py-2 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-md">Cancel</button>
+            <button
+              type="button"
+              onclick="claimHandoff('${item.id}')"
+              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-md shadow-xs transition-colors"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11" />
+              </svg>
+              <span>Claim This Request</span>
+            </button>
+          `;
+        } else {
+          drawerFooterActions.innerHTML = `
+            <button
+              type="button"
+              onclick="closeHandoff('${item.id}')"
+              class="px-3.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 rounded-md"
+            >
+              Resolve / Close Request
+            </button>
+            <a
+              href="${escapeHtml(item.room_url)}"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-md shadow-xs transition-colors"
+            >
+              ${uiIcon("video")} Open Jitsi Room
+            </a>
+          `;
+        }
+
+        detailDrawer.classList.remove("drawer-hidden");
+      }
+
+      function closeDrawer() {
+        detailDrawer.classList.add("drawer-hidden");
+        activeDrawerHandoff = null;
+      }
+
+      function setQuickReply(text) {
+        drawerReplyMessage.value = text;
+      }
+
+      async function replyHandoff(id, messageOrForm) {
+        let msg = "";
+        if (typeof messageOrForm === "string") {
+          msg = messageOrForm.trim();
+        } else if (messageOrForm && messageOrForm.elements) {
+          msg = (messageOrForm.elements["message"]?.value || "").trim();
+        }
+        if (!msg) return;
+
+        try {
+          const res = await fetch(`${getApiUrl()}/handoff/${id}/reply`, {
+            method: "POST",
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ agent_ref: getAgentRef(), message: msg }),
+          });
+          if (res.ok) {
+            alert("Reply sent successfully to learner!");
+            if (messageOrForm && messageOrForm.elements && messageOrForm.elements["message"]) {
+              messageOrForm.elements["message"].value = "";
+            }
+            if (drawerReplyMessage) drawerReplyMessage.value = "";
+          } else if (res.status === 401) {
+            setHelperToken("");
+            alert("Helper session expired. Please sign in again.");
+          } else {
+            alert("Failed to deliver reply.");
+          }
+        } catch (err) {
+          alert(`Error sending reply: ${err.message}`);
+        }
+      }
+
+      async function submitDrawerReply() {
+        if (!activeDrawerHandoff) return;
+        const msg = drawerReplyMessage.value.trim();
+        if (!msg) return;
+        await replyHandoff(activeDrawerHandoff.id, msg);
+      }
+
+      function escapeHtml(str) {
+        return String(str || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      // Helper Login and Session Event Handlers
+      if (helperLoginForm) {
+        helperLoginForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const username = document.getElementById("loginUsername").value.trim();
+          const password = document.getElementById("loginPassword").value.trim();
+          loginError.classList.add("hidden");
+          loginSubmitBtn.disabled = true;
+          loginSubmitBtn.textContent = "Verifying...";
+          try {
+            const res = await fetch(`${getApiUrl()}/api/v1/helper/login`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ username, password }),
+            });
+            if (!res.ok) {
+              const errData = await res.json().catch(() => ({}));
+              throw new Error(errData.detail || "Invalid helper credentials");
+            }
+            const data = await res.json();
+            agentRefInput.value = data.agent_ref || username;
+            agentAvatar.textContent = (data.agent_ref || username).charAt(0).toUpperCase();
+            sessionStorage.removeItem("savanna_logged_out");
+            setHelperToken(data.token);
+            fetchQueue();
+          } catch (err) {
+            loginError.textContent = err.message;
+            loginError.classList.remove("hidden");
+          } finally {
+            loginSubmitBtn.disabled = false;
+            loginSubmitBtn.textContent = "Unlock Support Queue";
+          }
+        });
+      }
+
+      if (logoutBtn) {
+        logoutBtn.addEventListener("click", async () => {
+          try {
+            await fetch(`${getApiUrl()}/api/v1/helper/logout`, {
+              method: "POST",
+              headers: getAuthHeaders(),
+            });
+          } catch {}
+          sessionStorage.setItem("savanna_logged_out", "true");
+          setHelperToken("");
+          currentHandoffs = [];
+          renderQueue();
+        });
+      }
+
+      // Auto-refresh every 5 seconds (only runs when authenticated; fetchQueue() is a no-op otherwise)
+      refreshBtn.addEventListener("click", fetchQueue);
+      setInterval(fetchQueue, 5000);
+
+      // ── Boot auth gate ──────────────────────────────────────────────────────
+      // The login modal is displayed (not hidden) by default in the HTML.
+      // We ONLY close it here if a valid session token already exists.
+      // There is no silent auto-login; every new session must sign in manually.
+      if (getHelperToken()) {
+        // Existing session: unlock the UI immediately and load the queue
+        setHelperToken(getHelperToken());   // runs the unlock side-effects
+        fetchQueue();
+      } else {
+        // No session: keep the modal visible and lock the main content area.
+        // setHelperToken("") with an empty string triggers the lock side-effects.
+        setHelperToken("");
+      }
+    </script>
+  </body>
+</html>
