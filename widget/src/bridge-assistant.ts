@@ -3940,7 +3940,8 @@ export class BridgeAssistant extends HTMLElement {
 
       if (res.ok) {
         const data = await res.json();
-        if (!data.mocked && data.audio_url) {
+        const hasRealAudio = data.audio_url && !data.audio_url.includes("demo.ogg");
+        if (hasRealAudio) {
           const rawAudioUrl = String(data.audio_url);
           const audioUrl = /^(https?:|data:|blob:)/.test(rawAudioUrl)
             ? rawAudioUrl
@@ -3948,20 +3949,34 @@ export class BridgeAssistant extends HTMLElement {
           this.audioCache.set(cacheKey, audioUrl);
           this.activeAudio = new Audio(audioUrl);
           this.activeAudio.onended = () => this.finishSpeaking(msg);
-          this.activeAudio.onerror = () => this.fallbackTTS(cleanText, msg);
+          this.activeAudio.onerror = () => {
+            if (this.currentLang === "en") {
+              this.fallbackTTS(cleanText, msg);
+            } else {
+              this.finishSpeaking(msg);
+            }
+          };
           await this.activeAudio.play();
+          return;
+        } else if (data.mocked && this.currentLang === "en") {
+          this.fallbackTTS(cleanText, msg);
           return;
         }
       }
     } catch (error) {
-      console.warn("Server TTS unavailable; using browser speech fallback.", error);
+      console.warn("Server TTS unavailable:", error);
     }
 
-    this.fallbackTTS(cleanText, msg);
+    if (this.currentLang === "en") {
+      this.fallbackTTS(cleanText, msg);
+    } else {
+      this.finishSpeaking(msg);
+    }
   }
 
   private fallbackTTS(text: string, msg: ChatMessage): void {
-    if (!("speechSynthesis" in window)) {
+    // Only use browser SpeechSynthesis for English; never for Ethiopian languages where browser lacks native voices
+    if (this.currentLang !== "en" || !("speechSynthesis" in window)) {
       this.finishSpeaking(msg);
       return;
     }

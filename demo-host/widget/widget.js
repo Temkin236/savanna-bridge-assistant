@@ -3032,19 +3032,24 @@ ${h}
       });
       if (c.ok) {
         const o = await c.json();
-        if (!o.mocked && o.audio_url) {
-          const h = String(o.audio_url), g = /^(https?:|data:|blob:)/.test(h) ? h : `${this.apiBase}${h}`;
-          this.audioCache.set(s, g), this.activeAudio = new Audio(g), this.activeAudio.onended = () => this.finishSpeaking(e), this.activeAudio.onerror = () => this.fallbackTTS(a, e), await this.activeAudio.play();
+        if (o.audio_url && !o.audio_url.includes("demo.ogg")) {
+          const g = String(o.audio_url), p = /^(https?:|data:|blob:)/.test(g) ? g : `${this.apiBase}${g}`;
+          this.audioCache.set(s, p), this.activeAudio = new Audio(p), this.activeAudio.onended = () => this.finishSpeaking(e), this.activeAudio.onerror = () => {
+            this.currentLang === "en" ? this.fallbackTTS(a, e) : this.finishSpeaking(e);
+          }, await this.activeAudio.play();
+          return;
+        } else if (o.mocked && this.currentLang === "en") {
+          this.fallbackTTS(a, e);
           return;
         }
       }
     } catch (c) {
-      console.warn("Server TTS unavailable; using browser speech fallback.", c);
+      console.warn("Server TTS unavailable:", c);
     }
-    this.fallbackTTS(a, e);
+    this.currentLang === "en" ? this.fallbackTTS(a, e) : this.finishSpeaking(e);
   }
   fallbackTTS(e, i) {
-    if (!("speechSynthesis" in window)) {
+    if (this.currentLang !== "en" || !("speechSynthesis" in window)) {
       this.finishSpeaking(i);
       return;
     }

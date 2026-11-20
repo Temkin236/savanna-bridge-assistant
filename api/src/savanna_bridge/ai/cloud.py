@@ -10,6 +10,7 @@ import logging
 import os
 import re
 import threading
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -337,15 +338,19 @@ Return only JSON:
 
         if self.api_key:
             try:
-                # Group by 2 to 3 sentences per clip
                 sentences = split_sentences(cleaned_text, language.value)
                 if not sentences:
                     sentences = [cleaned_text]
 
-                chunk_size = 2 if len(sentences) <= 4 else 3
-                sentence_groups = []
-                for i in range(0, len(sentences), chunk_size):
-                    sentence_groups.append(" ".join(sentences[i : i + chunk_size]))
+                # Synthesize in a single clip for standard answers (<= 3 sentences or <= 500 chars)
+                # to preserve natural prosody and conserve API rate limits.
+                if len(sentences) <= 3 or len(cleaned_text) <= 500:
+                    sentence_groups = [cleaned_text]
+                else:
+                    chunk_size = 3
+                    sentence_groups = []
+                    for i in range(0, len(sentences), chunk_size):
+                        sentence_groups.append(" ".join(sentences[i : i + chunk_size]))
 
                 if len(sentence_groups) == 1:
                     audio_b64, media_type = self._call_gemini_tts(
@@ -413,8 +418,14 @@ Return only JSON:
             except Exception as exc:
                 logger.warning("Google Text-to-Speech error: %s", exc)
 
-        self._last_call_mocked = True
-        return self._offline_fallback.synthesize(cleaned_text, language, speed, style)
+        # Strictly offline mode only when no cloud keys are configured
+        if not self.api_keys and not self.speech_key:
+            self._last_call_mocked = True
+            return self._offline_fallback.synthesize(cleaned_text, language, speed, style)
+
+        # Do NOT fall back to mocked audio when Gemini provider is configured!
+        self._last_call_mocked = False
+        return ""
 
     def _call_cloud_translate(
         self, text: str, source_lang: str, target_lang: str
@@ -475,12 +486,12 @@ Return only JSON:
     def _call_gemini_endpoint(
         self, endpoint: str, payload: dict[str, object]
     ) -> dict[str, object]:
-        """Post to Gemini endpoint with automatic key rotation on 429/403/network errors."""
+        """Post to Gemini endpoint with automatic key rotation and backoff on 429/403/network errors."""
         if not self.api_keys:
             return {}
-        attempts = max(1, len(self.api_keys))
+        max_attempts = len(self.api_keys) * 2
         last_error: Exception | None = None
-        for _ in range(attempts):
+        for attempt in range(max_attempts):
             key = self.api_key
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{endpoint}?key={urllib.parse.quote(key)}"
             try:
@@ -488,9 +499,15 @@ Return only JSON:
             except urllib.error.HTTPError as exc:
                 last_error = exc
                 if exc.code in (429, 403, 500, 503) and len(self.api_keys) > 1:
-                    logger.warning("Gemini API key HTTP %s; rotating key.", exc.code)
+                    logger.warning(
+                        "Gemini API key HTTP %s; rotating key (attempt %d/%d).",
+                        exc.code, attempt + 1, max_attempts
+                    )
                     with self._key_lock:
                         self._key_index += 1
+                    # After cycling through all keys once, pause 1.5s to let per-minute quota bucket refill
+                    if (attempt + 1) % len(self.api_keys) == 0 and (attempt + 1) < max_attempts:
+                        time.sleep(1.5)
                     continue
                 raise
             except Exception as exc:
@@ -499,6 +516,8 @@ Return only JSON:
                     logger.warning("Gemini request error %s; rotating key.", exc)
                     with self._key_lock:
                         self._key_index += 1
+                    if (attempt + 1) % len(self.api_keys) == 0 and (attempt + 1) < max_attempts:
+                        time.sleep(1.0)
                     continue
                 raise
         if last_error:
