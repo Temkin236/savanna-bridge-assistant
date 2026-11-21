@@ -1,5 +1,5 @@
-var F = Object.defineProperty;
-var U = (S, x, e) => x in S ? F(S, x, { enumerable: !0, configurable: !0, writable: !0, value: e }) : S[x] = e;
+var Q = Object.defineProperty;
+var U = (S, x, e) => x in S ? Q(S, x, { enumerable: !0, configurable: !0, writable: !0, value: e }) : S[x] = e;
 var l = (S, x, e) => U(S, typeof x != "symbol" ? x + "" : x, e);
 const O = () => ({
   deadlines: !0,
@@ -115,6 +115,9 @@ const r = {
     recordingState: "Listening... speak now",
     transcribingState: "Processing speech...",
     voicePreviewNotice: "Voice transcribed. You can edit the text before sending.",
+    voicePreviewPrompt: "I heard: {text}. You can edit it, or say send.",
+    voiceListeningForSend: "Listening for 'send'...",
+    voiceActionCancelled: "Cancelled.",
     micError: "Microphone unavailable. Please check microphone permissions or type your question.",
     lookingInCourse: "Looking in the course...",
     answerHeading: "Answer",
@@ -277,6 +280,9 @@ const r = {
     recordingState: "እያዳመጥኩ ነው... አሁን ይናገሩ",
     transcribingState: "ድምጹን ወደ ጽሑፍ በመቀየር ላይ...",
     voicePreviewNotice: "ድምጽዎ ወደ ጽሑፍ ተቀይሯል። ከመላክዎ በፊት ማስተካከል ይችላሉ።",
+    voicePreviewPrompt: "የሰማሁት፡ {text}። ማረም ወይም ላክ ማለት ይችላሉ።",
+    voiceListeningForSend: "'ላክ' የሚለውን ቃል በማዳመጥ ላይ...",
+    voiceActionCancelled: "ተሰርዟል።",
     micError: "ማይክሮፎን ማግኘት አልተቻለም። እባክዎ ጥያቄዎን በጽሑፍ ያስገቡ።",
     lookingInCourse: "በኮርሱ ውስጥ በመፈለግ ላይ...",
     answerHeading: "መልስ",
@@ -425,6 +431,9 @@ const r = {
     recordingState: "Dhaggeeffachaa jira... dubbadhaa",
     transcribingState: "Sagalee jijjiiraa jira...",
     voicePreviewNotice: "Sagaleen gara barruutti jijjiirameera. Ergisaa dura sirreessuu dandeessu.",
+    voicePreviewPrompt: "Wanan dhaga'e: {text}. Sirreessuu ykn ergi jechuu dandeessu.",
+    voiceListeningForSend: "'Ergi' jechuu eegaa jira...",
+    voiceActionCancelled: "Haqameera.",
     micError: "Maaykirofooniin hin argamne.",
     lookingInCourse: "Barnoota keessaa barbaadaa jira...",
     answerHeading: "Deebii",
@@ -573,6 +582,9 @@ const r = {
     recordingState: "ይሰምዕ ኣለኹ... ሕጂ ተዛረቡ",
     transcribingState: "ናብ ጽሑፍ ይቕየር ኣሎ...",
     voicePreviewNotice: "ድምጽኹም ናብ ጽሑፍ ተቐዪሩ ኣሎ።",
+    voicePreviewPrompt: "ዝሰማዕክዎ፡ {text}። ከተዐርይዎ ወይ ልኣኽ ክትብሉ ትኽእሉ።",
+    voiceListeningForSend: "'ልኣኽ' ንምስማዕ ይጽበ ኣሎ...",
+    voiceActionCancelled: "ተሰሪዙ።",
     micError: "ማይክሮፎን ክርከብ ኣይተኻእለን።",
     lookingInCourse: "ኣብ ኮርስ ይድለ ኣሎ...",
     answerHeading: "መልሲ",
@@ -721,6 +733,9 @@ const r = {
     recordingState: "جاري الاستماع... تحدث الآن",
     transcribingState: "جاري تحويل الصوت إلى نص...",
     voicePreviewNotice: "تم تحويل الصوت إلى نص. يمكنك تعديله قبل الإرسال.",
+    voicePreviewPrompt: "سمعت: {text}. يمكنك تعديله، أو قول أرسل.",
+    voiceListeningForSend: "بانتظار قول 'أرسل'...",
+    voiceActionCancelled: "تم الإلغاء.",
     micError: "الميكروفون غير متوفر. يرجى التحقق من أذونات الميكروفون.",
     lookingInCourse: "جاري البحث في محتوى الدورة...",
     answerHeading: "الإجابة",
@@ -1911,7 +1926,7 @@ const r = {
     outline-offset: 3px !important;
   }
 `;
-class Q extends HTMLElement {
+class F extends HTMLElement {
   constructor() {
     super(...arguments);
     l(this, "isOpen", !1);
@@ -1989,12 +2004,15 @@ class Q extends HTMLElement {
     l(this, "spokenOnboardingIndex", 0);
     l(this, "pendingVoiceAction", null);
     l(this, "pendingVoiceTranscript", "");
+    l(this, "isListeningForSend", !1);
+    l(this, "audioStream", null);
+    l(this, "audioContext", null);
+    l(this, "audioAnalyser", null);
+    l(this, "silenceTimer", null);
+    l(this, "vadInterval", null);
+    l(this, "hasDetectedSound", !1);
     l(this, "lastSpokenText", "");
     l(this, "voiceRecordingTimeout", null);
-    l(this, "voiceVadTimer", null);
-    l(this, "voiceAudioContext", null);
-    l(this, "voiceDetectedSound", !1);
-    l(this, "lastVoiceActivityAt", 0);
     l(this, "previousFocus", null);
   }
   // Attributes: supports both guide plain attributes (lang, api, content) and data-*
@@ -2058,7 +2076,21 @@ class Q extends HTMLElement {
     }, window.addEventListener("popstate", this.popstateListener), this.fetchTelegramStartLink(), this.fetchSupportNeeds(), this.fetchNotificationPreferences(), this.accessibilityPrefs.voice_enabled && this.initWakeWordDetection(), this.initGlobalKeyboardShortcuts(), this.accessibilityPrefs.sync_enabled && this.syncPreferencesFromBackend(), this.preloadWelcomeAudio(), this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_welcome && !this.hasSpokenWelcomeThisSession && setTimeout(() => this.triggerSpokenWelcome(), 500);
   }
   disconnectedCallback() {
-    if (this.telegramPollTimer && (window.clearInterval(this.telegramPollTimer), this.telegramPollTimer = null), this.handoffPollTimer && (window.clearInterval(this.handoffPollTimer), this.handoffPollTimer = null), this.voiceRecordingTimeout && (window.clearTimeout(this.voiceRecordingTimeout), this.voiceRecordingTimeout = null), this.wakeWordRecognizer) {
+    if (this.telegramPollTimer && (window.clearInterval(this.telegramPollTimer), this.telegramPollTimer = null), this.handoffPollTimer && (window.clearInterval(this.handoffPollTimer), this.handoffPollTimer = null), this.voiceRecordingTimeout && (window.clearTimeout(this.voiceRecordingTimeout), this.voiceRecordingTimeout = null), this.silenceTimer && (window.clearTimeout(this.silenceTimer), this.silenceTimer = null), this.vadInterval && (window.clearInterval(this.vadInterval), this.vadInterval = null), this.audioAnalyser) {
+      try {
+        this.audioAnalyser.disconnect();
+      } catch {
+      }
+      this.audioAnalyser = null;
+    }
+    if (this.audioContext && this.audioContext.state !== "closed") {
+      try {
+        this.audioContext.close();
+      } catch {
+      }
+      this.audioContext = null;
+    }
+    if (this.audioStream && (this.audioStream.getTracks().forEach((e) => e.stop()), this.audioStream = null), this.wakeWordRecognizer) {
       try {
         this.wakeWordRecognizer.stop();
       } catch {
@@ -2278,18 +2310,10 @@ class Q extends HTMLElement {
     return s = t.find((d) => d.name.toLowerCase().includes(o)), s || null;
   }
   speakText(e, t) {
-    this.lastSpokenText = e;
-    let i = !1;
-    const a = (s) => {
-      i || (i = !0, !("speechSynthesis" in window && this.browserSpeechText(e, t)) && t?.onError && t.onError(s));
-    }, n = {
-      ...t,
-      onError: (s) => a(s)
-    };
-    return this.playServerAudioText(e, n).then((s) => {
-      s || a();
-    }).catch((s) => {
-      console.warn("playServerAudioText failed:", s), a(s);
+    return this.lastSpokenText = e, this.playServerAudioText(e, t).then((i) => {
+      !i && this.currentLang === "en" && "speechSynthesis" in window && this.browserSpeechText(e, t);
+    }).catch((i) => {
+      console.warn("playServerAudioText failed:", i), this.currentLang === "en" && "speechSynthesis" in window ? this.browserSpeechText(e, t) : t?.onError && t.onError(i);
     }), !0;
   }
   browserSpeechText(e, t) {
@@ -2297,21 +2321,13 @@ class Q extends HTMLElement {
       return t?.onError && t.onError(), !1;
     try {
       window.speechSynthesis.cancel();
-      const i = new SpeechSynthesisUtterance(e), a = {
-        en: "en-US",
-        am: "am-ET",
-        om: "om-ET",
-        ti: "ti-ET",
-        ar: "ar-SA"
-      };
-      i.lang = a[this.currentLang];
-      const n = this.getBestVoice(this.currentLang);
-      return n && (i.voice = n), i.rate = t?.rate || this.accessibilityPrefs?.speech_rate || 1, i.onstart = () => {
+      const i = new SpeechSynthesisUtterance(e);
+      return i.lang = "en-US", i.rate = t?.rate || this.accessibilityPrefs?.speech_rate || 1, i.onstart = () => {
         t?.onStart && t.onStart();
       }, i.onend = () => {
         t?.onEnd && t.onEnd();
-      }, i.onerror = (s) => {
-        t?.onError && t.onError(s);
+      }, i.onerror = (a) => {
+        t?.onError && t.onError(a);
       }, window.speechSynthesis.speak(i), !0;
     } catch {
       return t?.onError && t.onError(), !1;
@@ -2681,7 +2697,7 @@ ${d}
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           token: this.telegramToken,
-          learner_ref: this.getLearnerRef()
+          learner_ref: this.getAttribute("learner-id") || `learner_${this.sessionId}`
         })
       });
     } catch {
@@ -2815,54 +2831,13 @@ ${d}
   isNegative(e) {
     return /^(no|nope|cancel|stop|አይ|አይደለም|lakki|ኣይፋል|لا|إلغاء)\b/i.test(e.trim());
   }
-  isSendCommand(e) {
-    const t = e.trim().toLocaleLowerCase().replace(/[.!?،።፧]+/gu, "").replace(/\s+/g, " ");
-    return (/* @__PURE__ */ new Set([
-      "send",
-      "send it",
-      "send this",
-      "send now",
-      "send it now",
-      "please send",
-      "please send it",
-      "yes send it",
-      "submit",
-      "submit it",
-      "go ahead",
-      "ላክ",
-      "ላኩ",
-      "ላኪ",
-      "እሺ ላክ",
-      "ergo",
-      "erga",
-      "ergaa",
-      "maaloo ergo",
-      "ስደድ",
-      "ስደዱ",
-      "أرسل",
-      "ارسل",
-      "إرسال",
-      "أرسله",
-      "ارسلها"
-    ])).has(t);
+  isSendIntent(e) {
+    const t = e.trim().toLowerCase().replace(/[.,!?;:\"\'`።፣፤]/g, "");
+    return t ? !!(/^(send|send it|send this|send message|send question|submit|yes|yeah|yep|confirm|okay|ok|go|proceed|correct|that's correct|looks good)\b/i.test(t) || /^(ላክ|ላከው|አዎ|እሺ|ትክክል|አዎ ላከው|ላኪ)\b/.test(t) || /^(ergi|itti ergi|eeyyee|sirrii|sirriidha|tole)\b/i.test(t) || /^(ልኣኽ|ስደድ|እወ|ሕራይ|ቅኑዕ|ሰዲድካ)\b/.test(t) || /^(أرسل|ارسل|إرسال|نعم|أجل|تمام|صحيح|تأكيد|موافق)\b/.test(t)) : !1;
   }
-  voicePreviewPrompt(e) {
-    return {
-      en: `I heard: ${e}. You can edit it, or say send.`,
-      am: `የሰማሁት፦ ${e}። ማስተካከል ይችላሉ፣ ትክክል ከሆነ ላክ ይበሉ።`,
-      om: `Waan ani dhaga'e: ${e}. Sirreessuu dandeessa; sirrii yoo ta'e ergo jedhi.`,
-      ti: `ዝሰማዕክዎ፦ ${e}። ከተድልዩ ኣስተኻኽሉ፣ ቅኑዕ እንተኾይኑ ስደድ በሉ።`,
-      ar: `سمعت: ${e}. يمكنك تعديله، أو قل أرسل إذا كان صحيحاً.`
-    }[this.currentLang];
-  }
-  speakThenListen(e, t) {
-    let i = !1;
-    const a = () => {
-      i || (i = !0, window.setTimeout(() => {
-        !this.isRecording && !this.isProcessingSpeech && !this.isThinking && this.startVoiceRecording(t);
-      }, 180));
-    };
-    this.announce(e), this.speakText(e, { onEnd: a, onError: a });
+  isCancelIntent(e) {
+    const t = e.trim().toLowerCase().replace(/[.,!?;:\"\'`።፣፤]/g, "");
+    return t ? !!(/^(no|nope|cancel|clear|delete|stop|don't send|dont send)\b/i.test(t) || /^(አይ|አይደለም|አትላክ|ተው|ሰርዝ)\b/.test(t) || /^(lakki|dhiisi|haqi)\b/i.test(t) || /^(ኣይፋል|ኣይፋሉን|ግደፎ|ሰርዝ)\b/.test(t) || /^(لا|إلغاء|الغاء|كلا|توقف)\b/.test(t)) : !1;
   }
   async planVoiceAction(e) {
     const t = {
@@ -2939,30 +2914,50 @@ ${d}
       this.handleSpokenOnboardingAnswer(i);
       return;
     }
-    if (this.pendingVoiceTranscript && this.isSendCommand(i)) {
-      const s = t.value.trim() || this.pendingVoiceTranscript;
-      this.pendingVoiceTranscript = "", this.pendingVoiceAction = null, t.value = "", await this.askQuestion(s, !1, !0);
-      return;
-    }
     if (this.shadowRoot?.querySelector("#onboarding-overlay") && (this.isAffirmative(i) || this.isNegative(i))) {
       this.speakText("Choose Start spoken setup before answering yes or no.");
       return;
     }
     if (this.pendingVoiceAction) {
       if (this.isAffirmative(i)) {
-        const s = this.pendingVoiceAction;
-        this.pendingVoiceAction = null, await this.executeVoiceAction(s);
-      } else this.isNegative(i) ? (this.pendingVoiceAction = null, this.announce("Action cancelled."), this.speakText("Action cancelled.")) : this.speakThenListen("Please say yes to confirm or no to cancel.", t);
+        const o = this.pendingVoiceAction;
+        this.pendingVoiceAction = null, await this.executeVoiceAction(o);
+      } else this.isNegative(i) ? (this.pendingVoiceAction = null, this.announce("Action cancelled."), this.speakText("Action cancelled.")) : this.speakText("Please say yes to confirm or no to cancel.");
       return;
+    }
+    if (this.pendingVoiceTranscript || t && t.value.trim()) {
+      if (this.isSendIntent(i)) {
+        const o = this.pendingVoiceTranscript || t.value.trim();
+        this.pendingVoiceTranscript = "", this.isListeningForSend = !1, t.value = "", this.stopVoiceRecording(), await this.askQuestion(o, !1, !0);
+        return;
+      }
+      if (this.isCancelIntent(i)) {
+        this.pendingVoiceTranscript = "", this.isListeningForSend = !1, t.value = "", this.stopVoiceRecording();
+        const o = this.t("voiceActionCancelled");
+        this.announce(o), this.speakText(o);
+        return;
+      }
     }
     const a = this.detectLanguageWithConfidence(i);
     a.confidence >= 0.82 && a.language !== this.currentLang && this.setLanguage(a.language, !1);
     const n = await this.planVoiceAction(i);
     if (n.language && n.confidence >= 0.82 && n.language !== this.currentLang && this.setLanguage(n.language, !1), n.action !== "none") {
-      n.requires_confirmation ? (this.pendingVoiceAction = n, this.speakThenListen(n.spoken_confirmation, t)) : await this.executeVoiceAction(n);
+      n.requires_confirmation ? (this.pendingVoiceAction = n, this.announce(n.spoken_confirmation), this.speakText(n.spoken_confirmation)) : await this.executeVoiceAction(n);
       return;
     }
-    t.value = i, t.focus(), this.pendingVoiceTranscript = i, this.speakThenListen(this.voicePreviewPrompt(i), t);
+    t.value = i, t.focus(), this.pendingVoiceTranscript = i;
+    const c = this.t("voicePreviewPrompt").replace("{text}", i);
+    this.announce(c), this.speakText(c, {
+      onEnd: () => {
+        if (this.pendingVoiceTranscript) {
+          const o = this.shadowRoot?.querySelector("#chat-input");
+          o && this.startVoiceListeningForConfirmation(o);
+        }
+      }
+    });
+  }
+  startVoiceListeningForConfirmation(e) {
+    !this.pendingVoiceTranscript && !e.value.trim() || (this.isListeningForSend = !0, this.startVoiceRecording(e, !0));
   }
   spokenOnboardingQuestions() {
     const e = {
@@ -3101,60 +3096,89 @@ ${d}
   async toggleVoiceInput(e) {
     this.isRecording ? this.stopVoiceRecording() : await this.startVoiceRecording(e);
   }
-  async startVoiceRecording(e) {
+  async startVoiceRecording(e, t = !1) {
     if (this.isSpeaking && this.stopSpeaking(), this.wakeWordRecognizer)
       try {
         this.wakeWordRecognizer.stop();
       } catch {
       }
-    this.isRecording = !0, this.isProcessingSpeech = !1, this.playEarcon("start"), this.announce(this.t("voiceListening")), this.updateVoiceStatusUI(), this.updateMicButtonUI();
-    let t = !1;
-    const i = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (i)
+    this.voiceRecordingTimeout && (window.clearTimeout(this.voiceRecordingTimeout), this.voiceRecordingTimeout = null), this.silenceTimer && (window.clearTimeout(this.silenceTimer), this.silenceTimer = null), this.vadInterval && (window.clearInterval(this.vadInterval), this.vadInterval = null), this.isRecording = !0, this.isProcessingSpeech = !1, this.isListeningForSend = t, this.hasDetectedSound = !1, this.playEarcon("start"), this.announce(t ? this.t("voiceListeningForSend") : this.t("voiceListening")), this.updateVoiceStatusUI(), this.updateMicButtonUI();
+    let i = !1;
+    const a = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (a && this.currentLang === "en")
       try {
-        this.activeRecognition = new i(), this.activeRecognition.continuous = !1, this.activeRecognition.interimResults = !0;
-        const a = {
-          en: "en-US",
-          am: "am-ET",
-          om: "om-ET",
-          ar: "ar-SA",
-          ti: "ti-ET"
-        };
-        this.activeRecognition.lang = a[this.currentLang] || "en-US", this.activeRecognition.onresult = (n) => {
+        this.activeRecognition = new a(), this.activeRecognition.continuous = !1, this.activeRecognition.interimResults = !0, this.activeRecognition.lang = "en-US", this.activeRecognition.onresult = (n) => {
           let s = "";
           for (let o = 0; o < n.results.length; o++)
             s += n.results[o][0]?.transcript || "";
           const c = s.trim();
-          c && (!this.pendingVoiceTranscript && !this.pendingVoiceAction && (e.value = c), n.results[n.results.length - 1]?.isFinal && (t = !0, this.handleVoiceTranscript(c, e)));
+          c && (this.hasDetectedSound = !0, e.value = c, n.results[n.results.length - 1]?.isFinal && (i = !0, this.handleVoiceTranscript(c, e)));
         }, this.activeRecognition.onend = () => {
-          this.activeRecognition = null, this.isRecording && (t ? this.stopVoiceRecording(!0) : (!this.mediaRecorder || this.mediaRecorder.state === "inactive") && (this.isRecording = !1, this.updateMicButtonUI(), this.updateVoiceStatusUI()));
+          i && this.isRecording && this.stopVoiceRecording(!0);
         }, this.activeRecognition.onerror = (n) => {
-          console.warn("Active speech recognition error:", n.error), (n.error === "language-not-supported" || n.error === "no-speech" || n.error === "network") && (this.activeRecognition = null);
+          console.warn("Active speech recognition notice:", n.error);
         }, this.activeRecognition.start();
-      } catch (a) {
-        console.warn("Active recognition init error, falling back to MediaRecorder", a);
+      } catch (n) {
+        console.warn("Active recognition init error, falling back to MediaRecorder", n);
       }
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia)
       try {
-        const a = await navigator.mediaDevices.getUserMedia({ audio: !0 });
-        this.audioChunks = [];
-        const n = MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : MediaRecorder.isTypeSupported("audio/ogg") ? "audio/ogg" : "audio/wav";
-        this.mediaRecorder = new MediaRecorder(a), this.mediaRecorder.ondataavailable = (s) => {
-          s.data.size > 0 && this.audioChunks.push(s.data);
+        const n = await navigator.mediaDevices.getUserMedia({ audio: !0 });
+        this.audioStream = n, this.audioChunks = [];
+        const s = MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : MediaRecorder.isTypeSupported("audio/ogg") ? "audio/ogg" : "audio/wav";
+        this.mediaRecorder = new MediaRecorder(n), this.mediaRecorder.ondataavailable = (o) => {
+          o.data.size > 0 && this.audioChunks.push(o.data);
         }, this.mediaRecorder.onstop = async () => {
-          if (a.getTracks().forEach((s) => s.stop()), !t && this.audioChunks.length > 0) {
-            const s = new Blob(this.audioChunks, { type: n });
-            await this.sendAudioForTranscription(s, n, e);
+          if (this.audioStream && (this.audioStream.getTracks().forEach((o) => o.stop()), this.audioStream = null), !i && this.audioChunks.length > 0) {
+            const o = new Blob(this.audioChunks, { type: s });
+            await this.sendAudioForTranscription(o, s, e);
           }
-        }, this.mediaRecorder.start(), this.startVoiceActivityDetection(a), this.voiceRecordingTimeout = window.setTimeout(() => {
-          this.isRecording && this.stopVoiceRecording(t);
-        }, 15e3);
-      } catch (a) {
-        console.warn("MediaRecorder permission/init notice:", a), i || (alert(this.t("micError")), this.isRecording = !1, this.updateMicButtonUI(), this.updateVoiceStatusUI());
+        }, this.mediaRecorder.start();
+        try {
+          const o = window.AudioContext || window.webkitAudioContext;
+          if (o) {
+            this.audioContext = new o(), this.audioContext.state === "suspended" && await this.audioContext.resume();
+            const d = this.audioContext.createMediaStreamSource(n);
+            this.audioAnalyser = this.audioContext.createAnalyser(), this.audioAnalyser.fftSize = 256, d.connect(this.audioAnalyser);
+            const g = this.audioAnalyser.frequencyBinCount, p = new Uint8Array(g);
+            this.vadInterval = window.setInterval(() => {
+              if (!this.isRecording || !this.audioAnalyser) return;
+              this.audioAnalyser.getByteFrequencyData(p);
+              let f = 0;
+              for (let b = 0; b < g; b++)
+                f += p[b];
+              f / g > 12 ? (this.hasDetectedSound = !0, this.silenceTimer && (window.clearTimeout(this.silenceTimer), this.silenceTimer = null)) : this.hasDetectedSound && (this.silenceTimer || (this.silenceTimer = window.setTimeout(() => {
+                this.isRecording && this.stopVoiceRecording(i);
+              }, 1600)));
+            }, 100);
+          }
+        } catch (o) {
+          console.warn("AudioContext VAD notice:", o);
+        }
+        const c = t ? 8e3 : 1e4;
+        this.voiceRecordingTimeout = window.setTimeout(() => {
+          this.isRecording && this.stopVoiceRecording(i);
+        }, c);
+      } catch (n) {
+        console.warn("MediaRecorder permission/init notice:", n), (!a || this.currentLang !== "en") && (alert(this.t("micError")), this.isRecording = !1, this.updateMicButtonUI(), this.updateVoiceStatusUI());
       }
   }
   stopVoiceRecording(e = !1) {
-    if (this.isRecording = !1, this.voiceRecordingTimeout && (window.clearTimeout(this.voiceRecordingTimeout), this.voiceRecordingTimeout = null), this.stopVoiceActivityDetection(), this.playEarcon("stop"), this.activeRecognition) {
+    if (this.isRecording = !1, this.isListeningForSend = !1, this.voiceRecordingTimeout && (window.clearTimeout(this.voiceRecordingTimeout), this.voiceRecordingTimeout = null), this.silenceTimer && (window.clearTimeout(this.silenceTimer), this.silenceTimer = null), this.vadInterval && (window.clearInterval(this.vadInterval), this.vadInterval = null), this.audioAnalyser) {
+      try {
+        this.audioAnalyser.disconnect();
+      } catch {
+      }
+      this.audioAnalyser = null;
+    }
+    if (this.audioContext && this.audioContext.state !== "closed") {
+      try {
+        this.audioContext.close();
+      } catch {
+      }
+      this.audioContext = null;
+    }
+    if (this.audioStream && (this.audioStream.getTracks().forEach((t) => t.stop()), this.audioStream = null), this.playEarcon("stop"), this.activeRecognition) {
       try {
         this.activeRecognition.stop();
       } catch {
@@ -3174,34 +3198,6 @@ ${d}
         }
     }, 1200);
   }
-  startVoiceActivityDetection(e) {
-    this.stopVoiceActivityDetection();
-    const t = window.AudioContext || window.webkitAudioContext;
-    if (t)
-      try {
-        this.voiceAudioContext = new t();
-        const i = this.voiceAudioContext.createMediaStreamSource(e), a = this.voiceAudioContext.createAnalyser();
-        a.fftSize = 512, a.smoothingTimeConstant = 0.25, i.connect(a);
-        const n = new Uint8Array(a.fftSize);
-        this.voiceDetectedSound = !1, this.lastVoiceActivityAt = performance.now(), this.voiceVadTimer = window.setInterval(() => {
-          if (!this.isRecording) return;
-          a.getByteTimeDomainData(n);
-          let s = 0;
-          for (const d of n) {
-            const g = (d - 128) / 128;
-            s += g * g;
-          }
-          const c = Math.sqrt(s / n.length), o = performance.now();
-          c >= 0.025 ? (this.voiceDetectedSound = !0, this.lastVoiceActivityAt = o) : this.voiceDetectedSound && o - this.lastVoiceActivityAt >= 1100 && this.stopVoiceRecording(!1);
-        }, 100);
-      } catch (i) {
-        console.warn("Voice activity detection unavailable:", i), this.stopVoiceActivityDetection();
-      }
-  }
-  stopVoiceActivityDetection() {
-    this.voiceVadTimer && (window.clearInterval(this.voiceVadTimer), this.voiceVadTimer = null), this.voiceAudioContext && (this.voiceAudioContext.close().catch(() => {
-    }), this.voiceAudioContext = null), this.voiceDetectedSound = !1;
-  }
   async sendAudioForTranscription(e, t, i) {
     this.isProcessingSpeech = !0, this.updateVoiceStatusUI(), this.announce(this.t("voiceProcessing"));
     try {
@@ -3218,9 +3214,7 @@ ${d}
         body: JSON.stringify({
           audio_base64: s,
           media_type: t,
-          // The selected language is a strong STT hint. The API still returns
-          // detected_language and the widget may switch when confidence is high.
-          language: this.currentLang,
+          language: this.currentLang || "auto",
           retain: !1
         })
       });
@@ -3249,17 +3243,21 @@ ${d}
   }
   updateVoiceStatusUI() {
     const e = this.shadowRoot?.querySelector("#voice-status-container");
-    e && (this.isRecording ? (e.innerHTML = `
+    if (e)
+      if (this.isRecording) {
+        const t = this.isListeningForSend ? this.t("voiceListeningForSend") : `${this.t("voiceListening")} (${this.getLangDisplayName()})`;
+        e.innerHTML = `
         <div class="voice-status-bar listening" role="status">
           <div style="display:flex; align-items:center; gap:0.5rem;">
             <span class="pulse-dot"></span>
-            <span>${this.t("voiceListening")} (${this.getLangDisplayName()})</span>
+            <span>${t}</span>
           </div>
           <button type="button" class="btn btn-secondary btn-sm" id="btn-stop-voice">
             ${this.t("stopAudio")}
           </button>
         </div>
-      `, e.querySelector("#btn-stop-voice")?.addEventListener("click", () => this.stopVoiceRecording())) : this.isProcessingSpeech ? e.innerHTML = `
+      `, e.querySelector("#btn-stop-voice")?.addEventListener("click", () => this.stopVoiceRecording());
+      } else this.isProcessingSpeech ? e.innerHTML = `
         <div class="voice-status-bar processing" role="status">
           <div style="display:flex; align-items:center; gap:0.5rem;">
             <span class="pulse-dot" style="background:#2563eb;"></span>
@@ -3276,7 +3274,7 @@ ${d}
             ${this.t("stopAudio")}
           </button>
         </div>
-      `, e.querySelector("#btn-stop-speech")?.addEventListener("click", () => this.stopSpeaking())) : e.innerHTML = "");
+      `, e.querySelector("#btn-stop-speech")?.addEventListener("click", () => this.stopSpeaking())) : e.innerHTML = "";
   }
   // --- Text-to-Speech (Voice Responses) ---
   cleanTextForSpeech(e) {
@@ -3318,8 +3316,8 @@ ${d}
         if (o.audio_url && !o.audio_url.includes("demo.ogg")) {
           const g = String(o.audio_url), p = /^(https?:|data:|blob:)/.test(g) ? g : `${this.apiBase}${g}`;
           this.audioCache.set(s, p), this.activeAudio = new Audio(p);
-          const b = this.accessibilityPrefs?.speech_rate || 1;
-          this.activeAudio.playbackRate = b, this.activeAudio.preservesPitch = !0, this.activeAudio.mozPreservesPitch = !0, this.activeAudio.webkitPreservesPitch = !0, this.activeAudio.onended = () => this.finishSpeaking(e), this.activeAudio.onerror = () => {
+          const f = this.accessibilityPrefs?.speech_rate || 1;
+          this.activeAudio.playbackRate = f, this.activeAudio.preservesPitch = !0, this.activeAudio.mozPreservesPitch = !0, this.activeAudio.webkitPreservesPitch = !0, this.activeAudio.onended = () => this.finishSpeaking(e), this.activeAudio.onerror = () => {
             this.currentLang === "en" ? this.fallbackTTS(a, e) : this.finishSpeaking(e);
           }, await this.activeAudio.play();
           return;
@@ -3440,21 +3438,21 @@ ${d}
     ))), n = a.length > 0 ? a : [e.text];
     let s = -1;
     const c = n.map((o, d) => {
-      const g = o.replace(/[#*•_`]/g, " ").replace(/\s+/g, " ").trim().toLowerCase(), p = /^(this course|this lesson|summary of|የዚህ|ይህ ትምህርት|barnoonni|يشرح|ملخص)/i.test(g), b = g.slice(0, 35);
-      let m = null, f = -1;
+      const g = o.replace(/[#*•_`]/g, " ").replace(/\s+/g, " ").trim().toLowerCase(), p = /^(this course|this lesson|summary of|የዚህ|ይህ ትምህርት|barnoonni|يشرح|ملخص)/i.test(g), f = g.slice(0, 35);
+      let m = null, b = -1;
       for (let y = 0; y < i.length; y++) {
         const A = i[y], L = (A.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
-        if ((b.length > 10 && L.includes(b) || g.length > 20 && L.includes(g.slice(10, 45)) || L.length > 15 && g.includes(L.slice(0, 35))) && (y > s || f === -1) && (m = A, f = y, y > s))
+        if ((f.length > 10 && L.includes(f) || g.length > 20 && L.includes(g.slice(10, 45)) || L.length > 15 && g.includes(L.slice(0, 35))) && (y > s || b === -1) && (m = A, b = y, y > s))
           break;
       }
       if (!m)
         if (p && i.length > 0)
-          m = i[0], f = 0;
+          m = i[0], b = 0;
         else {
           const y = s + 1;
-          y < i.length ? (m = i[y], f = y) : d < i.length && (m = i[d], f = d);
+          y < i.length ? (m = i[y], b = y) : d < i.length && (m = i[d], b = d);
         }
-      return f !== -1 && (s = f), {
+      return b !== -1 && (s = b), {
         text: o,
         element: m || null
       };
@@ -3652,9 +3650,9 @@ ${d}
           ...c
         })
       })), g.ok) {
-        const p = await g.json(), b = p.language;
-        p.language_changed && b && b in k && b !== this.currentLang && this.setLanguage(b, !1);
-        const m = !!p.offer_human || p.reason === "low_confidence", f = {
+        const p = await g.json(), f = p.language;
+        p.language_changed && f && f in k && f !== this.currentLang && this.setLanguage(f, !1);
+        const m = !!p.offer_human || p.reason === "low_confidence", b = {
           id: `msg_${Date.now()}_assistant`,
           sender: "assistant",
           text: p.answer,
@@ -3664,8 +3662,8 @@ ${d}
           offerHuman: p.offer_human,
           isRefusal: m
         };
-        this.messages.push(f), this.saveChatState(), this.renderMessages();
-        const y = f.spoken || f.text, A = this.cleanTextForSpeech(y);
+        this.messages.push(b), this.saveChatState(), this.renderMessages();
+        const y = b.spoken || b.text, A = this.cleanTextForSpeech(y);
         if (A) {
           const L = "warm, calm tutor, moderate pace, clear, unhurried", _ = `${A}_${this.currentLang}_${L}`;
           this.audioCache.has(_) || fetch(`${this.apiBase}/api/v1/speech/synthesize`, {
@@ -3686,8 +3684,8 @@ ${d}
           });
         }
         i ? setTimeout(() => {
-          this.speakResponse(f);
-        }, 300) : (this.autoReadSpeech || this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_tts) && this.speakResponse(f);
+          this.speakResponse(b);
+        }, 300) : (this.autoReadSpeech || this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_tts) && this.speakResponse(b);
       } else {
         const p = {
           id: `msg_${Date.now()}_err`,
@@ -3794,9 +3792,9 @@ ${d}
           roomUrl: p,
           offerHuman: !1
         }), this.saveChatState();
-        const b = this.shadowRoot?.querySelector("#handoff-room-box");
-        if (b) {
-          b.innerHTML = `
+        const f = this.shadowRoot?.querySelector("#handoff-room-box");
+        if (f) {
+          f.innerHTML = `
             <div style="padding:0.75rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:0.5rem; margin-top:0.75rem;">
               <p style="margin:0 0 0.5rem 0; font-size:0.875rem; font-weight:600; color:#166534; display:flex; align-items:center; gap:0.375rem;">
                 ${r.celebrate} <span>${this.t("handoffReadyTitle")}</span>
@@ -3811,15 +3809,15 @@ ${d}
               </div>
             </div>
           `;
-          const m = b.querySelector(".btn-copy-room");
+          const m = f.querySelector(".btn-copy-room");
           m && m.addEventListener("click", async () => {
-            const f = m.getAttribute("data-url");
-            if (f) {
+            const b = m.getAttribute("data-url");
+            if (b) {
               try {
-                await navigator.clipboard.writeText(f);
+                await navigator.clipboard.writeText(b);
               } catch {
                 const y = document.createElement("textarea");
-                y.value = f, document.body.appendChild(y), y.select(), document.execCommand("copy"), document.body.removeChild(y);
+                y.value = b, document.body.appendChild(y), y.select(), document.execCommand("copy"), document.body.removeChild(y);
               }
               m.innerHTML = `${r.check} <span>${this.t("linkCodeCopied")}</span>`, this.announce(this.t("linkCodeCopied")), setTimeout(() => {
                 m.innerHTML = `${r.copy} <span>${this.t("copyRoomBtn")}</span>`;
@@ -4541,11 +4539,11 @@ ${d}
           `;
       const a = [], n = /* @__PURE__ */ new Set();
       if (i.citations)
-        for (const b of i.citations) {
-          const f = (b.title || b.heading || "").replace(/\s*\|\s*.*$/, "").replace(/^Concept page:\s*/i, "").trim();
-          f && !n.has(f) && (n.add(f), a.push({ ...b, title: f }));
+        for (const f of i.citations) {
+          const b = (f.title || f.heading || "").replace(/\s*\|\s*.*$/, "").replace(/^Concept page:\s*/i, "").trim();
+          b && !n.has(b) && (n.add(b), a.push({ ...f, title: b }));
         }
-      const s = a.length > 0, c = !!i.isRefusal, o = i.heading || (i.isHandoff ? this.t("handoffReadyTitle") : this.t("answerHeading")), d = !!(this.currentReading && this.currentReading.msgId === i.id), p = i.text.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean).map((b, m) => `<div class="answer-para-item ${d && this.currentReading.currentIndex === m ? "active-reading-para" : ""}" data-msg-id="${i.id}" data-idx="${m}" title="Click to read and highlight this paragraph" style="cursor:pointer; margin-bottom:0.625rem; line-height:1.5;">${this.escapeHtml(b)}</div>`).join("");
+      const s = a.length > 0, c = !!i.isRefusal, o = i.heading || (i.isHandoff ? this.t("handoffReadyTitle") : this.t("answerHeading")), d = !!(this.currentReading && this.currentReading.msgId === i.id), p = i.text.split(/\n\s*\n/).map((f) => f.trim()).filter(Boolean).map((f, m) => `<div class="answer-para-item ${d && this.currentReading.currentIndex === m ? "active-reading-para" : ""}" data-msg-id="${i.id}" data-idx="${m}" title="Click to read and highlight this paragraph" style="cursor:pointer; margin-bottom:0.625rem; line-height:1.5;">${this.escapeHtml(f)}</div>`).join("");
       return `
           <div class="msg-row msg-assistant" id="${i.id}">
             <h4 class="answer-heading">${this.escapeHtml(o)}</h4>
@@ -4613,10 +4611,10 @@ ${d}
             ${s ? `
                 <div class="sources-box">
                   <div class="sources-title">${this.t("sourcesTitle")}</div>
-                  ${(i.citations || []).filter((b, m, f) => f.findIndex((y) => y.url === b.url) === m).map(
-        (b) => `
-                    <a href="${this.escapeHtml(b.url)}" target="_blank" rel="noopener noreferrer" class="source-link citation-link" style="display:inline-flex; align-items:center; gap:0.375rem;">
-                      ${r.book} <span>${this.escapeHtml(b.title || b.heading)}</span>
+                  ${(i.citations || []).filter((f, m, b) => b.findIndex((y) => y.url === f.url) === m).map(
+        (f) => `
+                    <a href="${this.escapeHtml(f.url)}" target="_blank" rel="noopener noreferrer" class="source-link citation-link" style="display:inline-flex; align-items:center; gap:0.375rem;">
+                      ${r.book} <span>${this.escapeHtml(f.title || f.heading)}</span>
                     </a>
                   `
       ).join("")}
@@ -4732,10 +4730,10 @@ ${d}
           (u || v || t).querySelectorAll(
             'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
           )
-        ).filter((I) => I.getClientRects().length > 0);
+        ).filter((E) => E.getClientRects().length > 0);
         if (T.length > 0) {
-          const I = T[0], W = T[T.length - 1], H = this.shadowRoot?.activeElement;
-          h.shiftKey && H === I ? (h.preventDefault(), W.focus()) : !h.shiftKey && H === W && (h.preventDefault(), I.focus());
+          const E = T[0], W = T[T.length - 1], H = this.shadowRoot?.activeElement;
+          h.shiftKey && H === E ? (h.preventDefault(), W.focus()) : !h.shiftKey && H === W && (h.preventDefault(), E.focus());
         }
       }
     }), this.shadowRoot.querySelectorAll(".lang-toggle-btn").forEach((h) => {
@@ -4803,7 +4801,7 @@ ${d}
         this.wakeWordRecognition = null;
       }
     });
-    const b = (h, u) => {
+    const f = (h, u) => {
       const v = this.shadowRoot?.querySelector(h);
       v?.addEventListener("change", async () => {
         await this.saveNotificationPreferences({ [u]: v.checked });
@@ -4811,15 +4809,15 @@ ${d}
         w && (w.textContent = this.t("notificationSaved"));
       });
     };
-    b("#chk-notify-widget", "widget_enabled"), b("#chk-notify-telegram", "telegram_enabled"), b("#chk-notify-deadlines", "deadlines"), b("#chk-notify-jobs", "job_alerts"), b("#chk-notify-live-help", "live_help"), b("#chk-notify-lessons", "new_lessons");
+    f("#chk-notify-widget", "widget_enabled"), f("#chk-notify-telegram", "telegram_enabled"), f("#chk-notify-deadlines", "deadlines"), f("#chk-notify-jobs", "job_alerts"), f("#chk-notify-live-help", "live_help"), f("#chk-notify-lessons", "new_lessons");
     const m = this.shadowRoot?.querySelector("#select-notify-frequency");
     m?.addEventListener("change", async () => {
       await this.saveNotificationPreferences({ frequency: m.value });
       const h = this.shadowRoot?.querySelector("#notification-save-status");
       h && (h.textContent = this.t("notificationSaved"));
     });
-    const f = this.shadowRoot.querySelector("#settings-code-form");
-    f && f.addEventListener("submit", (h) => {
+    const b = this.shadowRoot.querySelector("#settings-code-form");
+    b && b.addEventListener("submit", (h) => {
       h.preventDefault();
       const u = this.shadowRoot?.querySelector("#settings-input-code"), v = this.shadowRoot?.querySelector("#settings-code-msg");
       u && u.value && this.confirmLinkCode(u.value, v);
@@ -4877,18 +4875,18 @@ ${d}
     $ && P && $.addEventListener("submit", (h) => {
       h.preventDefault();
       const u = P.value;
-      P.value = "", this.askQuestion(u);
+      P.value = "", this.pendingVoiceTranscript = "", this.isListeningForSend = !1, this.isRecording && this.stopVoiceRecording(), this.askQuestion(u);
     }), z && P && z.addEventListener("click", () => {
       this.toggleVoiceInput(P);
     });
-    const V = () => {
+    const j = () => {
       this.hasSpokenWelcomeThisSession = !1, this.showAutoplayBanner = !1, this.accessibilityPrefs.voice_enabled = !0, this.accessibilityPrefs.auto_tts = !0, this.autoReadSpeech = !0, this.savePreferences(), this.render(), this.triggerSpokenWelcome();
     };
-    this.shadowRoot.querySelector("#btn-activate-voice-welcome")?.addEventListener("click", V), this.shadowRoot.querySelector("#btn-activate-voice-welcome-floating")?.addEventListener("click", V);
-    const j = () => {
+    this.shadowRoot.querySelector("#btn-activate-voice-welcome")?.addEventListener("click", j), this.shadowRoot.querySelector("#btn-activate-voice-welcome-floating")?.addEventListener("click", j);
+    const V = () => {
       this.showAutoplayBanner = !1, this.render();
     };
-    this.shadowRoot.querySelector("#btn-dismiss-voice-banner")?.addEventListener("click", j), this.shadowRoot.querySelector("#btn-dismiss-voice-banner-floating")?.addEventListener("click", j), this.shadowRoot.querySelector("#btn-reading-pause")?.addEventListener("click", () => this.pausePageReading()), this.shadowRoot.querySelector("#btn-reading-resume")?.addEventListener("click", () => this.resumePageReading()), this.shadowRoot.querySelector("#btn-reading-stop")?.addEventListener("click", () => this.stopPageReading()), ["en", "am", "om", "ti", "ar"].forEach((h) => {
+    this.shadowRoot.querySelector("#btn-dismiss-voice-banner")?.addEventListener("click", V), this.shadowRoot.querySelector("#btn-dismiss-voice-banner-floating")?.addEventListener("click", V), this.shadowRoot.querySelector("#btn-reading-pause")?.addEventListener("click", () => this.pausePageReading()), this.shadowRoot.querySelector("#btn-reading-resume")?.addEventListener("click", () => this.resumePageReading()), this.shadowRoot.querySelector("#btn-reading-stop")?.addEventListener("click", () => this.stopPageReading()), ["en", "am", "om", "ti", "ar"].forEach((h) => {
       this.shadowRoot?.querySelector(`#onboard-lang-${h}`)?.addEventListener("click", () => {
         this.setLanguage(h);
       });
@@ -4943,9 +4941,9 @@ ${d}
     q && q.addEventListener("change", () => {
       this.accessibilityPrefs.keyboard_navigation = q.checked, this.savePreferences(), q.checked ? this.classList.add("keyboard-focus-enhanced") : this.classList.remove("keyboard-focus-enhanced"), this.announce(q.checked ? "Enhanced keyboard navigation enabled" : "Enhanced keyboard navigation disabled");
     });
-    const E = this.shadowRoot.querySelector("#chk-sync-prefs");
-    E && E.addEventListener("change", () => {
-      this.accessibilityPrefs.sync_enabled = E.checked, this.savePreferences(), E.checked ? (this.syncPreferencesToBackend(), this.announce("Cross-website synchronization enabled")) : this.announce("Cross-website synchronization disabled");
+    const I = this.shadowRoot.querySelector("#chk-sync-prefs");
+    I && I.addEventListener("change", () => {
+      this.accessibilityPrefs.sync_enabled = I.checked, this.savePreferences(), I.checked ? (this.syncPreferencesToBackend(), this.announce("Cross-website synchronization enabled")) : this.announce("Cross-website synchronization disabled");
     }), this.shadowRoot.querySelector("#btn-replay-onboarding")?.addEventListener("click", () => {
       this.accessibilityPrefs.onboarded = !1, this.onboardingDismissed = !1, this.onboardingStep = 0, this.isSettingsOpen = !1, this.render();
     });
@@ -4954,14 +4952,14 @@ ${d}
     return e ? e.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;") : "";
   }
 }
-customElements.get("bridge-assistant") || customElements.define("bridge-assistant", Q);
+customElements.get("bridge-assistant") || customElements.define("bridge-assistant", F);
 if (!customElements.get("db-assistant")) {
-  class S extends Q {
+  class S extends F {
   }
   customElements.define("db-assistant", S);
 }
 export {
-  Q as BridgeAssistant,
+  F as BridgeAssistant,
   r as ICONS
 };
 //# sourceMappingURL=widget.js.map
