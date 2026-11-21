@@ -1,7 +1,7 @@
 var Q = Object.defineProperty;
-var U = (S, x, e) => x in S ? Q(S, x, { enumerable: !0, configurable: !0, writable: !0, value: e }) : S[x] = e;
-var c = (S, x, e) => U(S, typeof x != "symbol" ? x + "" : x, e);
-const O = () => ({
+var U = (T, S, e) => S in T ? Q(T, S, { enumerable: !0, configurable: !0, writable: !0, value: e }) : T[S] = e;
+var c = (T, S, e) => U(T, typeof S != "symbol" ? S + "" : S, e);
+const H = () => ({
   deadlines: !0,
   new_lessons: !0,
   job_alerts: !0,
@@ -12,16 +12,16 @@ const O = () => ({
   muted: !1,
   frequency: "immediate"
 });
-async function K(S, x) {
+async function G(T, S) {
   const e = await fetch(
-    `${S}/api/v1/notification-settings?learner_ref=${encodeURIComponent(x)}`
+    `${T}/api/v1/notification-settings?learner_ref=${encodeURIComponent(S)}`
   );
   if (!e.ok) throw new Error(`Could not load notification settings: HTTP ${e.status}`);
-  return { ...O(), ...await e.json() };
+  return { ...H(), ...await e.json() };
 }
-async function G(S, x, e) {
+async function K(T, S, e) {
   const t = await fetch(
-    `${S}/api/v1/notification-settings?learner_ref=${encodeURIComponent(x)}`,
+    `${T}/api/v1/notification-settings?learner_ref=${encodeURIComponent(S)}`,
     {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -31,7 +31,7 @@ async function G(S, x, e) {
   if (!t.ok) throw new Error(`Could not save notification settings: HTTP ${t.status}`);
   return { ...e, ...await t.json() };
 }
-const r = {
+const l = {
   launcher: '<svg class="icon-inline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="7.2" r="1.5" fill="currentColor"></circle><path d="M5.5 10.5h13"></path><path d="M12 10.5v4"></path><path d="M12 14.5l-2.8 5"></path><path d="M12 14.5l2.8 5"></path></svg>',
   accessibility: '<svg class="icon-inline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="7.2" r="1.5" fill="currentColor"></circle><path d="M5.5 10.5h13"></path><path d="M12 10.5v4"></path><path d="M12 14.5l-2.8 5"></path><path d="M12 14.5l2.8 5"></path></svg>',
   chat: '<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>',
@@ -71,7 +71,7 @@ const r = {
   speed: '<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>',
   sync: '<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>',
   sparkles: '<svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>'
-}, k = {
+}, x = {
   en: {
     appTitle: "Savanna Bridge Assistant",
     appSubtitle: "Ask questions, adjust support, or connect with a mentor",
@@ -222,6 +222,9 @@ const r = {
     onboardingSkip: "Skip for now",
     onboardingReplay: "Setup Tour / Onboarding",
     spokenSetup: "Start spoken setup",
+    onboardingReadStep: "Read this step",
+    onboardingStopVoice: "Stop voice",
+    onboardingVoiceStopped: "Voice onboarding stopped. Select Read this step to continue.",
     voiceTab: "Voice & Audio",
     pageContextBadge: "Current Lesson:",
     explainLessonBtn: "Explain this lesson",
@@ -373,6 +376,9 @@ const r = {
     onboardingSkip: "ለጊዜው እለፈው",
     onboardingReplay: "የመጀመሪያ ቅንብር መመሪያ",
     spokenSetup: "የድምጽ ቅንብርን ጀምር",
+    onboardingReadStep: "ይህን ደረጃ አንብብ",
+    onboardingStopVoice: "ድምጹን አቁም",
+    onboardingVoiceStopped: "የድምጽ መመሪያው ቆሟል። ለመቀጠል ይህን ደረጃ አንብብ የሚለውን ይምረጡ።",
     voiceTab: "ድምጽ እና ማዳመጥ",
     pageContextBadge: "ወቅታዊ ትምህርት፡",
     explainLessonBtn: "ይህንን ትምህርት አስረዳኝ",
@@ -524,6 +530,9 @@ const r = {
     onboardingSkip: "Ammaaf darbi",
     onboardingReplay: "Daawwannaa Qindaa'inaa",
     spokenSetup: "Qindaa'ina sagalee jalqabi",
+    onboardingReadStep: "Tarkaanfii kana dubbisi",
+    onboardingStopVoice: "Sagalee dhaabi",
+    onboardingVoiceStopped: "Qindaa'inni sagalee dhaabbateera. Itti fufuuf Tarkaanfii kana dubbisi filadhu.",
     voiceTab: "Sagalee & Dhaggeeffannaa",
     pageContextBadge: "Kutaa Barnootaa Ammaa:",
     explainLessonBtn: "Barnoota kana naaf ibsi",
@@ -675,6 +684,9 @@ const r = {
     onboardingSkip: "ንሕጂ ሕለፎ",
     onboardingReplay: "ናይ መጀመርታ መምርሒ",
     spokenSetup: "ናይ ድምጺ ቅጥዒ ጀምር",
+    onboardingReadStep: "ነዚ ስጉምቲ ኣንብብ",
+    onboardingStopVoice: "ድምጺ ኣቋርጽ",
+    onboardingVoiceStopped: "ናይ ድምጺ መምርሒ ተቋሪጹ። ንምቕጻል ነዚ ስጉምቲ ኣንብብ ምረጹ።",
     voiceTab: "ድምጽን ምስማዕን",
     pageContextBadge: "ህሉው ትምህርቲ፡",
     explainLessonBtn: "እዚ ትምህርቲ ኣብርሃለይ",
@@ -826,6 +838,9 @@ const r = {
     onboardingSkip: "تخطي الآن",
     onboardingReplay: "دليل الإعداد الأولي",
     spokenSetup: "بدء الإعداد الصوتي",
+    onboardingReadStep: "اقرأ هذه الخطوة",
+    onboardingStopVoice: "إيقاف الصوت",
+    onboardingVoiceStopped: "تم إيقاف الإعداد الصوتي. اختر اقرأ هذه الخطوة للمتابعة.",
     voiceTab: "الصوت والقراءة",
     pageContextBadge: "الدرس الحالي:",
     explainLessonBtn: "اشرح لي هذا الدرس",
@@ -1790,6 +1805,7 @@ const r = {
   }
   .onboarding-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.5rem;
     justify-content: flex-end;
     border-top: 1px solid var(--b-border);
@@ -1965,7 +1981,7 @@ class F extends HTMLElement {
     c(this, "isTelegramLinked", !1);
     c(this, "isLinkCodeInputVisible", !1);
     c(this, "telegramPollTimer", null);
-    c(this, "notificationPreferences", O());
+    c(this, "notificationPreferences", H());
     // Settings dialog visibility
     c(this, "isSettingsOpen", !1);
     // Active Handoff state
@@ -2004,6 +2020,7 @@ class F extends HTMLElement {
     c(this, "popstateListener", null);
     c(this, "spokenOnboardingActive", !1);
     c(this, "spokenOnboardingIndex", 0);
+    c(this, "onboardingSpeechGeneration", 0);
     c(this, "pendingVoiceAction", null);
     c(this, "pendingVoiceTranscript", "");
     c(this, "isListeningForSend", !1);
@@ -2061,7 +2078,7 @@ class F extends HTMLElement {
     ];
   }
   attributeChangedCallback(e, t, i) {
-    if (t !== i && (e === "lang" || e === "data-lang") && i in k) {
+    if (t !== i && (e === "lang" || e === "data-lang") && i in x) {
       if (this.currentLang === i) {
         this.setAttribute("dir", i === "ar" ? "rtl" : "ltr");
         return;
@@ -2073,7 +2090,7 @@ class F extends HTMLElement {
     if (this.shadowRoot) return;
     this.restoreState();
     const e = this.getAttribute("lang") || this.getAttribute("data-lang"), t = localStorage.getItem("savanna_bridge_preferred_lang"), i = sessionStorage.getItem("savanna_bridge_lang");
-    e && e in k ? this.currentLang = e : this.accessibilityPrefs.language && this.accessibilityPrefs.language in k ? this.currentLang = this.accessibilityPrefs.language : t && t in k ? this.currentLang = t : i && i in k && (this.currentLang = i), this.accessibilityPrefs.keyboard_navigation && this.classList.add("keyboard-focus-enhanced"), this.accessibilityPrefs.screen_reader_mode && this.classList.add("screen-reader-mode"), this.attachShadow({ mode: "open" }), this.render(), this.setupNetworkMonitor(), this.setupPageNavigationMonitor(), this.voiceActivationEnabled && this.setupWakeWordDetector(), this.popstateListener = () => {
+    e && e in x ? this.currentLang = e : this.accessibilityPrefs.language && this.accessibilityPrefs.language in x ? this.currentLang = this.accessibilityPrefs.language : t && t in x ? this.currentLang = t : i && i in x && (this.currentLang = i), this.accessibilityPrefs.keyboard_navigation && this.classList.add("keyboard-focus-enhanced"), this.accessibilityPrefs.screen_reader_mode && this.classList.add("screen-reader-mode"), this.attachShadow({ mode: "open" }), this.render(), this.setupNetworkMonitor(), this.setupPageNavigationMonitor(), this.voiceActivationEnabled && this.setupWakeWordDetector(), this.popstateListener = () => {
       this.isReadingPage && this.stopPageReading();
     }, window.addEventListener("popstate", this.popstateListener), this.fetchTelegramStartLink(), this.fetchSupportNeeds(), this.fetchNotificationPreferences(), this.accessibilityPrefs.voice_enabled && this.initWakeWordDetection(), this.initGlobalKeyboardShortcuts(), this.accessibilityPrefs.sync_enabled && this.syncPreferencesFromBackend(), this.preloadWelcomeAudio(), this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_welcome && !this.hasSpokenWelcomeThisSession && setTimeout(() => this.triggerSpokenWelcome(), 500);
   }
@@ -2109,7 +2126,7 @@ class F extends HTMLElement {
     this.stopSpeaking(), this.popstateListener && (window.removeEventListener("popstate", this.popstateListener), this.popstateListener = null), this.navCheckTimer && (window.clearInterval(this.navCheckTimer), this.navCheckTimer = null), this.isReadingPage && this.stopPageReading(), this.stopPageReadingHighlight();
   }
   t(e) {
-    return (k[this.currentLang] || k.en)[e] || k.en[e] || e;
+    return (x[this.currentLang] || x.en)[e] || x.en[e] || e;
   }
   announce(e) {
     const t = this.shadowRoot?.querySelector("#live-announcer");
@@ -2227,15 +2244,15 @@ class F extends HTMLElement {
         } catch {
         }
       const i = localStorage.getItem("savanna_bridge_preferred_lang");
-      i && i in k && (this.currentLang = i, this.accessibilityPrefs.language = i);
+      i && i in x && (this.currentLang = i, this.accessibilityPrefs.language = i);
       const a = localStorage.getItem("savanna_bridge_contrast");
       a && (this.highContrast = a === "high", this.accessibilityPrefs.high_contrast = this.highContrast);
       const n = localStorage.getItem("savanna_bridge_text_size");
       n && (this.textSize = n, this.accessibilityPrefs.large_text = n);
       const s = localStorage.getItem("savanna_bridge_auto_read");
       s !== null && (this.autoReadSpeech = s === "true");
-      const l = localStorage.getItem("savanna_bridge_simple_mode");
-      l && (this.simpleMode = l === "true", this.accessibilityPrefs.simple_mode = this.simpleMode);
+      const r = localStorage.getItem("savanna_bridge_simple_mode");
+      r && (this.simpleMode = r === "true", this.accessibilityPrefs.simple_mode = this.simpleMode);
       const o = localStorage.getItem("savanna_bridge_wake_word");
       o && (this.voiceActivationEnabled = o === "true");
     } catch {
@@ -2283,7 +2300,7 @@ class F extends HTMLElement {
       const e = this.getAttribute("learner-id") || `learner_${this.sessionId}`, t = await fetch(`${this.apiBase}/api/v1/accessibility-profile?learner_ref=${encodeURIComponent(e)}`);
       if (t.ok) {
         const i = await t.json();
-        i && i.updated_at && (this.accessibilityPrefs.voice_enabled = !!i.voice_enabled, this.accessibilityPrefs.auto_welcome = !!i.auto_welcome, this.accessibilityPrefs.auto_tts = !!i.auto_tts, typeof i.speech_rate == "number" && (this.accessibilityPrefs.speech_rate = i.speech_rate), i.language && i.language in k && (this.currentLang = i.language, this.accessibilityPrefs.language = i.language), i.large_text && (this.textSize = i.large_text), typeof i.high_contrast == "boolean" && (this.highContrast = i.high_contrast), typeof i.simple_mode == "boolean" && (this.simpleMode = i.simple_mode), typeof i.onboarded == "boolean" && (this.accessibilityPrefs.onboarded = i.onboarded), this.savePreferences(), this.render());
+        i && i.updated_at && (this.accessibilityPrefs.voice_enabled = !!i.voice_enabled, this.accessibilityPrefs.auto_welcome = !!i.auto_welcome, this.accessibilityPrefs.auto_tts = !!i.auto_tts, typeof i.speech_rate == "number" && (this.accessibilityPrefs.speech_rate = i.speech_rate), i.language && i.language in x && (this.currentLang = i.language, this.accessibilityPrefs.language = i.language), i.large_text && (this.textSize = i.large_text), typeof i.high_contrast == "boolean" && (this.highContrast = i.high_contrast), typeof i.simple_mode == "boolean" && (this.simpleMode = i.simple_mode), typeof i.onboarded == "boolean" && (this.accessibilityPrefs.onboarded = i.onboarded), this.savePreferences(), this.render());
       }
     } catch (e) {
       console.warn("Could not fetch accessibility profile from backend:", e);
@@ -2313,12 +2330,13 @@ class F extends HTMLElement {
   }
   speakText(e, t) {
     return this.lastSpokenText = e, this.playServerAudioText(e, t).then((i) => {
-      !i && this.currentLang === "en" && "speechSynthesis" in window && this.browserSpeechText(e, t);
+      t?.shouldContinue && !t.shouldContinue() || !i && this.currentLang === "en" && "speechSynthesis" in window && this.browserSpeechText(e, t);
     }).catch((i) => {
-      console.warn("playServerAudioText failed:", i), this.currentLang === "en" && "speechSynthesis" in window ? this.browserSpeechText(e, t) : t?.onError && t.onError(i);
+      t?.shouldContinue && !t.shouldContinue() || (console.warn("playServerAudioText failed:", i), this.currentLang === "en" && "speechSynthesis" in window ? this.browserSpeechText(e, t) : t?.onError && t.onError(i));
     }), !0;
   }
   browserSpeechText(e, t) {
+    if (t?.shouldContinue && !t.shouldContinue()) return !1;
     if (!("speechSynthesis" in window))
       return t?.onError && t.onError(), !1;
     try {
@@ -2339,11 +2357,11 @@ class F extends HTMLElement {
     try {
       this.activeAudio && (this.activeAudio.pause(), this.activeAudio = null), "speechSynthesis" in window && window.speechSynthesis.cancel();
       const i = this.cleanTextForSpeech(e);
-      if (!i) return !1;
+      if (!i || t?.shouldContinue && !t.shouldContinue()) return !1;
       const a = "warm, calm tutor, moderate pace, clear, unhurried", n = `${i}_${this.currentLang}_${a}`;
       let s = this.audioCache.get(n);
       if (!s) {
-        const l = await fetch(`${this.apiBase}/api/v1/speech/synthesize`, {
+        const r = await fetch(`${this.apiBase}/api/v1/speech/synthesize`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -2353,8 +2371,8 @@ class F extends HTMLElement {
             style: a
           })
         });
-        if (l.ok) {
-          const o = await l.json();
+        if (r.ok) {
+          const o = await r.json();
           if (o.audio_url && !o.audio_url.includes("demo.ogg")) {
             const d = String(o.audio_url);
             s = /^(https?:|data:|blob:)/.test(d) ? d : `${this.apiBase}${d}`, this.audioCache.set(n, s);
@@ -2362,9 +2380,10 @@ class F extends HTMLElement {
         }
       }
       if (s) {
+        if (t?.shouldContinue && !t.shouldContinue()) return !1;
         this.activeAudio = new Audio(s);
-        const l = t?.rate || this.accessibilityPrefs?.speech_rate || 1;
-        return this.activeAudio.playbackRate = l, this.activeAudio.preservesPitch = !0, this.activeAudio.mozPreservesPitch = !0, this.activeAudio.webkitPreservesPitch = !0, t?.onStart && (this.activeAudio.onplay = () => t.onStart()), this.activeAudio.onended = () => {
+        const r = t?.rate || this.accessibilityPrefs?.speech_rate || 1;
+        return this.activeAudio.playbackRate = r, this.activeAudio.preservesPitch = !0, this.activeAudio.mozPreservesPitch = !0, this.activeAudio.webkitPreservesPitch = !0, t?.onStart && (this.activeAudio.onplay = () => t.onStart()), this.activeAudio.onended = () => {
           this.activeAudio = null, t?.onEnd && t.onEnd();
         }, this.activeAudio.onerror = (o) => {
           this.activeAudio = null, t?.onError && t.onError(o);
@@ -2378,8 +2397,8 @@ class F extends HTMLElement {
   preloadWelcomeAudio() {
     const e = ["en", "am", "om", "ti", "ar"], t = "warm, calm tutor, moderate pace, clear, unhurried";
     for (const i of e) {
-      const n = (k[i] || k.en).voiceWelcomeAnnouncement || k.en.voiceWelcomeAnnouncement, s = this.cleanTextForSpeech(n), l = `${s}_${i}_${t}`;
-      this.audioCache.has(l) || fetch(`${this.apiBase}/api/v1/speech/synthesize`, {
+      const n = (x[i] || x.en).voiceWelcomeAnnouncement || x.en.voiceWelcomeAnnouncement, s = this.cleanTextForSpeech(n), r = `${s}_${i}_${t}`;
+      this.audioCache.has(r) || fetch(`${this.apiBase}/api/v1/speech/synthesize`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -2391,7 +2410,7 @@ class F extends HTMLElement {
       }).then((o) => o.ok ? o.json() : null).then((o) => {
         if (o && o.audio_url && !o.audio_url.includes("demo.ogg")) {
           const d = String(o.audio_url), g = /^(https?:|data:|blob:)/.test(d) ? d : `${this.apiBase}${d}`;
-          this.audioCache.set(l, g);
+          this.audioCache.set(r, g);
         }
       }).catch(() => {
       });
@@ -2434,16 +2453,16 @@ class F extends HTMLElement {
           s.querySelectorAll(
             "script, style, db-assistant, bridge-assistant, noscript, nav, footer, header, #sidebar, .sidebar, button, input"
           ).forEach((o) => o.remove());
-          const l = [];
+          const r = [];
           s.querySelectorAll("h1, h2, h3, h4, h5, p, li").forEach((o) => {
             const d = (o.textContent || "").replace(/\s+/g, " ").trim();
             if (d) {
               const g = o.tagName.toLowerCase();
-              g.startsWith("h") ? l.push(`
+              g.startsWith("h") ? r.push(`
 ${d}
-`) : g === "li" ? l.push(`• ${d}`) : l.push(d);
+`) : g === "li" ? r.push(`• ${d}`) : r.push(d);
             }
-          }), l.length > 0 ? a = l.join(`
+          }), r.length > 0 ? a = r.join(`
 
 `).slice(0, 15e3) : a = (s.textContent || "").replace(/\s+/g, " ").trim().slice(0, 15e3);
         } catch {
@@ -2504,7 +2523,7 @@ ${d}
   }
   async fetchNotificationPreferences() {
     try {
-      this.notificationPreferences = await K(this.apiBase, this.getLearnerRef()), this.isSettingsOpen && this.render();
+      this.notificationPreferences = await G(this.apiBase, this.getLearnerRef()), this.isSettingsOpen && this.render();
     } catch {
     }
   }
@@ -2512,7 +2531,7 @@ ${d}
     const t = { ...this.notificationPreferences, ...e };
     t.telegram_enabled && !this.isTelegramLinked && (t.telegram_enabled = !1), t.consent_granted = t.widget_enabled || t.telegram_enabled, this.notificationPreferences = t;
     try {
-      this.notificationPreferences = await G(
+      this.notificationPreferences = await K(
         this.apiBase,
         this.getLearnerRef(),
         t
@@ -2559,8 +2578,8 @@ ${d}
         }
         const n = Array.isArray(i.messages) ? i.messages.filter((s) => s?.sender === "helper" && s?.message) : [];
         for (const s of n) {
-          const l = `${s.sent_at || ""}|${s.message}`;
-          if (this.seenHandoffMessages.has(l) || (this.seenHandoffMessages.add(l), !this.notificationPreferences.widget_enabled || !this.notificationPreferences.live_help)) continue;
+          const r = `${s.sent_at || ""}|${s.message}`;
+          if (this.seenHandoffMessages.has(r) || (this.seenHandoffMessages.add(r), !this.notificationPreferences.widget_enabled || !this.notificationPreferences.live_help)) continue;
           const o = String(s.message), d = this.t("helperReplyHeading");
           this.messages.push({
             id: `msg_${Date.now()}_helper_${this.seenHandoffMessages.size}`,
@@ -2734,7 +2753,7 @@ ${d}
     e.innerHTML = `
       <div style="display:flex; justify-content:center; margin-top:0.25rem;">
         <button type="button" class="btn-toggle-link-code" id="btn-toggle-link-code" style="background:none; border:none; color:var(--b-primary); font-size:0.75rem; text-decoration:underline; cursor:pointer; padding:0.125rem 0;">
-          ${this.isLinkCodeInputVisible ? this.t("hideCodePrompt") : `${r.link} <span>${this.t("haveCodePrompt")}</span>`}
+          ${this.isLinkCodeInputVisible ? this.t("hideCodePrompt") : `${l.link} <span>${this.t("haveCodePrompt")}</span>`}
         </button>
       </div>
       ${this.isLinkCodeInputVisible ? `
@@ -2966,8 +2985,8 @@ ${d}
       return;
     }
     t.value = i, t.focus(), this.pendingVoiceTranscript = i;
-    const l = this.t("voicePreviewPrompt").replace("{text}", i);
-    this.announce(l), this.speakText(l, {
+    const r = this.t("voicePreviewPrompt").replace("{text}", i);
+    this.announce(r), this.speakText(r, {
       onEnd: () => {
         if (this.pendingVoiceTranscript) {
           const o = this.shadowRoot?.querySelector("#chat-input");
@@ -3036,25 +3055,142 @@ ${d}
     }[this.currentLang];
   }
   startSpokenOnboarding() {
-    this.stopPageReading(), this.pendingVoiceAction = null, this.spokenOnboardingActive = !0, this.spokenOnboardingIndex = [0, 1, 3, 5][this.onboardingStep] ?? 0, this.speakSpokenOnboardingQuestion();
+    this.stopPageReading(), this.pendingVoiceAction = null, this.spokenOnboardingActive = !0, this.spokenOnboardingIndex = [0, 1, 3, 5][this.onboardingStep] ?? 0, this.render(), window.setTimeout(() => this.speakOnboardingStep(), 0);
   }
-  speakSpokenOnboardingQuestion(e = "") {
-    const t = this.spokenOnboardingQuestions()[this.spokenOnboardingIndex];
-    if (!t) return;
-    const i = e ? `${e} ${t}` : t;
-    this.announce(i), this.speakText(i, {
+  speakOnboardingAndListen(e) {
+    const t = ++this.onboardingSpeechGeneration;
+    this.stopSpeaking(), this.isRecording && (this.audioChunks = [], this.stopVoiceRecording(!0)), this.announce(e), this.speakText(e, {
+      shouldContinue: () => t === this.onboardingSpeechGeneration && this.spokenOnboardingActive,
       onEnd: () => {
-        const a = this.shadowRoot?.querySelector("#chat-input");
-        a && this.spokenOnboardingActive && this.startVoiceRecording(a);
+        if (t !== this.onboardingSpeechGeneration || !this.spokenOnboardingActive) return;
+        const i = this.shadowRoot?.querySelector("#chat-input");
+        i && this.startVoiceRecording(i);
+      },
+      onError: () => {
+        if (t !== this.onboardingSpeechGeneration || !this.spokenOnboardingActive) return;
+        const i = this.shadowRoot?.querySelector("#chat-input");
+        i && this.startVoiceRecording(i);
       }
     });
   }
-  handleSpokenOnboardingAnswer(e) {
-    if (!this.isAffirmative(e) && !this.isNegative(e)) {
-      this.speakText("Please answer yes or no.", { onEnd: () => this.speakSpokenOnboardingQuestion() });
+  onboardingOptionState(e) {
+    return {
+      en: ["checked", "not checked"],
+      am: ["ተመርጧል", "አልተመረጠም"],
+      om: ["filatameera", "hin filatamne"],
+      ti: ["ተመሪጹ", "ኣይተመርጸን"],
+      ar: ["محدد", "غير محدد"]
+    }[this.currentLang][e ? 0 : 1];
+  }
+  onboardingStepNarration() {
+    const e = this.spokenOnboardingQuestions()[this.spokenOnboardingIndex] || "", t = this.onboardingStep + 1, i = (s, r) => `${s}: ${this.onboardingOptionState(r)}.`, a = {
+      en: "You can say check or uncheck an option, next, back, repeat, or stop.",
+      am: "ምርጫን ምረጥ ወይም አትምረጥ፣ ቀጣይ፣ ተመለስ፣ ድገም ወይም አቁም ማለት ይችላሉ።",
+      om: "Filannoo bani ykn cufi, itti aanu, duubatti, irra deebi'i ykn dhaabi jechuu dandeessa.",
+      ti: "ምርጫ ምረጽ ወይ ኣይትምረጽ፣ ቀጻሊ፣ ተመለስ፣ ደግም ወይ ኣቋርጽ ክትብሉ ትኽእሉ።",
+      ar: "يمكنك قول حدد أو ألغ تحديد خيار، التالي، رجوع، كرر، أو توقف."
+    };
+    let n = `${this.t("onboardingSubtitle")} ${this.t("onboardingLangPrompt")} ${this.getLangDisplayName()}.`;
+    return this.onboardingStep === 1 ? n = `${i(this.t("screenReaderModeLabel"), this.accessibilityPrefs.screen_reader_mode)} ${i(this.t("keyboardNavLabel"), this.accessibilityPrefs.keyboard_navigation)}` : this.onboardingStep === 2 ? n = `${i(this.t("highContrastLabel"), this.accessibilityPrefs.high_contrast)} ${i(this.t("textLarger"), this.accessibilityPrefs.large_text === "larger")}` : this.onboardingStep === 3 && (n = `${i(this.t("onboardingVoiceEnable"), this.accessibilityPrefs.voice_enabled)} ${i(this.t("autoTtsLabel"), this.accessibilityPrefs.auto_tts)}`), `Step ${t} of 4. ${n} ${e} ${a[this.currentLang]}`;
+  }
+  speakOnboardingStep(e = "") {
+    if (!this.spokenOnboardingActive) return;
+    const t = this.onboardingStepNarration();
+    this.speakOnboardingAndListen(e ? `${e} ${t}` : t);
+  }
+  speakSpokenOnboardingQuestion(e = "") {
+    if (!this.spokenOnboardingActive) return;
+    const t = this.spokenOnboardingQuestions()[this.spokenOnboardingIndex];
+    t && this.speakOnboardingAndListen(e ? `${e} ${t}` : t);
+  }
+  stopSpokenOnboarding() {
+    this.onboardingSpeechGeneration += 1, this.spokenOnboardingActive = !1, this.stopSpeaking(), this.isRecording && (this.audioChunks = [], this.stopVoiceRecording(!0)), this.announce(this.t("onboardingVoiceStopped")), this.render();
+  }
+  moveSpokenOnboarding(e) {
+    if (this.captureOnboardingStep(), e === 1 && this.onboardingStep === 3) {
+      this.completeOnboarding(!0);
       return;
     }
-    const t = this.isAffirmative(e), i = {
+    this.onboardingStep = Math.max(0, Math.min(3, this.onboardingStep + e)), this.spokenOnboardingIndex = [0, 1, 3, 5][this.onboardingStep] ?? 0, this.savePreferences(), this.render(), window.setTimeout(() => this.speakOnboardingStep(), 0);
+  }
+  setOnboardingOption(e, t) {
+    switch (e) {
+      case "screen_reader":
+        this.accessibilityPrefs.screen_reader_mode = t;
+        break;
+      case "keyboard":
+        this.accessibilityPrefs.keyboard_navigation = t;
+        break;
+      case "contrast":
+        this.accessibilityPrefs.high_contrast = t, this.highContrast = t;
+        break;
+      case "large_text":
+        this.accessibilityPrefs.large_text = t ? "larger" : "normal", this.textSize = this.accessibilityPrefs.large_text;
+        break;
+      case "voice":
+        this.accessibilityPrefs.voice_enabled = t;
+        break;
+      case "auto_tts":
+        this.accessibilityPrefs.auto_tts = t;
+        break;
+      default:
+        return !1;
+    }
+    return this.savePreferences(), this.render(), !0;
+  }
+  handleSpokenOnboardingCommand(e) {
+    const t = e.trim().toLocaleLowerCase().replace(/[.,!?;:"'`።،]/gu, "").replace(/\s+/g, " "), a = [
+      ["en", /^(english|ingiliffa)$/iu],
+      ["am", /^(amharic|አማርኛ)$/iu],
+      ["om", /^(oromo|afaan oromoo)$/iu],
+      ["ti", /^(tigrinya|ትግርኛ)$/iu],
+      ["ar", /^(arabic|العربية)$/iu]
+    ].find(([, o]) => o.test(t));
+    if (a)
+      return this.setLanguage(a[0]), this.spokenOnboardingIndex = 0, window.setTimeout(() => this.speakOnboardingStep(), 0), !0;
+    if (/^(stop|stop reading|stop voice|pause|quiet|be quiet|mute|silence|cancel voice|enough|that's enough|thats enough|hold on|wait|አቁም|ቁም|dhaabi|ኣቋርጽ|توقف|إيقاف)/iu.test(t))
+      return this.stopSpokenOnboarding(), !0;
+    if (/^(repeat|read again|read this step|again|ድገም|እንደገና|irra deebi|ደግም|كرر|أعد|اقرأ)/iu.test(t))
+      return this.speakOnboardingStep(), !0;
+    if (/^(next|continue|go next|go on|proceed|skip|ቀጣይ|ቀጥል|itti aanu|ቀጻሊ|التالي|استمر)/iu.test(t))
+      return this.moveSpokenOnboarding(1), !0;
+    if (/^(back|previous|go back|ተመለስ|duubatti|رجوع|السابق)/iu.test(t))
+      return this.moveSpokenOnboarding(-1), !0;
+    if (/^(finish|save|done|complete|ጨርስ|xumuri|ዛዝም|إنهاء|حفظ)/iu.test(t))
+      return this.captureOnboardingStep(), this.completeOnboarding(!0), !0;
+    const n = /\b(uncheck|disable|turn off|deselect|untick|remove)\b/iu.test(t), s = /\b(check|enable|turn on|select|tick)\b/iu.test(t);
+    if (!n && !s) return !1;
+    let r = "";
+    if (/(screen reader|nvda|talkback|voiceover|ስክሪን|iskiriinii|قارئ)/iu.test(t)) r = "screen_reader";
+    else if (/(keyboard|ኪቦርድ|kiiboodii|لوحة المفاتيح)/iu.test(t)) r = "keyboard";
+    else if (/(contrast|ንፅፅር|ንጽጽር|walbira|تباين)/iu.test(t)) r = "contrast";
+    else if (/(large text|larger text|big text|ትልቅ ጽሑፍ|barreeffama guddaa|نص أكبر)/iu.test(t)) r = "large_text";
+    else if (/(automatic reading|auto read|read answers|auto tts|መልሶችን|deebii|قراءة الإجابات)/iu.test(t)) r = "auto_tts";
+    else if (/(voice assistance|voice accessibility|የድምጽ|gargaarsa sagalee|مساعدة صوتية)/iu.test(t)) r = "voice";
+    else if (/\b(first|one|1)\b/iu.test(t)) r = ["", "screen_reader", "contrast", "voice"][this.onboardingStep] || "";
+    else if (/\b(second|two|2)\b/iu.test(t)) r = ["", "keyboard", "large_text", "auto_tts"][this.onboardingStep] || "";
+    else if (/\b(this|that|current)\b/iu.test(t))
+      r = ["", "screen_reader", "keyboard", "contrast", "large_text", "voice", "auto_tts"][this.spokenOnboardingIndex] || "";
+    else {
+      const o = this.shadowRoot?.activeElement, d = {
+        "onboard-chk-screen-reader": "screen_reader",
+        "onboard-chk-keyboard-nav": "keyboard",
+        "onboard-chk-contrast": "contrast",
+        "onboard-chk-large-text": "large_text",
+        "onboard-chk-voice": "voice",
+        "onboard-chk-auto-tts": "auto_tts"
+      };
+      r = o?.id && d[o.id] || "";
+    }
+    return r ? (this.setOnboardingOption(r, s && !n), window.setTimeout(() => this.speakOnboardingStep(), 0), !0) : (this.speakOnboardingAndListen("Please name the option, for example, check screen reader or uncheck high contrast."), !0);
+  }
+  handleSpokenOnboardingAnswer(e) {
+    if (this.handleSpokenOnboardingCommand(e)) return;
+    if (!this.isAffirmative(e) && !this.isNegative(e)) {
+      this.speakOnboardingAndListen("Please answer yes or no, name an option to check, or say next, back, repeat, or stop.");
+      return;
+    }
+    const t = this.isAffirmative(e), i = this.onboardingStep, a = {
       en: ["Selected yes.", "Selected no."],
       am: ["አዎ ተመርጧል።", "አይ ተመርጧል።"],
       om: ["Eeyyee filatameera.", "Lakki filatameera."],
@@ -3063,14 +3199,14 @@ ${d}
     };
     if (this.spokenOnboardingIndex === 0 && !t) {
       this.spokenOnboardingActive = !1;
-      const n = {
+      const s = {
         en: "Choose another language, then select Start spoken setup again.",
         am: "ሌላ ቋንቋ ይምረጡ፣ ከዚያ የድምጽ ቅንብርን እንደገና ይጀምሩ።",
         om: "Afaan biraa filadhaa, sana booda qindaa'ina sagalee irra deebi'aa jalqabaa.",
         ti: "ካልእ ቋንቋ ምረጹ፣ ድሕሪኡ ናይ ድምጺ ቅጥዒ እንደገና ጀምሩ።",
         ar: "اختر لغة أخرى، ثم ابدأ الإعداد الصوتي مرة أخرى."
       };
-      this.speakText(n[this.currentLang]);
+      this.speakText(s[this.currentLang]);
       return;
     }
     switch (this.spokenOnboardingIndex) {
@@ -3097,20 +3233,23 @@ ${d}
     }
     if (this.spokenOnboardingIndex += 1, this.spokenOnboardingIndex < this.spokenOnboardingQuestions().length) {
       this.onboardingStep = this.spokenOnboardingIndex < 1 ? 0 : this.spokenOnboardingIndex < 3 ? 1 : this.spokenOnboardingIndex < 5 ? 2 : 3, this.savePreferences(), this.render(), setTimeout(
-        () => this.speakSpokenOnboardingQuestion(i[this.currentLang][t ? 0 : 1]),
+        () => {
+          const s = a[this.currentLang][t ? 0 : 1];
+          this.onboardingStep !== i ? this.speakOnboardingStep(s) : this.speakSpokenOnboardingQuestion(s);
+        },
         0
       );
       return;
     }
     this.spokenOnboardingActive = !1, this.accessibilityPrefs.onboarded = !0, this.onboardingDismissed = !0, this.savePreferences(), this.render();
-    const a = {
+    const n = {
       en: "Setup complete. You can change these choices in accessibility settings.",
       am: "ቅንብሩ ተጠናቋል። እነዚህን ምርጫዎች በተደራሽነት ቅንብሮች ውስጥ መቀየር ይችላሉ።",
       om: "Qindaa'inni xumurameera. Filannoowwan kana qindaa'ina qaqqabummaa keessatti jijjiiruu dandeessu.",
       ti: "ቅጥዒ ተዛዚሙ። ነዞም ምርጫታት ኣብ ቅጥዒ ተበጻሕነት ክትቅይሩ ትኽእሉ።",
       ar: "اكتمل الإعداد. يمكنك تغيير هذه الخيارات من إعدادات إمكانية الوصول."
     };
-    this.speakText(a[this.currentLang]), this.accessibilityPrefs.voice_enabled && this.initWakeWordDetection();
+    this.speakText(n[this.currentLang]), this.accessibilityPrefs.voice_enabled && this.initWakeWordDetection();
   }
   // --- Voice-to-Text (Speech Recognition) ---
   async toggleVoiceInput(e) {
@@ -3131,8 +3270,8 @@ ${d}
           let s = "";
           for (let o = 0; o < n.results.length; o++)
             s += n.results[o][0]?.transcript || "";
-          const l = s.trim();
-          l && (this.hasDetectedSound = !0, e.value = l, n.results[n.results.length - 1]?.isFinal && (i = !0, this.handleVoiceTranscript(l, e)));
+          const r = s.trim();
+          r && (this.hasDetectedSound = !0, e.value = r, n.results[n.results.length - 1]?.isFinal && (i = !0, this.handleVoiceTranscript(r, e)));
         }, this.activeRecognition.onend = () => {
           i && this.isRecording && this.stopVoiceRecording(!0);
         }, this.activeRecognition.onerror = (n) => {
@@ -3164,10 +3303,10 @@ ${d}
             this.vadInterval = window.setInterval(() => {
               if (!this.isRecording || !this.audioAnalyser) return;
               this.audioAnalyser.getByteFrequencyData(p);
-              let f = 0;
-              for (let b = 0; b < g; b++)
-                f += p[b];
-              f / g > 12 ? (this.hasDetectedSound = !0, this.silenceTimer && (window.clearTimeout(this.silenceTimer), this.silenceTimer = null)) : this.hasDetectedSound && (this.silenceTimer || (this.silenceTimer = window.setTimeout(() => {
+              let b = 0;
+              for (let f = 0; f < g; f++)
+                b += p[f];
+              b / g > 12 ? (this.hasDetectedSound = !0, this.silenceTimer && (window.clearTimeout(this.silenceTimer), this.silenceTimer = null)) : this.hasDetectedSound && (this.silenceTimer || (this.silenceTimer = window.setTimeout(() => {
                 this.isRecording && this.stopVoiceRecording(i);
               }, 1600)));
             }, 100);
@@ -3175,10 +3314,10 @@ ${d}
         } catch (o) {
           console.warn("AudioContext VAD notice:", o);
         }
-        const l = t ? 8e3 : 1e4;
+        const r = t ? 8e3 : 1e4;
         this.voiceRecordingTimeout = window.setTimeout(() => {
           this.isRecording && this.stopVoiceRecording(i);
-        }, l);
+        }, r);
       } catch (n) {
         console.warn("MediaRecorder permission/init notice:", n), (!a || this.currentLang !== "en") && (alert(this.t("micError")), this.isRecording = !1, this.updateMicButtonUI(), this.updateVoiceStatusUI());
       }
@@ -3228,7 +3367,7 @@ ${d}
         }, a.onerror = d;
       });
       a.readAsDataURL(e);
-      const s = await n, l = await fetch(`${this.apiBase}/api/v1/speech/transcribe`, {
+      const s = await n, r = await fetch(`${this.apiBase}/api/v1/speech/transcribe`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -3238,11 +3377,11 @@ ${d}
           retain: !1
         })
       });
-      if (l.ok) {
-        const o = await l.json();
+      if (r.ok) {
+        const o = await r.json();
         if (o.transcript) {
           const d = o.detected_language, g = Number(o.language_confidence || 0);
-          if (d && d in k && g >= 0.82 && d !== this.currentLang)
+          if (d && d in x && g >= 0.82 && d !== this.currentLang)
             this.setLanguage(d, !1);
           else {
             const p = this.detectLanguage(o.transcript);
@@ -3262,29 +3401,31 @@ ${d}
     e && (this.isRecording ? (e.classList.add("recording"), e.setAttribute("aria-pressed", "true"), e.setAttribute("title", this.t("recordingState"))) : (e.classList.remove("recording"), e.setAttribute("aria-pressed", "false"), e.setAttribute("title", this.t("micLabel"))));
   }
   updateVoiceStatusUI() {
-    const e = this.shadowRoot?.querySelector("#voice-status-container");
-    if (e)
+    const e = this.shadowRoot?.querySelector("#onboarding-voice-status");
+    e && this.spokenOnboardingActive && (e.textContent = this.isRecording ? `${this.t("voiceListening")} (${this.getLangDisplayName()})` : `${this.t("voiceSpeaking")} (${this.getLangDisplayName()})`);
+    const t = this.shadowRoot?.querySelector("#voice-status-container");
+    if (t)
       if (this.isRecording) {
-        const t = this.isListeningForSend ? this.t("voiceListeningForSend") : `${this.t("voiceListening")} (${this.getLangDisplayName()})`;
-        e.innerHTML = `
+        const i = this.isListeningForSend ? this.t("voiceListeningForSend") : `${this.t("voiceListening")} (${this.getLangDisplayName()})`;
+        t.innerHTML = `
         <div class="voice-status-bar listening" role="status">
           <div style="display:flex; align-items:center; gap:0.5rem;">
             <span class="pulse-dot"></span>
-            <span>${t}</span>
+            <span>${i}</span>
           </div>
           <button type="button" class="btn btn-secondary btn-sm" id="btn-stop-voice">
             ${this.t("stopAudio")}
           </button>
         </div>
-      `, e.querySelector("#btn-stop-voice")?.addEventListener("click", () => this.stopVoiceRecording());
-      } else this.isProcessingSpeech ? e.innerHTML = `
+      `, t.querySelector("#btn-stop-voice")?.addEventListener("click", () => this.stopVoiceRecording());
+      } else this.isProcessingSpeech ? t.innerHTML = `
         <div class="voice-status-bar processing" role="status">
           <div style="display:flex; align-items:center; gap:0.5rem;">
             <span class="pulse-dot" style="background:#2563eb;"></span>
             <span>${this.t("voiceProcessing")} (${this.getLangDisplayName()})</span>
           </div>
         </div>
-      ` : this.isSpeaking ? (e.innerHTML = `
+      ` : this.isSpeaking ? (t.innerHTML = `
         <div class="voice-status-bar speaking" role="status">
           <div style="display:flex; align-items:center; gap:0.5rem;">
             <span class="sound-bars"><span></span><span></span><span></span></span>
@@ -3294,7 +3435,7 @@ ${d}
             ${this.t("stopAudio")}
           </button>
         </div>
-      `, e.querySelector("#btn-stop-speech")?.addEventListener("click", () => this.stopSpeaking())) : e.innerHTML = "";
+      `, t.querySelector("#btn-stop-speech")?.addEventListener("click", () => this.stopSpeaking())) : t.innerHTML = "";
   }
   // --- Text-to-Speech (Voice Responses) ---
   cleanTextForSpeech(e) {
@@ -3307,8 +3448,8 @@ ${d}
     this.isSpeaking = !0, e.isAudioPlaying = !0, this.renderMessages(), this.updateVoiceStatusUI();
     const n = "warm, calm tutor, moderate pace, clear, unhurried", s = `${a}_${this.currentLang}_${n}`;
     if (this.audioCache.has(s)) {
-      const l = this.audioCache.get(s);
-      this.activeAudio = new Audio(l);
+      const r = this.audioCache.get(s);
+      this.activeAudio = new Audio(r);
       const o = this.accessibilityPrefs?.speech_rate || 1;
       this.activeAudio.playbackRate = o, this.activeAudio.preservesPitch = !0, this.activeAudio.mozPreservesPitch = !0, this.activeAudio.webkitPreservesPitch = !0, this.activeAudio.onended = () => this.finishSpeaking(e), this.activeAudio.onerror = () => {
         this.currentLang === "en" ? this.fallbackTTS(a, e) : this.finishSpeaking(e);
@@ -3321,7 +3462,7 @@ ${d}
       }
     }
     try {
-      const l = await fetch(`${this.apiBase}/api/v1/speech/synthesize`, {
+      const r = await fetch(`${this.apiBase}/api/v1/speech/synthesize`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -3331,13 +3472,13 @@ ${d}
           style: n
         })
       });
-      if (l.ok) {
-        const o = await l.json();
+      if (r.ok) {
+        const o = await r.json();
         if (o.audio_url && !o.audio_url.includes("demo.ogg")) {
           const g = String(o.audio_url), p = /^(https?:|data:|blob:)/.test(g) ? g : `${this.apiBase}${g}`;
           this.audioCache.set(s, p), this.activeAudio = new Audio(p);
-          const f = this.accessibilityPrefs?.speech_rate || 1;
-          this.activeAudio.playbackRate = f, this.activeAudio.preservesPitch = !0, this.activeAudio.mozPreservesPitch = !0, this.activeAudio.webkitPreservesPitch = !0, this.activeAudio.onended = () => this.finishSpeaking(e), this.activeAudio.onerror = () => {
+          const b = this.accessibilityPrefs?.speech_rate || 1;
+          this.activeAudio.playbackRate = b, this.activeAudio.preservesPitch = !0, this.activeAudio.mozPreservesPitch = !0, this.activeAudio.webkitPreservesPitch = !0, this.activeAudio.onended = () => this.finishSpeaking(e), this.activeAudio.onerror = () => {
             this.currentLang === "en" ? this.fallbackTTS(a, e) : this.finishSpeaking(e);
           }, await this.activeAudio.play();
           return;
@@ -3346,8 +3487,8 @@ ${d}
           return;
         }
       }
-    } catch (l) {
-      console.warn("Server TTS unavailable:", l);
+    } catch (r) {
+      console.warn("Server TTS unavailable:", r);
     }
     this.currentLang === "en" ? this.fallbackTTS(a, e) : this.finishSpeaking(e);
   }
@@ -3457,29 +3598,29 @@ ${d}
       o
     ))), n = a.length > 0 ? a : [e.text];
     let s = -1;
-    const l = n.map((o, d) => {
-      const g = o.replace(/[#*•_`]/g, " ").replace(/\s+/g, " ").trim().toLowerCase(), p = /^(this course|this lesson|summary of|የዚህ|ይህ ትምህርት|barnoonni|يشرح|ملخص)/i.test(g), f = g.slice(0, 35);
-      let m = null, b = -1;
+    const r = n.map((o, d) => {
+      const g = o.replace(/[#*•_`]/g, " ").replace(/\s+/g, " ").trim().toLowerCase(), p = /^(this course|this lesson|summary of|የዚህ|ይህ ትምህርት|barnoonni|يشرح|ملخص)/i.test(g), b = g.slice(0, 35);
+      let m = null, f = -1;
       for (let y = 0; y < i.length; y++) {
         const A = i[y], L = (A.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
-        if ((f.length > 10 && L.includes(f) || g.length > 20 && L.includes(g.slice(10, 45)) || L.length > 15 && g.includes(L.slice(0, 35))) && (y > s || b === -1) && (m = A, b = y, y > s))
+        if ((b.length > 10 && L.includes(b) || g.length > 20 && L.includes(g.slice(10, 45)) || L.length > 15 && g.includes(L.slice(0, 35))) && (y > s || f === -1) && (m = A, f = y, y > s))
           break;
       }
       if (!m)
         if (p && i.length > 0)
-          m = i[0], b = 0;
+          m = i[0], f = 0;
         else {
           const y = s + 1;
-          y < i.length ? (m = i[y], b = y) : d < i.length && (m = i[d], b = d);
+          y < i.length ? (m = i[y], f = y) : d < i.length && (m = i[d], f = d);
         }
-      return b !== -1 && (s = b), {
+      return f !== -1 && (s = f), {
         text: o,
         element: m || null
       };
     });
     this.currentReading = {
       msgId: e.id,
-      items: l,
+      items: r,
       currentIndex: t,
       isPaused: !1
     }, e.isAudioPlaying = !0, e.isAudioPaused = !1, this.renderMessages(), this.playNextReadingItem(e);
@@ -3638,7 +3779,7 @@ ${d}
       text: a
     };
     this.messages.push(s), this.isThinking = !0, this.announce(this.t("lookingInCourse")), this.renderMessages();
-    const l = this.extractPlatformContext(), o = new AbortController(), d = setTimeout(() => o.abort(), 25e3);
+    const r = this.extractPlatformContext(), o = new AbortController(), d = setTimeout(() => o.abort(), 25e3);
     try {
       let g = await fetch(`${this.apiBase}/api/v1/ask`, {
         method: "POST",
@@ -3652,7 +3793,7 @@ ${d}
           channel: "web",
           learner_ref: this.getAttribute("learner-id") || `learner_${this.sessionId}`,
           platform_id: this.platformId,
-          ...l
+          ...r
         })
       });
       if (!g.ok && g.status === 404 && (g = await fetch(`${this.apiBase}/ask`, {
@@ -3667,12 +3808,12 @@ ${d}
           channel: "web",
           learner_ref: this.getAttribute("learner-id") || `learner_${this.sessionId}`,
           platform_id: this.platformId,
-          ...l
+          ...r
         })
       })), g.ok) {
-        const p = await g.json(), f = p.language;
-        p.language_changed && f && f in k && f !== this.currentLang && this.setLanguage(f, !1);
-        const m = !!p.offer_human || p.reason === "low_confidence", b = {
+        const p = await g.json(), b = p.language;
+        p.language_changed && b && b in x && b !== this.currentLang && this.setLanguage(b, !1);
+        const m = !!p.offer_human || p.reason === "low_confidence", f = {
           id: `msg_${Date.now()}_assistant`,
           sender: "assistant",
           text: p.answer,
@@ -3682,8 +3823,8 @@ ${d}
           offerHuman: p.offer_human,
           isRefusal: m
         };
-        this.messages.push(b), this.saveChatState(), this.renderMessages();
-        const y = b.spoken || b.text, A = this.cleanTextForSpeech(y);
+        this.messages.push(f), this.saveChatState(), this.renderMessages();
+        const y = f.spoken || f.text, A = this.cleanTextForSpeech(y);
         if (A) {
           const L = "warm, calm tutor, moderate pace, clear, unhurried", _ = `${A}_${this.currentLang}_${L}`;
           this.audioCache.has(_) || fetch(`${this.apiBase}/api/v1/speech/synthesize`, {
@@ -3704,8 +3845,8 @@ ${d}
           });
         }
         i ? setTimeout(() => {
-          this.speakResponse(b);
-        }, 300) : (this.autoReadSpeech || this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_tts) && this.speakResponse(b);
+          this.speakResponse(f);
+        }, 300) : (this.autoReadSpeech || this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_tts) && this.speakResponse(f);
       } else {
         const p = {
           id: `msg_${Date.now()}_err`,
@@ -3771,7 +3912,7 @@ ${d}
         },
         channel: "web"
       };
-      let l = null;
+      let r = null;
       for (const o of n)
         try {
           const d = await fetch(o, {
@@ -3780,13 +3921,13 @@ ${d}
             body: JSON.stringify(s)
           });
           if (d.ok) {
-            l = d;
+            r = d;
             break;
           }
         } catch {
         }
-      if (l && l.ok) {
-        const o = await l.json(), d = o.ticketId || o.handoff_id || o.id || "ticket_01", g = o.ticket_secret || o.ticketSecret || "", p = o.room_url || o.roomUrl || "https://meet.jit.si/savanna-bridge-demo";
+      if (r && r.ok) {
+        const o = await r.json(), d = o.ticketId || o.handoff_id || o.id || "ticket_01", g = o.ticket_secret || o.ticketSecret || "", p = o.room_url || o.roomUrl || "https://meet.jit.si/savanna-bridge-demo";
         if (this.activeHandoff = {
           id: d,
           room_url: p,
@@ -3812,35 +3953,35 @@ ${d}
           roomUrl: p,
           offerHuman: !1
         }), this.saveChatState();
-        const f = this.shadowRoot?.querySelector("#handoff-room-box");
-        if (f) {
-          f.innerHTML = `
+        const b = this.shadowRoot?.querySelector("#handoff-room-box");
+        if (b) {
+          b.innerHTML = `
             <div style="padding:0.75rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:0.5rem; margin-top:0.75rem;">
               <p style="margin:0 0 0.5rem 0; font-size:0.875rem; font-weight:600; color:#166534; display:flex; align-items:center; gap:0.375rem;">
-                ${r.celebrate} <span>${this.t("handoffReadyTitle")}</span>
+                ${l.celebrate} <span>${this.t("handoffReadyTitle")}</span>
               </p>
               <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
                 <a href="${p}" target="_blank" rel="noopener noreferrer" class="btn btn-primary room-link" style="text-decoration:none; display:inline-flex; align-items:center; gap:0.375rem;">
-                  ${r.video} <span>${this.t("joinRoomButton")}</span>
+                  ${l.video} <span>${this.t("joinRoomButton")}</span>
                 </a>
                 <button type="button" class="btn btn-secondary btn-copy-room" data-url="${this.escapeHtml(p)}" style="font-size:0.8125rem; min-height:44px; display:inline-flex; align-items:center; gap:0.375rem;">
-                  ${r.copy} <span>${this.t("copyRoomBtn")}</span>
+                  ${l.copy} <span>${this.t("copyRoomBtn")}</span>
                 </button>
               </div>
             </div>
           `;
-          const m = f.querySelector(".btn-copy-room");
+          const m = b.querySelector(".btn-copy-room");
           m && m.addEventListener("click", async () => {
-            const b = m.getAttribute("data-url");
-            if (b) {
+            const f = m.getAttribute("data-url");
+            if (f) {
               try {
-                await navigator.clipboard.writeText(b);
+                await navigator.clipboard.writeText(f);
               } catch {
                 const y = document.createElement("textarea");
-                y.value = b, document.body.appendChild(y), y.select(), document.execCommand("copy"), document.body.removeChild(y);
+                y.value = f, document.body.appendChild(y), y.select(), document.execCommand("copy"), document.body.removeChild(y);
               }
-              m.innerHTML = `${r.check} <span>${this.t("linkCodeCopied")}</span>`, this.announce(this.t("linkCodeCopied")), setTimeout(() => {
-                m.innerHTML = `${r.copy} <span>${this.t("copyRoomBtn")}</span>`;
+              m.innerHTML = `${l.check} <span>${this.t("linkCodeCopied")}</span>`, this.announce(this.t("linkCodeCopied")), setTimeout(() => {
+                m.innerHTML = `${l.copy} <span>${this.t("copyRoomBtn")}</span>`;
               }, 2e3);
             }
           });
@@ -3854,7 +3995,7 @@ ${d}
       const n = this.shadowRoot?.querySelector("#handoff-consent-error");
       n ? (n.textContent = this.t("serverErrorNotice"), n.style.display = "block") : alert(this.t("serverErrorNotice"));
     } finally {
-      a && (a.disabled = !1, a.innerHTML = `${r.users} <span>${this.t("requestMentorBtn")}</span>`);
+      a && (a.disabled = !1, a.innerHTML = `${l.users} <span>${this.t("requestMentorBtn")}</span>`);
     }
   }
   renderOnboardingWizard() {
@@ -3876,9 +4017,6 @@ ${d}
           <button type="button" class="lang-toggle-btn" id="onboard-lang-ti" aria-pressed="${this.currentLang === "ti"}" aria-label="ትግ, ትግርኛ">ትግ</button>
           <button type="button" class="lang-toggle-btn" id="onboard-lang-ar" aria-pressed="${this.currentLang === "ar"}" aria-label="عربي, العربية">عربي</button>
         </div>
-        <button type="button" class="btn btn-secondary" id="btn-spoken-onboarding" style="align-self:flex-start;">
-          ${r.sound} <span>${this.t("spokenSetup")}</span>
-        </button>
       `,
       `
         <p class="onboarding-subtitle">Choose how the assistant should work with your assistive technology.</p>
@@ -3918,24 +4056,29 @@ ${d}
             <input type="checkbox" id="onboard-chk-auto-tts" class="toggle-switch" ${this.accessibilityPrefs.auto_tts ? "checked" : ""}>
           </label>
         </div>
-        <div class="privacy-note">${r.lock} <span>${this.t("onboardingMicExplain")}</span></div>
+        <div class="privacy-note">${l.lock} <span>${this.t("onboardingMicExplain")}</span></div>
       `
     ], i = [0, 1, 2, 3].map((a) => `<span class="${a <= this.onboardingStep ? "active" : ""}"></span>`).join("");
     return `
       <div class="onboarding-overlay" id="onboarding-overlay">
         <section class="onboarding-card" role="dialog" aria-modal="true" aria-labelledby="onboard-title">
           <div class="onboarding-header">
-            <h3 class="onboarding-title" id="onboard-title" tabindex="-1">${r.accessibility}<span>${this.t("onboardingTitle")}</span></h3>
-            <button type="button" class="btn btn-secondary btn-icon-only" id="btn-onboard-close" aria-label="${e.skip}">${r.close}</button>
+            <h3 class="onboarding-title" id="onboard-title" tabindex="-1">${l.accessibility}<span>${this.t("onboardingTitle")}</span></h3>
+            <button type="button" class="btn btn-secondary btn-icon-only" id="btn-onboard-close" aria-label="${e.skip}">${l.close}</button>
           </div>
           <div class="wizard-progress" role="progressbar" aria-label="${e.step} ${this.onboardingStep + 1} ${e.of} 4" aria-valuemin="1" aria-valuemax="4" aria-valuenow="${this.onboardingStep + 1}">${i}</div>
           <div class="wizard-step-label">${e.step} ${this.onboardingStep + 1} ${e.of} 4</div>
+          ${this.spokenOnboardingActive ? `<div id="onboarding-voice-status" role="status" aria-live="polite" style="padding:0.625rem 0.75rem; border:1px solid var(--b-primary); border-radius:0.5rem; background:var(--b-surface-alt); font-weight:600;">${this.isRecording ? this.t("voiceListening") : this.t("voiceSpeaking")} (${this.getLangDisplayName()})</div>` : ""}
           <div class="onboarding-body">${t[this.onboardingStep]}</div>
           <div class="onboarding-actions">
+            <button type="button" class="btn btn-secondary" id="btn-spoken-onboarding">
+              ${l.sound} <span>${this.spokenOnboardingActive ? this.t("onboardingReadStep") : this.onboardingStep === 0 ? this.t("spokenSetup") : this.t("onboardingReadStep")}</span>
+            </button>
+            ${this.spokenOnboardingActive ? `<button type="button" class="btn btn-secondary" id="btn-stop-spoken-onboarding">${l.stop} <span>${this.t("onboardingStopVoice")}</span></button>` : ""}
             <button type="button" class="btn btn-secondary" id="btn-onboard-skip">${e.skip}</button>
             <span style="flex:1;"></span>
             ${this.onboardingStep > 0 ? `<button type="button" class="btn btn-secondary" id="btn-onboard-back">${e.back}</button>` : ""}
-            ${this.onboardingStep < 3 ? `<button type="button" class="btn btn-primary" id="btn-onboard-next">${e.next} ${r.arrowRight}</button>` : `<button type="button" class="btn btn-primary" id="btn-onboard-save">${e.finish}</button>`}
+            ${this.onboardingStep < 3 ? `<button type="button" class="btn btn-primary" id="btn-onboard-next">${e.next} ${l.arrowRight}</button>` : `<button type="button" class="btn btn-primary" id="btn-onboard-save">${e.finish}</button>`}
           </div>
         </section>
       </div>`;
@@ -3944,11 +4087,11 @@ ${d}
     const e = (o) => {
       const d = this.shadowRoot?.querySelector(`#${o}`);
       return d ? d.checked : null;
-    }, t = e("onboard-chk-screen-reader"), i = e("onboard-chk-keyboard-nav"), a = e("onboard-chk-contrast"), n = e("onboard-chk-large-text"), s = e("onboard-chk-voice"), l = e("onboard-chk-auto-tts");
-    t !== null && (this.accessibilityPrefs.screen_reader_mode = t), i !== null && (this.accessibilityPrefs.keyboard_navigation = i), a !== null && (this.accessibilityPrefs.high_contrast = a), n !== null && (this.accessibilityPrefs.large_text = n ? "larger" : "normal"), s !== null && (this.accessibilityPrefs.voice_enabled = s), l !== null && (this.accessibilityPrefs.auto_tts = l), this.highContrast = this.accessibilityPrefs.high_contrast, this.textSize = this.accessibilityPrefs.large_text;
+    }, t = e("onboard-chk-screen-reader"), i = e("onboard-chk-keyboard-nav"), a = e("onboard-chk-contrast"), n = e("onboard-chk-large-text"), s = e("onboard-chk-voice"), r = e("onboard-chk-auto-tts");
+    t !== null && (this.accessibilityPrefs.screen_reader_mode = t), i !== null && (this.accessibilityPrefs.keyboard_navigation = i), a !== null && (this.accessibilityPrefs.high_contrast = a), n !== null && (this.accessibilityPrefs.large_text = n ? "larger" : "normal"), s !== null && (this.accessibilityPrefs.voice_enabled = s), r !== null && (this.accessibilityPrefs.auto_tts = r), this.highContrast = this.accessibilityPrefs.high_contrast, this.textSize = this.accessibilityPrefs.large_text;
   }
   completeOnboarding(e) {
-    e && this.captureOnboardingStep(), this.accessibilityPrefs.onboarded = !0, this.onboardingDismissed = !0, this.onboardingStep = 0, this.savePreferences(), this.render(), e && this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_welcome && (this.hasSpokenWelcomeThisSession = !1, this.triggerSpokenWelcome()), e && this.accessibilityPrefs.voice_enabled && this.initWakeWordDetection();
+    this.onboardingSpeechGeneration += 1, this.spokenOnboardingActive = !1, this.stopSpeaking(), this.isRecording && (this.audioChunks = [], this.stopVoiceRecording(!0)), e && this.captureOnboardingStep(), this.accessibilityPrefs.onboarded = !0, this.onboardingDismissed = !0, this.onboardingStep = 0, this.savePreferences(), this.render(), e && this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_welcome && (this.hasSpokenWelcomeThisSession = !1, this.triggerSpokenWelcome()), e && this.accessibilityPrefs.voice_enabled && this.initWakeWordDetection();
   }
   // --- Rendering ---
   render() {
@@ -3963,7 +4106,7 @@ ${d}
               aria-expanded="${this.isOpen}" aria-controls="assistant-dialog" aria-haspopup="dialog"
               aria-label="${this.t("launcherLabel")}. ${this.t("wakeHint")}">
         <span class="launcher-icon-badge" aria-hidden="true" style="display:inline-flex; align-items:center; justify-content:center; width:2rem; height:2rem; border-radius:50%; background:rgba(255,255,255,0.22); color:#ffffff; flex-shrink:0;">
-          ${r.launcher}
+          ${l.launcher}
         </span>
         <div style="display:flex; flex-direction:column; align-items:flex-start; text-align:left; line-height:1.2;">
           <span style="color:#ffffff; font-weight:700;">${this.t("launcherLabel")}</span>
@@ -3975,7 +4118,7 @@ ${d}
       ${!this.isOpen && this.showAutoplayBanner ? `
         <div class="voice-activation-banner" role="alert" style="position:fixed; bottom:5.5rem; right:1.5rem; max-width:320px; z-index:99999; box-shadow:0 8px 24px rgba(0,0,0,0.18);">
           <div style="display:flex; align-items:center; gap:0.5rem;">
-            ${r.sound}
+            ${l.sound}
             <span>${this.t("oneTapVoiceActivation")}</span>
           </div>
           <div style="display:flex; align-items:center; gap:0.375rem; margin-top:0.375rem;">
@@ -3983,7 +4126,7 @@ ${d}
               ${this.t("voiceAccessibilityLabel")}
             </button>
             <button type="button" class="btn btn-secondary btn-icon-only" id="btn-dismiss-voice-banner-floating" aria-label="Dismiss">
-              ${r.close}
+              ${l.close}
             </button>
           </div>
         </div>
@@ -3999,18 +4142,18 @@ ${d}
           <div class="header-top">
             <div class="header-titles">
               <span class="header-accessibility-icon" aria-hidden="true">
-                ${r.accessibility}
+                ${l.accessibility}
               </span>
               <h2 id="dialog-title" class="title" tabindex="-1">${this.t("appTitle")}</h2>
             </div>
             <div class="header-window-controls">
               <!-- Settings Button -->
               <button type="button" class="btn btn-secondary" id="btn-open-settings" aria-label="${this.t("settingsLabel")}" title="${this.t("settingsLabel")}" style="min-height:38px; min-width:38px; width:38px; height:38px; padding:0; display:inline-flex; align-items:center; justify-content:center;">
-                ${r.settings}
+                ${l.settings}
               </button>
               <!-- Close Button -->
               <button type="button" class="btn btn-secondary" id="btn-close-dialog" aria-label="${this.t("closeLabel")}" style="min-height:38px; min-width:38px; width:38px; height:38px; padding:0; display:inline-flex; align-items:center; justify-content:center;">
-                ${r.close}
+                ${l.close}
               </button>
             </div>
           </div>
@@ -4039,15 +4182,15 @@ ${d}
         <!-- Navigation Tabs on Main Assistant Dialog -->
         <nav class="nav-tabs" role="tablist" aria-label="Assistant sections">
           <button type="button" class="tab-btn" id="tab-chat" role="tab" aria-selected="${this.activeTab === "chat"}" aria-controls="pane-chat">
-            ${r.launcher}
+            ${l.launcher}
             <span>${this.t("chatTab")}</span>
           </button>
           <button type="button" class="tab-btn" id="tab-support" role="tab" aria-selected="${this.activeTab === "support"}" aria-controls="pane-support">
-            ${r.heart}
+            ${l.heart}
             <span>${this.t("supportTab")}</span>
           </button>
           <button type="button" class="tab-btn" id="tab-handoff" role="tab" aria-selected="${this.activeTab === "handoff"}" aria-controls="pane-handoff">
-            ${r.headphones}
+            ${l.headphones}
             <span>${this.t("handoffTab")}</span>
           </button>
         </nav>
@@ -4060,7 +4203,7 @@ ${d}
           ${this.showAutoplayBanner ? `
             <div class="voice-activation-banner" role="alert" style="margin:0.5rem 1rem; padding:0.625rem 0.875rem; background:#eff6ff; border:1px solid #bfdbfe; border-radius:0.5rem; display:flex; align-items:center; justify-content:space-between; gap:0.5rem; font-size:0.8125rem; color:#1e40af;">
               <div style="display:flex; align-items:center; gap:0.5rem;">
-                ${r.sound}
+                ${l.sound}
                 <span>${this.t("oneTapVoiceActivation")}</span>
               </div>
               <div style="display:flex; align-items:center; gap:0.375rem;">
@@ -4068,7 +4211,7 @@ ${d}
                   ${this.t("voiceAccessibilityLabel")}
                 </button>
                 <button type="button" class="btn btn-secondary btn-icon-only" id="btn-dismiss-voice-banner" aria-label="Dismiss">
-                  ${r.close}
+                  ${l.close}
                 </button>
               </div>
             </div>
@@ -4083,9 +4226,9 @@ ${d}
                 </span>
               </div>
               <div class="reading-btns">
-                ${this.isReadingPaused ? `<button type="button" class="btn btn-secondary btn-icon-only" id="btn-reading-resume" aria-label="${this.t("resumeReading")}" title="${this.t("resumeReading")}">${r.play}</button>` : `<button type="button" class="btn btn-secondary btn-icon-only" id="btn-reading-pause" aria-label="${this.t("pauseReading")}" title="${this.t("pauseReading")}">${r.pause}</button>`}
+                ${this.isReadingPaused ? `<button type="button" class="btn btn-secondary btn-icon-only" id="btn-reading-resume" aria-label="${this.t("resumeReading")}" title="${this.t("resumeReading")}">${l.play}</button>` : `<button type="button" class="btn btn-secondary btn-icon-only" id="btn-reading-pause" aria-label="${this.t("pauseReading")}" title="${this.t("pauseReading")}">${l.pause}</button>`}
                 <button type="button" class="btn btn-danger btn-icon-only" id="btn-reading-stop" aria-label="${this.t("stopReading")}" title="${this.t("stopReading")}" style="background:#fee2e2; color:#991b1b; border:1px solid #fca5a5;">
-                  ${r.stop}
+                  ${l.stop}
                 </button>
               </div>
             </div>
@@ -4107,18 +4250,18 @@ ${d}
                      required autocomplete="off">
               <button type="button" class="btn btn-secondary mic-btn btn-icon-only" id="mic-btn"
                       aria-label="${this.t("micLabel")}" title="${this.t("micLabel")}" aria-keyshortcuts="Alt+Shift+V">
-                ${r.mic}
+                ${l.mic}
               </button>
               <button type="submit" class="btn btn-primary" id="btn-send" data-id="btn-send" style="display:inline-flex; align-items:center; gap:0.375rem;">
                 <span>${this.t("sendButton")}</span>
-                ${r.send}
+                ${l.send}
               </button>
             </form>
 
             <!-- Bottom Row: Talk to a person & Continue on Telegram -->
             <div class="footer-actions-row">
               <button type="button" class="btn btn-secondary btn-footer btn-talk-person" id="btn-footer-handoff" style="display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-                ${r.user}
+                ${l.user}
                 <span>${this.t("talkToPersonButton")}</span>
               </button>
               <div id="telegram-container" class="telegram-section">
@@ -4135,7 +4278,7 @@ ${d}
         <!-- Pane 2: Support Preferences (Zero Proof Required) -->
         <div id="pane-support" class="tab-panel" role="tabpanel" ${this.activeTab === "support" ? "" : "hidden"} style="${this.activeTab === "support" ? "display:block; overflow-y:auto; padding:1rem;" : "display:none;"}">
           <div class="settings-card">
-            <div class="settings-card-title">${r.heart} <span>${this.t("supportNeedsTitle")}</span></div>
+            <div class="settings-card-title">${l.heart} <span>${this.t("supportNeedsTitle")}</span></div>
             <div class="settings-card-desc">
               ${this.t("supportZeroProof")}
             </div>
@@ -4187,7 +4330,7 @@ ${d}
               </label>
 
               <div id="support-saved-notice" class="support-saved-notice" hidden style="color:#166534; font-size:0.8125rem; font-weight:600; display:inline-flex; align-items:center; gap:0.375rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:0.5rem; padding:0.5rem 0.75rem;">
-                ${r.check} <span>${this.t("supportSavedNotice")}</span>
+                ${l.check} <span>${this.t("supportSavedNotice")}</span>
               </div>
 
               <button type="submit" class="btn btn-primary" style="margin-top:0.25rem;">
@@ -4200,7 +4343,7 @@ ${d}
         <!-- Pane 3: Consented Live Help Handoff -->
         <div id="pane-handoff" class="tab-panel" role="tabpanel" ${this.activeTab === "handoff" ? "" : "hidden"} style="${this.activeTab === "handoff" ? "display:block; overflow-y:auto; padding:1rem;" : "display:none;"}">
           <div class="settings-card">
-            <div class="settings-card-title">${r.headphones} <span>${this.t("handoffTab")}</span></div>
+            <div class="settings-card-title">${l.headphones} <span>${this.t("handoffTab")}</span></div>
             <div class="settings-card-desc">
               ${this.t("appSubtitle")}
             </div>
@@ -4221,7 +4364,7 @@ ${d}
                        placeholder="${this.t("handoffReasonPlaceholder")}">
               </label>
               <button type="submit" class="btn btn-primary" id="btn-submit-handoff" style="display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-                ${r.users} <span>${this.t("requestMentorBtn")}</span>
+                ${l.users} <span>${this.t("requestMentorBtn")}</span>
               </button>
             </form>
             <div id="handoff-room-box" style="margin-top:0.5rem;"></div>
@@ -4241,7 +4384,7 @@ ${d}
           <div id="pane-general" class="settings-pane" style="overflow-y:auto; flex:1; padding:0.5rem 0;">
             <!-- Text Size Card -->
             <div class="settings-card">
-              <div class="settings-card-title">${r.type} <span>${this.t("textSizeLabel")}</span></div>
+              <div class="settings-card-title">${l.type} <span>${this.t("textSizeLabel")}</span></div>
               <div class="size-btn-group">
                 <button type="button" class="size-btn" id="btn-size-smaller" aria-pressed="${this.textSize === "smaller"}" aria-label="A- Smaller text">
                   A- <span>${this.t("textSmaller")}</span>
@@ -4257,7 +4400,7 @@ ${d}
 
             <!-- Accessibility Card -->
             <div class="settings-card">
-              <div class="settings-card-title">${r.contrast} <span>Display & Accessibility</span></div>
+              <div class="settings-card-title">${l.contrast} <span>Display & Accessibility</span></div>
               
               <!-- High Contrast -->
               <label class="toggle-row">
@@ -4291,7 +4434,7 @@ ${d}
 
             <!-- Voice Accessibility & Screen Reader Suite -->
             <div class="settings-card">
-              <div class="settings-card-title">${r.sound} <span>${this.t("voiceTab")}</span></div>
+              <div class="settings-card-title">${l.sound} <span>${this.t("voiceTab")}</span></div>
 
               <!-- Master Voice Toggle -->
               <label class="toggle-row">
@@ -4341,14 +4484,14 @@ ${d}
               <div style="display:flex; flex-direction:column; gap:0.375rem; margin-top:0.25rem;">
                 <div style="display:flex; gap:0.375rem; flex-wrap:wrap;">
                   <button type="button" class="btn btn-secondary" id="btn-read-page" style="flex:1; min-height:44px; font-size:0.8125rem; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-                    ${r.sound} <span>${this.t("readPageBtn")}</span>
+                    ${l.sound} <span>${this.t("readPageBtn")}</span>
                   </button>
                   <button type="button" class="btn btn-secondary" id="btn-read-section" style="flex:1; min-height:44px; font-size:0.8125rem; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-                    ${r.sound} <span>${this.t("readSectionBtn")}</span>
+                    ${l.sound} <span>${this.t("readSectionBtn")}</span>
                   </button>
                 </div>
                 <button type="button" class="btn btn-secondary" id="btn-test-voice" style="min-height:2rem; font-size:0.75rem; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-                  ${r.play} <span>${this.t("testVoiceBtn")}</span>
+                  ${l.play} <span>${this.t("testVoiceBtn")}</span>
                 </button>
               </div>
 
@@ -4384,13 +4527,13 @@ ${d}
               <!-- Replay Onboarding Wizard -->
               <div style="border-top:1px solid var(--b-border); margin:0.5rem 0;"></div>
               <button type="button" class="btn btn-secondary" id="btn-replay-onboarding" style="width:100%; min-height:44px; font-size:0.8125rem; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-                ${r.accessibility} <span>${this.t("onboardingReplay")}</span>
+                ${l.accessibility} <span>${this.t("onboardingReplay")}</span>
               </button>
             </div>
 
             <!-- Notification Preferences Card -->
             <div class="settings-card" id="card-notifications">
-              <div class="settings-card-title">${r.bell} <span>${this.t("notificationsTitle")}</span></div>
+              <div class="settings-card-title">${l.bell} <span>${this.t("notificationsTitle")}</span></div>
               <div class="settings-card-desc">${this.t("notificationsDesc")}</div>
 
               <label class="toggle-row">
@@ -4434,7 +4577,7 @@ ${d}
 
             <!-- Account & Telegram Linking Card -->
             <div class="settings-card" id="card-account-linking">
-              <div class="settings-card-title">${r.link} <span>${this.t("linkTab")}</span></div>
+              <div class="settings-card-title">${l.link} <span>${this.t("linkTab")}</span></div>
               <div class="settings-card-desc">
                 ${this.t("supportZeroProof")}
               </div>
@@ -4470,7 +4613,7 @@ ${d}
                 <!-- Generate Code for Telegram -->
                 <div>
                   <button type="button" class="btn btn-secondary" id="btn-generate-code" style="width:100%; display:inline-flex; align-items:center; justify-content:center; gap:0.375rem;">
-                    ${r.link} <span>${this.t("generateCodeBtn")}</span>
+                    ${l.link} <span>${this.t("generateCodeBtn")}</span>
                   </button>
                   <div class="code-display" id="code-display" style="display:none; font-size:1.5rem; font-weight:700; letter-spacing:0.25em; text-align:center; padding:0.75rem; background:var(--b-surface-alt, #f8fafc); border:2px dashed var(--b-primary); border-radius:0.5rem; margin-top:0.625rem; color:var(--b-primary);">
                   </div>
@@ -4489,7 +4632,7 @@ ${d}
                   <div style="font-size:0.75rem; color:#7f1d1d;">Reset conversation and erase stored history</div>
                 </div>
                 <button type="button" class="btn btn-danger" id="btn-clear-chat" style="font-size:0.8125rem; min-height:44px; padding:0.375rem 0.75rem;">
-                  ${r.trash} <span>${this.t("clearChatBtn")}</span>
+                  ${l.trash} <span>${this.t("clearChatBtn")}</span>
                 </button>
               </div>
             </div>
@@ -4511,28 +4654,28 @@ ${d}
         ${t}
         <div class="empty-state">
           <div class="page-context-pill">
-            ${r.book} <span>${this.t("pageContextBadge")} <strong>${this.escapeHtml(i)}</strong></span>
+            ${l.book} <span>${this.t("pageContextBadge")} <strong>${this.escapeHtml(i)}</strong></span>
           </div>
           <p style="margin:0 0 0.5rem 0; font-size:1rem; font-weight:600;">${this.t("emptyWelcome")}</p>
           <div class="suggested-questions">
             <span style="font-size:0.8125rem; font-weight:700; color:var(--b-text-muted);">${this.t("suggestedTitle")}</span>
             <button type="button" class="btn btn-suggested btn-quick-explain" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
-              ${r.lightbulb} <span>${this.escapeHtml(this.t("explainLessonBtn"))}</span>
+              ${l.lightbulb} <span>${this.escapeHtml(this.t("explainLessonBtn"))}</span>
             </button>
             <button type="button" class="btn btn-suggested btn-quick-summarize" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
-              ${r.book} <span>${this.escapeHtml(this.t("summarizePageBtn"))}</span>
+              ${l.book} <span>${this.escapeHtml(this.t("summarizePageBtn"))}</span>
             </button>
             <button type="button" class="btn btn-suggested btn-quick-read" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
-              ${r.listen} <span>${this.escapeHtml(this.t("readPageBtn"))}</span>
+              ${l.listen} <span>${this.escapeHtml(this.t("readPageBtn"))}</span>
             </button>
             <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ1"))}" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
-              ${r.arrowRight} <span>${this.escapeHtml(this.t("suggestedQ1"))}</span>
+              ${l.arrowRight} <span>${this.escapeHtml(this.t("suggestedQ1"))}</span>
             </button>
             <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ2"))}" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
-              ${r.arrowRight} <span>${this.escapeHtml(this.t("suggestedQ2"))}</span>
+              ${l.arrowRight} <span>${this.escapeHtml(this.t("suggestedQ2"))}</span>
             </button>
             <button type="button" class="btn btn-suggested" data-q="${this.escapeHtml(this.t("suggestedQ3"))}" style="display:inline-flex; align-items:center; gap:0.5rem; text-align:left;">
-              ${r.arrowRight} <span>${this.escapeHtml(this.t("suggestedQ3"))}</span>
+              ${l.arrowRight} <span>${this.escapeHtml(this.t("suggestedQ3"))}</span>
             </button>
           </div>
         </div>
@@ -4559,11 +4702,11 @@ ${d}
           `;
       const a = [], n = /* @__PURE__ */ new Set();
       if (i.citations)
-        for (const f of i.citations) {
-          const b = (f.title || f.heading || "").replace(/\s*\|\s*.*$/, "").replace(/^Concept page:\s*/i, "").trim();
-          b && !n.has(b) && (n.add(b), a.push({ ...f, title: b }));
+        for (const b of i.citations) {
+          const f = (b.title || b.heading || "").replace(/\s*\|\s*.*$/, "").replace(/^Concept page:\s*/i, "").trim();
+          f && !n.has(f) && (n.add(f), a.push({ ...b, title: f }));
         }
-      const s = a.length > 0, l = !!i.isRefusal, o = i.heading || (i.isHandoff ? this.t("handoffReadyTitle") : this.t("answerHeading")), d = !!(this.currentReading && this.currentReading.msgId === i.id), p = i.text.split(/\n\s*\n/).map((f) => f.trim()).filter(Boolean).map((f, m) => `<div class="answer-para-item ${d && this.currentReading.currentIndex === m ? "active-reading-para" : ""}" data-msg-id="${i.id}" data-idx="${m}" title="Click to read and highlight this paragraph" style="cursor:pointer; margin-bottom:0.625rem; line-height:1.5;">${this.escapeHtml(f)}</div>`).join("");
+      const s = a.length > 0, r = !!i.isRefusal, o = i.heading || (i.isHandoff ? this.t("handoffReadyTitle") : this.t("answerHeading")), d = !!(this.currentReading && this.currentReading.msgId === i.id), p = i.text.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean).map((b, m) => `<div class="answer-para-item ${d && this.currentReading.currentIndex === m ? "active-reading-para" : ""}" data-msg-id="${i.id}" data-idx="${m}" title="Click to read and highlight this paragraph" style="cursor:pointer; margin-bottom:0.625rem; line-height:1.5;">${this.escapeHtml(b)}</div>`).join("");
       return `
           <div class="msg-row msg-assistant" id="${i.id}">
             <h4 class="answer-heading">${this.escapeHtml(o)}</h4>
@@ -4572,20 +4715,20 @@ ${d}
             ${i.isHandoff ? `
                 <div class="handoff-card" style="margin-top:0.75rem; padding:0.75rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:0.5rem;">
                   <p style="margin:0 0 0.5rem 0; font-size:0.875rem; font-weight:600; color:#166534; display:flex; align-items:center; gap:0.375rem;">
-                    ${r.celebrate} <span>${this.t("handoffReadyTitle")}</span>
+                    ${l.celebrate} <span>${this.t("handoffReadyTitle")}</span>
                   </p>
                   <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
                     <a href="${this.escapeHtml(i.roomUrl || this.activeHandoff?.room_url || "https://meet.jit.si/savanna-bridge-demo")}" target="_blank" rel="noopener noreferrer" class="btn btn-primary room-link" id="btn-join-room-card" style="text-decoration:none; display:inline-flex; align-items:center; gap:0.375rem;">
-                      ${r.video} <span>${this.t("joinRoomButton")}</span>
+                      ${l.video} <span>${this.t("joinRoomButton")}</span>
                     </a>
                     <button type="button" class="btn btn-secondary btn-copy-room" data-url="${this.escapeHtml(i.roomUrl || this.activeHandoff?.room_url || "https://meet.jit.si/savanna-bridge-demo")}" style="font-size:0.8125rem; min-height:44px; display:inline-flex; align-items:center; gap:0.375rem;">
-                      ${r.copy} <span>${this.t("copyRoomBtn")}</span>
+                      ${l.copy} <span>${this.t("copyRoomBtn")}</span>
                     </button>
                   </div>
                 </div>
               ` : ""}
 
-            ${l ? `
+            ${r ? `
                 <div class="not-verified-box" role="alert">
                   <div>${this.t("notVerifiedNotice")}</div>
                   <p class="ticket-privacy-notice" style="font-size:0.75rem; color:#4b5563; line-height:1.3; margin:0.25rem 0 0.5rem 0;">
@@ -4593,7 +4736,7 @@ ${d}
                   </p>
                   <div style="display:flex; gap:0.375rem; flex-wrap:wrap;">
                     <button type="button" class="btn btn-primary btn-talk-person" data-msg-id="${i.id}" style="font-size:0.8125rem; min-height:44px; display:inline-flex; align-items:center; gap:0.375rem;">
-                      ${r.user} <span>${this.t("talkToPersonButton")}</span>
+                      ${l.user} <span>${this.t("talkToPersonButton")}</span>
                     </button>
                     <button type="button" class="btn btn-secondary btn-try-another" style="font-size:0.8125rem; min-height:44px;">
                       ${this.t("tryAnotherQuestion")}
@@ -4605,36 +4748,36 @@ ${d}
             <!-- Listen, Stop, Replay & Make Simpler action buttons -->
             <div class="answer-actions">
               <button type="button" class="btn btn-secondary btn-listen" data-msg-id="${i.id}">
-                ${i.isAudioPlaying ? `${r.pause} <span>${this.t("pauseButton")}</span>` : `${r.sound} <span>${this.t("listenButton")}</span>`}
+                ${i.isAudioPlaying ? `${l.pause} <span>${this.t("pauseButton")}</span>` : `${l.sound} <span>${this.t("listenButton")}</span>`}
               </button>
               ${i.spoken && i.text && i.spoken.trim() !== i.text.trim() ? `
                 <button type="button" class="btn btn-secondary btn-read-full" data-msg-id="${i.id}" style="display:inline-flex; align-items:center; gap:0.375rem;">
-                  ${r.sound} <span>${this.t("readFullAnswer")}</span>
+                  ${l.sound} <span>${this.t("readFullAnswer")}</span>
                 </button>
               ` : ""}
               <button type="button" class="btn btn-secondary btn-stop" data-msg-id="${i.id}" style="display:inline-flex; align-items:center; gap:0.375rem;" ${i.isAudioPlaying || i.isAudioPaused ? "" : "hidden"}>
-                ${r.stop}
+                ${l.stop}
                 <span>${this.t("stopButton")}</span>
               </button>
               <button type="button" class="btn btn-secondary btn-replay" data-msg-id="${i.id}" style="display:inline-flex; align-items:center; gap:0.375rem;">
-                ${r.replay}
+                ${l.replay}
                 <span>${this.t("replayButton")}</span>
               </button>
               <button type="button" class="btn btn-secondary btn-simpler" data-msg-id="${i.id}" style="display:inline-flex; align-items:center; gap:0.375rem;">
-                ${r.lightbulb}
+                ${l.lightbulb}
                 <span>${this.t("makeSimplerButton")}</span>
               </button>
-              ${i.isAudioPlaying ? `<span class="speaking-indicator-pill" role="status" aria-live="polite">${r.volume} <span>${this.t("speakingIndicator")}</span></span>` : ""}
+              ${i.isAudioPlaying ? `<span class="speaking-indicator-pill" role="status" aria-live="polite">${l.volume} <span>${this.t("speakingIndicator")}</span></span>` : ""}
             </div>
 
             <!-- Citations / Sources with readable names -->
             ${s ? `
                 <div class="sources-box">
                   <div class="sources-title">${this.t("sourcesTitle")}</div>
-                  ${(i.citations || []).filter((f, m, b) => b.findIndex((y) => y.url === f.url) === m).map(
-        (f) => `
-                    <a href="${this.escapeHtml(f.url)}" target="_blank" rel="noopener noreferrer" class="source-link citation-link" style="display:inline-flex; align-items:center; gap:0.375rem;">
-                      ${r.book} <span>${this.escapeHtml(f.title || f.heading)}</span>
+                  ${(i.citations || []).filter((b, m, f) => f.findIndex((y) => y.url === b.url) === m).map(
+        (b) => `
+                    <a href="${this.escapeHtml(b.url)}" target="_blank" rel="noopener noreferrer" class="source-link citation-link" style="display:inline-flex; align-items:center; gap:0.375rem;">
+                      ${l.book} <span>${this.escapeHtml(b.title || b.heading)}</span>
                     </a>
                   `
       ).join("")}
@@ -4642,7 +4785,7 @@ ${d}
               ` : ""}
 
             <!-- Suggested Follow-up Questions -->
-            ${!l && !i.isHandoff ? `
+            ${!r && !i.isHandoff ? `
                 <div class="followup-box">
                   <div class="followup-title">
                     <span>${this.t("followupTitle")}</span>
@@ -4668,11 +4811,11 @@ ${d}
         </div>
       `), this.isRecording && (e.innerHTML += `
         <div class="live-status-indicator" style="display:inline-flex; align-items:center; gap:0.375rem;">
-          <span class="listening-indicator-pill">${r.mic} <span>${this.t("listeningIndicator")}</span></span>
+          <span class="listening-indicator-pill">${l.mic} <span>${this.t("listeningIndicator")}</span></span>
         </div>
       `), e.querySelectorAll(".answer-para-item").forEach((i) => {
       i.addEventListener("click", () => {
-        const a = i.getAttribute("data-msg-id"), n = parseInt(i.getAttribute("data-idx") || "0", 10), s = this.messages.find((l) => l.id === a);
+        const a = i.getAttribute("data-msg-id"), n = parseInt(i.getAttribute("data-idx") || "0", 10), s = this.messages.find((r) => r.id === a);
         s && this.startSequentialReading(s, n);
       });
     }), e.querySelectorAll(".btn-prev-para").forEach((i) => {
@@ -4746,14 +4889,14 @@ ${d}
         } else
           this.closeAssistant();
       if (h.key === "Tab") {
-        const u = this.shadowRoot?.querySelector("#onboarding-overlay"), v = this.shadowRoot?.querySelector("#settings-dialog:not([hidden])"), T = Array.from(
+        const u = this.shadowRoot?.querySelector("#onboarding-overlay"), v = this.shadowRoot?.querySelector("#settings-dialog:not([hidden])"), w = Array.from(
           (u || v || t).querySelectorAll(
             'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
           )
         ).filter((E) => E.getClientRects().length > 0);
-        if (T.length > 0) {
-          const E = T[0], W = T[T.length - 1], H = this.shadowRoot?.activeElement;
-          h.shiftKey && H === E ? (h.preventDefault(), W.focus()) : !h.shiftKey && H === W && (h.preventDefault(), E.focus());
+        if (w.length > 0) {
+          const E = w[0], D = w[w.length - 1], W = this.shadowRoot?.activeElement;
+          h.shiftKey && W === E ? (h.preventDefault(), D.focus()) : !h.shiftKey && W === D && (h.preventDefault(), E.focus());
         }
       }
     }), this.shadowRoot.querySelectorAll(".lang-toggle-btn").forEach((h) => {
@@ -4778,13 +4921,13 @@ ${d}
       { id: "chat", btn: this.shadowRoot.querySelector("#tab-chat"), pane: this.shadowRoot.querySelector("#pane-chat") },
       { id: "support", btn: this.shadowRoot.querySelector("#tab-support"), pane: this.shadowRoot.querySelector("#pane-support") },
       { id: "handoff", btn: this.shadowRoot.querySelector("#tab-handoff"), pane: this.shadowRoot.querySelector("#pane-handoff") }
-    ], l = (h) => {
+    ], r = (h) => {
       this.switchTab(s[h].id);
     };
     s.forEach(({ btn: h }, u) => {
-      h?.addEventListener("click", () => l(u)), h?.addEventListener("keydown", (v) => {
-        const w = v;
-        w.key === "ArrowRight" ? (w.preventDefault(), l((u + 1) % s.length)) : w.key === "ArrowLeft" && (w.preventDefault(), l((u - 1 + s.length) % s.length));
+      h?.addEventListener("click", () => r(u)), h?.addEventListener("keydown", (v) => {
+        const k = v;
+        k.key === "ArrowRight" ? (k.preventDefault(), r((u + 1) % s.length)) : k.key === "ArrowLeft" && (k.preventDefault(), r((u - 1 + s.length) % s.length));
       });
     }), this.shadowRoot.querySelectorAll(".btn-talk-person, #btn-footer-handoff").forEach((h) => {
       h.addEventListener("click", (u) => {
@@ -4821,23 +4964,23 @@ ${d}
         this.wakeWordRecognition = null;
       }
     });
-    const f = (h, u) => {
+    const b = (h, u) => {
       const v = this.shadowRoot?.querySelector(h);
       v?.addEventListener("change", async () => {
         await this.saveNotificationPreferences({ [u]: v.checked });
-        const w = this.shadowRoot?.querySelector("#notification-save-status");
-        w && (w.textContent = this.t("notificationSaved"));
+        const k = this.shadowRoot?.querySelector("#notification-save-status");
+        k && (k.textContent = this.t("notificationSaved"));
       });
     };
-    f("#chk-notify-widget", "widget_enabled"), f("#chk-notify-telegram", "telegram_enabled"), f("#chk-notify-deadlines", "deadlines"), f("#chk-notify-jobs", "job_alerts"), f("#chk-notify-live-help", "live_help"), f("#chk-notify-lessons", "new_lessons");
+    b("#chk-notify-widget", "widget_enabled"), b("#chk-notify-telegram", "telegram_enabled"), b("#chk-notify-deadlines", "deadlines"), b("#chk-notify-jobs", "job_alerts"), b("#chk-notify-live-help", "live_help"), b("#chk-notify-lessons", "new_lessons");
     const m = this.shadowRoot?.querySelector("#select-notify-frequency");
     m?.addEventListener("change", async () => {
       await this.saveNotificationPreferences({ frequency: m.value });
       const h = this.shadowRoot?.querySelector("#notification-save-status");
       h && (h.textContent = this.t("notificationSaved"));
     });
-    const b = this.shadowRoot.querySelector("#settings-code-form");
-    b && b.addEventListener("submit", (h) => {
+    const f = this.shadowRoot.querySelector("#settings-code-form");
+    f && f.addEventListener("submit", (h) => {
       h.preventDefault();
       const u = this.shadowRoot?.querySelector("#settings-input-code"), v = this.shadowRoot?.querySelector("#settings-code-msg");
       u && u.value && this.confirmLinkCode(u.value, v);
@@ -4861,15 +5004,15 @@ ${d}
       const u = h.target, v = u.closest(".btn-followup");
       if (v) {
         h.preventDefault();
-        const T = v.getAttribute("data-query") || v.textContent?.trim();
-        T && this.askQuestion(T);
+        const w = v.getAttribute("data-query") || v.textContent?.trim();
+        w && this.askQuestion(w);
         return;
       }
-      const w = u.closest(".btn-suggested");
-      if (w) {
+      const k = u.closest(".btn-suggested");
+      if (k) {
         h.preventDefault();
-        const T = w.getAttribute("data-q") || w.textContent?.trim();
-        T && this.askQuestion(T);
+        const w = k.getAttribute("data-q") || k.textContent?.trim();
+        w && this.askQuestion(w);
         return;
       }
       if (u.closest(".btn-quick-explain")) {
@@ -4888,8 +5031,8 @@ ${d}
     const R = this.shadowRoot.querySelector("#support-form");
     R && R.addEventListener("submit", (h) => {
       h.preventDefault();
-      const u = new FormData(R), v = u.getAll("need"), w = u.get("other_text") || "", T = u.get("contact_mode") || "text";
-      this.saveSupportNeeds(v, w, T);
+      const u = new FormData(R), v = u.getAll("need"), k = u.get("other_text") || "", w = u.get("contact_mode") || "text";
+      this.saveSupportNeeds(v, k, w);
     });
     const $ = this.shadowRoot.querySelector("#chat-form"), P = this.shadowRoot.querySelector("#chat-input"), z = this.shadowRoot.querySelector("#mic-btn");
     $ && P && $.addEventListener("submit", (h) => {
@@ -4899,22 +5042,47 @@ ${d}
     }), z && P && z.addEventListener("click", () => {
       this.toggleVoiceInput(P);
     });
-    const j = () => {
+    const O = () => {
       this.hasSpokenWelcomeThisSession = !1, this.showAutoplayBanner = !1, this.accessibilityPrefs.voice_enabled = !0, this.accessibilityPrefs.auto_tts = !0, this.autoReadSpeech = !0, this.savePreferences(), this.render(), this.triggerSpokenWelcome();
     };
-    this.shadowRoot.querySelector("#btn-activate-voice-welcome")?.addEventListener("click", j), this.shadowRoot.querySelector("#btn-activate-voice-welcome-floating")?.addEventListener("click", j);
+    this.shadowRoot.querySelector("#btn-activate-voice-welcome")?.addEventListener("click", O), this.shadowRoot.querySelector("#btn-activate-voice-welcome-floating")?.addEventListener("click", O);
     const V = () => {
       this.showAutoplayBanner = !1, this.render();
     };
     this.shadowRoot.querySelector("#btn-dismiss-voice-banner")?.addEventListener("click", V), this.shadowRoot.querySelector("#btn-dismiss-voice-banner-floating")?.addEventListener("click", V), this.shadowRoot.querySelector("#btn-reading-pause")?.addEventListener("click", () => this.pausePageReading()), this.shadowRoot.querySelector("#btn-reading-resume")?.addEventListener("click", () => this.resumePageReading()), this.shadowRoot.querySelector("#btn-reading-stop")?.addEventListener("click", () => this.stopPageReading()), ["en", "am", "om", "ti", "ar"].forEach((h) => {
       this.shadowRoot?.querySelector(`#onboard-lang-${h}`)?.addEventListener("click", () => {
-        this.setLanguage(h);
+        const u = this.spokenOnboardingActive;
+        this.setLanguage(h), u && window.setTimeout(() => this.speakOnboardingStep(), 0);
+      });
+    }), [
+      ["#onboard-chk-screen-reader", this.t("screenReaderModeLabel")],
+      ["#onboard-chk-keyboard-nav", this.t("keyboardNavLabel")],
+      ["#onboard-chk-contrast", this.t("highContrastLabel")],
+      ["#onboard-chk-large-text", this.t("textLarger")],
+      ["#onboard-chk-voice", this.t("onboardingVoiceEnable")],
+      ["#onboard-chk-auto-tts", this.t("autoTtsLabel")]
+    ].forEach(([h, u]) => {
+      this.shadowRoot?.querySelector(h)?.addEventListener("change", (v) => {
+        const k = v.currentTarget;
+        this.captureOnboardingStep(), this.savePreferences();
+        const w = `${u}: ${this.onboardingOptionState(k.checked)}.`;
+        this.announce(w), this.spokenOnboardingActive && this.speakOnboardingStep(w);
       });
     }), this.shadowRoot.querySelector("#btn-spoken-onboarding")?.addEventListener("click", () => {
       this.startSpokenOnboarding();
+    }), this.shadowRoot.querySelector("#btn-stop-spoken-onboarding")?.addEventListener("click", () => {
+      this.stopSpokenOnboarding();
     }), this.shadowRoot.querySelector("#btn-onboard-next")?.addEventListener("click", () => {
+      if (this.spokenOnboardingActive) {
+        this.moveSpokenOnboarding(1);
+        return;
+      }
       this.captureOnboardingStep(), this.onboardingStep = Math.min(3, this.onboardingStep + 1), this.render(), setTimeout(() => this.shadowRoot?.querySelector("#onboard-title")?.focus(), 0);
     }), this.shadowRoot.querySelector("#btn-onboard-back")?.addEventListener("click", () => {
+      if (this.spokenOnboardingActive) {
+        this.moveSpokenOnboarding(-1);
+        return;
+      }
       this.captureOnboardingStep(), this.onboardingStep = Math.max(0, this.onboardingStep - 1), this.render();
     }), this.shadowRoot.querySelector("#btn-onboard-save")?.addEventListener("click", () => this.completeOnboarding(!0)), this.shadowRoot.querySelector("#btn-onboard-skip")?.addEventListener("click", () => this.completeOnboarding(!1)), this.shadowRoot.querySelector("#btn-onboard-close")?.addEventListener("click", () => this.completeOnboarding(!1));
     const C = this.shadowRoot.querySelector("#chk-voice-master");
@@ -4930,36 +5098,36 @@ ${d}
       }
       this.announce(C.checked ? "Voice accessibility enabled" : "Voice accessibility disabled");
     });
-    const M = this.shadowRoot.querySelector("#chk-auto-welcome");
-    M && M.addEventListener("change", () => {
-      this.accessibilityPrefs.auto_welcome = M.checked, this.savePreferences();
-    });
-    const N = this.shadowRoot.querySelector("#chk-auto-tts");
+    const N = this.shadowRoot.querySelector("#chk-auto-welcome");
     N && N.addEventListener("change", () => {
-      this.accessibilityPrefs.auto_tts = N.checked, this.savePreferences();
+      this.accessibilityPrefs.auto_welcome = N.checked, this.savePreferences();
     });
-    const D = [
+    const M = this.shadowRoot.querySelector("#chk-auto-tts");
+    M && M.addEventListener("change", () => {
+      this.accessibilityPrefs.auto_tts = M.checked, this.savePreferences();
+    });
+    const j = [
       { id: "#btn-rate-075", rate: 0.75 },
       { id: "#btn-rate-100", rate: 1 },
       { id: "#btn-rate-125", rate: 1.25 },
       { id: "#btn-rate-150", rate: 1.5 }
     ];
-    D.forEach(({ id: h, rate: u }) => {
+    j.forEach(({ id: h, rate: u }) => {
       this.shadowRoot?.querySelector(h)?.addEventListener("click", () => {
-        this.accessibilityPrefs.speech_rate = u, this.activeAudio && (this.activeAudio.playbackRate = u, this.activeAudio.preservesPitch = !0, this.activeAudio.mozPreservesPitch = !0, this.activeAudio.webkitPreservesPitch = !0), this.savePreferences(), D.forEach((v) => {
+        this.accessibilityPrefs.speech_rate = u, this.activeAudio && (this.activeAudio.playbackRate = u, this.activeAudio.preservesPitch = !0, this.activeAudio.mozPreservesPitch = !0, this.activeAudio.webkitPreservesPitch = !0), this.savePreferences(), j.forEach((v) => {
           this.shadowRoot?.querySelector(v.id)?.setAttribute("aria-pressed", v.rate === u ? "true" : "false");
         }), this.announce(`Speech rate set to ${u}x`);
       });
     }), this.shadowRoot.querySelector("#btn-read-page")?.addEventListener("click", () => this.readPageAloud()), this.shadowRoot.querySelector("#btn-read-section")?.addEventListener("click", () => this.readSectionAloud()), this.shadowRoot.querySelector("#btn-test-voice")?.addEventListener("click", () => {
       this.playServerAudioText(this.t("voiceWelcomeAnnouncement"));
     });
-    const B = this.shadowRoot.querySelector("#chk-screen-reader");
-    B && B.addEventListener("change", () => {
-      this.accessibilityPrefs.screen_reader_mode = B.checked, B.checked && (this.accessibilityPrefs.auto_tts = !1, this.autoReadSpeech = !1, localStorage.setItem("savanna_bridge_auto_read", "false"), this.stopSpeaking()), this.savePreferences(), this.announce(B.checked ? "Screen reader mode enabled" : "Screen reader mode disabled");
-    });
-    const q = this.shadowRoot.querySelector("#chk-keyboard-nav");
+    const q = this.shadowRoot.querySelector("#chk-screen-reader");
     q && q.addEventListener("change", () => {
-      this.accessibilityPrefs.keyboard_navigation = q.checked, this.savePreferences(), q.checked ? this.classList.add("keyboard-focus-enhanced") : this.classList.remove("keyboard-focus-enhanced"), this.announce(q.checked ? "Enhanced keyboard navigation enabled" : "Enhanced keyboard navigation disabled");
+      this.accessibilityPrefs.screen_reader_mode = q.checked, q.checked && (this.accessibilityPrefs.auto_tts = !1, this.autoReadSpeech = !1, localStorage.setItem("savanna_bridge_auto_read", "false"), this.stopSpeaking()), this.savePreferences(), this.announce(q.checked ? "Screen reader mode enabled" : "Screen reader mode disabled");
+    });
+    const B = this.shadowRoot.querySelector("#chk-keyboard-nav");
+    B && B.addEventListener("change", () => {
+      this.accessibilityPrefs.keyboard_navigation = B.checked, this.savePreferences(), B.checked ? this.classList.add("keyboard-focus-enhanced") : this.classList.remove("keyboard-focus-enhanced"), this.announce(B.checked ? "Enhanced keyboard navigation enabled" : "Enhanced keyboard navigation disabled");
     });
     const I = this.shadowRoot.querySelector("#chk-sync-prefs");
     I && I.addEventListener("change", () => {
@@ -4974,12 +5142,12 @@ ${d}
 }
 customElements.get("bridge-assistant") || customElements.define("bridge-assistant", F);
 if (!customElements.get("db-assistant")) {
-  class S extends F {
+  class T extends F {
   }
-  customElements.define("db-assistant", S);
+  customElements.define("db-assistant", T);
 }
 export {
   F as BridgeAssistant,
-  r as ICONS
+  l as ICONS
 };
 //# sourceMappingURL=widget.js.map

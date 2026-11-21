@@ -232,6 +232,68 @@ test.describe("screen-reader and non-visual interaction contract", () => {
     await expect(page.locator("bridge-assistant .wizard-step-label")).toHaveText("Step 1 of 4");
   });
 
+  test("spoken onboarding supports navigation, checkbox commands, and immediate stop", async ({ page }) => {
+    await page.goto(`${demoBase}/savanna/`);
+    await page.evaluate(() => customElements.whenDefined("bridge-assistant"));
+    await page.locator("bridge-assistant #launcher-btn").click();
+
+    await page.locator("bridge-assistant").evaluate((element) => {
+      const assistant = element as any;
+      (window as any).__onboardingSpeech = [];
+      (window as any).__onboardingGuard = null;
+      assistant.startVoiceRecording = async () => undefined;
+      assistant.speakText = (text: string, options?: { shouldContinue?: () => boolean }) => {
+        (window as any).__onboardingSpeech.push(text);
+        (window as any).__onboardingGuard = options?.shouldContinue || null;
+        return true;
+      };
+    });
+
+    await page.locator("bridge-assistant #btn-spoken-onboarding").click();
+    await expect(page.locator("bridge-assistant #btn-stop-spoken-onboarding")).toBeVisible();
+    await expect(page.locator("bridge-assistant #onboarding-voice-status")).toBeVisible();
+
+    const say = async (command: string) => {
+      await page.locator("bridge-assistant").evaluate((element, value) => {
+        const assistant = element as any;
+        const input = element.shadowRoot?.querySelector<HTMLInputElement>("#chat-input");
+        if (!input) throw new Error("Chat input not found");
+        return assistant.handleVoiceTranscript(value, input);
+      }, command);
+    };
+
+    await say("next");
+    await expect(page.locator("bridge-assistant .wizard-step-label")).toHaveText("Step 2 of 4");
+    await expect.poll(() => page.evaluate(() => (window as any).__onboardingSpeech.at(-1))).toContain("screen reader");
+
+    await say("check screen reader");
+    await expect(page.locator("bridge-assistant #onboard-chk-screen-reader")).toBeChecked();
+    await say("uncheck this");
+    await expect(page.locator("bridge-assistant #onboard-chk-screen-reader")).not.toBeChecked();
+    await say("check first option");
+    await expect(page.locator("bridge-assistant #onboard-chk-screen-reader")).toBeChecked();
+
+    await say("next");
+    await expect(page.locator("bridge-assistant .wizard-step-label")).toHaveText("Step 3 of 4");
+    await say("check high contrast");
+    await expect(page.locator("bridge-assistant #onboard-chk-contrast")).toBeChecked();
+    await say("back");
+    await expect(page.locator("bridge-assistant .wizard-step-label")).toHaveText("Step 2 of 4");
+
+    const guardBeforeStop = await page.evaluate(() => (window as any).__onboardingGuard?.());
+    expect(guardBeforeStop).toBe(true);
+    await say("stop reading");
+    await expect(page.locator("bridge-assistant #btn-stop-spoken-onboarding")).toHaveCount(0);
+    await expect(page.locator("bridge-assistant #onboarding-voice-status")).toHaveCount(0);
+    const guardAfterStop = await page.evaluate(() => (window as any).__onboardingGuard?.());
+    expect(guardAfterStop).toBe(false);
+
+    await page.locator("bridge-assistant #btn-spoken-onboarding").click();
+    await expect(page.locator("bridge-assistant #btn-stop-spoken-onboarding")).toBeVisible();
+    await page.locator("bridge-assistant #btn-stop-spoken-onboarding").click();
+    await expect(page.locator("bridge-assistant #btn-stop-spoken-onboarding")).toHaveCount(0);
+  });
+
   test("keyboard shortcuts: Alt+Shift+A opens dialog without activating mic, Alt+Shift+V triggers mic", async ({ page }) => {
     await page.goto(`${demoBase}/savanna/`);
     await page.evaluate(() => customElements.whenDefined("bridge-assistant"));

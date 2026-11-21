@@ -292,6 +292,9 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     onboardingSkip: "Skip for now",
     onboardingReplay: "Setup Tour / Onboarding",
     spokenSetup: "Start spoken setup",
+    onboardingReadStep: "Read this step",
+    onboardingStopVoice: "Stop voice",
+    onboardingVoiceStopped: "Voice onboarding stopped. Select Read this step to continue.",
     voiceTab: "Voice & Audio",
     pageContextBadge: "Current Lesson:",
     explainLessonBtn: "Explain this lesson",
@@ -443,6 +446,9 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     onboardingSkip: "ለጊዜው እለፈው",
     onboardingReplay: "የመጀመሪያ ቅንብር መመሪያ",
     spokenSetup: "የድምጽ ቅንብርን ጀምር",
+    onboardingReadStep: "ይህን ደረጃ አንብብ",
+    onboardingStopVoice: "ድምጹን አቁም",
+    onboardingVoiceStopped: "የድምጽ መመሪያው ቆሟል። ለመቀጠል ይህን ደረጃ አንብብ የሚለውን ይምረጡ።",
     voiceTab: "ድምጽ እና ማዳመጥ",
     pageContextBadge: "ወቅታዊ ትምህርት፡",
     explainLessonBtn: "ይህንን ትምህርት አስረዳኝ",
@@ -594,6 +600,9 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     onboardingSkip: "Ammaaf darbi",
     onboardingReplay: "Daawwannaa Qindaa'inaa",
     spokenSetup: "Qindaa'ina sagalee jalqabi",
+    onboardingReadStep: "Tarkaanfii kana dubbisi",
+    onboardingStopVoice: "Sagalee dhaabi",
+    onboardingVoiceStopped: "Qindaa'inni sagalee dhaabbateera. Itti fufuuf Tarkaanfii kana dubbisi filadhu.",
     voiceTab: "Sagalee & Dhaggeeffannaa",
     pageContextBadge: "Kutaa Barnootaa Ammaa:",
     explainLessonBtn: "Barnoota kana naaf ibsi",
@@ -745,6 +754,9 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     onboardingSkip: "ንሕጂ ሕለፎ",
     onboardingReplay: "ናይ መጀመርታ መምርሒ",
     spokenSetup: "ናይ ድምጺ ቅጥዒ ጀምር",
+    onboardingReadStep: "ነዚ ስጉምቲ ኣንብብ",
+    onboardingStopVoice: "ድምጺ ኣቋርጽ",
+    onboardingVoiceStopped: "ናይ ድምጺ መምርሒ ተቋሪጹ። ንምቕጻል ነዚ ስጉምቲ ኣንብብ ምረጹ።",
     voiceTab: "ድምጽን ምስማዕን",
     pageContextBadge: "ህሉው ትምህርቲ፡",
     explainLessonBtn: "እዚ ትምህርቲ ኣብርሃለይ",
@@ -896,6 +908,9 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     onboardingSkip: "تخطي الآن",
     onboardingReplay: "دليل الإعداد الأولي",
     spokenSetup: "بدء الإعداد الصوتي",
+    onboardingReadStep: "اقرأ هذه الخطوة",
+    onboardingStopVoice: "إيقاف الصوت",
+    onboardingVoiceStopped: "تم إيقاف الإعداد الصوتي. اختر اقرأ هذه الخطوة للمتابعة.",
     voiceTab: "الصوت والقراءة",
     pageContextBadge: "الدرس الحالي:",
     explainLessonBtn: "اشرح لي هذا الدرس",
@@ -1862,6 +1877,7 @@ const STYLES = `
   }
   .onboarding-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.5rem;
     justify-content: flex-end;
     border-top: 1px solid var(--b-border);
@@ -2093,6 +2109,7 @@ export class BridgeAssistant extends HTMLElement {
   private popstateListener: (() => void) | null = null;
   private spokenOnboardingActive = false;
   private spokenOnboardingIndex = 0;
+  private onboardingSpeechGeneration = 0;
   private pendingVoiceAction: PageActionPlan | null = null;
   private pendingVoiceTranscript = "";
   private isListeningForSend = false;
@@ -2667,14 +2684,17 @@ export class BridgeAssistant extends HTMLElement {
       onStart?: () => void;
       onEnd?: () => void;
       onError?: (err?: any) => void;
+      shouldContinue?: () => boolean;
     }
   ): boolean {
     this.lastSpokenText = text;
     this.playServerAudioText(text, options).then((started) => {
+      if (options?.shouldContinue && !options.shouldContinue()) return;
       if (!started && this.currentLang === "en" && "speechSynthesis" in window) {
         this.browserSpeechText(text, options);
       }
     }).catch((err) => {
+      if (options?.shouldContinue && !options.shouldContinue()) return;
       console.warn("playServerAudioText failed:", err);
       if (this.currentLang === "en" && "speechSynthesis" in window) {
         this.browserSpeechText(text, options);
@@ -2692,8 +2712,10 @@ export class BridgeAssistant extends HTMLElement {
       onStart?: () => void;
       onEnd?: () => void;
       onError?: (err?: any) => void;
+      shouldContinue?: () => boolean;
     }
   ): boolean {
+    if (options?.shouldContinue && !options.shouldContinue()) return false;
     if (!("speechSynthesis" in window)) {
       if (options?.onError) options.onError();
       return false;
@@ -2727,6 +2749,7 @@ export class BridgeAssistant extends HTMLElement {
       onStart?: () => void;
       onEnd?: () => void;
       onError?: (err?: any) => void;
+      shouldContinue?: () => boolean;
     }
   ): Promise<boolean> {
     try {
@@ -2739,6 +2762,7 @@ export class BridgeAssistant extends HTMLElement {
       }
       const cleanText = this.cleanTextForSpeech(text);
       if (!cleanText) return false;
+      if (options?.shouldContinue && !options.shouldContinue()) return false;
 
       const style = "warm, calm tutor, moderate pace, clear, unhurried";
       const cacheKey = `${cleanText}_${this.currentLang}_${style}`;
@@ -2766,6 +2790,7 @@ export class BridgeAssistant extends HTMLElement {
       }
 
       if (audioUrl) {
+        if (options?.shouldContinue && !options.shouldContinue()) return false;
         this.activeAudio = new Audio(audioUrl);
         const rate = options?.rate || this.accessibilityPrefs?.speech_rate || 1.0;
         this.activeAudio.playbackRate = rate;
@@ -3936,28 +3961,210 @@ export class BridgeAssistant extends HTMLElement {
     this.pendingVoiceAction = null;
     this.spokenOnboardingActive = true;
     this.spokenOnboardingIndex = [0, 1, 3, 5][this.onboardingStep] ?? 0;
-    this.speakSpokenOnboardingQuestion();
+    this.render();
+    window.setTimeout(() => this.speakOnboardingStep(), 0);
   }
 
-  private speakSpokenOnboardingQuestion(prefix = ""): void {
-    const question = this.spokenOnboardingQuestions()[this.spokenOnboardingIndex];
-    if (!question) return;
-    const spoken = prefix ? `${prefix} ${question}` : question;
+  private speakOnboardingAndListen(spoken: string): void {
+    const generation = ++this.onboardingSpeechGeneration;
+    this.stopSpeaking();
+    if (this.isRecording) {
+      this.audioChunks = [];
+      this.stopVoiceRecording(true);
+    }
     this.announce(spoken);
     this.speakText(spoken, {
+      shouldContinue: () => generation === this.onboardingSpeechGeneration && this.spokenOnboardingActive,
       onEnd: () => {
+        if (generation !== this.onboardingSpeechGeneration || !this.spokenOnboardingActive) return;
         const input = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-input");
-        if (input && this.spokenOnboardingActive) this.startVoiceRecording(input);
+        if (input) void this.startVoiceRecording(input);
+      },
+      onError: () => {
+        if (generation !== this.onboardingSpeechGeneration || !this.spokenOnboardingActive) return;
+        const input = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-input");
+        if (input) void this.startVoiceRecording(input);
       },
     });
   }
 
+  private onboardingOptionState(selected: boolean): string {
+    const words: Record<SupportedLanguage, [string, string]> = {
+      en: ["checked", "not checked"],
+      am: ["ተመርጧል", "አልተመረጠም"],
+      om: ["filatameera", "hin filatamne"],
+      ti: ["ተመሪጹ", "ኣይተመርጸን"],
+      ar: ["محدد", "غير محدد"],
+    };
+    return words[this.currentLang][selected ? 0 : 1];
+  }
+
+  private onboardingStepNarration(): string {
+    const question = this.spokenOnboardingQuestions()[this.spokenOnboardingIndex] || "";
+    const step = this.onboardingStep + 1;
+    const state = (label: string, selected: boolean) => `${label}: ${this.onboardingOptionState(selected)}.`;
+    const commandHelp: Record<SupportedLanguage, string> = {
+      en: "You can say check or uncheck an option, next, back, repeat, or stop.",
+      am: "ምርጫን ምረጥ ወይም አትምረጥ፣ ቀጣይ፣ ተመለስ፣ ድገም ወይም አቁም ማለት ይችላሉ።",
+      om: "Filannoo bani ykn cufi, itti aanu, duubatti, irra deebi'i ykn dhaabi jechuu dandeessa.",
+      ti: "ምርጫ ምረጽ ወይ ኣይትምረጽ፣ ቀጻሊ፣ ተመለስ፣ ደግም ወይ ኣቋርጽ ክትብሉ ትኽእሉ።",
+      ar: "يمكنك قول حدد أو ألغ تحديد خيار، التالي، رجوع، كرر، أو توقف.",
+    };
+
+    let details = `${this.t("onboardingSubtitle")} ${this.t("onboardingLangPrompt")} ${this.getLangDisplayName()}.`;
+    if (this.onboardingStep === 1) {
+      details = `${state(this.t("screenReaderModeLabel"), this.accessibilityPrefs.screen_reader_mode)} ${state(this.t("keyboardNavLabel"), this.accessibilityPrefs.keyboard_navigation)}`;
+    } else if (this.onboardingStep === 2) {
+      details = `${state(this.t("highContrastLabel"), this.accessibilityPrefs.high_contrast)} ${state(this.t("textLarger"), this.accessibilityPrefs.large_text === "larger")}`;
+    } else if (this.onboardingStep === 3) {
+      details = `${state(this.t("onboardingVoiceEnable"), this.accessibilityPrefs.voice_enabled)} ${state(this.t("autoTtsLabel"), this.accessibilityPrefs.auto_tts)}`;
+    }
+    return `Step ${step} of 4. ${details} ${question} ${commandHelp[this.currentLang]}`;
+  }
+
+  private speakOnboardingStep(prefix = ""): void {
+    if (!this.spokenOnboardingActive) return;
+    const narration = this.onboardingStepNarration();
+    this.speakOnboardingAndListen(prefix ? `${prefix} ${narration}` : narration);
+  }
+
+  private speakSpokenOnboardingQuestion(prefix = ""): void {
+    if (!this.spokenOnboardingActive) return;
+    const question = this.spokenOnboardingQuestions()[this.spokenOnboardingIndex];
+    if (!question) return;
+    this.speakOnboardingAndListen(prefix ? `${prefix} ${question}` : question);
+  }
+
+  private stopSpokenOnboarding(): void {
+    this.onboardingSpeechGeneration += 1;
+    this.spokenOnboardingActive = false;
+    this.stopSpeaking();
+    if (this.isRecording) {
+      this.audioChunks = [];
+      this.stopVoiceRecording(true);
+    }
+    this.announce(this.t("onboardingVoiceStopped"));
+    this.render();
+  }
+
+  private moveSpokenOnboarding(direction: 1 | -1): void {
+    this.captureOnboardingStep();
+    if (direction === 1 && this.onboardingStep === 3) {
+      this.completeOnboarding(true);
+      return;
+    }
+    this.onboardingStep = Math.max(0, Math.min(3, this.onboardingStep + direction));
+    this.spokenOnboardingIndex = [0, 1, 3, 5][this.onboardingStep] ?? 0;
+    this.savePreferences();
+    this.render();
+    window.setTimeout(() => this.speakOnboardingStep(), 0);
+  }
+
+  private setOnboardingOption(option: string, selected: boolean): boolean {
+    switch (option) {
+      case "screen_reader": this.accessibilityPrefs.screen_reader_mode = selected; break;
+      case "keyboard": this.accessibilityPrefs.keyboard_navigation = selected; break;
+      case "contrast":
+        this.accessibilityPrefs.high_contrast = selected;
+        this.highContrast = selected;
+        break;
+      case "large_text":
+        this.accessibilityPrefs.large_text = selected ? "larger" : "normal";
+        this.textSize = this.accessibilityPrefs.large_text;
+        break;
+      case "voice": this.accessibilityPrefs.voice_enabled = selected; break;
+      case "auto_tts": this.accessibilityPrefs.auto_tts = selected; break;
+      default: return false;
+    }
+    this.savePreferences();
+    this.render();
+    return true;
+  }
+
+  private handleSpokenOnboardingCommand(answer: string): boolean {
+    const command = answer.trim().toLocaleLowerCase().replace(/[.,!?;:"'`።،]/gu, "").replace(/\s+/g, " ");
+    const languageCommands: Array<[SupportedLanguage, RegExp]> = [
+      ["en", /^(english|ingiliffa)$/iu],
+      ["am", /^(amharic|አማርኛ)$/iu],
+      ["om", /^(oromo|afaan oromoo)$/iu],
+      ["ti", /^(tigrinya|ትግርኛ)$/iu],
+      ["ar", /^(arabic|العربية)$/iu],
+    ];
+    const selectedLanguage = languageCommands.find(([, pattern]) => pattern.test(command));
+    if (selectedLanguage) {
+      this.setLanguage(selectedLanguage[0]);
+      this.spokenOnboardingIndex = 0;
+      window.setTimeout(() => this.speakOnboardingStep(), 0);
+      return true;
+    }
+    if (/^(stop|stop reading|stop voice|pause|quiet|be quiet|mute|silence|cancel voice|enough|that's enough|thats enough|hold on|wait|አቁም|ቁም|dhaabi|ኣቋርጽ|توقف|إيقاف)/iu.test(command)) {
+      this.stopSpokenOnboarding();
+      return true;
+    }
+    if (/^(repeat|read again|read this step|again|ድገም|እንደገና|irra deebi|ደግም|كرر|أعد|اقرأ)/iu.test(command)) {
+      this.speakOnboardingStep();
+      return true;
+    }
+    if (/^(next|continue|go next|go on|proceed|skip|ቀጣይ|ቀጥል|itti aanu|ቀጻሊ|التالي|استمر)/iu.test(command)) {
+      this.moveSpokenOnboarding(1);
+      return true;
+    }
+    if (/^(back|previous|go back|ተመለስ|duubatti|رجوع|السابق)/iu.test(command)) {
+      this.moveSpokenOnboarding(-1);
+      return true;
+    }
+    if (/^(finish|save|done|complete|ጨርስ|xumuri|ዛዝም|إنهاء|حفظ)/iu.test(command)) {
+      this.captureOnboardingStep();
+      this.completeOnboarding(true);
+      return true;
+    }
+
+    const wantsOff = /\b(uncheck|disable|turn off|deselect|untick|remove)\b/iu.test(command);
+    const wantsOn = /\b(check|enable|turn on|select|tick)\b/iu.test(command);
+    if (!wantsOff && !wantsOn) return false;
+
+    let option = "";
+    if (/(screen reader|nvda|talkback|voiceover|ስክሪን|iskiriinii|قارئ)/iu.test(command)) option = "screen_reader";
+    else if (/(keyboard|ኪቦርድ|kiiboodii|لوحة المفاتيح)/iu.test(command)) option = "keyboard";
+    else if (/(contrast|ንፅፅር|ንጽጽር|walbira|تباين)/iu.test(command)) option = "contrast";
+    else if (/(large text|larger text|big text|ትልቅ ጽሑፍ|barreeffama guddaa|نص أكبر)/iu.test(command)) option = "large_text";
+    else if (/(automatic reading|auto read|read answers|auto tts|መልሶችን|deebii|قراءة الإجابات)/iu.test(command)) option = "auto_tts";
+    else if (/(voice assistance|voice accessibility|የድምጽ|gargaarsa sagalee|مساعدة صوتية)/iu.test(command)) option = "voice";
+    else if (/\b(first|one|1)\b/iu.test(command)) option = ["", "screen_reader", "contrast", "voice"][this.onboardingStep] || "";
+    else if (/\b(second|two|2)\b/iu.test(command)) option = ["", "keyboard", "large_text", "auto_tts"][this.onboardingStep] || "";
+    else if (/\b(this|that|current)\b/iu.test(command)) {
+      option = ["", "screen_reader", "keyboard", "contrast", "large_text", "voice", "auto_tts"][this.spokenOnboardingIndex] || "";
+    }
+    else {
+      const focused = this.shadowRoot?.activeElement as HTMLInputElement | null;
+      const focusedMap: Record<string, string> = {
+        "onboard-chk-screen-reader": "screen_reader",
+        "onboard-chk-keyboard-nav": "keyboard",
+        "onboard-chk-contrast": "contrast",
+        "onboard-chk-large-text": "large_text",
+        "onboard-chk-voice": "voice",
+        "onboard-chk-auto-tts": "auto_tts",
+      };
+      option = focused?.id ? focusedMap[focused.id] || "" : "";
+    }
+
+    if (!option) {
+      this.speakOnboardingAndListen("Please name the option, for example, check screen reader or uncheck high contrast.");
+      return true;
+    }
+    this.setOnboardingOption(option, wantsOn && !wantsOff);
+    window.setTimeout(() => this.speakOnboardingStep(), 0);
+    return true;
+  }
+
   private handleSpokenOnboardingAnswer(answer: string): void {
+    if (this.handleSpokenOnboardingCommand(answer)) return;
     if (!this.isAffirmative(answer) && !this.isNegative(answer)) {
-      this.speakText("Please answer yes or no.", { onEnd: () => this.speakSpokenOnboardingQuestion() });
+      this.speakOnboardingAndListen("Please answer yes or no, name an option to check, or say next, back, repeat, or stop.");
       return;
     }
     const selected = this.isAffirmative(answer);
+    const previousStep = this.onboardingStep;
     const acknowledgements: Record<SupportedLanguage, [string, string]> = {
       en: ["Selected yes.", "Selected no."],
       am: ["አዎ ተመርጧል።", "አይ ተመርጧል።"],
@@ -4006,7 +4213,11 @@ export class BridgeAssistant extends HTMLElement {
       this.savePreferences();
       this.render();
       setTimeout(
-        () => this.speakSpokenOnboardingQuestion(acknowledgements[this.currentLang][selected ? 0 : 1]),
+        () => {
+          const acknowledgement = acknowledgements[this.currentLang][selected ? 0 : 1];
+          if (this.onboardingStep !== previousStep) this.speakOnboardingStep(acknowledgement);
+          else this.speakSpokenOnboardingQuestion(acknowledgement);
+        },
         0
       );
       return;
@@ -4342,6 +4553,12 @@ export class BridgeAssistant extends HTMLElement {
   }
 
   private updateVoiceStatusUI(): void {
+    const onboardingStatus = this.shadowRoot?.querySelector<HTMLElement>("#onboarding-voice-status");
+    if (onboardingStatus && this.spokenOnboardingActive) {
+      onboardingStatus.textContent = this.isRecording
+        ? `${this.t("voiceListening")} (${this.getLangDisplayName()})`
+        : `${this.t("voiceSpeaking")} (${this.getLangDisplayName()})`;
+    }
     const container = this.shadowRoot?.querySelector("#voice-status-container");
     if (!container) return;
 
@@ -5462,9 +5679,6 @@ export class BridgeAssistant extends HTMLElement {
           <button type="button" class="lang-toggle-btn" id="onboard-lang-ti" aria-pressed="${this.currentLang === "ti"}" aria-label="ትግ, ትግርኛ">ትግ</button>
           <button type="button" class="lang-toggle-btn" id="onboard-lang-ar" aria-pressed="${this.currentLang === "ar"}" aria-label="عربي, العربية">عربي</button>
         </div>
-        <button type="button" class="btn btn-secondary" id="btn-spoken-onboarding" style="align-self:flex-start;">
-          ${ICONS.sound} <span>${this.t("spokenSetup")}</span>
-        </button>
       `,
       `
         <p class="onboarding-subtitle">Choose how the assistant should work with your assistive technology.</p>
@@ -5521,8 +5735,13 @@ export class BridgeAssistant extends HTMLElement {
           </div>
           <div class="wizard-progress" role="progressbar" aria-label="${copy.step} ${this.onboardingStep + 1} ${copy.of} 4" aria-valuemin="1" aria-valuemax="4" aria-valuenow="${this.onboardingStep + 1}">${progress}</div>
           <div class="wizard-step-label">${copy.step} ${this.onboardingStep + 1} ${copy.of} 4</div>
+          ${this.spokenOnboardingActive ? `<div id="onboarding-voice-status" role="status" aria-live="polite" style="padding:0.625rem 0.75rem; border:1px solid var(--b-primary); border-radius:0.5rem; background:var(--b-surface-alt); font-weight:600;">${this.isRecording ? this.t("voiceListening") : this.t("voiceSpeaking")} (${this.getLangDisplayName()})</div>` : ""}
           <div class="onboarding-body">${steps[this.onboardingStep]}</div>
           <div class="onboarding-actions">
+            <button type="button" class="btn btn-secondary" id="btn-spoken-onboarding">
+              ${ICONS.sound} <span>${this.spokenOnboardingActive ? this.t("onboardingReadStep") : (this.onboardingStep === 0 ? this.t("spokenSetup") : this.t("onboardingReadStep"))}</span>
+            </button>
+            ${this.spokenOnboardingActive ? `<button type="button" class="btn btn-secondary" id="btn-stop-spoken-onboarding">${ICONS.stop} <span>${this.t("onboardingStopVoice")}</span></button>` : ""}
             <button type="button" class="btn btn-secondary" id="btn-onboard-skip">${copy.skip}</button>
             <span style="flex:1;"></span>
             ${this.onboardingStep > 0 ? `<button type="button" class="btn btn-secondary" id="btn-onboard-back">${copy.back}</button>` : ""}
@@ -5556,6 +5775,13 @@ export class BridgeAssistant extends HTMLElement {
   }
 
   private completeOnboarding(saveSelected: boolean): void {
+    this.onboardingSpeechGeneration += 1;
+    this.spokenOnboardingActive = false;
+    this.stopSpeaking();
+    if (this.isRecording) {
+      this.audioChunks = [];
+      this.stopVoiceRecording(true);
+    }
     if (saveSelected) this.captureOnboardingStep();
     this.accessibilityPrefs.onboarded = true;
     this.onboardingDismissed = true;
@@ -6962,21 +7188,53 @@ export class BridgeAssistant extends HTMLElement {
     const onboardLangCodes: SupportedLanguage[] = ["en", "am", "om", "ti", "ar"];
     onboardLangCodes.forEach((l) => {
       this.shadowRoot?.querySelector(`#onboard-lang-${l}`)?.addEventListener("click", () => {
+        const continueSpeaking = this.spokenOnboardingActive;
         this.setLanguage(l);
+        if (continueSpeaking) window.setTimeout(() => this.speakOnboardingStep(), 0);
+      });
+    });
+
+    const onboardingToggles: Array<[string, string]> = [
+      ["#onboard-chk-screen-reader", this.t("screenReaderModeLabel")],
+      ["#onboard-chk-keyboard-nav", this.t("keyboardNavLabel")],
+      ["#onboard-chk-contrast", this.t("highContrastLabel")],
+      ["#onboard-chk-large-text", this.t("textLarger")],
+      ["#onboard-chk-voice", this.t("onboardingVoiceEnable")],
+      ["#onboard-chk-auto-tts", this.t("autoTtsLabel")],
+    ];
+    onboardingToggles.forEach(([selector, label]) => {
+      this.shadowRoot?.querySelector<HTMLInputElement>(selector)?.addEventListener("change", (event) => {
+        const input = event.currentTarget as HTMLInputElement;
+        this.captureOnboardingStep();
+        this.savePreferences();
+        const confirmation = `${label}: ${this.onboardingOptionState(input.checked)}.`;
+        this.announce(confirmation);
+        if (this.spokenOnboardingActive) this.speakOnboardingStep(confirmation);
       });
     });
 
     this.shadowRoot.querySelector("#btn-spoken-onboarding")?.addEventListener("click", () => {
       this.startSpokenOnboarding();
     });
+    this.shadowRoot.querySelector("#btn-stop-spoken-onboarding")?.addEventListener("click", () => {
+      this.stopSpokenOnboarding();
+    });
 
     this.shadowRoot.querySelector("#btn-onboard-next")?.addEventListener("click", () => {
+      if (this.spokenOnboardingActive) {
+        this.moveSpokenOnboarding(1);
+        return;
+      }
       this.captureOnboardingStep();
       this.onboardingStep = Math.min(3, this.onboardingStep + 1);
       this.render();
       setTimeout(() => this.shadowRoot?.querySelector<HTMLElement>("#onboard-title")?.focus(), 0);
     });
     this.shadowRoot.querySelector("#btn-onboard-back")?.addEventListener("click", () => {
+      if (this.spokenOnboardingActive) {
+        this.moveSpokenOnboarding(-1);
+        return;
+      }
       this.captureOnboardingStep();
       this.onboardingStep = Math.max(0, this.onboardingStep - 1);
       this.render();
