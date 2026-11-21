@@ -521,8 +521,15 @@
           if (loginModal) {
             loginModal.classList.remove("hidden");
             loginModal.removeAttribute("aria-hidden");
-            // Focus the username field for keyboard users
-            setTimeout(() => document.getElementById("loginUsername")?.focus(), 60);
+            // Focus username only when focus is not already inside the login form.
+            // Background queue polling must never steal focus from the password field.
+            if (!loginModal.contains(document.activeElement)) {
+              setTimeout(() => {
+                if (!loginModal.contains(document.activeElement)) {
+                  document.getElementById("loginUsername")?.focus();
+                }
+              }, 60);
+            }
           }
           if (logoutBtn) logoutBtn.classList.add("hidden");
           document.getElementById("mainContent")?.classList.add("pointer-events-none", "opacity-0");
@@ -611,8 +618,8 @@
       async function fetchQueue() {
         const token = getHelperToken();
         if (!token) {
-          // No token: show login gate, do not attempt to fetch
-          setHelperToken("");
+          // The boot/logout flow already shows the gate. Do not reset it on
+          // every polling interval because that would steal keyboard focus.
           return;
         }
         try {
