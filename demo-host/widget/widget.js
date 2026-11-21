@@ -1,6 +1,6 @@
 var Q = Object.defineProperty;
 var U = (S, x, e) => x in S ? Q(S, x, { enumerable: !0, configurable: !0, writable: !0, value: e }) : S[x] = e;
-var l = (S, x, e) => U(S, typeof x != "symbol" ? x + "" : x, e);
+var c = (S, x, e) => U(S, typeof x != "symbol" ? x + "" : x, e);
 const O = () => ({
   deadlines: !0,
   new_lessons: !0,
@@ -12,14 +12,14 @@ const O = () => ({
   muted: !1,
   frequency: "immediate"
 });
-async function G(S, x) {
+async function K(S, x) {
   const e = await fetch(
     `${S}/api/v1/notification-settings?learner_ref=${encodeURIComponent(x)}`
   );
   if (!e.ok) throw new Error(`Could not load notification settings: HTTP ${e.status}`);
   return { ...O(), ...await e.json() };
 }
-async function K(S, x, e) {
+async function G(S, x, e) {
   const t = await fetch(
     `${S}/api/v1/notification-settings?learner_ref=${encodeURIComponent(x)}`,
     {
@@ -145,6 +145,7 @@ const r = {
     dailyFrequency: "Daily summary",
     notificationSaved: "Notification preferences saved.",
     helperClaimedNotice: "A helper has claimed your request. Your Jitsi room is ready.",
+    helperReplyHeading: "Message from your helper",
     helpClosedNotice: "Your live-help request has been closed.",
     telegramConnected: "Telegram connected",
     connectedToTelegram: "Connected to Telegram",
@@ -1929,56 +1930,57 @@ const r = {
 class F extends HTMLElement {
   constructor() {
     super(...arguments);
-    l(this, "isOpen", !1);
-    l(this, "currentLang", "en");
-    l(this, "textSize", "normal");
-    l(this, "highContrast", !1);
-    l(this, "simpleMode", !1);
-    l(this, "autoReadSpeech", !1);
-    l(this, "isOffline", !navigator.onLine);
+    c(this, "isOpen", !1);
+    c(this, "currentLang", "en");
+    c(this, "textSize", "normal");
+    c(this, "highContrast", !1);
+    c(this, "simpleMode", !1);
+    c(this, "autoReadSpeech", !1);
+    c(this, "isOffline", !navigator.onLine);
     // Voice States
-    l(this, "isThinking", !1);
-    l(this, "isRecording", !1);
-    l(this, "isProcessingSpeech", !1);
-    l(this, "isSpeaking", !1);
-    l(this, "mediaRecorder", null);
-    l(this, "audioChunks", []);
-    l(this, "activeRecognition", null);
-    l(this, "wakeWordRecognizer", null);
-    l(this, "activeUtterance", null);
-    l(this, "readingWatchdogTimer", null);
-    l(this, "currentReading", null);
-    l(this, "navCheckTimer", null);
-    l(this, "voiceActivationEnabled", !1);
-    l(this, "wakeWordRecognition", null);
-    l(this, "lastPageUrl", null);
-    l(this, "lastPageTitle", null);
-    l(this, "lastPageSection", null);
-    l(this, "activeAudio", null);
-    l(this, "audioCache", /* @__PURE__ */ new Map());
-    l(this, "messages", []);
-    l(this, "sessionId", `sess_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`);
+    c(this, "isThinking", !1);
+    c(this, "isRecording", !1);
+    c(this, "isProcessingSpeech", !1);
+    c(this, "isSpeaking", !1);
+    c(this, "mediaRecorder", null);
+    c(this, "audioChunks", []);
+    c(this, "activeRecognition", null);
+    c(this, "wakeWordRecognizer", null);
+    c(this, "activeUtterance", null);
+    c(this, "readingWatchdogTimer", null);
+    c(this, "currentReading", null);
+    c(this, "navCheckTimer", null);
+    c(this, "voiceActivationEnabled", !1);
+    c(this, "wakeWordRecognition", null);
+    c(this, "lastPageUrl", null);
+    c(this, "lastPageTitle", null);
+    c(this, "lastPageSection", null);
+    c(this, "activeAudio", null);
+    c(this, "audioCache", /* @__PURE__ */ new Map());
+    c(this, "messages", []);
+    c(this, "sessionId", `sess_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`);
     // Telegram link state
-    l(this, "telegramToken", null);
-    l(this, "telegramDeepLink", "https://t.me/savannah_assistant3_bot");
-    l(this, "isTelegramLinked", !1);
-    l(this, "isLinkCodeInputVisible", !1);
-    l(this, "telegramPollTimer", null);
-    l(this, "notificationPreferences", O());
+    c(this, "telegramToken", null);
+    c(this, "telegramDeepLink", "https://t.me/savannah_assistant3_bot");
+    c(this, "isTelegramLinked", !1);
+    c(this, "isLinkCodeInputVisible", !1);
+    c(this, "telegramPollTimer", null);
+    c(this, "notificationPreferences", O());
     // Settings dialog visibility
-    l(this, "isSettingsOpen", !1);
+    c(this, "isSettingsOpen", !1);
     // Active Handoff state
-    l(this, "activeHandoff", null);
-    l(this, "handoffPollTimer", null);
+    c(this, "activeHandoff", null);
+    c(this, "handoffPollTimer", null);
+    c(this, "seenHandoffMessages", /* @__PURE__ */ new Set());
     // Support needs
-    l(this, "supportNeeds", {
+    c(this, "supportNeeds", {
       needs: ["written_instructions"],
       other_text: "",
       preferred_contact_mode: "text"
     });
-    l(this, "activeTab", "chat");
+    c(this, "activeTab", "chat");
     // Persistent Accessibility & Voice Preferences (Configure Once, Access Everywhere)
-    l(this, "accessibilityPrefs", {
+    c(this, "accessibilityPrefs", {
       language: "en",
       voice_enabled: !1,
       auto_welcome: !0,
@@ -1993,27 +1995,27 @@ class F extends HTMLElement {
       sync_enabled: !0,
       onboarded: !1
     });
-    l(this, "onboardingDismissed", !1);
-    l(this, "onboardingStep", 0);
-    l(this, "isReadingPage", !1);
-    l(this, "isReadingPaused", !1);
-    l(this, "showAutoplayBanner", !1);
-    l(this, "hasSpokenWelcomeThisSession", !1);
-    l(this, "popstateListener", null);
-    l(this, "spokenOnboardingActive", !1);
-    l(this, "spokenOnboardingIndex", 0);
-    l(this, "pendingVoiceAction", null);
-    l(this, "pendingVoiceTranscript", "");
-    l(this, "isListeningForSend", !1);
-    l(this, "audioStream", null);
-    l(this, "audioContext", null);
-    l(this, "audioAnalyser", null);
-    l(this, "silenceTimer", null);
-    l(this, "vadInterval", null);
-    l(this, "hasDetectedSound", !1);
-    l(this, "lastSpokenText", "");
-    l(this, "voiceRecordingTimeout", null);
-    l(this, "previousFocus", null);
+    c(this, "onboardingDismissed", !1);
+    c(this, "onboardingStep", 0);
+    c(this, "isReadingPage", !1);
+    c(this, "isReadingPaused", !1);
+    c(this, "showAutoplayBanner", !1);
+    c(this, "hasSpokenWelcomeThisSession", !1);
+    c(this, "popstateListener", null);
+    c(this, "spokenOnboardingActive", !1);
+    c(this, "spokenOnboardingIndex", 0);
+    c(this, "pendingVoiceAction", null);
+    c(this, "pendingVoiceTranscript", "");
+    c(this, "isListeningForSend", !1);
+    c(this, "audioStream", null);
+    c(this, "audioContext", null);
+    c(this, "audioAnalyser", null);
+    c(this, "silenceTimer", null);
+    c(this, "vadInterval", null);
+    c(this, "hasDetectedSound", !1);
+    c(this, "lastSpokenText", "");
+    c(this, "voiceRecordingTimeout", null);
+    c(this, "previousFocus", null);
   }
   // Attributes: supports both guide plain attributes (lang, api, content) and data-*
   get apiBase() {
@@ -2232,8 +2234,8 @@ class F extends HTMLElement {
       n && (this.textSize = n, this.accessibilityPrefs.large_text = n);
       const s = localStorage.getItem("savanna_bridge_auto_read");
       s !== null && (this.autoReadSpeech = s === "true");
-      const c = localStorage.getItem("savanna_bridge_simple_mode");
-      c && (this.simpleMode = c === "true", this.accessibilityPrefs.simple_mode = this.simpleMode);
+      const l = localStorage.getItem("savanna_bridge_simple_mode");
+      l && (this.simpleMode = l === "true", this.accessibilityPrefs.simple_mode = this.simpleMode);
       const o = localStorage.getItem("savanna_bridge_wake_word");
       o && (this.voiceActivationEnabled = o === "true");
     } catch {
@@ -2341,7 +2343,7 @@ class F extends HTMLElement {
       const a = "warm, calm tutor, moderate pace, clear, unhurried", n = `${i}_${this.currentLang}_${a}`;
       let s = this.audioCache.get(n);
       if (!s) {
-        const c = await fetch(`${this.apiBase}/api/v1/speech/synthesize`, {
+        const l = await fetch(`${this.apiBase}/api/v1/speech/synthesize`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -2351,8 +2353,8 @@ class F extends HTMLElement {
             style: a
           })
         });
-        if (c.ok) {
-          const o = await c.json();
+        if (l.ok) {
+          const o = await l.json();
           if (o.audio_url && !o.audio_url.includes("demo.ogg")) {
             const d = String(o.audio_url);
             s = /^(https?:|data:|blob:)/.test(d) ? d : `${this.apiBase}${d}`, this.audioCache.set(n, s);
@@ -2361,8 +2363,8 @@ class F extends HTMLElement {
       }
       if (s) {
         this.activeAudio = new Audio(s);
-        const c = t?.rate || this.accessibilityPrefs?.speech_rate || 1;
-        return this.activeAudio.playbackRate = c, this.activeAudio.preservesPitch = !0, this.activeAudio.mozPreservesPitch = !0, this.activeAudio.webkitPreservesPitch = !0, t?.onStart && (this.activeAudio.onplay = () => t.onStart()), this.activeAudio.onended = () => {
+        const l = t?.rate || this.accessibilityPrefs?.speech_rate || 1;
+        return this.activeAudio.playbackRate = l, this.activeAudio.preservesPitch = !0, this.activeAudio.mozPreservesPitch = !0, this.activeAudio.webkitPreservesPitch = !0, t?.onStart && (this.activeAudio.onplay = () => t.onStart()), this.activeAudio.onended = () => {
           this.activeAudio = null, t?.onEnd && t.onEnd();
         }, this.activeAudio.onerror = (o) => {
           this.activeAudio = null, t?.onError && t.onError(o);
@@ -2376,8 +2378,8 @@ class F extends HTMLElement {
   preloadWelcomeAudio() {
     const e = ["en", "am", "om", "ti", "ar"], t = "warm, calm tutor, moderate pace, clear, unhurried";
     for (const i of e) {
-      const n = (k[i] || k.en).voiceWelcomeAnnouncement || k.en.voiceWelcomeAnnouncement, s = this.cleanTextForSpeech(n), c = `${s}_${i}_${t}`;
-      this.audioCache.has(c) || fetch(`${this.apiBase}/api/v1/speech/synthesize`, {
+      const n = (k[i] || k.en).voiceWelcomeAnnouncement || k.en.voiceWelcomeAnnouncement, s = this.cleanTextForSpeech(n), l = `${s}_${i}_${t}`;
+      this.audioCache.has(l) || fetch(`${this.apiBase}/api/v1/speech/synthesize`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -2389,7 +2391,7 @@ class F extends HTMLElement {
       }).then((o) => o.ok ? o.json() : null).then((o) => {
         if (o && o.audio_url && !o.audio_url.includes("demo.ogg")) {
           const d = String(o.audio_url), g = /^(https?:|data:|blob:)/.test(d) ? d : `${this.apiBase}${d}`;
-          this.audioCache.set(c, g);
+          this.audioCache.set(l, g);
         }
       }).catch(() => {
       });
@@ -2432,16 +2434,16 @@ class F extends HTMLElement {
           s.querySelectorAll(
             "script, style, db-assistant, bridge-assistant, noscript, nav, footer, header, #sidebar, .sidebar, button, input"
           ).forEach((o) => o.remove());
-          const c = [];
+          const l = [];
           s.querySelectorAll("h1, h2, h3, h4, h5, p, li").forEach((o) => {
             const d = (o.textContent || "").replace(/\s+/g, " ").trim();
             if (d) {
               const g = o.tagName.toLowerCase();
-              g.startsWith("h") ? c.push(`
+              g.startsWith("h") ? l.push(`
 ${d}
-`) : g === "li" ? c.push(`• ${d}`) : c.push(d);
+`) : g === "li" ? l.push(`• ${d}`) : l.push(d);
             }
-          }), c.length > 0 ? a = c.join(`
+          }), l.length > 0 ? a = l.join(`
 
 `).slice(0, 15e3) : a = (s.textContent || "").replace(/\s+/g, " ").trim().slice(0, 15e3);
         } catch {
@@ -2502,7 +2504,7 @@ ${d}
   }
   async fetchNotificationPreferences() {
     try {
-      this.notificationPreferences = await G(this.apiBase, this.getLearnerRef()), this.isSettingsOpen && this.render();
+      this.notificationPreferences = await K(this.apiBase, this.getLearnerRef()), this.isSettingsOpen && this.render();
     } catch {
     }
   }
@@ -2510,7 +2512,7 @@ ${d}
     const t = { ...this.notificationPreferences, ...e };
     t.telegram_enabled && !this.isTelegramLinked && (t.telegram_enabled = !1), t.consent_granted = t.widget_enabled || t.telegram_enabled, this.notificationPreferences = t;
     try {
-      this.notificationPreferences = await K(
+      this.notificationPreferences = await G(
         this.apiBase,
         this.getLearnerRef(),
         t
@@ -2534,25 +2536,43 @@ ${d}
         });
         if (!t.ok) return;
         const i = await t.json(), a = String(i.status || "waiting");
-        if (a === e.status) return;
-        if (e.status = a, a === "claimed" && this.notificationPreferences.widget_enabled && this.notificationPreferences.live_help) {
-          const n = this.t("helperClaimedNotice");
+        if (a !== e.status) {
+          if (e.status = a, a === "claimed" && this.notificationPreferences.widget_enabled && this.notificationPreferences.live_help) {
+            const s = this.t("helperClaimedNotice");
+            this.messages.push({
+              id: `msg_${Date.now()}_claimed`,
+              sender: "assistant",
+              text: s,
+              heading: this.t("handoffReadyTitle"),
+              isHandoff: !0,
+              roomUrl: i.room_url || e.room_url,
+              offerHuman: !1
+            }), this.saveChatState(), this.renderMessages(), this.announce(s), (this.autoReadSpeech || this.accessibilityPrefs.auto_tts) && this.speakText(s), this.dispatchEvent(new CustomEvent("db-assistant:handoff-claimed", {
+              bubbles: !0,
+              composed: !0,
+              detail: { ticketId: e.id, roomUrl: i.room_url || e.room_url }
+            }));
+          } else if (a === "closed") {
+            const s = this.t("helpClosedNotice");
+            this.notificationPreferences.widget_enabled && this.notificationPreferences.live_help && (this.messages.push({ id: `msg_${Date.now()}_closed`, sender: "assistant", text: s }), this.saveChatState(), this.renderMessages(), this.announce(s)), this.handoffPollTimer && window.clearInterval(this.handoffPollTimer), this.handoffPollTimer = null;
+          }
+        }
+        const n = Array.isArray(i.messages) ? i.messages.filter((s) => s?.sender === "helper" && s?.message) : [];
+        for (const s of n) {
+          const l = `${s.sent_at || ""}|${s.message}`;
+          if (this.seenHandoffMessages.has(l) || (this.seenHandoffMessages.add(l), !this.notificationPreferences.widget_enabled || !this.notificationPreferences.live_help)) continue;
+          const o = String(s.message), d = this.t("helperReplyHeading");
           this.messages.push({
-            id: `msg_${Date.now()}_claimed`,
+            id: `msg_${Date.now()}_helper_${this.seenHandoffMessages.size}`,
             sender: "assistant",
-            text: n,
-            heading: this.t("handoffReadyTitle"),
-            isHandoff: !0,
-            roomUrl: i.room_url || e.room_url,
+            text: o,
+            heading: d,
             offerHuman: !1
-          }), this.saveChatState(), this.renderMessages(), this.announce(n), (this.autoReadSpeech || this.accessibilityPrefs.auto_tts) && this.speakText(n), this.dispatchEvent(new CustomEvent("db-assistant:handoff-claimed", {
+          }), this.saveChatState(), this.renderMessages(), this.announce(`${d}: ${o}`), (this.autoReadSpeech || this.accessibilityPrefs.auto_tts) && this.speakText(`${d}. ${o}`), this.dispatchEvent(new CustomEvent("db-assistant:helper-message", {
             bubbles: !0,
             composed: !0,
-            detail: { ticketId: e.id, roomUrl: i.room_url || e.room_url }
+            detail: { ticketId: e.id, message: o, sentAt: s.sent_at || null }
           }));
-        } else if (a === "closed") {
-          const n = this.t("helpClosedNotice");
-          this.notificationPreferences.widget_enabled && this.notificationPreferences.live_help && (this.messages.push({ id: `msg_${Date.now()}_closed`, sender: "assistant", text: n }), this.saveChatState(), this.renderMessages(), this.announce(n)), this.handoffPollTimer && window.clearInterval(this.handoffPollTimer), this.handoffPollTimer = null;
         }
       } catch {
       }
@@ -2946,8 +2966,8 @@ ${d}
       return;
     }
     t.value = i, t.focus(), this.pendingVoiceTranscript = i;
-    const c = this.t("voicePreviewPrompt").replace("{text}", i);
-    this.announce(c), this.speakText(c, {
+    const l = this.t("voicePreviewPrompt").replace("{text}", i);
+    this.announce(l), this.speakText(l, {
       onEnd: () => {
         if (this.pendingVoiceTranscript) {
           const o = this.shadowRoot?.querySelector("#chat-input");
@@ -3111,8 +3131,8 @@ ${d}
           let s = "";
           for (let o = 0; o < n.results.length; o++)
             s += n.results[o][0]?.transcript || "";
-          const c = s.trim();
-          c && (this.hasDetectedSound = !0, e.value = c, n.results[n.results.length - 1]?.isFinal && (i = !0, this.handleVoiceTranscript(c, e)));
+          const l = s.trim();
+          l && (this.hasDetectedSound = !0, e.value = l, n.results[n.results.length - 1]?.isFinal && (i = !0, this.handleVoiceTranscript(l, e)));
         }, this.activeRecognition.onend = () => {
           i && this.isRecording && this.stopVoiceRecording(!0);
         }, this.activeRecognition.onerror = (n) => {
@@ -3155,10 +3175,10 @@ ${d}
         } catch (o) {
           console.warn("AudioContext VAD notice:", o);
         }
-        const c = t ? 8e3 : 1e4;
+        const l = t ? 8e3 : 1e4;
         this.voiceRecordingTimeout = window.setTimeout(() => {
           this.isRecording && this.stopVoiceRecording(i);
-        }, c);
+        }, l);
       } catch (n) {
         console.warn("MediaRecorder permission/init notice:", n), (!a || this.currentLang !== "en") && (alert(this.t("micError")), this.isRecording = !1, this.updateMicButtonUI(), this.updateVoiceStatusUI());
       }
@@ -3208,7 +3228,7 @@ ${d}
         }, a.onerror = d;
       });
       a.readAsDataURL(e);
-      const s = await n, c = await fetch(`${this.apiBase}/api/v1/speech/transcribe`, {
+      const s = await n, l = await fetch(`${this.apiBase}/api/v1/speech/transcribe`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -3218,8 +3238,8 @@ ${d}
           retain: !1
         })
       });
-      if (c.ok) {
-        const o = await c.json();
+      if (l.ok) {
+        const o = await l.json();
         if (o.transcript) {
           const d = o.detected_language, g = Number(o.language_confidence || 0);
           if (d && d in k && g >= 0.82 && d !== this.currentLang)
@@ -3287,8 +3307,8 @@ ${d}
     this.isSpeaking = !0, e.isAudioPlaying = !0, this.renderMessages(), this.updateVoiceStatusUI();
     const n = "warm, calm tutor, moderate pace, clear, unhurried", s = `${a}_${this.currentLang}_${n}`;
     if (this.audioCache.has(s)) {
-      const c = this.audioCache.get(s);
-      this.activeAudio = new Audio(c);
+      const l = this.audioCache.get(s);
+      this.activeAudio = new Audio(l);
       const o = this.accessibilityPrefs?.speech_rate || 1;
       this.activeAudio.playbackRate = o, this.activeAudio.preservesPitch = !0, this.activeAudio.mozPreservesPitch = !0, this.activeAudio.webkitPreservesPitch = !0, this.activeAudio.onended = () => this.finishSpeaking(e), this.activeAudio.onerror = () => {
         this.currentLang === "en" ? this.fallbackTTS(a, e) : this.finishSpeaking(e);
@@ -3301,7 +3321,7 @@ ${d}
       }
     }
     try {
-      const c = await fetch(`${this.apiBase}/api/v1/speech/synthesize`, {
+      const l = await fetch(`${this.apiBase}/api/v1/speech/synthesize`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -3311,8 +3331,8 @@ ${d}
           style: n
         })
       });
-      if (c.ok) {
-        const o = await c.json();
+      if (l.ok) {
+        const o = await l.json();
         if (o.audio_url && !o.audio_url.includes("demo.ogg")) {
           const g = String(o.audio_url), p = /^(https?:|data:|blob:)/.test(g) ? g : `${this.apiBase}${g}`;
           this.audioCache.set(s, p), this.activeAudio = new Audio(p);
@@ -3326,8 +3346,8 @@ ${d}
           return;
         }
       }
-    } catch (c) {
-      console.warn("Server TTS unavailable:", c);
+    } catch (l) {
+      console.warn("Server TTS unavailable:", l);
     }
     this.currentLang === "en" ? this.fallbackTTS(a, e) : this.finishSpeaking(e);
   }
@@ -3437,7 +3457,7 @@ ${d}
       o
     ))), n = a.length > 0 ? a : [e.text];
     let s = -1;
-    const c = n.map((o, d) => {
+    const l = n.map((o, d) => {
       const g = o.replace(/[#*•_`]/g, " ").replace(/\s+/g, " ").trim().toLowerCase(), p = /^(this course|this lesson|summary of|የዚህ|ይህ ትምህርት|barnoonni|يشرح|ملخص)/i.test(g), f = g.slice(0, 35);
       let m = null, b = -1;
       for (let y = 0; y < i.length; y++) {
@@ -3459,7 +3479,7 @@ ${d}
     });
     this.currentReading = {
       msgId: e.id,
-      items: c,
+      items: l,
       currentIndex: t,
       isPaused: !1
     }, e.isAudioPlaying = !0, e.isAudioPaused = !1, this.renderMessages(), this.playNextReadingItem(e);
@@ -3618,7 +3638,7 @@ ${d}
       text: a
     };
     this.messages.push(s), this.isThinking = !0, this.announce(this.t("lookingInCourse")), this.renderMessages();
-    const c = this.extractPlatformContext(), o = new AbortController(), d = setTimeout(() => o.abort(), 25e3);
+    const l = this.extractPlatformContext(), o = new AbortController(), d = setTimeout(() => o.abort(), 25e3);
     try {
       let g = await fetch(`${this.apiBase}/api/v1/ask`, {
         method: "POST",
@@ -3632,7 +3652,7 @@ ${d}
           channel: "web",
           learner_ref: this.getAttribute("learner-id") || `learner_${this.sessionId}`,
           platform_id: this.platformId,
-          ...c
+          ...l
         })
       });
       if (!g.ok && g.status === 404 && (g = await fetch(`${this.apiBase}/ask`, {
@@ -3647,7 +3667,7 @@ ${d}
           channel: "web",
           learner_ref: this.getAttribute("learner-id") || `learner_${this.sessionId}`,
           platform_id: this.platformId,
-          ...c
+          ...l
         })
       })), g.ok) {
         const p = await g.json(), f = p.language;
@@ -3751,7 +3771,7 @@ ${d}
         },
         channel: "web"
       };
-      let c = null;
+      let l = null;
       for (const o of n)
         try {
           const d = await fetch(o, {
@@ -3760,19 +3780,19 @@ ${d}
             body: JSON.stringify(s)
           });
           if (d.ok) {
-            c = d;
+            l = d;
             break;
           }
         } catch {
         }
-      if (c && c.ok) {
-        const o = await c.json(), d = o.ticketId || o.handoff_id || o.id || "ticket_01", g = o.ticket_secret || o.ticketSecret || "", p = o.room_url || o.roomUrl || "https://meet.jit.si/savanna-bridge-demo";
+      if (l && l.ok) {
+        const o = await l.json(), d = o.ticketId || o.handoff_id || o.id || "ticket_01", g = o.ticket_secret || o.ticketSecret || "", p = o.room_url || o.roomUrl || "https://meet.jit.si/savanna-bridge-demo";
         if (this.activeHandoff = {
           id: d,
           room_url: p,
           ticket_secret: g,
           status: o.status || "waiting"
-        }, g)
+        }, this.seenHandoffMessages.clear(), g)
           try {
             sessionStorage.setItem(`savanna_ticket_secret_${d}`, g);
           } catch {
@@ -3924,8 +3944,8 @@ ${d}
     const e = (o) => {
       const d = this.shadowRoot?.querySelector(`#${o}`);
       return d ? d.checked : null;
-    }, t = e("onboard-chk-screen-reader"), i = e("onboard-chk-keyboard-nav"), a = e("onboard-chk-contrast"), n = e("onboard-chk-large-text"), s = e("onboard-chk-voice"), c = e("onboard-chk-auto-tts");
-    t !== null && (this.accessibilityPrefs.screen_reader_mode = t), i !== null && (this.accessibilityPrefs.keyboard_navigation = i), a !== null && (this.accessibilityPrefs.high_contrast = a), n !== null && (this.accessibilityPrefs.large_text = n ? "larger" : "normal"), s !== null && (this.accessibilityPrefs.voice_enabled = s), c !== null && (this.accessibilityPrefs.auto_tts = c), this.highContrast = this.accessibilityPrefs.high_contrast, this.textSize = this.accessibilityPrefs.large_text;
+    }, t = e("onboard-chk-screen-reader"), i = e("onboard-chk-keyboard-nav"), a = e("onboard-chk-contrast"), n = e("onboard-chk-large-text"), s = e("onboard-chk-voice"), l = e("onboard-chk-auto-tts");
+    t !== null && (this.accessibilityPrefs.screen_reader_mode = t), i !== null && (this.accessibilityPrefs.keyboard_navigation = i), a !== null && (this.accessibilityPrefs.high_contrast = a), n !== null && (this.accessibilityPrefs.large_text = n ? "larger" : "normal"), s !== null && (this.accessibilityPrefs.voice_enabled = s), l !== null && (this.accessibilityPrefs.auto_tts = l), this.highContrast = this.accessibilityPrefs.high_contrast, this.textSize = this.accessibilityPrefs.large_text;
   }
   completeOnboarding(e) {
     e && this.captureOnboardingStep(), this.accessibilityPrefs.onboarded = !0, this.onboardingDismissed = !0, this.onboardingStep = 0, this.savePreferences(), this.render(), e && this.accessibilityPrefs.voice_enabled && this.accessibilityPrefs.auto_welcome && (this.hasSpokenWelcomeThisSession = !1, this.triggerSpokenWelcome()), e && this.accessibilityPrefs.voice_enabled && this.initWakeWordDetection();
@@ -4543,7 +4563,7 @@ ${d}
           const b = (f.title || f.heading || "").replace(/\s*\|\s*.*$/, "").replace(/^Concept page:\s*/i, "").trim();
           b && !n.has(b) && (n.add(b), a.push({ ...f, title: b }));
         }
-      const s = a.length > 0, c = !!i.isRefusal, o = i.heading || (i.isHandoff ? this.t("handoffReadyTitle") : this.t("answerHeading")), d = !!(this.currentReading && this.currentReading.msgId === i.id), p = i.text.split(/\n\s*\n/).map((f) => f.trim()).filter(Boolean).map((f, m) => `<div class="answer-para-item ${d && this.currentReading.currentIndex === m ? "active-reading-para" : ""}" data-msg-id="${i.id}" data-idx="${m}" title="Click to read and highlight this paragraph" style="cursor:pointer; margin-bottom:0.625rem; line-height:1.5;">${this.escapeHtml(f)}</div>`).join("");
+      const s = a.length > 0, l = !!i.isRefusal, o = i.heading || (i.isHandoff ? this.t("handoffReadyTitle") : this.t("answerHeading")), d = !!(this.currentReading && this.currentReading.msgId === i.id), p = i.text.split(/\n\s*\n/).map((f) => f.trim()).filter(Boolean).map((f, m) => `<div class="answer-para-item ${d && this.currentReading.currentIndex === m ? "active-reading-para" : ""}" data-msg-id="${i.id}" data-idx="${m}" title="Click to read and highlight this paragraph" style="cursor:pointer; margin-bottom:0.625rem; line-height:1.5;">${this.escapeHtml(f)}</div>`).join("");
       return `
           <div class="msg-row msg-assistant" id="${i.id}">
             <h4 class="answer-heading">${this.escapeHtml(o)}</h4>
@@ -4565,7 +4585,7 @@ ${d}
                 </div>
               ` : ""}
 
-            ${c ? `
+            ${l ? `
                 <div class="not-verified-box" role="alert">
                   <div>${this.t("notVerifiedNotice")}</div>
                   <p class="ticket-privacy-notice" style="font-size:0.75rem; color:#4b5563; line-height:1.3; margin:0.25rem 0 0.5rem 0;">
@@ -4622,7 +4642,7 @@ ${d}
               ` : ""}
 
             <!-- Suggested Follow-up Questions -->
-            ${!c && !i.isHandoff ? `
+            ${!l && !i.isHandoff ? `
                 <div class="followup-box">
                   <div class="followup-title">
                     <span>${this.t("followupTitle")}</span>
@@ -4652,7 +4672,7 @@ ${d}
         </div>
       `), e.querySelectorAll(".answer-para-item").forEach((i) => {
       i.addEventListener("click", () => {
-        const a = i.getAttribute("data-msg-id"), n = parseInt(i.getAttribute("data-idx") || "0", 10), s = this.messages.find((c) => c.id === a);
+        const a = i.getAttribute("data-msg-id"), n = parseInt(i.getAttribute("data-idx") || "0", 10), s = this.messages.find((l) => l.id === a);
         s && this.startSequentialReading(s, n);
       });
     }), e.querySelectorAll(".btn-prev-para").forEach((i) => {
@@ -4758,13 +4778,13 @@ ${d}
       { id: "chat", btn: this.shadowRoot.querySelector("#tab-chat"), pane: this.shadowRoot.querySelector("#pane-chat") },
       { id: "support", btn: this.shadowRoot.querySelector("#tab-support"), pane: this.shadowRoot.querySelector("#pane-support") },
       { id: "handoff", btn: this.shadowRoot.querySelector("#tab-handoff"), pane: this.shadowRoot.querySelector("#pane-handoff") }
-    ], c = (h) => {
+    ], l = (h) => {
       this.switchTab(s[h].id);
     };
     s.forEach(({ btn: h }, u) => {
-      h?.addEventListener("click", () => c(u)), h?.addEventListener("keydown", (v) => {
+      h?.addEventListener("click", () => l(u)), h?.addEventListener("keydown", (v) => {
         const w = v;
-        w.key === "ArrowRight" ? (w.preventDefault(), c((u + 1) % s.length)) : w.key === "ArrowLeft" && (w.preventDefault(), c((u - 1 + s.length) % s.length));
+        w.key === "ArrowRight" ? (w.preventDefault(), l((u + 1) % s.length)) : w.key === "ArrowLeft" && (w.preventDefault(), l((u - 1 + s.length) % s.length));
       });
     }), this.shadowRoot.querySelectorAll(".btn-talk-person, #btn-footer-handoff").forEach((h) => {
       h.addEventListener("click", (u) => {
@@ -4910,13 +4930,13 @@ ${d}
       }
       this.announce(C.checked ? "Voice accessibility enabled" : "Voice accessibility disabled");
     });
-    const N = this.shadowRoot.querySelector("#chk-auto-welcome");
-    N && N.addEventListener("change", () => {
-      this.accessibilityPrefs.auto_welcome = N.checked, this.savePreferences();
-    });
-    const M = this.shadowRoot.querySelector("#chk-auto-tts");
+    const M = this.shadowRoot.querySelector("#chk-auto-welcome");
     M && M.addEventListener("change", () => {
-      this.accessibilityPrefs.auto_tts = M.checked, this.savePreferences();
+      this.accessibilityPrefs.auto_welcome = M.checked, this.savePreferences();
+    });
+    const N = this.shadowRoot.querySelector("#chk-auto-tts");
+    N && N.addEventListener("change", () => {
+      this.accessibilityPrefs.auto_tts = N.checked, this.savePreferences();
     });
     const D = [
       { id: "#btn-rate-075", rate: 0.75 },

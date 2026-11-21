@@ -87,6 +87,17 @@ def test_handoff_full_lifecycle_claim_reply_close(monkeypatch) -> None:
     assert reply_data["delivered"] is True
     assert reply_data["message"] == "ሰላም፣ በምን ልርዳዎት?"
 
+    # The widget's secure polling endpoint must expose the new helper reply.
+    ticket_res = client.get(
+        f"/api/v1/tickets/{handoff_id}",
+        headers={"X-Ticket-Secret": handoff_data["ticket_secret"]},
+    )
+    assert ticket_res.status_code == 200
+    assert any(
+        message["sender"] == "helper" and message["message"] == "ሰላም፣ በምን ልርዳዎት?"
+        for message in ticket_res.json()["messages"]
+    )
+
     # 7. Agent closes handoff
     close_res = client.post(f"/handoff/{handoff_id}/close", json={}, headers=auth_headers)
     assert close_res.status_code == 200

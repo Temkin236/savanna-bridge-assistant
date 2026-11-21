@@ -215,6 +215,7 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     dailyFrequency: "Daily summary",
     notificationSaved: "Notification preferences saved.",
     helperClaimedNotice: "A helper has claimed your request. Your Jitsi room is ready.",
+    helperReplyHeading: "Message from your helper",
     helpClosedNotice: "Your live-help request has been closed.",
     telegramConnected: "Telegram connected",
     connectedToTelegram: "Connected to Telegram",
@@ -2055,6 +2056,7 @@ export class BridgeAssistant extends HTMLElement {
   // Active Handoff state
   private activeHandoff: { id: string; room_url: string; ticket_secret: string; status: string } | null = null;
   private handoffPollTimer: number | null = null;
+  private seenHandoffMessages = new Set<string>();
 
   // Support needs
   private supportNeeds: SupportNeedsData = {
@@ -3072,39 +3074,69 @@ export class BridgeAssistant extends HTMLElement {
       if (!res.ok) return;
       const detail = await res.json();
       const nextStatus = String(detail.status || "waiting");
-      if (nextStatus === handoff.status) return;
-      handoff.status = nextStatus;
+      if (nextStatus !== handoff.status) {
+        handoff.status = nextStatus;
 
-      if (nextStatus === "claimed" && this.notificationPreferences.widget_enabled && this.notificationPreferences.live_help) {
-        const notice = this.t("helperClaimedNotice");
+        if (nextStatus === "claimed" && this.notificationPreferences.widget_enabled && this.notificationPreferences.live_help) {
+          const notice = this.t("helperClaimedNotice");
+          this.messages.push({
+            id: `msg_${Date.now()}_claimed`,
+            sender: "assistant",
+            text: notice,
+            heading: this.t("handoffReadyTitle"),
+            isHandoff: true,
+            roomUrl: detail.room_url || handoff.room_url,
+            offerHuman: false,
+          });
+          this.saveChatState();
+          this.renderMessages();
+          this.announce(notice);
+          if (this.autoReadSpeech || this.accessibilityPrefs.auto_tts) this.speakText(notice);
+          this.dispatchEvent(new CustomEvent("db-assistant:handoff-claimed", {
+            bubbles: true,
+            composed: true,
+            detail: { ticketId: handoff.id, roomUrl: detail.room_url || handoff.room_url },
+          }));
+        } else if (nextStatus === "closed") {
+          const notice = this.t("helpClosedNotice");
+          if (this.notificationPreferences.widget_enabled && this.notificationPreferences.live_help) {
+            this.messages.push({ id: `msg_${Date.now()}_closed`, sender: "assistant", text: notice });
+            this.saveChatState();
+            this.renderMessages();
+            this.announce(notice);
+          }
+          if (this.handoffPollTimer) window.clearInterval(this.handoffPollTimer);
+          this.handoffPollTimer = null;
+        }
+      }
+
+      const helperMessages = Array.isArray(detail.messages)
+        ? detail.messages.filter((message: any) => message?.sender === "helper" && message?.message)
+        : [];
+      for (const helperMessage of helperMessages) {
+        const messageKey = `${helperMessage.sent_at || ""}|${helperMessage.message}`;
+        if (this.seenHandoffMessages.has(messageKey)) continue;
+        this.seenHandoffMessages.add(messageKey);
+        if (!this.notificationPreferences.widget_enabled || !this.notificationPreferences.live_help) continue;
+
+        const text = String(helperMessage.message);
+        const heading = this.t("helperReplyHeading");
         this.messages.push({
-          id: `msg_${Date.now()}_claimed`,
+          id: `msg_${Date.now()}_helper_${this.seenHandoffMessages.size}`,
           sender: "assistant",
-          text: notice,
-          heading: this.t("handoffReadyTitle"),
-          isHandoff: true,
-          roomUrl: detail.room_url || handoff.room_url,
+          text,
+          heading,
           offerHuman: false,
         });
         this.saveChatState();
         this.renderMessages();
-        this.announce(notice);
-        if (this.autoReadSpeech || this.accessibilityPrefs.auto_tts) this.speakText(notice);
-        this.dispatchEvent(new CustomEvent("db-assistant:handoff-claimed", {
+        this.announce(`${heading}: ${text}`);
+        if (this.autoReadSpeech || this.accessibilityPrefs.auto_tts) this.speakText(`${heading}. ${text}`);
+        this.dispatchEvent(new CustomEvent("db-assistant:helper-message", {
           bubbles: true,
           composed: true,
-          detail: { ticketId: handoff.id, roomUrl: detail.room_url || handoff.room_url },
+          detail: { ticketId: handoff.id, message: text, sentAt: helperMessage.sent_at || null },
         }));
-      } else if (nextStatus === "closed") {
-        const notice = this.t("helpClosedNotice");
-        if (this.notificationPreferences.widget_enabled && this.notificationPreferences.live_help) {
-          this.messages.push({ id: `msg_${Date.now()}_closed`, sender: "assistant", text: notice });
-          this.saveChatState();
-          this.renderMessages();
-          this.announce(notice);
-        }
-        if (this.handoffPollTimer) window.clearInterval(this.handoffPollTimer);
-        this.handoffPollTimer = null;
       }
     } catch {
       // A later polling interval retries transient network failures.
@@ -5312,6 +5344,7 @@ export class BridgeAssistant extends HTMLElement {
           ticket_secret: ticketSecret,
           status: data.status || "waiting",
         };
+        this.seenHandoffMessages.clear();
         if (ticketSecret) {
           try {
             sessionStorage.setItem(`savanna_ticket_secret_${ticketId}`, ticketSecret);
