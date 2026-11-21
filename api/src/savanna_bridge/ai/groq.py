@@ -249,10 +249,14 @@ class GroqProvider(AIProvider):
 
         def request(key: str) -> str:
             with httpx.Client(timeout=30.0) as client:
+                data = {"model": self.stt_model, "response_format": "json"}
+                lang_code = language.value if isinstance(language, Language) else str(language or "")
+                if lang_code in ("en", "ar", "am"):
+                    data["language"] = lang_code
                 response = client.post(
                     f"{self.base_url}/audio/transcriptions",
                     headers={"Authorization": f"Bearer {key}"},
-                    data={"model": self.stt_model, "response_format": "json"},
+                    data=data,
                     files={"file": (f"voice.{extension}", audio_bytes, media_type)},
                 )
                 response.raise_for_status()

@@ -529,8 +529,42 @@ Return only JSON:
         return {}
 
     def _call_gemini_transcribe(
-        self, audio_bytes: bytes, media_type: str, language: Language
+        self, audio_bytes: bytes, media_type: str, language: Language | str | None
     ) -> str:
+        lang_str = language.value if isinstance(language, Language) else str(language or "auto")
+        if lang_str == "am":
+            instruction = (
+                "Accurately transcribe the spoken audio in Amharic (አማርኛ) using Ethiopic/Ge'ez script. "
+                "Do NOT translate into English. Return ONLY the verbatim Amharic transcript without quotes, markdown, or explanations."
+            )
+        elif lang_str == "om":
+            instruction = (
+                "Accurately transcribe the spoken audio in Afaan Oromo using Latin script (Qubee). "
+                "Do NOT translate into English. Return ONLY the verbatim Afaan Oromo transcript without quotes, markdown, or explanations."
+            )
+        elif lang_str == "ti":
+            instruction = (
+                "Accurately transcribe the spoken audio in Tigrinya (ትግርኛ) using Ethiopic/Ge'ez script. "
+                "Do NOT translate into English. Return ONLY the verbatim Tigrinya transcript without quotes, markdown, or explanations."
+            )
+        elif lang_str == "ar":
+            instruction = (
+                "Accurately transcribe the spoken audio in Arabic (العربية) using Arabic script. "
+                "Do NOT translate into English. Return ONLY the verbatim Arabic transcript without quotes, markdown, or explanations."
+            )
+        elif lang_str == "en":
+            instruction = (
+                "Accurately transcribe the spoken audio in English. "
+                "Return ONLY the verbatim transcript without quotes, markdown, or explanations."
+            )
+        else:
+            instruction = (
+                "Detect the language spoken in this audio (such as English, Amharic, Afaan Oromo, Tigrinya, Arabic). "
+                "Transcribe the audio accurately in its original spoken language using its native script "
+                "(Ethiopic script for Amharic/Tigrinya, Latin script for Afaan Oromo/English, Arabic script for Arabic). "
+                "Do NOT translate into English. Return ONLY the verbatim transcript without quotes, labels, or explanations."
+            )
+
         response = self._call_gemini_endpoint(
             f"{self.model}:generateContent",
             {
@@ -543,12 +577,7 @@ Return only JSON:
                                     "data": base64.b64encode(audio_bytes).decode("ascii"),
                                 }
                             },
-                            {
-                                "text": (
-                                    "Transcribe this audio accurately in "
-                                    f"{language.value}. Return only the transcript."
-                                )
-                            },
+                            {"text": instruction},
                         ]
                     }
                 ],

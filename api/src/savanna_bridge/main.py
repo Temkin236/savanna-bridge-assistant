@@ -1467,35 +1467,75 @@ def draft_accommodation(payload: AccommodationDraftRequest) -> AccommodationDraf
 @app.post("/api/v1/speech/transcribe", response_model=Transcription, tags=["Speech"])
 def transcribe_speech(payload: TranscriptionRequest) -> Transcription:
     requested_language = payload.language
-    language_hint = Language.EN if requested_language == "auto" else requested_language
-
-    # Speech-to-text: use Gemini with audio input when the Gemini provider is on;
-    # auto mode starts with multilingual Groq STT, then the normal resilient chain.
-    ai = get_ai_provider()
-    if requested_language == "auto":
-        from savanna_bridge.ai.groq import GroqProvider
-
-        groq = GroqProvider()
-        ai = groq if groq.keys.count else ai
+    is_auto = requested_language == "auto"
+    language_hint = Language.EN if is_auto else requested_language
 
     audio_bytes = b""
     with contextlib.suppress(Exception):
         audio_bytes = base64.b64decode(payload.audio_base64)
 
-    text = ai.transcribe(
-        audio_bytes=audio_bytes,
-        media_type=payload.media_type,
-        language=language_hint,
-        retain=payload.retain,
-    )
-    if requested_language == "auto" and ai.name == "groq" and ai.is_mocked:
-        ai = get_ai_provider()
-        text = ai.transcribe(
+    text = ""
+    provider_used = "offline"
+    is_mocked = True
+
+    # Try available providers in prioritized order based on language support:
+    # 1. CloudProvider (Gemini): Excellent native support for Amharic, Afaan Oromo, Tigrinya, Arabic, English.
+    #    Essential for Oromo (om) and Tigrinya (ti) where Whisper models are unavailable.
+    # 2. GroqProvider (Whisper): Fast STT for English, Arabic, and Amharic.
+    from savanna_bridge.ai.cloud import CloudProvider
+    from savanna_bridge.ai.groq import GroqProvider
+    from savanna_bridge.ai.offline import OfflineFaqProvider
+
+    cloud = CloudProvider()
+    groq = GroqProvider()
+
+    providers_to_try = []
+    # If language is Oromo or Tigrinya, CloudProvider (Gemini) must be tried first
+    if language_hint in (Language.OM, Language.TI):
+        if cloud.api_key:
+            providers_to_try.append(cloud)
+        if groq.keys.count:
+            providers_to_try.append(groq)
+    else:
+        # For auto or other languages, try CloudProvider then GroqProvider
+        if cloud.api_key:
+            providers_to_try.append(cloud)
+        if groq.keys.count:
+            providers_to_try.append(groq)
+
+    # If the user explicitly configured a specific provider other than offline, cloud, or groq:
+    cfg_provider = get_ai_provider()
+    if cfg_provider.name not in ("offline", cloud.name, groq.name):
+        providers_to_try.insert(0, cfg_provider)
+
+    for provider in providers_to_try:
+        try:
+            transcribed = provider.transcribe(
+                audio_bytes=audio_bytes,
+                media_type=payload.media_type,
+                language=language_hint,
+                retain=payload.retain,
+            )
+            if transcribed and not provider.is_mocked:
+                text = transcribed
+                provider_used = provider.name
+                is_mocked = False
+                break
+        except Exception as exc:
+            logger.warning("Provider %s transcribe failed: %s", getattr(provider, "name", "unknown"), exc)
+
+    # Fallback to offline provider if still empty or no keys
+    if not text:
+        offline = OfflineFaqProvider()
+        text = offline.transcribe(
             audio_bytes=audio_bytes,
             media_type=payload.media_type,
             language=language_hint,
             retain=payload.retain,
         )
+        provider_used = "offline"
+        is_mocked = True
+
     detected_code, language_confidence = LanguageGuard.detect_language_with_confidence(
         text, language_hint.value
     )
@@ -1509,8 +1549,8 @@ def transcribe_speech(payload: TranscriptionRequest) -> Transcription:
         language=detected_language,
         retained=payload.retain,  # Must be false by default
         editable=True,
-        provider=ai.name,
-        mocked=ai.is_mocked,
+        provider=provider_used,
+        mocked=is_mocked,
         detected_language=detected_language,
         language_confidence=round(language_confidence, 2),
     )

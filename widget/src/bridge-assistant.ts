@@ -177,6 +177,9 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     recordingState: "Listening... speak now",
     transcribingState: "Processing speech...",
     voicePreviewNotice: "Voice transcribed. You can edit the text before sending.",
+    voicePreviewPrompt: "I heard: {text}. You can edit it, or say send.",
+    voiceListeningForSend: "Listening for 'send'...",
+    voiceActionCancelled: "Cancelled.",
     micError: "Microphone unavailable. Please check microphone permissions or type your question.",
     lookingInCourse: "Looking in the course...",
     answerHeading: "Answer",
@@ -325,6 +328,9 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     recordingState: "እያዳመጥኩ ነው... አሁን ይናገሩ",
     transcribingState: "ድምጹን ወደ ጽሑፍ በመቀየር ላይ...",
     voicePreviewNotice: "ድምጽዎ ወደ ጽሑፍ ተቀይሯል። ከመላክዎ በፊት ማስተካከል ይችላሉ።",
+    voicePreviewPrompt: "የሰማሁት፡ {text}። ማረም ወይም ላክ ማለት ይችላሉ።",
+    voiceListeningForSend: "'ላክ' የሚለውን ቃል በማዳመጥ ላይ...",
+    voiceActionCancelled: "ተሰርዟል።",
     micError: "ማይክሮፎን ማግኘት አልተቻለም። እባክዎ ጥያቄዎን በጽሑፍ ያስገቡ።",
     lookingInCourse: "በኮርሱ ውስጥ በመፈለግ ላይ...",
     answerHeading: "መልስ",
@@ -473,6 +479,9 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     recordingState: "Dhaggeeffachaa jira... dubbadhaa",
     transcribingState: "Sagalee jijjiiraa jira...",
     voicePreviewNotice: "Sagaleen gara barruutti jijjiirameera. Ergisaa dura sirreessuu dandeessu.",
+    voicePreviewPrompt: "Wanan dhaga'e: {text}. Sirreessuu ykn ergi jechuu dandeessu.",
+    voiceListeningForSend: "'Ergi' jechuu eegaa jira...",
+    voiceActionCancelled: "Haqameera.",
     micError: "Maaykirofooniin hin argamne.",
     lookingInCourse: "Barnoota keessaa barbaadaa jira...",
     answerHeading: "Deebii",
@@ -621,6 +630,9 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     recordingState: "ይሰምዕ ኣለኹ... ሕጂ ተዛረቡ",
     transcribingState: "ናብ ጽሑፍ ይቕየር ኣሎ...",
     voicePreviewNotice: "ድምጽኹም ናብ ጽሑፍ ተቐዪሩ ኣሎ።",
+    voicePreviewPrompt: "ዝሰማዕክዎ፡ {text}። ከተዐርይዎ ወይ ልኣኽ ክትብሉ ትኽእሉ።",
+    voiceListeningForSend: "'ልኣኽ' ንምስማዕ ይጽበ ኣሎ...",
+    voiceActionCancelled: "ተሰሪዙ።",
     micError: "ማይክሮፎን ክርከብ ኣይተኻእለን።",
     lookingInCourse: "ኣብ ኮርስ ይድለ ኣሎ...",
     answerHeading: "መልሲ",
@@ -769,6 +781,9 @@ const I18N: Record<SupportedLanguage, Record<string, string>> = {
     recordingState: "جاري الاستماع... تحدث الآن",
     transcribingState: "جاري تحويل الصوت إلى نص...",
     voicePreviewNotice: "تم تحويل الصوت إلى نص. يمكنك تعديله قبل الإرسال.",
+    voicePreviewPrompt: "سمعت: {text}. يمكنك تعديله، أو قول أرسل.",
+    voiceListeningForSend: "بانتظار قول 'أرسل'...",
+    voiceActionCancelled: "تم الإلغاء.",
     micError: "الميكروفون غير متوفر. يرجى التحقق من أذونات الميكروفون.",
     lookingInCourse: "جاري البحث في محتوى الدورة...",
     answerHeading: "الإجابة",
@@ -2054,6 +2069,13 @@ export class BridgeAssistant extends HTMLElement {
   private spokenOnboardingIndex = 0;
   private pendingVoiceAction: PageActionPlan | null = null;
   private pendingVoiceTranscript = "";
+  private isListeningForSend = false;
+  private audioStream: MediaStream | null = null;
+  private audioContext: AudioContext | null = null;
+  private audioAnalyser: AnalyserNode | null = null;
+  private silenceTimer: number | null = null;
+  private vadInterval: number | null = null;
+  private hasDetectedSound = false;
   private lastSpokenText = "";
   private voiceRecordingTimeout: number | null = null;
 
@@ -2197,6 +2219,26 @@ export class BridgeAssistant extends HTMLElement {
     if (this.voiceRecordingTimeout) {
       window.clearTimeout(this.voiceRecordingTimeout);
       this.voiceRecordingTimeout = null;
+    }
+    if (this.silenceTimer) {
+      window.clearTimeout(this.silenceTimer);
+      this.silenceTimer = null;
+    }
+    if (this.vadInterval) {
+      window.clearInterval(this.vadInterval);
+      this.vadInterval = null;
+    }
+    if (this.audioAnalyser) {
+      try { this.audioAnalyser.disconnect(); } catch {}
+      this.audioAnalyser = null;
+    }
+    if (this.audioContext && this.audioContext.state !== "closed") {
+      try { this.audioContext.close(); } catch {}
+      this.audioContext = null;
+    }
+    if (this.audioStream) {
+      this.audioStream.getTracks().forEach((t) => t.stop());
+      this.audioStream = null;
     }
     if (this.wakeWordRecognizer) {
       try { this.wakeWordRecognizer.stop(); } catch {}
@@ -3439,6 +3481,58 @@ export class BridgeAssistant extends HTMLElement {
     return /^(no|nope|cancel|stop|አይ|አይደለም|lakki|ኣይፋል|لا|إلغاء)\b/i.test(text.trim());
   }
 
+  private isSendIntent(text: string): boolean {
+    const t = text.trim().toLowerCase().replace(/[.,!?;:\"\'`።፣፤]/g, "");
+    if (!t) return false;
+    // English
+    if (/^(send|send it|send this|send message|send question|submit|yes|yeah|yep|confirm|okay|ok|go|proceed|correct|that's correct|looks good)\b/i.test(t)) {
+      return true;
+    }
+    // Amharic
+    if (/^(ላክ|ላከው|አዎ|እሺ|ትክክል|አዎ ላከው|ላኪ)\b/.test(t)) {
+      return true;
+    }
+    // Afaan Oromo
+    if (/^(ergi|itti ergi|eeyyee|sirrii|sirriidha|tole)\b/i.test(t)) {
+      return true;
+    }
+    // Tigrinya
+    if (/^(ልኣኽ|ስደድ|እወ|ሕራይ|ቅኑዕ|ሰዲድካ)\b/.test(t)) {
+      return true;
+    }
+    // Arabic
+    if (/^(أرسل|ارسل|إرسال|نعم|أجل|تمام|صحيح|تأكيد|موافق)\b/.test(t)) {
+      return true;
+    }
+    return false;
+  }
+
+  private isCancelIntent(text: string): boolean {
+    const t = text.trim().toLowerCase().replace(/[.,!?;:\"\'`።፣፤]/g, "");
+    if (!t) return false;
+    // English
+    if (/^(no|nope|cancel|clear|delete|stop|don't send|dont send)\b/i.test(t)) {
+      return true;
+    }
+    // Amharic
+    if (/^(አይ|አይደለም|አትላክ|ተው|ሰርዝ)\b/.test(t)) {
+      return true;
+    }
+    // Afaan Oromo
+    if (/^(lakki|dhiisi|haqi)\b/i.test(t)) {
+      return true;
+    }
+    // Tigrinya
+    if (/^(ኣይፋል|ኣይፋሉን|ግደፎ|ሰርዝ)\b/.test(t)) {
+      return true;
+    }
+    // Arabic
+    if (/^(لا|إلغاء|الغاء|كلا|توقف)\b/.test(t)) {
+      return true;
+    }
+    return false;
+  }
+
   private async planVoiceAction(utterance: string): Promise<PageActionPlan> {
     const fallback: PageActionPlan = {
       action: "none",
@@ -3563,6 +3657,29 @@ export class BridgeAssistant extends HTMLElement {
       return;
     }
 
+    // Check if user is confirming or cancelling a pending question to send
+    if (this.pendingVoiceTranscript || (inputEl && inputEl.value.trim())) {
+      if (this.isSendIntent(transcript)) {
+        const messageToSend = this.pendingVoiceTranscript || inputEl.value.trim();
+        this.pendingVoiceTranscript = "";
+        this.isListeningForSend = false;
+        inputEl.value = "";
+        this.stopVoiceRecording();
+        await this.askQuestion(messageToSend, false, true);
+        return;
+      }
+      if (this.isCancelIntent(transcript)) {
+        this.pendingVoiceTranscript = "";
+        this.isListeningForSend = false;
+        inputEl.value = "";
+        this.stopVoiceRecording();
+        const cancelMsg = this.t("voiceActionCancelled");
+        this.announce(cancelMsg);
+        this.speakText(cancelMsg);
+        return;
+      }
+    }
+
     const detected = this.detectLanguageWithConfidence(transcript);
     if (detected.confidence >= 0.82 && detected.language !== this.currentLang) {
       this.setLanguage(detected.language, false);
@@ -3586,9 +3703,25 @@ export class BridgeAssistant extends HTMLElement {
     inputEl.value = transcript;
     inputEl.focus();
     this.pendingVoiceTranscript = transcript;
-    const preview = `I heard: ${transcript}. You can edit it, or say send.`;
+    const promptTemplate = this.t("voicePreviewPrompt");
+    const preview = promptTemplate.replace("{text}", transcript);
     this.announce(preview);
-    this.speakText(preview);
+    this.speakText(preview, {
+      onEnd: () => {
+        if (this.pendingVoiceTranscript) {
+          const chatInput = this.shadowRoot?.querySelector<HTMLInputElement>("#chat-input");
+          if (chatInput) {
+            this.startVoiceListeningForConfirmation(chatInput);
+          }
+        }
+      },
+    });
+  }
+
+  private startVoiceListeningForConfirmation(inputEl: HTMLInputElement): void {
+    if (!this.pendingVoiceTranscript && !inputEl.value.trim()) return;
+    this.isListeningForSend = true;
+    void this.startVoiceRecording(inputEl, true);
   }
 
   private spokenOnboardingQuestions(): string[] {
@@ -3755,7 +3888,7 @@ export class BridgeAssistant extends HTMLElement {
     }
   }
 
-  private async startVoiceRecording(inputEl: HTMLInputElement): Promise<void> {
+  private async startVoiceRecording(inputEl: HTMLInputElement, isConfirmation = false): Promise<void> {
     if (this.isSpeaking) {
       this.stopSpeaking();
     }
@@ -3764,30 +3897,41 @@ export class BridgeAssistant extends HTMLElement {
       try { this.wakeWordRecognizer.stop(); } catch {}
     }
 
+    if (this.voiceRecordingTimeout) {
+      window.clearTimeout(this.voiceRecordingTimeout);
+      this.voiceRecordingTimeout = null;
+    }
+    if (this.silenceTimer) {
+      window.clearTimeout(this.silenceTimer);
+      this.silenceTimer = null;
+    }
+    if (this.vadInterval) {
+      window.clearInterval(this.vadInterval);
+      this.vadInterval = null;
+    }
+
     this.isRecording = true;
     this.isProcessingSpeech = false;
+    this.isListeningForSend = isConfirmation;
+    this.hasDetectedSound = false;
+
     this.playEarcon("start");
-    this.announce(this.t("voiceListening"));
+    this.announce(isConfirmation ? this.t("voiceListeningForSend") : this.t("voiceListening"));
     this.updateVoiceStatusUI();
     this.updateMicButtonUI();
 
     let speechRecDeliveredText = false;
     const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
-    if (SpeechRec) {
+    // Use Web Speech API only for English (as Chrome lacks models for Afaan Oromo and Tigrinya,
+    // and Amharic frequently errors out on desktop).
+    // MediaRecorder + backend Gemini / Whisper is used for all languages and delivers full fidelity.
+    if (SpeechRec && this.currentLang === "en") {
       try {
         this.activeRecognition = new SpeechRec();
         this.activeRecognition.continuous = false;
         this.activeRecognition.interimResults = true;
-
-        const langMap: Record<SupportedLanguage, string> = {
-          en: "en-US",
-          am: "am-ET",
-          om: "om-ET",
-          ar: "ar-SA",
-          ti: "ti-ET",
-        };
-        this.activeRecognition.lang = langMap[this.currentLang] || "en-US";
+        this.activeRecognition.lang = "en-US";
 
         this.activeRecognition.onresult = (event: any) => {
           let fullTranscript = "";
@@ -3796,6 +3940,7 @@ export class BridgeAssistant extends HTMLElement {
           }
           const text = fullTranscript.trim();
           if (text) {
+            this.hasDetectedSound = true;
             inputEl.value = text;
             const lastResult = event.results[event.results.length - 1];
             if (lastResult?.isFinal) {
@@ -3806,13 +3951,16 @@ export class BridgeAssistant extends HTMLElement {
         };
 
         this.activeRecognition.onend = () => {
-          if (this.isRecording) {
-            this.stopVoiceRecording(speechRecDeliveredText);
+          // IMPORTANT: Do NOT stop recording if speechRecDeliveredText is false!
+          // Only stop if speech recognition actually succeeded with text.
+          if (speechRecDeliveredText && this.isRecording) {
+            this.stopVoiceRecording(true);
           }
         };
 
         this.activeRecognition.onerror = (e: any) => {
-          console.warn("Active speech recognition error:", e.error);
+          console.warn("Active speech recognition notice:", e.error);
+          // Do NOT abort MediaRecorder when SpeechRecognition errors!
         };
 
         this.activeRecognition.start();
@@ -3824,6 +3972,7 @@ export class BridgeAssistant extends HTMLElement {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        this.audioStream = stream;
         this.audioChunks = [];
         const mimeType = MediaRecorder.isTypeSupported("audio/webm")
           ? "audio/webm"
@@ -3836,7 +3985,10 @@ export class BridgeAssistant extends HTMLElement {
           if (e.data.size > 0) this.audioChunks.push(e.data);
         };
         this.mediaRecorder.onstop = async () => {
-          stream.getTracks().forEach((t) => t.stop());
+          if (this.audioStream) {
+            this.audioStream.getTracks().forEach((t) => t.stop());
+            this.audioStream = null;
+          }
           if (!speechRecDeliveredText && this.audioChunks.length > 0) {
             const blob = new Blob(this.audioChunks, { type: mimeType });
             await this.sendAudioForTranscription(blob, mimeType, inputEl);
@@ -3844,12 +3996,62 @@ export class BridgeAssistant extends HTMLElement {
         };
 
         this.mediaRecorder.start();
+
+        // Audio Level & Voice Activity Detection (VAD) via Web Audio API
+        try {
+          const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+          if (AudioCtx) {
+            this.audioContext = new AudioCtx();
+            if (this.audioContext.state === "suspended") {
+              await this.audioContext.resume();
+            }
+            const source = this.audioContext.createMediaStreamSource(stream);
+            this.audioAnalyser = this.audioContext.createAnalyser();
+            this.audioAnalyser.fftSize = 256;
+            source.connect(this.audioAnalyser);
+
+            const bufferLength = this.audioAnalyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            this.vadInterval = window.setInterval(() => {
+              if (!this.isRecording || !this.audioAnalyser) return;
+              this.audioAnalyser.getByteFrequencyData(dataArray);
+              let sum = 0;
+              for (let i = 0; i < bufferLength; i++) {
+                sum += dataArray[i];
+              }
+              const average = sum / bufferLength;
+
+              // Voice activity detected
+              if (average > 12) {
+                this.hasDetectedSound = true;
+                if (this.silenceTimer) {
+                  window.clearTimeout(this.silenceTimer);
+                  this.silenceTimer = null;
+                }
+              } else if (this.hasDetectedSound) {
+                // Speech occurred, now silence: stop after 1.6s
+                if (!this.silenceTimer) {
+                  this.silenceTimer = window.setTimeout(() => {
+                    if (this.isRecording) {
+                      this.stopVoiceRecording(speechRecDeliveredText);
+                    }
+                  }, 1600);
+                }
+              }
+            }, 100);
+          }
+        } catch (audioCtxErr) {
+          console.warn("AudioContext VAD notice:", audioCtxErr);
+        }
+
+        const maxDuration = isConfirmation ? 8000 : 10000;
         this.voiceRecordingTimeout = window.setTimeout(() => {
           if (this.isRecording) this.stopVoiceRecording(speechRecDeliveredText);
-        }, 10000);
+        }, maxDuration);
       } catch (err) {
         console.warn("MediaRecorder permission/init notice:", err);
-        if (!SpeechRec) {
+        if (!SpeechRec || this.currentLang !== "en") {
           alert(this.t("micError"));
           this.isRecording = false;
           this.updateMicButtonUI();
@@ -3861,9 +4063,31 @@ export class BridgeAssistant extends HTMLElement {
 
   private stopVoiceRecording(hadDirectTranscript = false): void {
     this.isRecording = false;
+    this.isListeningForSend = false;
+
     if (this.voiceRecordingTimeout) {
       window.clearTimeout(this.voiceRecordingTimeout);
       this.voiceRecordingTimeout = null;
+    }
+    if (this.silenceTimer) {
+      window.clearTimeout(this.silenceTimer);
+      this.silenceTimer = null;
+    }
+    if (this.vadInterval) {
+      window.clearInterval(this.vadInterval);
+      this.vadInterval = null;
+    }
+    if (this.audioAnalyser) {
+      try { this.audioAnalyser.disconnect(); } catch {}
+      this.audioAnalyser = null;
+    }
+    if (this.audioContext && this.audioContext.state !== "closed") {
+      try { this.audioContext.close(); } catch {}
+      this.audioContext = null;
+    }
+    if (this.audioStream) {
+      this.audioStream.getTracks().forEach((t) => t.stop());
+      this.audioStream = null;
     }
     this.playEarcon("stop");
 
@@ -3923,7 +4147,7 @@ export class BridgeAssistant extends HTMLElement {
         body: JSON.stringify({
           audio_base64: audioBase64,
           media_type: mediaType,
-          language: "auto",
+          language: this.currentLang || "auto",
           retain: false,
         }),
       });
@@ -3944,7 +4168,6 @@ export class BridgeAssistant extends HTMLElement {
           await this.handleVoiceTranscript(data.transcript, inputEl);
           this.playEarcon("transcribed");
           this.announce(this.t("voicePreviewNotice"));
-          await this.askQuestion(data.transcript, false, true);
         }
       }
     } catch (err) {
@@ -3974,11 +4197,14 @@ export class BridgeAssistant extends HTMLElement {
     if (!container) return;
 
     if (this.isRecording) {
+      const statusText = this.isListeningForSend
+        ? this.t("voiceListeningForSend")
+        : `${this.t("voiceListening")} (${this.getLangDisplayName()})`;
       container.innerHTML = `
         <div class="voice-status-bar listening" role="status">
           <div style="display:flex; align-items:center; gap:0.5rem;">
             <span class="pulse-dot"></span>
-            <span>${this.t("voiceListening")} (${this.getLangDisplayName()})</span>
+            <span>${statusText}</span>
           </div>
           <button type="button" class="btn btn-secondary btn-sm" id="btn-stop-voice">
             ${this.t("stopAudio")}
@@ -6469,6 +6695,11 @@ export class BridgeAssistant extends HTMLElement {
         e.preventDefault();
         const text = chatInput.value;
         chatInput.value = "";
+        this.pendingVoiceTranscript = "";
+        this.isListeningForSend = false;
+        if (this.isRecording) {
+          this.stopVoiceRecording();
+        }
         this.askQuestion(text);
       });
     }
